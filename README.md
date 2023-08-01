@@ -63,10 +63,23 @@ $ vcpkg install openssl
 $ vcpkg install rapidjson
 $ vcpkg install protobuf protobuf[zlib]
 $ vcpkg install spdlog 
-$ make build
-$ make test
 ```
+
+#### Setup SDK local repository
+
+```
+$ git clone https://github.com/eclipse-uprotocol/uprotocol-sdk-cpp.git
+$ /usr/bin/cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/c89-gcc -S uprotocol-sdk-cpp -B uprotocol-sdk-cpp/build -G Ninja
+```
+
+#### Build and test SDK
+
 Now you should see formatting the code with clang-format, building and running the unit tests.
+```
+$ cd uprotocol-sdk-cpp/build/
+$ ninja
+$ ninja test
+```
 
 
 ## Show your support
