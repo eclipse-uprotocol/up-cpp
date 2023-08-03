@@ -63,8 +63,26 @@ $ vcpkg install openssl
 $ vcpkg install rapidjson
 $ vcpkg install protobuf protobuf[zlib]
 $ vcpkg install spdlog 
-$ make build
-$ make test
+```
+
+#### Setup SDK local repository, build and test
+```
+$ git clone https://github.com/eclipse-uprotocol/uprotocol-sdk-cpp.git
+$ cd uprotocol-sdk-cpp
+$ code .
+
+```
+Using VSCode with the CMake & CMake Tools plugins, following steps will be done automatically when the project is opened in VSCode. Build and test can be triggered using the extension.
+
+Please refer the following link for the CMake Tools extension:
+https://code.visualstudio.com/docs/cpp/CMake-linux
+
+If the CMake Tools plugin is not configured to auto generate, then manually run cmake and build using the following commands.
+```
+$ /usr/bin/cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S . -B build -G Ninja
+$ cd build
+$ ninja
+$ ninja test
 ```
 Now you should see formatting the code with clang-format, building and running the unit tests.
 
