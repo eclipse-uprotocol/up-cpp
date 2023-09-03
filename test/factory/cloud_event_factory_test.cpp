@@ -62,7 +62,7 @@ Ensure(ceFactory, publish) {
 
   auto msg = getMsseage();
   CE ce;
-  auto attributes = cloudevents::format::CE_Attributes();
+  auto attributes = cloudevents::format::UAttributes();
 
   auto ok =
       cloudevents::factory::factory::publish_factory(*msg, "", attributes, ce);
@@ -188,7 +188,7 @@ Ensure(ceFactory, notify) {
   jsonPrintOptions.add_whitespace = false;
   jsonPrintOptions.preserve_proto_field_names = true;
   auto msg = getMsseage();
-  auto attributes = cloudevents::format::CE_Attributes();
+  auto attributes = cloudevents::format::UAttributes();
   CE ce;
 
   auto ok = cloudevents::factory::factory::notify_factory(*msg, "", "",
@@ -289,7 +289,7 @@ Ensure(ceFactory, notify) {
 
 Ensure(ceFactory, file) {
   auto msg = getMsseage();
-  auto attributes = cloudevents::format::CE_Attributes();
+  auto attributes = cloudevents::format::UAttributes();
   CE ce;
 
   auto ok =
@@ -389,7 +389,7 @@ Ensure(ceFactory, file) {
 
 Ensure(ceFactory, request) {
   auto msg = getMsseage();
-  auto attributes = cloudevents::format::CE_Attributes();
+  auto attributes = cloudevents::format::UAttributes();
   CE ce;
 
   auto ok = cloudevents::factory::factory::request_factory(*msg, "", "",
@@ -478,7 +478,7 @@ Ensure(ceFactory, request) {
 
 Ensure(ceFactory, response) {
   auto msg = getMsseage();
-  auto attributes = cloudevents::format::CE_Attributes();
+  auto attributes = cloudevents::format::UAttributes();
   CE ce;
 
   auto ok = cloudevents::factory::factory::response_factory(*msg, "", "", "",

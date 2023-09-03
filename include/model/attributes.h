@@ -27,9 +27,9 @@
 #define unlikely(x) __builtin_expect(!!(x), 0)
 
 namespace cloudevents::format {
-class CE_Attributes {
+class UAttributes {
  public:
-  CE_Attributes(const std::string_view& hash, Priority::Priority_E priority,
+  UAttributes(const std::string_view& hash, Priority::Priority_E priority,
                 int32_t ttl) {
     if (unlikely(hash.empty())) {
       this->hash.clear();
@@ -48,12 +48,12 @@ class CE_Attributes {
     }
   }
 
-  CE_Attributes() {
+  UAttributes() {
     this->hash.clear();
     this->priority.clear();
   }
 
-  static CE_Attributes empty() { return {}; }
+  static UAttributes empty() { return {}; }
 
   [[nodiscard]] bool isEmpty() const {
     if (hash.empty() && priority.empty() && ttl == -1) {
@@ -80,18 +80,18 @@ class CE_Attributes {
     return ttl == -1 ? std::nullopt : std::make_optional(ttl);
   }
 
-  CE_Attributes* WithHash(const std::string_view& m_hash) {
+  UAttributes* WithHash(const std::string_view& m_hash) {
     this->hash = m_hash;
     return this;
   }
 
-  CE_Attributes* WithPriority(
+  UAttributes* WithPriority(
       cloudevents::format::Priority::Priority_E m_priority) {
     this->priority = Priority::ToString(m_priority);
     return this;
   }
 
-  CE_Attributes* WithTtl(int32_t m_ttl) {
+  UAttributes* WithTtl(int32_t m_ttl) {
     this->ttl = m_ttl;
     return this;
   }

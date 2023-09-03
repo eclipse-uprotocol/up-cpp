@@ -7,8 +7,8 @@
 #include <uStatus.h>
 #include <uPayload.h>
 
-using uUri = uri_datamodel::up_uri;
-using uAttributes = cloudevents::format::CE_Attributes;
+using uUri = uri_datamodel::UURI;
+using uAttributes = cloudevents::format::UAttributes;
 
 namespace uprotocol 
 {

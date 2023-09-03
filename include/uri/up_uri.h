@@ -25,23 +25,23 @@
 #include "uri_resource.h"
 
 namespace uri_datamodel {
-class up_uri {
+class UURI {
  public:
   static const std::string SCHEME;
 
-  up_uri(const uri_authority& uAuthority, uri_entity uEntity,
+  UURI(const uri_authority& uAuthority, uri_entity uEntity,
          const uri_resource& uResource)
       : uAuthority(uAuthority),
         uEntity(std::move(uEntity)),
         uResource(uResource) {}
 
-  up_uri(const uri_authority& uAuthority, const uri_entity& uEntity,
+  UURI(const uri_authority& uAuthority, const uri_entity& uEntity,
          const std::string& uResource)
-      : up_uri(uAuthority, uEntity, uri_resource::fromName(uResource)) {}
+      : UURI(uAuthority, uEntity, uri_resource::fromName(uResource)) {}
 
-  static up_uri empty() {
+  static UURI empty() {
     static const auto EMPTY =
-        uri_datamodel::up_uri(uri_datamodel::uri_authority::empty(),
+        uri_datamodel::UURI(uri_datamodel::uri_authority::empty(),
                               uri_datamodel::uri_entity::empty(),
                               uri_datamodel::uri_resource::empty());
     return EMPTY;
@@ -58,7 +58,7 @@ class up_uri {
 
   [[nodiscard]] uri_resource getUResource() const { return uResource; }
 
-  bool operator==(const up_uri& o) const {
+  bool operator==(const UURI& o) const {
     if (this == &o) {
       return true;
     }
@@ -79,7 +79,7 @@ class up_uri {
   const uri_resource uResource;
 };
 
-const std::string up_uri::SCHEME = std::string("up:");
+const std::string UURI::SCHEME = std::string("up:");
 }  // namespace uri_datamodel
 
 #endif  // up_URI_H_

@@ -19,51 +19,65 @@
  * under the License.
  */
 
- package org.eclipse.uprotocol.utransport.datamodel;
+namespace uprotocol 
+{
+    namespace utransport
+    {
+        namespace datamodel
+        {
+           class UMessageType
+            {
+                public:
+                    static const UMessageType PUBLISH;
+                    static const UMessageType REQUEST;
+                    static const UMessageType RESPONSE;
 
-import java.util.Arrays;
-import java.util.Optional;
+                    int intValue() const {
+                        return intValue_;
+                    }
 
-public enum UMessageType {
-    PUBLISH(0, "pub.v1"),   // Publish or notification event
-    REQUEST(1, "req.v1"),   // Request
-    RESPONSE(2, "res.v1");  // Response
+                    std::string stringValue() const {
+                        return stringValue_;
+                    }
 
-    private final int intValue;
-    private final String stringValue;
+                    static std::optional<UMessageType> from(int value) {
+                        auto it = std::find_if(allValues.begin(), allValues.end(), [value](const UMessageType& messageType) {
+                            return messageType.intValue() == value;
+                        });
 
-    public int intValue() {
-        return intValue;
-    }
+                        if (it != allValues.end()) {
+                            return *it;
+                        } else {
+                            return std::nullopt;
+                        }
+                    }
 
-    public String stringValue() {
-        return stringValue;
-    }
+                    static std::optional<UMessageType> from(const std::string& value) {
+                        auto it = std::find_if(allValues.begin(), allValues.end(), [value](const UMessageType& messageType) {
+                            return messageType.stringValue() == value;
+                        });
 
-    UMessageType(int value, String name) {
-        this.intValue = value;
-        this.stringValue = name;
-    }
+                        if (it != allValues.end()) {
+                            return *it;
+                        } else {
+                            return std::nullopt;
+                        }
+                    }
 
-    /**
-     * Find the Message type from a numeric value. Mind you, it might not exist.
-     * @param value numeric message type .
-     * @return Returns the UMessageType matching the numeric value
-     */
-    public static Optional<UMessageType> from(int value) {
-        return Arrays.stream(UMessageType.values())
-                .filter(p -> p.intValue() == value)
-                .findAny();
-    }
+                private:
+                    UMessageType(int value, const std::string& name)
+                        : intValue_(value), stringValue_(name) {}
 
-    /**
-     * Find the Message type from a string value. Mind you, it might not exist.
-     * @param value string message type .
-     * @return Returns the UMessageType matching the string value
-     */
-    public static Optional<UMessageType> from(String value) {
-        return Arrays.stream(UMessageType.values())
-                .filter(p -> p.stringValue().equals(value))
-                .findAny();
+                    int intValue_;
+                    std::string stringValue_;
+
+                    static std::vector<UMessageType> allValues;
+                };
+
+                const UMessageType UMessageType::PUBLISH = UMessageType(0, "pub.v1");
+                const UMessageType UMessageType::REQUEST = UMessageType(1, "req.v1");
+                const UMessageType UMessageType::RESPONSE = UMessageType(2, "res.v1");
+
+        }
     }
 }

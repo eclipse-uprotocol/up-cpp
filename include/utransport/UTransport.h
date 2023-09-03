@@ -3,39 +3,41 @@
 
 #include <stdint.h>
 #include <cstddef>
-//#include <uAttributes.h>
-#include <uListener.h>
-#include <uPayload.h>
+//#include <UAttributes.h>
+#include <UListener.h>
+#include <UPayload.h>
 #include <include/uri/up_uri.h>
 #include <include/model/attributes.h>
 
-using uUri = uri_datamodel::up_uri;
-using uAttributes = cloudevents::format::CE_Attributes;
-
-class uTransport 
+namespace uprotocol 
 {
-    public:
+    namespace Utransport
+    {
+          class UTransport 
+          {
+               public:
 
-        virtual uStatus send(
-            uUri &uri, 
-            uPayload &payload,
-            uAttributes &attributes) = 0;
+                    virtual UStatus send(
+                         UURI &uri, 
+                         UPayload &payload,
+                         UAttributes &attributes) = 0;
 
-       virtual uStatus registerListener(
-            uUri &uri,
-            uListener &listner) = 0;
+                    virtual UStatus registerListener(
+                         UURI &uri,
+                         uListener &listner) = 0;
 
-       virtual uStatus unregisterListener(
-            uUri &uri, 
-            uListener &listner) = 0;
+                    virtual UStatus unregisterListener(
+                         UURI &uri, 
+                         uListener &listner) = 0;
 
-       virtual uStatus receive(
-            uUri &uri, 
-            uPayload &payload, 
-            uAttributes &attributes) = 0;
-        
-        virtual ~uTransport() {} 
-
-};
+                    virtual UStatus receive(
+                         UURI &uri, 
+                         UPayload &payload, 
+                         UAttributes &attributes) = 0;
+                    
+                    virtual ~uTransport() {} 
+          };
+    }
+}
 
 #endif /*_UTRANSPORT_*/

@@ -30,65 +30,46 @@ namespace uprotocol
 {
     namespace Utransport
     {
-public class UPayload {
+        class UPayload 
+        {
+            public:
 
-    private static final UPayload EMPTY = new UPayload(new byte[0]);
+                UPayload(const uint8_t *data, size_t dataSize)
+                {
+                    this->data = data;
+                    this->dataSize = dataSize;
+                }
+              
+                /**
+                * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
+                * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
+                */
+                uint8_t* data()
+                {
+                    return this.data;
+                }
 
-    private final byte[] data;
+                /**
+                * @return Returns an empty representation of UPayload.
+                */
+                UPayload empty()
+                {
+                    return new UPayload(nullptr, 0);
+                }
 
+                /**
+                * @return Returns true if the data in the UPayload is empty.
+                */
+                bool isEmpty() 
+                {
+                    return this.data == null || this.data.length == 0;
+                }
 
-    /**
-     * Create a UPayload.
-     * @param data A byte array of the actual data.
-     * @param representationHint Hint regarding what the bytes represent such as simple binary, a String or maybe a special type of String.
-     */
-    public UPayload(byte[] data) {
-        this.data = data;
-    }
-
-    /**
-     * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
-     * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
-     */
-    public byte[] data() {
-        return this.data;
-    }
-
-    
-    /**
-     * @return Returns an empty representation of UPayload.
-     */
-    public static UPayload empty() {
-        return EMPTY;
-    }
-
-    /**
-     * @return Returns true if the data in the UPayload is empty.
-     */
-    public boolean isEmpty() {
-        return this.data == null || this.data.length == 0;
-    }
-
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UPayload uPayload = (UPayload) o;
-        return Arrays.equals(data, uPayload.data);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Arrays.hashCode(data);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "UPayload{" +
-                "data=" + Arrays.toString(data) +
-                '}';
+            private:
+                
+                uint8_t *data;
+                size_t dataSize;
+        }
     }
 }
 

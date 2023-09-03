@@ -67,7 +67,7 @@ struct factory {
    */
   [[nodiscard]] static inline bool publish_factory(
       google::protobuf::Message& msg, const std::string& rpcUri,
-      CE_Attributes& attributes, CE& ce) {
+      UAttributes& attributes, CE& ce) {
     auto any = new google::protobuf::Any();
     any->PackFrom(msg);
 
@@ -102,7 +102,7 @@ struct factory {
    */
   [[nodiscard]] static inline bool publish_factory(std::string* msg,
                                                    const std::string& rpcUri,
-                                                   CE_Attributes& attributes,
+                                                   UAttributes& attributes,
                                                    CE& ce) {
     auto ok = createBaseCE(ServiceType::MessageType_E::PUBLISH, rpcUri, msg,
                            attributes, ce);
@@ -136,7 +136,7 @@ struct factory {
    */
   [[nodiscard]] static inline bool notify_factory(
       google::protobuf::Message& msg, const std::string& rpcUri,
-      const std::string& sinkUri, CE_Attributes& attributes, CE& ce) {
+      const std::string& sinkUri, UAttributes& attributes, CE& ce) {
     if (unlikely(rpcUri.empty())) {
       spdlog::error("RPCURI shuld not be empty, in {}\n", __func__);
       return false;
@@ -192,7 +192,7 @@ struct factory {
   [[nodiscard]] static inline bool notify_factory(std::string* msg,
                                                   const std::string& rpcUri,
                                                   const std::string& sinkUri,
-                                                  CE_Attributes& attributes,
+                                                  UAttributes& attributes,
                                                   CE& ce) {
     if (unlikely(rpcUri.empty())) {
       spdlog::error("RPCURI shuld not be empty, in {}\n", __func__);
@@ -247,7 +247,7 @@ struct factory {
   [[nodiscard]] static inline bool file_factory(google::protobuf::Message& msg,
                                                 const std::string& rpcUri,
                                                 const std::string& sinkUri,
-                                                CE_Attributes& attributes,
+                                                UAttributes& attributes,
                                                 CE& ce) {
     auto any = new google::protobuf::Any();
     any->PackFrom(msg);
@@ -293,7 +293,7 @@ struct factory {
   [[nodiscard]] static inline bool file_factory(std::string* msg,
                                                 const std::string& rpcUri,
                                                 const std::string& sinkUri,
-                                                CE_Attributes& attributes,
+                                                UAttributes& attributes,
                                                 CE& ce) {
     auto ok = createBaseCE(ServiceType::MessageType_E::FILE, rpcUri, msg,
                            attributes, ce);
@@ -336,7 +336,7 @@ struct factory {
    */
   [[nodiscard]] static inline bool request_factory(
       google::protobuf::Message& msg, const std::string& rpcUri,
-      const std::string& sinkUri, CE_Attributes& attributes, CE& ce) {
+      const std::string& sinkUri, UAttributes& attributes, CE& ce) {
     auto any = new google::protobuf::Any();
     any->PackFrom(msg);
 
@@ -383,7 +383,7 @@ struct factory {
   [[nodiscard]] static inline bool request_factory(std::string* msg,
                                                    const std::string& rpcUri,
                                                    const std::string& sinkUri,
-                                                   CE_Attributes& attributes,
+                                                   UAttributes& attributes,
                                                    CE& ce) {
     auto ok = createBaseCE(ServiceType::MessageType_E::REQUEST, rpcUri, msg,
                            attributes, ce);
@@ -432,7 +432,7 @@ struct factory {
   [[nodiscard]] static inline bool response_factory(
       google::protobuf::Message& msg, const std::string& rpcUri,
       const std::string& sinkUri, const std::string& reqId,
-      CE_Attributes& attributes, CE& ce) {
+      UAttributes& attributes, CE& ce) {
     auto any = new google::protobuf::Any();
     any->PackFrom(msg);
 
@@ -478,7 +478,7 @@ struct factory {
 
   [[nodiscard]] static inline bool response_factory(
       std::string* msg, const std::string& rpcUri, const std::string& sinkUri,
-      const std::string& reqId, CE_Attributes& attributes, CE& ce) {
+      const std::string& reqId, UAttributes& attributes, CE& ce) {
     auto ok = createBaseCE(ServiceType::MessageType_E::REQUEST, sinkUri, msg,
                            attributes, ce);
     if (unlikely(!ok)) {
@@ -562,7 +562,7 @@ events and mandatory or optional in the uProtocol
   [[nodiscard]] static inline bool createBaseCE(ServiceType::MessageType_E type,
                                                 const std::string& rpcUri,
                                                 google::protobuf::Any* any,
-                                                CE_Attributes& attributs,
+                                                UAttributes& attributs,
                                                 CE& ce) {
     if (likely(up_validator::valid_uri(rpcUri))) {
       ce.set_source(rpcUri);
@@ -618,7 +618,7 @@ events and mandatory or optional in the uProtocol
   [[nodiscard]] static inline bool createBaseCE(ServiceType::MessageType_E type,
                                                 const std::string& rpcUri,
                                                 std::string* body,
-                                                CE_Attributes& attributs,
+                                                UAttributes& attributs,
                                                 CE& ce) {
     if (likely(up_validator::valid_uri(rpcUri))) {
       ce.set_source(rpcUri);

@@ -25,38 +25,38 @@
 #include <iostream>
 
 using namespace cgreen;
-using cloudevents::format::CE_Attributes;
+using cloudevents::format::UAttributes;
 
-Describe(CE_Attributes);
-BeforeEach(CE_Attributes) {
+Describe(UAttributes);
+BeforeEach(UAttributes) {
   // dummy
 }
-AfterEach(CE_Attributes) {
+AfterEach(UAttributes) {
   // dummy
 }
 
-Ensure(CE_Attributes, empty) {
-  CE_Attributes attributes;
+Ensure(UAttributes, empty) {
+  UAttributes attributes;
   assert_true(attributes.isEmpty());
-  auto attr2 = CE_Attributes();
+  auto attr2 = UAttributes();
   assert_true(attr2.isEmpty());
   std::string str;
-  attr2 = CE_Attributes(
+  attr2 = UAttributes(
       "", cloudevents::format::Priority::Priority_E::NOT_DEFINED, -1);
   assert_true(attr2.isEmpty());
-  auto attr3 = CE_Attributes(
+  auto attr3 = UAttributes(
       "", cloudevents::format::Priority::Priority_E::NOT_DEFINED, -1);
   assert_true(attr3.isEmpty());
-  auto attr4 = CE_Attributes(
+  auto attr4 = UAttributes(
       "stam", cloudevents::format::Priority::Priority_E::NOT_DEFINED, -1);
   assert_false(attr4.isEmpty());
-  attr4 = CE_Attributes(
+  attr4 = UAttributes(
       "", cloudevents::format::Priority::Priority_E::NETWORK_PRIORITY, -1);
   assert_false(attr4.isEmpty());
-  attr4 = CE_Attributes(
+  attr4 = UAttributes(
       "", cloudevents::format::Priority::Priority_E::NOT_DEFINED, 8);
   assert_false(attr4.isEmpty());
-  attr4 = CE_Attributes(
+  attr4 = UAttributes(
       "", cloudevents::format::Priority::Priority_E::NETWORK_PRIORITY, 9);
   assert_false(attr4.isEmpty());
   assert_true(attr2.isEmpty());
@@ -64,11 +64,11 @@ Ensure(CE_Attributes, empty) {
   assert_false(attr2.isEmpty());
 }
 
-Ensure(CE_Attributes, build) {
+Ensure(UAttributes, build) {
   std::string str = "stam";
-  auto attr = CE_Attributes(
+  auto attr = UAttributes(
       str, cloudevents::format::Priority::Priority_E::NOT_DEFINED, -1);
-  attr = CE_Attributes(
+  attr = UAttributes(
       "", cloudevents::format::Priority::Priority_E::REAL_TIME_PRIORITY, 15);
 
   auto priority = attr.get_priority();
@@ -83,7 +83,7 @@ Ensure(CE_Attributes, build) {
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   TestSuite* suite = create_test_suite();
-  add_test_with_context(suite, CE_Attributes, empty);
-  add_test_with_context(suite, CE_Attributes, build);
+  add_test_with_context(suite, UAttributes, empty);
+  add_test_with_context(suite, UAttributes, build);
   return run_test_suite(suite, create_text_reporter());
 }
