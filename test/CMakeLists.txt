@@ -110,3 +110,8 @@ add_executable(up_uri_factory_test
 target_compile_options(up_uri_factory_test PRIVATE -g -O0)
 target_link_libraries(up_uri_factory_test ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-13-up-uri_factory-test"  up_uri_factory_test)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(uattributes_test
+	${TESTS_PATH}/utransport/uattributes_test.cpp)
+target_link_libraries(uattributes_test ${CGREEN_LIBRARY} uprotocolsdk)

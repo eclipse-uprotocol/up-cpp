@@ -46,7 +46,7 @@ namespace uprotocol
                     {
                         this->_id = nullptr;
                         this->_type = nullptr;
-                        this->_priority = UPriority::UNKNOWN;
+                        this->_priority = UPriority::UNDEFINED;
                         this->_ttl = 0;
                         this->_token = "";
                         this->_hint = USerializationHint::UNKNOWN;
@@ -79,7 +79,7 @@ namespace uprotocol
                         this->_ttl = ttl;
                         this->_token = token;
                         this->_hint = hint;
-                        this->_sink = &sink;
+                       //this->*_sink = sink;
                         this->_plevel = plevel;
                         this->_commstatus = commstatus;
                         this->_reqid = reqid;
@@ -89,20 +89,21 @@ namespace uprotocol
                     {
                         (void)builder;
                     }
-                  /**
-                //     * Static factory method for creating an empty ultifi cloud event attributes object, to avoid working with null.
-                //     * @return Returns an empty transport attributes that indicates that there are no added additional attributes to configure.
-                //     */
-                        // UAttributes empty()
-                        // {
-                        //     return new UAttributes(null, null, null, null, null, null, null, null, null, null;
-                        // }
+                 
+                   /**
+                    * Static factory method for creating an empty ultifi cloud event attributes object, to avoid working with null.
+                    * @return Returns an empty transport attributes that indicates that there are no added additional attributes to configure.
+                    */
+                    UAttributes* empty()
+                    {
+                        return new UAttributes();
+                    }
 
                     bool isEmpty()
                     {
-                        return ((this->id == nullptr) && (this->type == nullptr) && (this->priority == UPriority::UNKNOWN) && (this->ttl == 0) && (this->token == "")
-                                && (this->hint == USerializationHint::UNKNOWN) && (this->sink == nullptr) && (this->plevel == 0) && (this->commstatus == 0)
-                                && (this->reqid == nullptr));
+                        return ((this->_id == nullptr) && (this->_type == nullptr) && (this->_priority == UPriority::UNDEFINED) && (this->_ttl == 0) && (this->_token == "")
+                                && (this->_hint == USerializationHint::UNKNOWN) && (this->_sink == nullptr) && (this->_plevel == 0) && (this->_commstatus == 0)
+                                && (this->_reqid == nullptr));
                     }
 
                     /**
@@ -136,18 +137,28 @@ namespace uprotocol
                     * hint regarding the bytes contained within the UPayload.
                     * @return Returns an Optional hint regarding the bytes contained within the UPayload.
                     */
-                    int32_t ttl() 
+                    std::optional<int32_t> ttl() const
                     {
-                        return _ttl;
+                        if (_ttl)
+                        {
+                            return _ttl;
+                        }
+
+                        return std::nullopt;
                     }
 
                     /**
                     * Oauth2 access token to perform the access request defined in the request message.
                     * @return Returns an Optional token attribute.
                     */
-                    std::string token()
+                    std::optional<std::string> token() const
                     {
-                        return _token;
+                        if (!_token.value().empty()) 
+                        {
+                            return _token;
+                        }
+
+                        return std::nullopt;
                     }
 
                     /**
@@ -155,51 +166,76 @@ namespace uprotocol
                     * Events without this attribute (or value is 0) MUST NOT timeout.
                     * @return Returns an Optional time to live attribute.
                     */
-                    USerializationHint serializationHint()
+                    std::optional<USerializationHint> serializationHint() const
                     {
-                        return _hint;
+                        if (_hint)
+                        {
+                            return _hint;
+                        }
+                        
+                        return std::nullopt;
                     }
 
                     /**
                     * an explicit destination URI.
                     * @return Returns an Optional destination URI attribute.
                     */
-                    UUri sink()
+                    std::optional<UUri> sink() const
                     {
-                        return *_sink;
+                        if (_sink)
+                        {
+                            return *_sink;
+                        }
+                        
+                        return std::nullopt;
                     }
 
                     /**
                     * The reqid is used to return a response for a specific request.
                     * @return Returns an Optional requestId attribute.
                     */
-                    UUID reqid()
+                    std::optional<UUID> reqid() const
                     {
-                        return _reqid;
+                        if (!_reqid)
+                        {
+                            return _reqid;
+                        }
+                        
+                        return std::nullopt;
                     }
 
                     /**
                     * The permission level of the message.
                     * @return Returns an Optional permission level attribute.
                     */
-                    int32_t plevel()
+                    std::optional<int32_t> plevel() const
                     {
-                        return _plevel;
+                        if (_plevel)
+                        {
+                            return _plevel;
+                        }
+                        
+                        return std::nullopt;
                     }
 
                     /**
                     * The communication status of the message.
                     * @return Returns an Optional communication status attribute.
                     */
-                    int32_t commstatus()
+                    std::optional<int32_t> commstatus() const
                     {
-                        return _commstatus;
+                        if (_commstatus)
+                        {
+                            return _commstatus;
+                        }
+                        
+                        return std::nullopt;
                     }
 
                     class UAttributesBuilder
                     {
                         public:
-                            UAttributesBuilder();
+                            UAttributesBuilder(UAttributes &attributes): attributes_(attributes){};
 
                             UAttributesBuilder& withId(const UUID& id) {
                                 attributes_._id = id;
@@ -260,19 +296,20 @@ namespace uprotocol
                         private:
                              UAttributes &attributes_;
                     };
+                    
                 private:
-                        UUID _id;                  // Unique identifier for the message
-                        UMessageType *_type;        // Message type
-                        UPriority _priority;       // Message priority
 
-                //     // Optional Attributes
-                        int32_t _ttl;              // Time to live in milliseconds
-                        std::string _token;        // Authorization token used for TAP
-                        USerializationHint _hint;  // Hint regarding the bytes contained within the UPayload
-                        UUri *_sink;                // Explicit destination URI
-                        int32_t _plevel;           // Permission Level
-                        int32_t _commstatus;       // Communication Status
-                        UUID _reqid;               // Request ID
+                    UUID _id;                                   // Unique identifier for the message
+                    UMessageType *_type;                        // Message type
+                    UPriority _priority;                        // Message priority
+                    // Optional Attributes 
+                    std::optional<int32_t> _ttl;                // Time to live in milliseconds
+                    std::optional<std::string> _token;          // Authorization token used for TAP
+                    std::optional<USerializationHint> _hint;    // Hint regarding the bytes contained within the UPayload
+                    std::optional<UUri> *_sink;                 // Explicit destination URI
+                    std::optional<int32_t> _plevel;             // Permission Level
+                    std::optional<int32_t> _commstatus;         // Communication Status
+                    std::optional<UUID> _reqid;                 // Request ID
             };
         }
     } 

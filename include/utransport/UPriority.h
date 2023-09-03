@@ -24,7 +24,7 @@ namespace uprotocol
                 // Network control such as Safety Critical
                 NETWORK_CONTROL =  6,
                 // UNKOWN
-                UNKNOWN = 7
+                UNDEFINED = 7
             };
         }
     }

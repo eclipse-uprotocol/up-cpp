@@ -53,10 +53,10 @@ namespace uprotocol
                 /**
                 * @return Returns an empty representation of UPayload.
                 */
-                // UPayload empty()
-                // {
-                //     return new UPayload(nullptr, 0);
-                // }
+                UPayload* empty()
+                {
+                    return new UPayload(nullptr, 0);
+                }
 
                 /**
                 * @return Returns true if the data in the UPayload is empty.
