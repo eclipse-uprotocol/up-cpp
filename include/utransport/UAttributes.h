@@ -46,7 +46,7 @@ namespace uprotocol
                     {
                         this->_id = nullptr;
                         this->_type = nullptr;
-                        this->_priority = UPriority::LOW;
+                        this->_priority = UPriority::UNKNOWN;
                         this->_ttl = 0;
                         this->_token = "";
                         this->_hint = USerializationHint::UNKNOWN;
@@ -89,7 +89,7 @@ namespace uprotocol
                     {
                         (void)builder;
                     }
-                   //      /**
+                  /**
                 //     * Static factory method for creating an empty ultifi cloud event attributes object, to avoid working with null.
                 //     * @return Returns an empty transport attributes that indicates that there are no added additional attributes to configure.
                 //     */
@@ -98,12 +98,12 @@ namespace uprotocol
                         //     return new UAttributes(null, null, null, null, null, null, null, null, null, null;
                         // }
 
-                //     bool isEmpty()
-                //     {
-                //         return this->id == null && this->type == null && this->priority == null && this->ttl == null && this->token == null
-                //                 && this->hint == null && this->sink == null && this->plevel == null && this->commstatus == null
-                //                 && this->reqid == null;
-                //     }
+                    bool isEmpty()
+                    {
+                        return ((this->id == nullptr) && (this->type == nullptr) && (this->priority == UPriority::UNKNOWN) && (this->ttl == 0) && (this->token == "")
+                                && (this->hint == USerializationHint::UNKNOWN) && (this->sink == nullptr) && (this->plevel == 0) && (this->commstatus == 0)
+                                && (this->reqid == nullptr));
+                    }
 
                     /**
                     * Unique identifier for the message.

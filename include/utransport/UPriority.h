@@ -22,7 +22,9 @@ namespace uprotocol
                 // Signaling such as Important
                 SIGNALING =  5,
                 // Network control such as Safety Critical
-                NETWORK_CONTROL =  6
+                NETWORK_CONTROL =  6,
+                // UNKOWN
+                UNKNOWN = 7
             };
         }
     }
