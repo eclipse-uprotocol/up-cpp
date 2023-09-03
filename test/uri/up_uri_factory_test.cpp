@@ -493,13 +493,13 @@ static void test_parse_protocol_rpc_uri_with_remote_service_with_version() {
 //("Test Create a uProtocol URI from null")
 static void test_build_protocol_uri_from_up_uri_when_up_uri_isnull() {
   std::string uProtocolUri = uri_factory::up_uri_factory::buildUProtocolUri(
-      uri_datamodel::UURI::empty());
+      uri_datamodel::UUri::empty());
   assertEquals("up:", uProtocolUri);
 }
 
 //("Test Create a uProtocol URI from an empty up URI Object")
 static void test_build_protocol_uri_from_up_uri_when_up_uri_isEmpty() {
-  auto upUri = uri_datamodel::UURI::empty();
+  auto upUri = uri_datamodel::UUri::empty();
   std::string uProtocolUri =
       uri_factory::up_uri_factory::buildUProtocolUri(upUri);
   assertEquals("up:", uProtocolUri);
@@ -509,7 +509,7 @@ static void test_build_protocol_uri_from_up_uri_when_up_uri_isEmpty() {
 static void test_build_protocol_uri_from_up_uri_when_up_uri_has_empty_use() {
   auto use = uri_datamodel::uri_entity::empty();
   auto upUri =
-      uri_datamodel::UURI(uri_datamodel::uri_authority::local(), use,
+      uri_datamodel::UUri(uri_datamodel::uri_authority::local(), use,
                             uri_datamodel::uri_resource::fromName("door"));
   std::string uProtocolUri =
       uri_factory::up_uri_factory::buildUProtocolUri(upUri);
@@ -521,7 +521,7 @@ static void test_build_protocol_uri_from_up_uri_when_up_uri_has_empty_use() {
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_no_version() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
-  auto upUri = uri_datamodel::UURI(uri_datamodel::uri_authority::local(), use,
+  auto upUri = uri_datamodel::UUri(uri_datamodel::uri_authority::local(), use,
                                      uri_datamodel::uri_resource::empty());
   std::string uProtocolUri =
       uri_factory::up_uri_factory::buildUProtocolUri(upUri);
@@ -533,7 +533,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_no_v
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_and_version() {
   auto use = uri_datamodel::uri_entity("body.access", "1");
-  auto upUri = uri_datamodel::UURI(uri_datamodel::uri_authority::local(), use,
+  auto upUri = uri_datamodel::UUri(uri_datamodel::uri_authority::local(), use,
                                      uri_datamodel::uri_resource::empty());
   std::string uProtocolUri =
       uri_factory::up_uri_factory::buildUProtocolUri(upUri);
@@ -546,7 +546,7 @@ static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_no_version_with_resource() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
   auto upUri =
-      uri_datamodel::UURI(uri_datamodel::uri_authority::local(), use,
+      uri_datamodel::UUri(uri_datamodel::uri_authority::local(), use,
                             uri_datamodel::uri_resource::fromName("door"));
   std::string uProtocolUri =
       uri_factory::up_uri_factory::buildUProtocolUri(upUri);
@@ -559,7 +559,7 @@ static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_and_version_with_resource() {
   auto use = uri_datamodel::uri_entity("body.access", "1");
   auto upUri =
-      uri_datamodel::UURI(uri_datamodel::uri_authority::local(), use,
+      uri_datamodel::UUri(uri_datamodel::uri_authority::local(), use,
                             uri_datamodel::uri_resource::fromName("door"));
   std::string uProtocolUri =
       uri_factory::up_uri_factory::buildUProtocolUri(upUri);
@@ -571,7 +571,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_and_
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_no_version_with_resource_with_instance_no_message() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::local(), use,
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left"));
   std::string uProtocolUri =
@@ -584,7 +584,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_no_v
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_and_version_with_resource_with_instance_no_message() {
   auto use = uri_datamodel::uri_entity("body.access", "1");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::local(), use,
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left"));
   std::string uProtocolUri =
@@ -597,7 +597,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_and_
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_no_version_with_resource_with_instance_with_message() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::local(), use,
       uri_datamodel::uri_resource("door", "front_left", "Door"));
   std::string uProtocolUri =
@@ -610,7 +610,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_no_v
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_and_version_with_resource_with_instance_with_message() {
   auto use = uri_datamodel::uri_entity("body.access", "1");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::local(), use,
       uri_datamodel::uri_resource("door", "front_left", "Door"));
   std::string uProtocolUri =
@@ -623,7 +623,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_local_authority_service_and_
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_no_version() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("VCU", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource::empty());
   std::string uProtocolUri =
@@ -636,7 +636,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_no_
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_no_device_with_domain_with_service_no_version() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource::empty());
   std::string uProtocolUri =
@@ -649,7 +649,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_no_device_w
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_and_version() {
   auto use = uri_datamodel::uri_entity("body.access", "1");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("VCU", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource::empty());
   std::string uProtocolUri =
@@ -662,7 +662,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_and
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_and_version_with_resource() {
   auto use = uri_datamodel::uri_entity("body.access", "1");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("VCU", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource::fromName("door"));
   std::string uProtocolUri =
@@ -675,7 +675,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_and
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_no_version_with_resource() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("VCU", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource::fromName("door"));
   std::string uProtocolUri =
@@ -688,7 +688,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_no_
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_and_version_with_resource_with_instance_no_message() {
   auto use = uri_datamodel::uri_entity("body.access", "1");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("VCU", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left"));
   std::string uProtocolUri =
@@ -702,7 +702,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_and
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_no_version_with_resource_with_instance_no_message() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("VCU", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left"));
   std::string uProtocolUri =
@@ -716,7 +716,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_no_
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_and_version_with_resource_with_instance_and_message() {
   auto use = uri_datamodel::uri_entity("body.access", "1");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("VCU", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource("door", "front_left", "Door"));
   std::string uProtocolUri =
@@ -730,7 +730,7 @@ test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_and
 static void
 test_build_protocol_uri_from_up_uri_when_up_uri_has_remote_authority_service_no_version_with_resource_with_instance_and_message() {
   auto use = uri_datamodel::uri_entity::fromName("body.access");
-  auto upUri = uri_datamodel::UURI(
+  auto upUri = uri_datamodel::UUri(
       uri_datamodel::uri_authority::remote("VCU", "MY_CAR_VIN"), use,
       uri_datamodel::uri_resource("door", "front_left", "Door"));
   std::string uProtocolUri =
@@ -846,7 +846,7 @@ static void test_build_protocol_uri_from_parts_when_they_are_null() {
   uri_datamodel::uri_authority uAuthority;
   uri_datamodel::uri_entity uSoftwareEntity;
   uri_datamodel::uri_resource uResource;
-  auto upUri = uri_datamodel::UURI(uAuthority, uSoftwareEntity, uResource);
+  auto upUri = uri_datamodel::UUri(uAuthority, uSoftwareEntity, uResource);
   std::string uProtocolUri =
       uri_factory::up_uri_factory::buildUProtocolUri(upUri);
   assertEquals("up:", uProtocolUri);

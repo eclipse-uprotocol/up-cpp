@@ -48,6 +48,7 @@ typedef const struct _st_uuid* cpst_uuid_v6;
 
 typedef struct _st_uuid_str st_uuid_v6_str, *pst_uuid_v6_str;
 typedef const struct _st_uuid_str* cpst_uuid_v6_str;
+typedef struct _st_uuid st_uuid_v6, *UUID;
 
 #ifdef __cplusplus
 extern "C" {

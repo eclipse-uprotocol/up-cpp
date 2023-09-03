@@ -19,6 +19,9 @@
  * under the License.
  */
 
+ #ifndef _UMESSAGETYPE_H_
+ #define _UMESSAGETYPE_H_
+
 namespace uprotocol 
 {
     namespace utransport
@@ -81,3 +84,5 @@ namespace uprotocol
         }
     }
 }
+
+#endif /* _UMESSAGETYPE_H_*/

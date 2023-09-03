@@ -4,15 +4,15 @@
 #include <include/uri/up_uri.h>
 #include <include/uri/up_uri_factory.h>
 #include <include/model/attributes.h>
-#include <uStatus.h>
-#include <uPayload.h>
+#include "UStatus.h"
+#include "UPayload.h"
+#include "UAttributes.h"
 
-using uUri = uri_datamodel::UURI;
-using uAttributes = cloudevents::format::UAttributes;
+using namespace uprotocol::utransport::datamodel;
 
 namespace uprotocol 
 {
-    namespace Utransport
+    namespace utransport
     {
 		class UListener 
 		{

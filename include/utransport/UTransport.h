@@ -4,38 +4,42 @@
 #include <stdint.h>
 #include <cstddef>
 //#include <UAttributes.h>
-#include <UListener.h>
-#include <UPayload.h>
+#include "UListener.h"
+#include "UPayload.h"
+#include "UAttributes.h"
 #include <include/uri/up_uri.h>
 #include <include/model/attributes.h>
 
+using namespace uprotocol::utransport::datamodel;
+using namespace uri_datamodel;
+
 namespace uprotocol 
 {
-    namespace Utransport
+    namespace utransport
     {
           class UTransport 
           {
                public:
 
                     virtual UStatus send(
-                         UURI &uri, 
+                         UUri &uri, 
                          UPayload &payload,
                          UAttributes &attributes) = 0;
 
                     virtual UStatus registerListener(
-                         UURI &uri,
-                         uListener &listner) = 0;
+                         UUri &uri,
+                         UListener &listner) = 0;
 
                     virtual UStatus unregisterListener(
-                         UURI &uri, 
-                         uListener &listner) = 0;
+                         UUri &uri, 
+                         UListener &listner) = 0;
 
                     virtual UStatus receive(
-                         UURI &uri, 
+                         UUri &uri, 
                          UPayload &payload, 
                          UAttributes &attributes) = 0;
                     
-                    virtual ~uTransport() {} 
+                    virtual ~UTransport() {} 
           };
     }
 }

@@ -48,7 +48,7 @@ static void test_create_full_local_uri() {
   uri_datamodel::uri_resource uResource =
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left");
 
-  uri_datamodel::UURI uri(uAuthority, use, uResource);
+  uri_datamodel::UUri uri(uAuthority, use, uResource);
 
   assertEquals(uAuthority, uri.getUAuthority());
   assertEquals(use, uri.getUEntity());
@@ -62,7 +62,7 @@ static void test_create_full_remote_uri() {
   uri_datamodel::uri_entity use("body.access", "1");
   uri_datamodel::uri_resource uResource("door", "front_left", "Door");
 
-  uri_datamodel::UURI uri(uAuthority, use, uResource);
+  uri_datamodel::UUri uri(uAuthority, use, uResource);
 
   assertEquals(uAuthority, uri.getUAuthority());
   assertEquals(use, uri.getUEntity());
@@ -78,7 +78,7 @@ static void test_create_uri_no_message_with_constructor() {
   uri_datamodel::uri_resource uResource =
       uri_datamodel::uri_resource::fromName("door");
 
-  uri_datamodel::UURI uri(uAuthority, use, "door");
+  uri_datamodel::UUri uri(uAuthority, use, "door");
 
   assertEquals(uAuthority, uri.getUAuthority());
   assertEquals(use, uri.getUEntity());
@@ -92,7 +92,7 @@ static void test_create_uri_null_authority() {
   uri_datamodel::uri_resource uResource =
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left");
 
-  uri_datamodel::UURI uri(uri_datamodel::uri_authority::empty(), use,
+  uri_datamodel::UUri uri(uri_datamodel::uri_authority::empty(), use,
                             uResource);
   assertEquals(uri_datamodel::uri_authority::empty(), uri.getUAuthority());
 }
@@ -105,7 +105,7 @@ static void test_create_uri_null_use() {
   uri_datamodel::uri_resource uResource =
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left");
 
-  uri_datamodel::UURI uri(uAuthority, uri_datamodel::uri_entity::empty(),
+  uri_datamodel::UUri uri(uAuthority, uri_datamodel::uri_entity::empty(),
                             uResource);
   assertEquals(uri_datamodel::uri_entity::empty(), uri.getUEntity());
 }
@@ -118,13 +118,13 @@ static void test_create_uri_null_uResource() {
   uri_datamodel::uri_entity use("body.access", "1");
   uri_datamodel::uri_resource uResource = uri_datamodel::uri_resource::empty();
 
-  uri_datamodel::UURI uri(uAuthority, use, uResource);
+  uri_datamodel::UUri uri(uAuthority, use, uResource);
   assertEquals(uri_datamodel::uri_resource::empty(), uri.getUResource());
 }
 
 //@DisplayName("Test creating an empty uri using the empty static method")
 static void test_create_empty_using_empty() {
-  uri_datamodel::UURI uri = uri_datamodel::UURI::empty();
+  uri_datamodel::UUri uri = uri_datamodel::UUri::empty();
 
   assertTrue(uri.getUAuthority().isLocal());
   assertTrue(uri.getUEntity().isEmpty());
@@ -133,7 +133,7 @@ static void test_create_empty_using_empty() {
 
 //@DisplayName("Test the isEmpty static method")
 static void test_is_empty() {
-  uri_datamodel::UURI uri = uri_datamodel::UURI::empty();
+  uri_datamodel::UUri uri = uri_datamodel::UUri::empty();
   assertTrue(uri.isEmpty());
 
   uri_datamodel::uri_authority uAuthority =
@@ -141,7 +141,7 @@ static void test_is_empty() {
   uri_datamodel::uri_entity use = uri_datamodel::uri_entity::empty();
   uri_datamodel::uri_resource uResource = uri_datamodel::uri_resource::empty();
 
-  uri_datamodel::UURI uri2(uAuthority, use, uResource);
+  uri_datamodel::UUri uri2(uAuthority, use, uResource);
   assertTrue(uri2.isEmpty());
 }
 

@@ -22,13 +22,14 @@
 #ifndef _UPAYLOAD_H_
 #define _UPAYLOAD_H_
 
+#include <stdint.h>
 /**
  * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
  */
 
 namespace uprotocol 
 {
-    namespace Utransport
+    namespace utransport
     {
         class UPayload 
         {
@@ -36,7 +37,7 @@ namespace uprotocol
 
                 UPayload(const uint8_t *data, size_t dataSize)
                 {
-                    this->data = data;
+                    this->_data = data;
                     this->dataSize = dataSize;
                 }
               
@@ -44,32 +45,32 @@ namespace uprotocol
                 * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
                 * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
                 */
-                uint8_t* data()
+                const uint8_t* data()
                 {
-                    return this.data;
+                    return this->_data;
                 }
 
                 /**
                 * @return Returns an empty representation of UPayload.
                 */
-                UPayload empty()
-                {
-                    return new UPayload(nullptr, 0);
-                }
+                // UPayload empty()
+                // {
+                //     return new UPayload(nullptr, 0);
+                // }
 
                 /**
                 * @return Returns true if the data in the UPayload is empty.
                 */
                 bool isEmpty() 
                 {
-                    return this.data == null || this.data.length == 0;
+                    return this->_data == nullptr ;// || this.data.length == 0;
                 }
 
             private:
                 
-                uint8_t *data;
+                const uint8_t *_data;
                 size_t dataSize;
-        }
+        };
     }
 }
 
