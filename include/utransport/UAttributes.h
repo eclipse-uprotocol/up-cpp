@@ -25,6 +25,7 @@
 #include <include/uri/up_uri.h>
 #include <include/uuid/uuid_gen.h>
 #include "UMessageType.h"
+#include "USerializationHint.h"
 #include "UPriority.h"
 
 using namespace uri_datamodel;
@@ -36,11 +37,25 @@ namespace uprotocol
         namespace datamodel
         {
             class UAttributes
-            {
+            {               
                 public:
 
-                UAttributes() {};
-                 /**
+                    class UAttributesBuilder; 
+
+                    UAttributes()
+                    {
+                        this->_id = nullptr;
+                        this->_type = nullptr;
+                        this->_priority = UPriority::LOW;
+                        this->_ttl = 0;
+                        this->_token = "";
+                        this->_hint = USerializationHint::UNKNOWN;
+                        this->_sink = nullptr;
+                        this->_plevel = 0;
+                        this->_commstatus = 0;
+                        this->_reqid = nullptr;
+                    };
+                    /**
                     * Construct the transport UAttributes object.
                     *
                     * @param id                Unique identifier for the message
@@ -56,27 +71,25 @@ namespace uprotocol
                     * @return Returns a constructed UAttributes.
                     */
                     UAttributes(UUID id, UMessageType &type, UPriority priority, int32_t ttl, std::string token,
-                            /*USerializationHint hint,*/ UUri &sink, int32_t plevel, int32_t commstatus, UUID reqid)
-                   {
+                        USerializationHint hint, UUri &sink, int32_t plevel, int32_t commstatus, UUID reqid)
+                    {
                         this->_id = id;
                         this->_type = &type;
                         this->_priority = priority;
                         this->_ttl = ttl;
                         this->_token = token;
-                        // this->hint = hint;
+                        this->_hint = hint;
                         this->_sink = &sink;
                         this->_plevel = plevel;
                         this->_commstatus = commstatus;
                         this->_reqid = reqid;
-                   }
-
-                //     // UAttributes(UAttributesBuilder builder) 
-                //     // {
-                //     //     this(builder.id, builder.type, builder.priority, builder.ttl, builder.token, builder.hint, builder.sink,
-                //     //             builder.plevel, builder.commstatus, builder.reqid);
-                //     // }
-
-                //      /**
+                    }
+                    
+                    UAttributes(UAttributesBuilder &builder)
+                    {
+                        (void)builder;
+                    }
+                   //      /**
                 //     * Static factory method for creating an empty ultifi cloud event attributes object, to avoid working with null.
                 //     * @return Returns an empty transport attributes that indicates that there are no added additional attributes to configure.
                 //     */
@@ -137,15 +150,15 @@ namespace uprotocol
                         return _token;
                     }
 
-                //     /**
-                //     * How long this event should live for after it was generated (in milliseconds).
-                //     * Events without this attribute (or value is 0) MUST NOT timeout.
-                //     * @return Returns an Optional time to live attribute.
-                //     */
-                //     USerializationHint serializationHint()
-                //     {
-                //         return hint;
-                //     }
+                    /**
+                    * How long this event should live for after it was generated (in milliseconds).
+                    * Events without this attribute (or value is 0) MUST NOT timeout.
+                    * @return Returns an Optional time to live attribute.
+                    */
+                    USerializationHint serializationHint()
+                    {
+                        return _hint;
+                    }
 
                     /**
                     * an explicit destination URI.
@@ -183,6 +196,70 @@ namespace uprotocol
                         return _commstatus;
                     }
 
+                    class UAttributesBuilder
+                    {
+                        public:
+                            UAttributesBuilder();
+
+                            UAttributesBuilder& withId(const UUID& id) {
+                                attributes_._id = id;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withType(UMessageType type) {
+                                attributes_._type = &type;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withPriority(UPriority priority) {
+                                attributes_._priority = priority;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withTtl(int ttl) {
+                                attributes_._ttl = ttl;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withToken(const std::string& token) {
+                                attributes_._token = token;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withHint(const USerializationHint& hint) {
+                                attributes_._hint = hint;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withSink(const UUri& sink) {
+                                (void)sink;
+                                // attributes_->_sink = &sink;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withPermissionLevel(int plevel) {
+                                attributes_._plevel = plevel;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withCommStatus(int commstatus) {
+                                attributes_._commstatus = commstatus;
+                                return *this;
+                            }
+
+                            UAttributesBuilder& withReqId(const UUID& reqid) {
+                                (void) reqid;
+                                // attributes_->_reqid = &reqid;
+                                return *this;
+                            }
+
+                            UAttributes build() {
+                                return attributes_;
+                            }
+
+                        private:
+                             UAttributes &attributes_;
+                    };
                 private:
                         UUID _id;                  // Unique identifier for the message
                         UMessageType *_type;        // Message type
@@ -191,155 +268,12 @@ namespace uprotocol
                 //     // Optional Attributes
                         int32_t _ttl;              // Time to live in milliseconds
                         std::string _token;        // Authorization token used for TAP
-                //    // USerializationHint hint;  // Hint regarding the bytes contained within the UPayload
+                        USerializationHint _hint;  // Hint regarding the bytes contained within the UPayload
                         UUri *_sink;                // Explicit destination URI
-                       int32_t _plevel;           // Permission Level
-                       int32_t _commstatus;       // Communication Status
-                       UUID _reqid;               // Request ID
+                        int32_t _plevel;           // Permission Level
+                        int32_t _commstatus;       // Communication Status
+                        UUID _reqid;               // Request ID
             };
-                
-            /**
-            * Builder for the UAttributes object.
-            */
-            // class UAttributesBuilder 
-            // {
-            //     public:
-
-            //         UAttributesBuilder() {}
-
-            //         /**
-            //         * Add uProtocol Prioritization classifications.
-            //         * @param priority the uProtocol Prioritization classifications.
-            //         * @return Returns the UAttributesBuilder with the configured Priority.
-            //         */
-            //         UAttributesBuilder withPriority(UPriority priority) 
-            //         {
-            //             this->priority = priority;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the unique identifier for the message.
-            //         * @param id the unique identifier for the message.
-            //         * @return Returns the UAttributesBuilder with the configured id.
-            //         */
-            //         UAttributesBuilder withId(UUID id) 
-            //         {
-            //             this->id = id;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the message type.
-            //         * @param type the message type.
-            //         * @return Returns the UAttributesBuilder with the configured type.
-            //         */
-            //         UAttributesBuilder withType(UMessageType type)
-            //         {
-            //             this->type = type;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the time to live in milliseconds.
-            //         * @param ttl the time to live in milliseconds.
-            //         * @return Returns the UAttributesBuilder with the configured ttl.
-            //         */
-            //         UAttributesBuilder withTtl(int32_t ttl)
-            //         {
-            //             this->ttl = ttl;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the authorization token used for TAP.
-            //         * @param token the authorization token used for TAP.
-            //         * @return Returns the UAttributesBuilder with the configured token.
-            //         */
-            //         UAttributesBuilder withToken(std::string token)
-            //         {
-            //             this->token = token;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the hint regarding the bytes contained within the UPayload.
-            //         * @param hint the hint regarding the bytes contained within the UPayload.
-            //         * @return Returns the UAttributesBuilder with the configured hint.
-            //         */
-            //         UAttributesBuilder withHint(USerializationHint hint)
-            //         {
-            //             this->hint = hint;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the explicit destination URI.
-            //         * @param sink the explicit destination URI.
-            //         * @return Returns the UAttributesBuilder with the configured sink.
-            //         */
-            //         UAttributesBuilder withSink(UUri sink) 
-            //         {
-            //             this->sink = sink;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the permission level of the message.
-            //         * @param plevel the permission level of the message.
-            //         * @return Returns the UAttributesBuilder with the configured plevel.
-            //         */
-            //         UAttributesBuilder withPermissionLevel(int32_t plevel)
-            //         {
-            //             this->plevel = plevel;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the communication status of the message.
-            //         * @param commstatus the communication status of the message.
-            //         * @return Returns the UAttributesBuilder with the configured commstatus.
-            //         */
-            //         UAttributesBuilder withCommStatus(int32_t commstatus)
-            //         {
-            //             this->commstatus = commstatus;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Add the request ID.
-            //         * @param reqid the request ID.
-            //         * @return Returns the UAttributesBuilder with the configured reqid.
-            //         */
-            //         UAttributesBuilder withReqId(UUID reqid)
-            //         {
-            //             this->reqid = reqid;
-            //             return this;
-            //         }
-
-            //         /**
-            //         * Construct the UAttributes from the builder.
-            //         * @return Returns a constructed UAttributes.
-            //         */
-            //         UAttributes build()
-            //         {
-            //             // validation if needed
-            //             return new UAttributes(this);
-            //         }
-
-            //     private:
-
-            //         UUID id;
-            //         UMessageType type;
-            //         UPriority priority;
-            //         int32_t ttl;
-            //         std::string token;
-            //         USerializationHint hint;
-            //         UUri sink;
-            //         int32_t plevel;
-            //         int32_t commstatus;
-            //         UUID reqid;
-            // };           
         }
     } 
 }
