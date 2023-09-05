@@ -279,8 +279,8 @@ namespace uprotocol
 
                             UAttributesBuilder& withSink(const UUri& sink)
                             {
-                                (void)sink;
-                                // attributes_->_sink = &sink;
+                                std::optional<UUri> optionalUri = sink; 
+                                _attributes->_sink = &optionalUri;
                                 return *this;
                             }
 
@@ -298,8 +298,7 @@ namespace uprotocol
 
                             UAttributesBuilder& withReqId(const UUID& reqid)
                             {
-                                (void) reqid;
-                                // attributes_->_reqid = &reqid;
+                                _attributes->_reqid = reqid;
                                 return *this;
                             }
 
