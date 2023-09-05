@@ -10,11 +10,11 @@ namespace uprotocol
             // Define an enumeration for USerializationHint
             enum class USerializationHint 
             {
-                UNKNOWN,
-                PROTOBUF,
-                JSON,
-                SOMEIP,
-                RAW
+                UNKNOWN = 0,
+                PROTOBUF = 1,
+                JSON = 2,
+                SOMEIP = 3,
+                RAW = 4
             };
         }
     }

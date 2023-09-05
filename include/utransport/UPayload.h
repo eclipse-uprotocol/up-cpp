@@ -38,7 +38,7 @@ namespace uprotocol
                 UPayload(const uint8_t *data, size_t dataSize)
                 {
                     this->_data = data;
-                    this->dataSize = dataSize;
+                    this->_dataSize = dataSize;
                 }
               
                 /**
@@ -48,6 +48,11 @@ namespace uprotocol
                 const uint8_t* data()
                 {
                     return this->_data;
+                }
+
+                const uint8_t* size()
+                {
+                    return this->_dataSize;
                 }
 
                 /**
@@ -69,7 +74,7 @@ namespace uprotocol
             private:
                 
                 const uint8_t *_data;
-                size_t dataSize;
+                size_t _dataSize;
         };
     }
 }

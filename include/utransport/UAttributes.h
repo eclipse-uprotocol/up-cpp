@@ -22,6 +22,7 @@
 #ifndef _UATTRIBUTES_
 #define _UATTRIBUTES_
 
+#include <memory>
 #include <include/uri/up_uri.h>
 #include <include/uuid/uuid_gen.h>
 #include "UMessageType.h"
@@ -110,7 +111,7 @@ namespace uprotocol
                     * Unique identifier for the message.
                     * @return Returns the unique identifier for the message.
                     */
-                    UUID id()
+                    UUID id() const
                     {
                         return _id;
                     }
@@ -119,7 +120,7 @@ namespace uprotocol
                     * Message type.
                     * @return Returns the message type.
                     */
-                    UMessageType type()
+                    UMessageType type() const
                     {
                         return *_type;
                     }
@@ -128,7 +129,7 @@ namespace uprotocol
                     * uProtocol Prioritization classifications. 
                     * @return Returns the configured uProtocol Prioritization classifications.
                     */
-                    UPriority priority()
+                    UPriority priority() const
                     {
                         return _priority;
                     }
@@ -235,66 +236,80 @@ namespace uprotocol
                     class UAttributesBuilder
                     {
                         public:
-                            UAttributesBuilder(UAttributes &attributes): attributes_(attributes){};
+                            UAttributesBuilder()
+                            {
+                                _attributes = std::make_shared<UAttributes>();
+                            }
 
-                            UAttributesBuilder& withId(const UUID& id) {
-                                attributes_._id = id;
+                            UAttributesBuilder& withId(const UUID& id)
+                            {
+                                _attributes->_id = id;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withType(UMessageType type) {
-                                attributes_._type = &type;
+                            UAttributesBuilder& withType(UMessageType type)
+                            {
+                                _attributes->_type = &type;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withPriority(UPriority priority) {
-                                attributes_._priority = priority;
+                            UAttributesBuilder& withPriority(UPriority priority)
+                            {
+                                _attributes->_priority = priority;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withTtl(int ttl) {
-                                attributes_._ttl = ttl;
+                            UAttributesBuilder& withTtl(int ttl)
+                            {
+                                _attributes->_ttl = ttl;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withToken(const std::string& token) {
-                                attributes_._token = token;
+                            UAttributesBuilder& withToken(const std::string& token)
+                            {
+                                _attributes->_token = token;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withHint(const USerializationHint& hint) {
-                                attributes_._hint = hint;
+                            UAttributesBuilder& withHint(const USerializationHint& hint)
+                            {
+                                _attributes->_hint = hint;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withSink(const UUri& sink) {
+                            UAttributesBuilder& withSink(const UUri& sink)
+                            {
                                 (void)sink;
                                 // attributes_->_sink = &sink;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withPermissionLevel(int plevel) {
-                                attributes_._plevel = plevel;
+                            UAttributesBuilder& withPermissionLevel(int plevel)
+                            {
+                                _attributes->_plevel = plevel;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withCommStatus(int commstatus) {
-                                attributes_._commstatus = commstatus;
+                            UAttributesBuilder& withCommStatus(int commstatus)
+                            {
+                                _attributes->_commstatus = commstatus;
                                 return *this;
                             }
 
-                            UAttributesBuilder& withReqId(const UUID& reqid) {
+                            UAttributesBuilder& withReqId(const UUID& reqid)
+                            {
                                 (void) reqid;
                                 // attributes_->_reqid = &reqid;
                                 return *this;
                             }
 
-                            UAttributes build() {
-                                return attributes_;
+                            UAttributes build()
+                            {
+                                return *_attributes;
                             }
 
                         private:
-                             UAttributes &attributes_;
+                            std::shared_ptr<UAttributes> _attributes;
                     };
                     
                 private:

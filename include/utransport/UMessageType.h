@@ -35,52 +35,62 @@ namespace uprotocol
                     static const UMessageType REQUEST;
                     static const UMessageType RESPONSE;
 
-                    int intValue() const {
-                        return intValue_;
+                    int32_t intValue() const
+                    {
+                        return _intValue;
                     }
 
-                    std::string stringValue() const {
-                        return stringValue_;
+                    std::string stringValue() const
+                    {
+                        return _stringValue;
                     }
 
-                    static std::optional<UMessageType> from(int value) {
-                        auto it = std::find_if(allValues.begin(), allValues.end(), [value](const UMessageType& messageType) {
+                    static std::optional<UMessageType> from(int value)
+                    {
+                        auto it = std::find_if(allValues.begin(), allValues.end(), [value](const UMessageType& messageType)
+                        {
                             return messageType.intValue() == value;
                         });
 
-                        if (it != allValues.end()) {
+                        if (it != allValues.end()) 
+                        {
                             return *it;
-                        } else {
+                        } 
+                        else 
+                        {
                             return std::nullopt;
                         }
                     }
 
-                    static std::optional<UMessageType> from(const std::string& value) {
-                        auto it = std::find_if(allValues.begin(), allValues.end(), [value](const UMessageType& messageType) {
+                    static std::optional<UMessageType> from(const std::string& value)
+                    {
+                        auto it = std::find_if(allValues.begin(), allValues.end(), [value](const UMessageType& messageType)
+                        {
                             return messageType.stringValue() == value;
                         });
 
-                        if (it != allValues.end()) {
+                        if (it != allValues.end())
+                        {
                             return *it;
-                        } else {
+                        } 
+                        else 
+                        {
                             return std::nullopt;
                         }
                     }
 
                 private:
                     UMessageType(int value, const std::string& name)
-                        : intValue_(value), stringValue_(name) {}
+                        : _intValue(value), _stringValue(name) {}
 
-                    int intValue_;
-                    std::string stringValue_;
-
+                    int _intValue;
+                    std::string _stringValue;
                     static std::vector<UMessageType> allValues;
                 };
 
                 const UMessageType UMessageType::PUBLISH = UMessageType(0, "pub.v1");
                 const UMessageType UMessageType::REQUEST = UMessageType(1, "req.v1");
                 const UMessageType UMessageType::RESPONSE = UMessageType(2, "res.v1");
-
         }
     }
 }

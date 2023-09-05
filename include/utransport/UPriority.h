@@ -23,7 +23,7 @@ namespace uprotocol
                 SIGNALING =  5,
                 // Network control such as Safety Critical
                 NETWORK_CONTROL =  6,
-                // UNKOWN
+                // UNDEFINED
                 UNDEFINED = 7
             };
         }

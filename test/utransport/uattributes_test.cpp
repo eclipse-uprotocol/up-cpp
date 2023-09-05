@@ -5,10 +5,8 @@ using namespace uprotocol::utransport::datamodel;
 
 int main() 
 {
-    UAttributes attributes;
-
     // Example usage of the UAttributes class and builder pattern
-    attributes = UAttributes::UAttributesBuilder(attributes)
+    UAttributes attributes = UAttributes::UAttributesBuilder()
         .withId({0})  // Replace {0} with the actual UUID value
         .withType(UMessageType::PUBLISH)
         .withPriority(UPriority::LOW)
@@ -35,6 +33,7 @@ int main()
     std::optional<int> commstatus = attributes.commstatus();
     std::optional<UUID> reqid = attributes.reqid();
 
+    
     
 
     return 0;
