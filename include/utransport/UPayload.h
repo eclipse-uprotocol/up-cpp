@@ -50,7 +50,7 @@ namespace uprotocol
                     return this->_data;
                 }
 
-                const uint8_t* size()
+                const size_t size()
                 {
                     return this->_dataSize;
                 }
