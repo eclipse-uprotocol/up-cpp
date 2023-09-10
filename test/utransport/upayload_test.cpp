@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <include/utransport/UPayload.h>
 
-using namespace uprotocol::utransport::datamodel;
+using namespace uprotocol::utransport;
 
 // Test fixture for UPayload class
 class UPayloadTest : public ::testing::Test
