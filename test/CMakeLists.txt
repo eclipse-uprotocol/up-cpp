@@ -115,3 +115,23 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(uattributes_test
 	${TESTS_PATH}/utransport/uattributes_test.cpp)
 target_link_libraries(uattributes_test ${CGREEN_LIBRARY} uprotocolsdk)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(umessagetypes_test
+	${TESTS_PATH}/utransport/umessagetypes_test.cpp)
+target_link_libraries(umessagetypes_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(upayload_test
+	${TESTS_PATH}/utransport/upayload_test.cpp)
+target_link_libraries(upayload_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(upriority_test
+	${TESTS_PATH}/utransport/upriority_test.cpp)
+target_link_libraries(upriority_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(userializationhint_test
+	${TESTS_PATH}/utransport/userializationhint_test.cpp)
+target_link_libraries(userializationhint_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
