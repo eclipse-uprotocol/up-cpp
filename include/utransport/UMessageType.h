@@ -22,75 +22,109 @@
  #ifndef _UMESSAGETYPE_H_
  #define _UMESSAGETYPE_H_
 
+#include <iostream>
+#include <optional>
+
 namespace uprotocol 
 {
     namespace utransport
     {
         namespace datamodel
         {
-           class UMessageType
+            enum class UMessageType 
             {
-                public:
-                    static const UMessageType PUBLISH;
-                    static const UMessageType REQUEST;
-                    static const UMessageType RESPONSE;
+                PUBLISH = 0,   // Publish or notification event
+                REQUEST = 1,   // Request
+                RESPONSE = 2,   // Response
+                UNDEFINED = 3
+            };
 
-                    int32_t intValue() const
+            std::optional<UMessageType> UMessageTypeFromInt(int32_t value) 
+            {
+                switch (value) 
+                {
+                    case 0:
                     {
-                        return _intValue;
+                        return UMessageType::PUBLISH;
                     }
-
-                    std::string stringValue() const
+                    case 1: 
                     {
-                        return _stringValue;
-                    }
-
-                    static std::optional<UMessageType> from(int value)
+                        return UMessageType::REQUEST;
+                    }                    
+                    case 2: 
                     {
-                        auto it = std::find_if(allValues.begin(), allValues.end(), [value](const UMessageType& messageType)
-                        {
-                            return messageType.intValue() == value;
-                        });
-
-                        if (it != allValues.end()) 
-                        {
-                            return *it;
-                        } 
-                        else 
-                        {
-                            return std::nullopt;
-                        }
-                    }
-
-                    static std::optional<UMessageType> from(const std::string& value)
+                        return UMessageType::RESPONSE;
+                    }                    
+                    default: 
                     {
-                        auto it = std::find_if(allValues.begin(), allValues.end(), [value](const UMessageType& messageType)
-                        {
-                            return messageType.stringValue() == value;
-                        });
-
-                        if (it != allValues.end())
-                        {
-                            return *it;
-                        } 
-                        else 
-                        {
-                            return std::nullopt;
-                        }
+                         return std::nullopt; 
                     }
+                }
+            }
 
-                private:
-                    UMessageType(int value, const std::string& name)
-                        : _intValue(value), _stringValue(name) {}
+            std::optional<UMessageType> UMessageTypeFromString(const std::string& value)
+            {
+                if (value == "pub.v1") 
+                {
+                    return UMessageType::PUBLISH;
+                }
+                if (value == "req.v1") 
+                {
+                    return UMessageType::REQUEST;
+                }
+                if (value == "res.v1") 
+                {
+                    return UMessageType::RESPONSE;
+                }
 
-                    int _intValue;
-                    std::string _stringValue;
-                    static std::vector<UMessageType> allValues;
-                };
+                return std::nullopt; 
+            }
 
-                const UMessageType UMessageType::PUBLISH = UMessageType(0, "pub.v1");
-                const UMessageType UMessageType::REQUEST = UMessageType(1, "req.v1");
-                const UMessageType UMessageType::RESPONSE = UMessageType(2, "res.v1");
+            std::optional<std::string> UMessageTypeToString(UMessageType value)
+            {
+                switch (value) 
+                {
+                    case UMessageType::PUBLISH:
+                    {
+                        return "pub.v1";
+                    }
+                    case UMessageType::REQUEST: 
+                    {
+                        return "req.v1";
+                    }  
+                    case UMessageType::RESPONSE: 
+                    {
+                        return "res.v1";
+                    }
+                    default: 
+                    {
+                         return std::nullopt; 
+                    }
+                }
+            }
+
+            std::optional<int32_t> UMessageTypeToInt(UMessageType value)
+            {
+                switch (value) 
+                {
+                    case UMessageType::PUBLISH:
+                    {
+                        return 0;
+                    }
+                    case UMessageType::REQUEST: 
+                    {
+                        return 1;
+                    }
+                    case UMessageType::RESPONSE: 
+                    {
+                        return 2;
+                    }
+                    default: 
+                    {
+                         return std::nullopt; 
+                    }
+                }
+            }
         }
     }
 }

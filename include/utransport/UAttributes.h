@@ -46,7 +46,7 @@ namespace uprotocol
                     UAttributes()
                     {
                         this->_id = nullptr;
-                        this->_type = nullptr;
+                        this->_type = UMessageType::UNDEFINED;
                         this->_priority = UPriority::UNDEFINED;
                         this->_ttl = 0;
                         this->_token = "";
@@ -56,41 +56,30 @@ namespace uprotocol
                         this->_commstatus = 0;
                         this->_reqid = nullptr;
                     };
+
                     /**
                     * Construct the transport UAttributes object.
                     *
                     * @param id                Unique identifier for the message
                     * @param type              Message type
                     * @param priority          Message priority
-                    * @param ttl               Time to live in milliseconds
-                    * @param token             Authorization token used for TAP
-                    * @param hint              Hint regarding the bytes contained within the UPayload
-                    * @param sink              Explicit destination URI
-                    * @param plevel            Permission Level
-                    * @param commstatus        Communication Status
-                    * @param reqid             Request ID
                     * @return Returns a constructed UAttributes.
                     */
-                    UAttributes(UUID id, UMessageType &type, UPriority priority, int32_t ttl, std::string token,
-                        USerializationHint hint, UUri &sink, int32_t plevel, int32_t commstatus, UUID reqid)
+                    UAttributes(UUID id, UMessageType type, UPriority priority)
                     {
                         this->_id = id;
-                        this->_type = &type;
+                        this->_type = type;
                         this->_priority = priority;
-                        this->_ttl = ttl;
-                        this->_token = token;
-                        this->_hint = hint;
-                       //this->*_sink = sink;
-                        this->_plevel = plevel;
-                        this->_commstatus = commstatus;
-                        this->_reqid = reqid;
+                        // optional 
+                        this->_ttl = 0;
+                        this->_token = "";
+                        this->_hint = USerializationHint::UNKNOWN;
+                        this->_sink = nullptr;
+                        this->_plevel = 0;
+                        this->_commstatus = 0;
+                        this->_reqid = nullptr;
                     }
-                    
-                    UAttributes(UAttributesBuilder &builder)
-                    {
-                        (void)builder;
-                    }
-                 
+                                    
                    /**
                     * Static factory method for creating an empty ultifi cloud event attributes object, to avoid working with null.
                     * @return Returns an empty transport attributes that indicates that there are no added additional attributes to configure.
@@ -102,9 +91,9 @@ namespace uprotocol
 
                     bool isEmpty()
                     {
-                        return ((this->_id == nullptr) && (this->_type == nullptr) && (this->_priority == UPriority::UNDEFINED) && (this->_ttl == 0) && (this->_token == "")
-                                && (this->_hint == USerializationHint::UNKNOWN) && (this->_sink == nullptr) && (this->_plevel == 0) && (this->_commstatus == 0)
-                                && (this->_reqid == nullptr));
+                        return ((this->_id == nullptr) && (this->_type == UMessageType::UNDEFINED) && (this->_priority == UPriority::UNDEFINED) && 
+                            (this->_ttl == 0) && (this->_token == "") && (this->_hint == USerializationHint::UNKNOWN) && (this->_sink == nullptr) && 
+                            (this->_plevel == 0) && (this->_commstatus == 0) && (this->_reqid == nullptr));
                     }
 
                     /**
@@ -122,7 +111,7 @@ namespace uprotocol
                     */
                     UMessageType type() const
                     {
-                        return *_type;
+                        return _type;
                     }
 
                     /**
@@ -236,27 +225,16 @@ namespace uprotocol
                     class UAttributesBuilder
                     {
                         public:
-                            UAttributesBuilder()
+                            UAttributesBuilder(UUID id, UMessageType type, UPriority priority)
                             {
                                 _attributes = std::make_shared<UAttributes>();
-                            }
 
-                            UAttributesBuilder& withId(const UUID& id)
-                            {
-                                _attributes->_id = id;
-                                return *this;
-                            }
-
-                            UAttributesBuilder& withType(UMessageType type)
-                            {
-                                _attributes->_type = &type;
-                                return *this;
-                            }
-
-                            UAttributesBuilder& withPriority(UPriority priority)
-                            {
-                                _attributes->_priority = priority;
-                                return *this;
+                                if (nullptr != _attributes)
+                                {
+                                    _attributes->_id = id;
+                                    _attributes->_type = type;
+                                    _attributes->_priority = priority;
+                                }
                             }
 
                             UAttributesBuilder& withTtl(int ttl)
@@ -314,7 +292,7 @@ namespace uprotocol
                 private:
 
                     UUID _id;                                   // Unique identifier for the message
-                    UMessageType *_type;                        // Message type
+                    UMessageType _type;                         // Message type
                     UPriority _priority;                        // Message priority
                     // Optional Attributes 
                     std::optional<int32_t> _ttl;                // Time to live in milliseconds

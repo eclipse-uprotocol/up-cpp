@@ -33,11 +33,17 @@ class UUri {
          const uri_resource& uResource)
       : uAuthority(uAuthority),
         uEntity(std::move(uEntity)),
-        uResource(uResource) {}
+        uResource(uResource) 
+      {
+        _hash = std::hash<std::string>{}(tostring());
+      }
 
   UUri(const uri_authority& uAuthority, const uri_entity& uEntity,
          const std::string& uResource)
-      : UUri(uAuthority, uEntity, uri_resource::fromName(uResource)) {}
+      : UUri(uAuthority, uEntity, uri_resource::fromName(uResource))
+      {
+        _hash = std::hash<std::string>{}(tostring());
+      }
 
   static UUri empty() {
     static const auto EMPTY =
@@ -73,10 +79,22 @@ class UUri {
            ", uResource=" + uResource.tostring() + '}';
   }
 
+  size_t getHash() const
+  {
+      return _hash;
+  }
+   
+  std::string getTopic() const
+  {
+      return "";
+  }
+
  private:
   const uri_authority uAuthority;
   const uri_entity uEntity;
   const uri_resource uResource;
+  size_t _hash;
+
 };
 
 const std::string UUri::SCHEME = std::string("up:");

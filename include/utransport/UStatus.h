@@ -1,10 +1,6 @@
 #ifndef _USTATUS_H_
 #define _USTATUS_H_
 
-#include <google/rpc/code.pb.h>
-
-using namespace google::rpc;
-
 namespace uprotocol 
 {
     namespace utransport
@@ -13,23 +9,23 @@ namespace uprotocol
         {
             enum UStatus 
             { 
-                OK =                    Code::OK,
-                CANCELLED =             Code::CANCELLED,
-                UNKNOWN =               Code::UNKNOWN,
-                INVALID_ARGUMENT =      Code::INVALID_ARGUMENT,
-                DEADLINE_EXCEEDED =     Code::DEADLINE_EXCEEDED,
-                NOT_FOUND =             Code::NOT_FOUND,
-                ALREADY_EXISTS =        Code::ALREADY_EXISTS,
-                PERMISSION_DENIED =     Code::PERMISSION_DENIED,
-                UNAUTHENTICATED =       Code::UNAUTHENTICATED,
-                RESOURCE_EXHAUSTED =    Code::RESOURCE_EXHAUSTED,
-                FAILED_PRECONDITION =   Code::FAILED_PRECONDITION,
-                ABORTED =               Code::ABORTED,
-                OUT_OF_RANGE =          Code::OUT_OF_RANGE,
-                UNIMPLEMENTED =         Code::UNIMPLEMENTED,
-                INTERNAL =              Code::INTERNAL,
-                UNAVAILABLE =           Code::UNAVAILABLE,
-                DATA_LOSS =             Code::DATA_LOSS,
+                OK =                    0,
+                CANCELLED =             1,
+                UNKNOWN =               2,
+                INVALID_ARGUMENT =      3,
+                DEADLINE_EXCEEDED =     4,
+                NOT_FOUND =             5,
+                ALREADY_EXISTS =        6,
+                PERMISSION_DENIED =     7,
+                UNAUTHENTICATED =       8,
+                RESOURCE_EXHAUSTED =    9,
+                FAILED_PRECONDITION =   10,
+                ABORTED =               11,
+                OUT_OF_RANGE =          12,
+                UNIMPLEMENTED =         13,
+                INTERNAL =              14,
+                UNAVAILABLE =           15,
+                DATA_LOSS =             16,
                 UNSPECIFIED =           -1
             };
         }

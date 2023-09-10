@@ -23,10 +23,10 @@
 #define _UPAYLOAD_H_
 
 #include <stdint.h>
+
 /**
  * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
  */
-
 namespace uprotocol 
 {
     namespace utransport
@@ -45,12 +45,12 @@ namespace uprotocol
                 * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
                 * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
                 */
-                const uint8_t* data()
+                const uint8_t* data() const 
                 {
                     return this->_data;
                 }
 
-                const size_t size()
+                const size_t size() const
                 {
                     return this->_dataSize;
                 }
@@ -58,7 +58,7 @@ namespace uprotocol
                 /**
                 * @return Returns an empty representation of UPayload.
                 */
-                UPayload* empty()
+                UPayload* empty() const
                 {
                     return new UPayload(nullptr, 0);
                 }
@@ -68,7 +68,7 @@ namespace uprotocol
                 */
                 bool isEmpty() 
                 {
-                    return this->_data == nullptr ;// || this.data.length == 0;
+                    return this->_data == nullptr;// || this.data.length == 0;
                 }
 
             private:
