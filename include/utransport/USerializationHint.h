@@ -20,7 +20,7 @@ namespace uprotocol
                 RAW = 4         // data is a Base64 encoded protobuf string of an Any object with the payload inside
             };
 
-            std::optional<USerializationHint> USerializationHintFromInt(int32_t value) 
+            inline std::optional<USerializationHint> USerializationHintFromInt(int32_t value) 
             {
                 switch (value) 
                 {
@@ -51,7 +51,7 @@ namespace uprotocol
                 }
             }
 
-            std::optional<USerializationHint> USerializationHintFromString(const std::string& value)
+            inline std::optional<USerializationHint> USerializationHintFromString(const std::string& value)
             {
                 if (value == "") 
                 {
@@ -81,7 +81,7 @@ namespace uprotocol
                 return std::nullopt; 
             }
 
-            std::optional<std::string> USerializationHintToString(USerializationHint value)
+            inline std::optional<std::string> USerializationHintToString(USerializationHint value)
             {
                 switch (value) 
                 {
@@ -112,7 +112,7 @@ namespace uprotocol
                 }
             }
 
-            std::optional<int32_t> USerializationHintToInt(USerializationHint value)
+            inline std::optional<int32_t> USerializationHintToInt(USerializationHint value)
             {
                 switch (value) 
                 {

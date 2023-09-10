@@ -23,7 +23,7 @@ namespace uprotocol
 
             };
 
-            std::optional<UPriority> UPriorityFromInt(int32_t value) 
+            inline std::optional<UPriority> UPriorityFromInt(int32_t value) 
             {
                 switch (value) 
                 {
@@ -66,7 +66,7 @@ namespace uprotocol
                 }
             }
 
-            std::optional<UPriority> UPriorityFromString(const std::string& value)
+            inline std::optional<UPriority> UPriorityFromString(const std::string& value)
             {
                 if (value == "CS0") 
                 {
@@ -106,7 +106,7 @@ namespace uprotocol
                 return std::nullopt; 
             }
 
-            std::optional<std::string> UPriorityToString(UPriority value)
+            inline std::optional<std::string> UPriorityToString(UPriority value)
             {
                 switch (value) 
                 {
@@ -145,7 +145,7 @@ namespace uprotocol
                 }
             }
 
-            std::optional<int32_t> UPriorityToInt(UPriority value)
+           inline  std::optional<int32_t> UPriorityToInt(UPriority value)
             {
                 switch (value) 
                 {

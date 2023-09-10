@@ -17,6 +17,8 @@
 #ifndef UP_URI_H_
 #define UP_URI_H_
 
+#pragma once 
+
 #include <string>
 #include <utility>
 
@@ -97,7 +99,6 @@ class UUri {
 
 };
 
-const std::string UUri::SCHEME = std::string("up:");
 }  // namespace uri_datamodel
 
 #endif  // up_URI_H_

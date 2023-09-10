@@ -37,10 +37,10 @@ class up_uri_factory {
  public:
   static std::string buildUProtocolUri(const uri_datamodel::UUri& upUri) {
     if (upUri.isEmpty()) {
-      return uri_datamodel::UUri::SCHEME;
+      return std::string("up:");
     }
 
-    std::string sb(uri_datamodel::UUri::SCHEME);
+    std::string sb(std::string("up:"));
 
     sb.append(buildAuthorityPartOfUri(upUri.getUAuthority()));
 
@@ -70,7 +70,7 @@ class up_uri_factory {
   static std::string buildUriForRpc(
       uri_datamodel::uri_authority const& uAuthority,
       uri_datamodel::uri_entity const& uEntitySource) {
-    std::string sb(uri_datamodel::UUri::SCHEME);
+    std::string sb(std::string("up:"));
 
     sb.append(buildAuthorityPartOfUri(uAuthority));
 
@@ -86,7 +86,7 @@ class up_uri_factory {
   static std::string buildMethodUri(
       uri_datamodel::uri_authority const& uAuthority,
       uri_datamodel::uri_entity const& uEntity, std::string const& methodName) {
-    std::string sb(uri_datamodel::UUri::SCHEME);
+    std::string sb(std::string("up:"));
 
     sb.append(buildAuthorityPartOfUri(uAuthority));
 

@@ -39,7 +39,7 @@ namespace uprotocol
                 UNDEFINED = 3
             };
 
-            std::optional<UMessageType> UMessageTypeFromInt(int32_t value) 
+            inline std::optional<UMessageType> UMessageTypeFromInt(int32_t value) 
             {
                 switch (value) 
                 {
@@ -62,7 +62,7 @@ namespace uprotocol
                 }
             }
 
-            std::optional<UMessageType> UMessageTypeFromString(const std::string& value)
+            inline std::optional<UMessageType> UMessageTypeFromString(const std::string& value)
             {
                 if (value == "pub.v1") 
                 {
@@ -80,7 +80,7 @@ namespace uprotocol
                 return std::nullopt; 
             }
 
-            std::optional<std::string> UMessageTypeToString(UMessageType value)
+            inline std::optional<std::string> UMessageTypeToString(UMessageType value)
             {
                 switch (value) 
                 {
@@ -103,7 +103,7 @@ namespace uprotocol
                 }
             }
 
-            std::optional<int32_t> UMessageTypeToInt(UMessageType value)
+            inline std::optional<int32_t> UMessageTypeToInt(UMessageType value)
             {
                 switch (value) 
                 {

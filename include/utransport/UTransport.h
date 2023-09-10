@@ -7,7 +7,6 @@
 #include "UPayload.h"
 #include "UAttributes.h"
 #include <include/uri/up_uri.h>
-#include <include/model/attributes.h>
 
 using namespace uprotocol::utransport::datamodel;
 using namespace uri_datamodel;
