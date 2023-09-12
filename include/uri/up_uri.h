@@ -25,6 +25,7 @@
 #include "uri_authority.h"
 #include "uri_entity.h"
 #include "uri_resource.h"
+#include "../tools/base64.h"
 
 namespace uri_datamodel {
 class UUri {
@@ -38,6 +39,7 @@ class UUri {
         uResource(uResource) 
       {
         _hash = std::hash<std::string>{}(tostring());
+        _base64uri = cloudevents::base64::encode(tostring());
       }
 
   UUri(const uri_authority& uAuthority, const uri_entity& uEntity,
@@ -85,7 +87,12 @@ class UUri {
   {
       return _hash;
   }
-   
+  
+  std::string getBase64() const
+  {
+      return _base64uri;
+  }
+
   std::string getTopic() const
   {
       return "";
@@ -96,6 +103,7 @@ class UUri {
   const uri_entity uEntity;
   const uri_resource uResource;
   size_t _hash;
+  std::string _base64uri;
 
 };
 
