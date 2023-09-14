@@ -11,8 +11,7 @@ namespace uprotocol
         namespace datamodel
         {
             // Define an enumeration for USerializationHint
-            enum class USerializationHint 
-            {
+            enum class USerializationHint {
                 UNKNOWN = 0,    
                 PROTOBUF = 1,   // data is a Base64 encoded protobuf string
                 JSON = 2,       // data is a UTF-8 string containing a JSON structure
@@ -20,124 +19,98 @@ namespace uprotocol
                 RAW = 4         // data is a Base64 encoded protobuf string of an Any object with the payload inside
             };
 
-            inline std::optional<USerializationHint> USerializationHintFromInt(int32_t value) 
-            {
-                switch (value) 
-                {
-                    case 0:
-                    {
+            inline std::optional<USerializationHint> USerializationHintFromInt(int32_t value) {
+
+                switch (value) {
+                    case 0: {
                         return USerializationHint::UNKNOWN;
                     }
-                    case 1: 
-                    {
+                    case 1: {
                         return USerializationHint::PROTOBUF;
                     }
-                    case 2: 
-                    {
+                    case 2: {
                         return USerializationHint::JSON;
                     }
-                    case 3:
-                    {
+                    case 3: {
                         return USerializationHint::SOMEIP;
                     }
-                    case 4:
-                    {
+                    case 4: {
                         return USerializationHint::RAW;
                     }
-                    default: 
-                    {
+                    default: {
                          return std::nullopt; 
                     }
                 }
             }
 
-            inline std::optional<USerializationHint> USerializationHintFromString(const std::string& value)
-            {
-                if (value == "") 
-                {
+            inline std::optional<USerializationHint> USerializationHintFromString(const std::string& value) {
+
+                if (value == "") {
                     return USerializationHint::UNKNOWN;
                 }
                
-                if (value == "application/x-protobuf") 
-                {
+                if (value == "application/x-protobuf") {
                     return USerializationHint::PROTOBUF;
                 }
                
-                if (value == "application/json") 
-                {
+                if (value == "application/json") {
                     return USerializationHint::JSON;
                 }
 
-                if (value == "application/x-someip") 
-                {
+                if (value == "application/x-someip") {
                     return USerializationHint::SOMEIP;
                 }
 
-                if (value == "application/octet-stream") 
-                {
+                if (value == "application/octet-stream") {
                     return USerializationHint::RAW;
                 }
 
                 return std::nullopt; 
             }
 
-            inline std::optional<std::string> USerializationHintToString(USerializationHint value)
-            {
-                switch (value) 
-                {
-                    case USerializationHint::UNKNOWN:
-                    {
+            inline std::optional<std::string> USerializationHintToString(USerializationHint value) {
+
+                switch (value) {
+                    case USerializationHint::UNKNOWN: {
                         return "";
                     }
-                    case USerializationHint::PROTOBUF: 
-                    {
+                    case USerializationHint::PROTOBUF: {
                         return "application/x-protobuf";
                     }
-                    case USerializationHint::JSON: 
-                    {
+                    case USerializationHint::JSON: {
                         return "application/json";
                     }
-                    case USerializationHint::SOMEIP: 
-                    {
+                    case USerializationHint::SOMEIP: {
                         return "application/x-someip";
                     }
-                    case USerializationHint::RAW: 
-                    {
+                    case USerializationHint::RAW: {
                         return "application/octet-stream";
                     }
-                    default: 
-                    {
+                    default: {
                          return std::nullopt; 
                     }
                 }
             }
 
-            inline std::optional<int32_t> USerializationHintToInt(USerializationHint value)
-            {
-                switch (value) 
-                {
-                    case USerializationHint::UNKNOWN:
-                    {
+            inline std::optional<int32_t> USerializationHintToInt(USerializationHint value) {
+
+                switch (value) {
+                    case USerializationHint::UNKNOWN: {
                         return 0;
                     }
-                    case USerializationHint::PROTOBUF: 
-                    {
+                    case USerializationHint::PROTOBUF: {
                         return 1;
                     }
-                    case USerializationHint::JSON: 
-                    {
+                    case USerializationHint::JSON: {
                         return 2;
                     }
-                    case USerializationHint::SOMEIP: 
-                    {
+                    case USerializationHint::SOMEIP: {
                         return 3;
                     }
-                    case USerializationHint::RAW: 
-                    {
+                    case USerializationHint::RAW: {
                         return 4;
                     }
-                    default: 
-                    {
+                    default: {
                          return std::nullopt; 
                     }
                 }

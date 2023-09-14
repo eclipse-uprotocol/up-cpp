@@ -35,38 +35,37 @@ namespace uprotocol
         {
             public:
 
-                UPayload(const uint8_t *data, size_t dataSize)
-                {
-                    this->_data = data;
-                    this->_dataSize = dataSize;
+                UPayload(const uint8_t *data, size_t dataSize) {
+
+                    data_ = data;
+                    dataSize_ = dataSize;
                 }
               
                 /**
                 * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
                 * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
                 */
-                const uint8_t* data() const 
-                {
-                    return this->_data;
+                const uint8_t* data() const {
+
+                    return data_;
                 }
 
-                const size_t size() const
-                {
-                    return this->_dataSize;
+                const size_t size() const {
+
+                    return dataSize_;
                 }
 
                 /**
                 * @return Returns true if the data in the UPayload is empty.
                 */
-                bool isEmpty() 
-                {
-                    return this->_data == nullptr;// || this.data.length == 0;
+                bool isEmpty() {
+                    return data_ == nullptr || dataSize_ == 0;
                 }
 
             private:
                 
-                const uint8_t *_data;
-                size_t _dataSize;
+                const uint8_t *data_;
+                size_t dataSize_;
         };
     }
 }

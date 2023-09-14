@@ -31,96 +31,77 @@ namespace uprotocol
     {
         namespace datamodel
         {
-            enum class UMessageType 
-            {
-                PUBLISH = 0,   // Publish or notification event
-                REQUEST = 1,   // Request
+            enum class UMessageType {
+                PUBLISH = 0,    // Publish or notification event
+                REQUEST = 1,    // Request
                 RESPONSE = 2,   // Response
                 UNDEFINED = 3
             };
 
-            inline std::optional<UMessageType> UMessageTypeFromInt(int32_t value) 
-            {
-                switch (value) 
-                {
-                    case 0:
-                    {
+            inline std::optional<UMessageType> UMessageTypeFromInt(int32_t value) {
+
+                switch (value) {
+                    case 0: {
                         return UMessageType::PUBLISH;
                     }
-                    case 1: 
-                    {
+                    case 1: {
                         return UMessageType::REQUEST;
                     }                    
-                    case 2: 
-                    {
+                    case 2: {
                         return UMessageType::RESPONSE;
                     }                    
-                    default: 
-                    {
+                    default: {
                          return std::nullopt; 
                     }
                 }
             }
 
-            inline std::optional<UMessageType> UMessageTypeFromString(const std::string& value)
-            {
-                if (value == "pub.v1") 
-                {
+            inline std::optional<UMessageType> UMessageTypeFromString(const std::string& value) {
+
+                if (value == "pub.v1") {
                     return UMessageType::PUBLISH;
                 }
-                if (value == "req.v1") 
-                {
+                if (value == "req.v1") {
                     return UMessageType::REQUEST;
                 }
-                if (value == "res.v1") 
-                {
+                if (value == "res.v1") {
                     return UMessageType::RESPONSE;
                 }
 
                 return std::nullopt; 
             }
 
-            inline std::optional<std::string> UMessageTypeToString(UMessageType value)
-            {
-                switch (value) 
-                {
-                    case UMessageType::PUBLISH:
-                    {
+            inline std::optional<std::string> UMessageTypeToString(UMessageType value) {
+
+                switch (value) {
+                    case UMessageType::PUBLISH: {
                         return "pub.v1";
                     }
-                    case UMessageType::REQUEST: 
-                    {
+                    case UMessageType::REQUEST: {
                         return "req.v1";
                     }  
-                    case UMessageType::RESPONSE: 
-                    {
+                    case UMessageType::RESPONSE: {
                         return "res.v1";
                     }
-                    default: 
-                    {
+                    default: {
                          return std::nullopt; 
                     }
                 }
             }
 
-            inline std::optional<int32_t> UMessageTypeToInt(UMessageType value)
-            {
-                switch (value) 
-                {
-                    case UMessageType::PUBLISH:
-                    {
+            inline std::optional<int32_t> UMessageTypeToInt(UMessageType value) {
+
+                switch (value) {
+                    case UMessageType::PUBLISH: {
                         return 0;
                     }
-                    case UMessageType::REQUEST: 
-                    {
+                    case UMessageType::REQUEST: {
                         return 1;
                     }
-                    case UMessageType::RESPONSE: 
-                    {
+                    case UMessageType::RESPONSE: {
                         return 2;
                     }
-                    default: 
-                    {
+                    default: {
                          return std::nullopt; 
                     }
                 }
