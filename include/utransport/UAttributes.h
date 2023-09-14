@@ -80,15 +80,6 @@ namespace uprotocol
                         this->_reqid = nullptr;
                     }
                                     
-                   /**
-                    * Static factory method for creating an empty ultifi cloud event attributes object, to avoid working with null.
-                    * @return Returns an empty transport attributes that indicates that there are no added additional attributes to configure.
-                    */
-                    UAttributes* empty()
-                    {
-                        return new UAttributes();
-                    }
-
                     bool isEmpty()
                     {
                         return ((this->_id == nullptr) && (this->_type == UMessageType::UNDEFINED) && (this->_priority == UPriority::UNDEFINED) && 

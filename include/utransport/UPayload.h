@@ -56,14 +56,6 @@ namespace uprotocol
                 }
 
                 /**
-                * @return Returns an empty representation of UPayload.
-                */
-                UPayload* empty() const
-                {
-                    return new UPayload(nullptr, 0);
-                }
-
-                /**
                 * @return Returns true if the data in the UPayload is empty.
                 */
                 bool isEmpty() 
