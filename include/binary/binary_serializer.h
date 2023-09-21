@@ -105,7 +105,7 @@ if (!cloudEvent.SerializeToString(
   return std::nullopt;
 }
 
-std::string encData = cloudevents::base64::encode(str);
+std::string encData = cloudevents::base64::base64encode(str);
 if (encData.empty()) {
   spdlog::error("Failed to encode cloudevent structure to base64");
   return std::nullopt;
@@ -130,7 +130,7 @@ deserialized(const formatted_event& formatedEvent) override {
     return std::nullopt;
   }
   const std::string str(
-      cloudevents::base64::decode(formatedEvent.serialized_data));
+      cloudevents::base64::base64decode(formatedEvent.serialized_data));
   if (str.empty()) {
     spdlog::error("Failed to decode from base64\n");
     return std::nullopt;

@@ -39,42 +39,13 @@ Ensure(Base64, base64_encode_decode) {
   static const char ac_input[] =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghi"
       "jklmnopqrstuvwxyz!@#$%^&*()";
-  // static char ac_output[sizeof(ac_input)];
-  static std::array<char, sizeof(ac_input)> ac_output;
 
-  int i_val = Base64encode_len(sizeof(ac_input));
-  assert_true(i_val >= 0);
+  static std::string ac_output;
 
-  auto sz_size = (size_t)i_val;
-
-  auto* pc_buffer = new char[sz_size];
-  assert_true(pc_buffer != nullptr);
-
-  i_val = Base64encode(pc_buffer, ac_input,
-                       /*strlen(ac_input)*/ sizeof(ac_input) - 1);
-  assert_true(i_val >= 0);
-
-  assert_true(((sz_size - 4) == ((size_t)i_val)) ||
-              (((size_t)i_val) == sz_size));
-
-  sz_size = Base64decode_len(pc_buffer);
-
-  assert_true(sz_size == sizeof(ac_output));
-
-  assert_true((size_t)Base64decode(ac_output.data(), pc_buffer) ==
-              /*strlen(ac_input)*/ sizeof(ac_input) - 1);
-
-  assert_true(strncmp(ac_input, ac_output.data(), sizeof(ac_input)) == 0);
-
-  delete (pc_buffer);
-  // pc_buffer = nullptr;
-
-  std::string encoded(cloudevents::base64::encode(std::string(ac_input)));
-
-  (void)memset(ac_output.data(), 0, sizeof(ac_output));
-  std::string decoded(cloudevents::base64::decode(encoded));
-
+  std::string encoded(cloudevents::base64::base64encode(std::string(ac_input)));
+  std::string decoded(cloudevents::base64::base64decode(encoded));
   assert_true(std::string(ac_input) == decoded);
+
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
