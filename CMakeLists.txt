@@ -1,10 +1,3 @@
-set(VCPKG $ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-if (EXISTS ${VCPKG})
-    message(STATUS "Found VCPKG installation")
-    set(CMAKE_TOOLCHAIN_FILE ${VCPKG}
-            CACHE STRING "")
-endif ()
-
 cmake_minimum_required(VERSION 3.18.0)
 
 
@@ -51,11 +44,11 @@ find_package(CGreen REQUIRED)
 set(protobuf_MODULE_COMPATIBLE TRUE)
 
 set(PROTOS
-    ${CMAKE_CURRENT_SOURCE_DIR}/proto/cloudevents.proto	
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/proto/cloudevents.proto	
 )
-set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/proto)
-set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/proto)
-add_subdirectory(proto)
+set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/proto)
+set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/uprotocol/proto)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/uprotocol/proto)
 
 
 file(GLOB PROTO_CPP "${PROTO_BINARY_DIR}/*.cc")
@@ -70,13 +63,15 @@ include_directories(${RapidJSON_INCLUDE_DIRS})
 include_directories(${UUID_INCLUDE_DIRS})
 
 include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uuid)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/json)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/binary)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/model)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/tools)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/factory)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uri)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/cloudevent/datamodel)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/cloudevent/factory)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/cloudevent/serialize)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/proto)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/tools)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/uri/datamodel)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/uri/factory)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/uri/validator)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/uprotocol/uuid)
 include_directories(${CGREEN_INCLUDE_DIR})
 
 
@@ -86,19 +81,19 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 	add_compile_options(-g)
 endif()
 
-file(GLOB SRC_HDR_BINARY 	"include/binary/*.h")
-file(GLOB SRC_HDR_JSON 	 	"include/json/*.h")
-file(GLOB SRC_HDR_MODEL  	"include/model/*.h")
-file(GLOB SRC_HDR_FACTORY 	"include/factory/*.h")
-file(GLOB SRC_HDR_URI 		"include/uri/*.h")
-file(GLOB SRC_HDR_UUID 		"include/uuid/*.h")
-file(GLOB SRC_HDR_TOOLS 	"include/tools/*.h")
+file(GLOB SRC_HDR_BINARY 	"../uprotocol/serialize/*.h")
+file(GLOB SRC_HDR_JSON 	 	"../uprotocol/serialize/*.h")
+file(GLOB SRC_HDR_MODEL  	"../uprotocol/cloudevent/datamodel/*.h")
+file(GLOB SRC_HDR_FACTORY 	"../uprotocol/cloudevent/factory/*.h")
+file(GLOB SRC_HDR_URI 		"../uprotocol/uri/**/*.h")
+file(GLOB SRC_HDR_UUID 		"../uprotocol/uuid/*.h")
+file(GLOB SRC_HDR_TOOLS 	"../uprotocol/uuid/tools/*.h")
 
 
 
-set(uprotocol_src src/tools/byte_order.cpp
-		src/tools/base64.cpp
-		src/uuid/uuid_gen.cpp
+set(uprotocol_src src/uprotocol/tools/byte_order.cpp
+		src/uprotocol/tools/base64.cpp
+		src/uprotocol/uuid/uuid_gen.cpp
 		${PROTO_CPP}
 		${PROTO_HPP}
 		${SRC_HDR_MODEL}
@@ -155,4 +150,4 @@ target_link_libraries(uprotocolsdk_shared Threads::Threads
 add_dependencies(uprotocolsdk proto)
 add_dependencies(uprotocolsdk_shared proto)
 
-add_subdirectory(test)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/test)

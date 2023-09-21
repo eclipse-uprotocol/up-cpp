@@ -1,29 +1,29 @@
-set(TESTS_PATH ../test)
+set(TESTS_PATH ${CMAKE_SOURCE_DIR}/src/test)
 ## setting the compiler
-if(CMAKE_COMPILER_IS_GNUCXX)
+#if(CMAKE_COMPILER_IS_GNUCXX)
+#
+#	find_program(GCOV_TOOL gcov-11)
+#	if (NOT GCOV_TOOL)
+#    	message(FATAL_ERROR "Impossible to generate coverge report. Install gcov-11.")
+#	endif()
+#    add_custom_target("coverage"
+#        COMMAND "lcov" --directory ${TESTS_PATH} --zerocounters
+#        COMMAND ctest --test-dir ${TESTS_PATH}
+#        COMMAND "lcov" --directory ${TESTS_PATH} --capture --output-file coverage.info --gcov-tool ${GCOV_TOOL}
+#        COMMAND "lcov" --remove coverage.info "'/t/*'" "'/usr/*'" --output-file coverage.info.cleaned
+#        COMMAND "rm" coverage.info
+#
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#    )
+#    add_custom_target("coverage-report"
+#        COMMAND "genhtml" -o coverage coverage.info.cleaned
+#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#        DEPENDS "coverage"
+#    )
+#endif()
 
-	find_program(GCOV_TOOL gcov-11)
-	if (NOT GCOV_TOOL)
-    	message(FATAL_ERROR "Impossible to generate coverge report. Install gcov-11.")
-	endif()
-    add_custom_target("coverage"
-        COMMAND "lcov" --directory ${TESTS_PATH} --zerocounters
-        COMMAND ctest --test-dir ${TESTS_PATH}
-        COMMAND "lcov" --directory ${TESTS_PATH} --capture --output-file coverage.info --gcov-tool ${GCOV_TOOL}
-        COMMAND "lcov" --remove coverage.info "'/t/*'" "'/usr/*'" --output-file coverage.info.cleaned
-        COMMAND "rm" coverage.info
 
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-    add_custom_target("coverage-report"
-        COMMAND "genhtml" -o coverage coverage.info.cleaned
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        DEPENDS "coverage"
-    )
-endif()
-
-
-include_directories(../proto)
+include_directories(../src/uprotocol/proto)
 add_executable(json_serializer_test
 		${TESTS_PATH}/json/json_serializer_test.cpp
 		${CGREEN_INCLUDE_DIR}
