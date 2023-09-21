@@ -1,10 +1,3 @@
-set(VCPKG $ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-if (EXISTS ${VCPKG})
-    message(STATUS "Found VCPKG installation")
-    set(CMAKE_TOOLCHAIN_FILE ${VCPKG}
-            CACHE STRING "")
-endif ()
-
 cmake_minimum_required(VERSION 3.18.0)
 
 
