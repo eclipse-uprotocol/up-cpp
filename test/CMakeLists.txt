@@ -67,7 +67,7 @@ add_executable(uuid_v8_tests
 target_link_libraries(uuid_v8_tests ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-04-uuid-v8" uuid_v8_tests)
 
-add_executable(uuid_gen_test 
+add_executable(uuid_gen_test
 	${TESTS_PATH}/uuid/uuid_gen_test.cpp)
 target_link_libraries(uuid_gen_test ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-05-uuid-gen-test" uuid_gen_test)
@@ -89,24 +89,28 @@ target_link_libraries(service_type_test ${CGREEN_LIBRARY} uprotocolsdk)
 
 add_test("t-09-service-type-test" service_type_test)
 
-add_executable(uri_authority_test
-	${TESTS_PATH}/uri/uri_authority_test.cpp)
-target_link_libraries(uri_authority_test ${CGREEN_LIBRARY} uprotocolsdk)
+add_executable(UAuthorityTest
+	${TESTS_PATH}/uri/UAuthorityTest.cpp)
+target_link_libraries(UAuthorityTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-10-UAuthorityTest" UAuthorityTest)
 
-add_test("t-10-uri-authority-test" uri_authority_test)
+add_executable(UEntityTest
+		${TESTS_PATH}/uri/UEntityTest.cpp)
+target_link_libraries(UEntityTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-11-UEntityTest" UEntityTest)
 
-add_executable(uri_entity_test
-		${TESTS_PATH}/uri/uri_entity_test.cpp)
-target_link_libraries(uri_entity_test ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-11-uri-entity-test" uri_entity_test)
+add_executable(UResourceTest
+	${TESTS_PATH}/uri/UResourceTest.cpp)
+target_link_libraries(UResourceTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-12-UResourceTest" UResourceTest)
 
-add_executable(up_uri_test
-	${TESTS_PATH}/uri/up_uri_test.cpp)
-target_link_libraries(up_uri_test ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-12-up-uri-test" up_uri_test)
+add_executable(UUriTest
+	${TESTS_PATH}/uri/UUriTest.cpp)
+target_link_libraries(UUriTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-13-UUriTest" UUriTest)
 
-add_executable(up_uri_factory_test
-	${TESTS_PATH}/uri/up_uri_factory_test.cpp)
-target_compile_options(up_uri_factory_test PRIVATE -g -O0)
-target_link_libraries(up_uri_factory_test ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-13-up-uri_factory-test"  up_uri_factory_test)
+add_executable(LongUriSerializerTest
+	${TESTS_PATH}/uri/LongUriSerializerTest.cpp)
+target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
+target_link_libraries(LongUriSerializerTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-14-LongUriSerializerTest"  LongUriSerializerTest)

@@ -16,39 +16,40 @@
  * limitations under the License.
  *
  */
-#include "uri_resource.h"
+#include "UResource.h"
 
 #include <cgreen/cgreen.h>
 
 #include <string>
 
 using namespace cgreen;
+using namespace uprotocol::uri;
 
 #define assertTrue(a) assert_true(a)
 #define assertEquals(a, b) assert_true(b == a)
 #define assertFalse(a) assert_false(a)
 
-Describe(uri_resource);
+Describe(UResource);
 
-BeforeEach(uri_resource) {
+BeforeEach(UResource) {
   // Dummy
 }
 
-AfterEach(uri_resource) {
+AfterEach(UResource) {
   // Dummy
 }
 
 //@DisplayName("Make sure the toString works")
 static void testToString() {
-  uri_datamodel::uri_resource uResource("door", "front_left", "Door");
-  std::string expected(
-      "uResource{name='door', instance='front_left', message='Door'}");
+  UResource uResource = UResource::longFormat("door", "front_left", "Door");
+  std::string expected("uResource{name='door', instance='front_left', message='Door', id='null', markedResolved='false'}");
   assertEquals(expected, uResource.tostring());
+  assertFalse(uResource.isEmpty());
 }
 
 //@DisplayName("Test creating a complete up Resource")
 static void test_create_upResource() {
-  uri_datamodel::uri_resource uResource("door", "front_left", "Door");
+  UResource uResource = UResource::longFormat("door", "front_left", "Door");
   assertEquals("door", uResource.getName());
   assertTrue(uResource.getInstance().has_value());
   assertEquals("front_left", uResource.getInstance().value());
@@ -58,32 +59,30 @@ static void test_create_upResource() {
 
 //@DisplayName("Test creating a up Resource with no instance and no message")
 static void test_create_upResource_with_no_instance_and_no_message() {
-  uri_datamodel::uri_resource uResource("door", " ", " ");
+  UResource uResource = UResource::longFormat("door", " ", " ");
   assertEquals("door", uResource.getName());
   assertTrue(!uResource.getInstance().has_value());
   assertTrue(!uResource.getMessage().has_value());
 
-  uri_datamodel::uri_resource uResource2("door", "", "");
+  UResource uResource2 = UResource::longFormat("door", "", "");
   assertEquals("door", uResource2.getName());
   assertTrue(!uResource.getInstance().has_value());
   assertTrue(!uResource.getMessage().has_value());
 }
 
-//@DisplayName("Test creating a up Resource using the fromName static method")
+//@DisplayName("Test creating a up Resource using the longFormat static method")
 static void
 test_create_upResource_with_no_instance_and_no_message_using_fromName() {
-  uri_datamodel::uri_resource uResource =
-      uri_datamodel::uri_resource::fromName("door");
+  UResource uResource = UResource::longFormat("door");
   assertEquals("door", uResource.getName());
   assertTrue(!uResource.getInstance().has_value());
   assertTrue(!uResource.getMessage().has_value());
 }
 
-//@DisplayName("Test creating a up Resource using the fromNameWithInstance
+//@DisplayName("Test creating a up Resource using the longFormat
 // static method")
 static void test_create_upResource_with_no_message_using_fromName() {
-  uri_datamodel::uri_resource uResource =
-      uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left");
+  UResource uResource = UResource::longFormat("door", "front_left", "");
   assertEquals("door", uResource.getName());
   assertTrue(uResource.getInstance().has_value());
   assertEquals("front_left", uResource.getInstance().value());
@@ -92,8 +91,7 @@ static void test_create_upResource_with_no_message_using_fromName() {
 
 //@DisplayName("Test creating a up Resource for an RPC command on the resource")
 static void test_create_upResource_for_rpc_commands() {
-  uri_datamodel::uri_resource uResource =
-      uri_datamodel::uri_resource::forRpc("UpdateDoor");
+  UResource uResource = UResource::forRpcRequest("UpdateDoor");
   assertEquals("rpc", uResource.getName());
   assertTrue(uResource.getInstance().has_value());
   assertEquals("UpdateDoor", uResource.getInstance().value());
@@ -102,16 +100,14 @@ static void test_create_upResource_for_rpc_commands() {
 
 //@DisplayName("Test if the up resource represents an RPC method call")
 static void test_upResource_represents_an_rpc_method_call() {
-  uri_datamodel::uri_resource uResource =
-      uri_datamodel::uri_resource::fromNameWithInstance("rpc", "UpdateDoor");
+  UResource uResource = UResource::longFormat("rpc", "UpdateDoor", "");
   assertTrue(uResource.isRPCMethod());
 }
 
 //@DisplayName("Test if the up resource represents a resource and not an RPC
 // method call")
 static void test_upResource_represents_a_resource_and_not_an_rpc_method_call() {
-  uri_datamodel::uri_resource uResource =
-      uri_datamodel::uri_resource::fromName("door");
+  UResource uResource = UResource::longFormat("door");
   assertFalse(uResource.isRPCMethod());
 }
 
@@ -119,35 +115,33 @@ static void test_upResource_represents_a_resource_and_not_an_rpc_method_call() {
 // are configured")
 static void
 test_returning_a_name_with_instance_from_uResource_when_name_and_instance_are_configured() {
-  uri_datamodel::uri_resource uResource =
-      uri_datamodel::uri_resource::fromNameWithInstance("doors", "front_left");
-  const std::string nameWithInstance = uResource.nameWithInstance();
-  assertEquals("doors.front_left", nameWithInstance);
+  UResource uResource = UResource::longFormat("doors", "front_left", "");
+  const std::string instance = uResource.getInstance().value_or("");
+  assertEquals("front_left", instance);
 }
 
 //@DisplayName("Test returning a name with instance when only name is
 // configured")
 static void
 test_returning_a_name_with_instance_from_uResource_when_only_name_is_configured() {
-  uri_datamodel::uri_resource uResource =
-      uri_datamodel::uri_resource::fromName("door");
-  const std::string nameWithInstance = uResource.nameWithInstance();
-  assertEquals("door", nameWithInstance);
+  UResource uResource = UResource::longFormat("door");
+  const std::string name = uResource.getName();
+  assertEquals("door", name);
 }
 
 //@DisplayName("Test returning a name with instance when all properties are
 // configured")
 static void
 test_returning_a_name_with_instance_from_uResource_when_all_properties_are_configured() {
-  uri_datamodel::uri_resource uResource("doors", "front_left", "Door");
-  const std::string nameWithInstance = uResource.nameWithInstance();
-  assertEquals("doors.front_left", nameWithInstance);
+  UResource uResource = UResource::longFormat("doors", "front_left", "Door");
+  const std::string message = uResource.getMessage().value_or("");
+  assertEquals("Door", message);
 }
 
 //@DisplayName("Test creating an empty up Resource using the empty static
 // method")
 static void test_create_empty_using_empty() {
-  uri_datamodel::uri_resource uResource = uri_datamodel::uri_resource::empty();
+  UResource uResource = UResource::empty();
   auto name = uResource.getName();
   bool whiteSpacesOnly = std::all_of(name.begin(), name.end(), isspace);
   assertTrue(whiteSpacesOnly);
@@ -157,20 +151,20 @@ static void test_create_empty_using_empty() {
 
 //@DisplayName("Test the isEmpty static method")
 static void test_is_empty() {
-  uri_datamodel::uri_resource uResource = uri_datamodel::uri_resource::empty();
+  UResource uResource = UResource::empty();
   assertTrue(uResource.isEmpty());
 
-  uri_datamodel::uri_resource uResource2("", "", "");
+  UResource uResource2 = UResource::longFormat("", "", "");
   assertTrue(uResource2.isEmpty());
 
-  uri_datamodel::uri_resource uResource3("", "front_left", "");
+  UResource uResource3 = UResource::longFormat("", "front_left", "");
   assertFalse(uResource3.isEmpty());
 
-  uri_datamodel::uri_resource uResource4("", "", "Door");
+  UResource uResource4 = UResource::longFormat("", "", "Door");
   assertFalse(uResource4.isEmpty());
 }
 
-Ensure(uri_resource, all_tests) {
+Ensure(UResource, all_tests) {
   testToString();
   test_create_upResource();
   test_create_upResource_with_no_instance_and_no_message();
@@ -189,7 +183,7 @@ Ensure(uri_resource, all_tests) {
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
   TestSuite* suite = create_test_suite();
 
-  add_test_with_context(suite, uri_resource, all_tests);
+  add_test_with_context(suite, UResource, all_tests);
 
   return run_test_suite(suite, create_text_reporter());
 }
