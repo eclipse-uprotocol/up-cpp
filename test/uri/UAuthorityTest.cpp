@@ -16,67 +16,68 @@
  * limitations under the License.
  *
  */
-#include "uri_authority.h"
+#include "UAuthority.h"
 
 #include <cgreen/cgreen.h>
 
 #include <string>
 
 using namespace cgreen;
+using namespace uprotocol::uri;
 
 #define assertTrue(a) assert_true(a)
 #define assertEquals(a, b) assert_true(b == a)
 #define assertFalse(a) assert_false(a)
 
-Describe(uri_authority);
+Describe(UAuthority);
 
-BeforeEach(uri_authority) {
+BeforeEach(UAuthority) {
   // Dummy
 }
 
-AfterEach(uri_authority) {
+AfterEach(UAuthority) {
   // Dummy
 }
 
 //@DisplayName("Test a local uAuthority")
 static void test_local_uAuthority() {
-  uri_datamodel::uri_authority uAuthority =
-      uri_datamodel::uri_authority::local();
+  UAuthority uAuthority =
+      UAuthority::local();
   assertTrue(!uAuthority.getDevice().has_value());
   assertTrue(!uAuthority.getDomain().has_value());
   assertTrue(uAuthority.isLocal());
   assertFalse(uAuthority.isMarkedRemote());
 }
 
-//@DisplayName("Test a blank remote uAuthority is actually local")
+//@DisplayName("Test a blank longRemote uAuthority is actually local")
 static void test_blank_remote_uAuthority_is_local() {
-  uri_datamodel::uri_authority uAuthority =
-      uri_datamodel::uri_authority::remote(" ", " ");
+  UAuthority uAuthority =
+      UAuthority::longRemote(" ", " ");
   assertTrue(!uAuthority.getDevice().has_value());
   assertTrue(!uAuthority.getDomain().has_value());
-  assertTrue(uAuthority.isLocal());
-  assertFalse(uAuthority.isRemote());
+  assertFalse(uAuthority.isLocal());
+  assertTrue(uAuthority.isRemote());
   assertTrue(uAuthority.isMarkedRemote());
 }
 
 //@DisplayName("Make sure the empty() works")
 static void testEmpty() {
-  uri_datamodel::uri_authority uAuthority =
-      uri_datamodel::uri_authority::empty();
+  UAuthority uAuthority =
+      UAuthority::empty();
   assertTrue(!uAuthority.getDevice().has_value());
   assertTrue(!uAuthority.getDomain().has_value());
 }
 
 //@DisplayName("Make sure the isLocal() works")
 static void test_isLocal() {
-  uri_datamodel::uri_authority local = uri_datamodel::uri_authority::local();
+  UAuthority local = UAuthority::local();
   assertTrue(local.isLocal());
   assertFalse(local.isRemote());
   assertFalse(local.isMarkedRemote());
 }
 
 // TODO: reintroduce tests.
-Ensure(uri_authority, all_tests) {
+Ensure(UAuthority, all_tests) {
   test_local_uAuthority();
   test_blank_remote_uAuthority_is_local();
   testEmpty();
@@ -86,7 +87,7 @@ Ensure(uri_authority, all_tests) {
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
   TestSuite* suite = create_test_suite();
 
-  add_test_with_context(suite, uri_authority, all_tests);
+  add_test_with_context(suite, UAuthority, all_tests);
 
   return run_test_suite(suite, create_text_reporter());
 }

@@ -14,13 +14,18 @@
  * limitations under the License.
  *
  */
-#ifndef UP_VALIDATOR_H
-#define UP_VALIDATOR_H
-#include "up_uri_factory.h"
-namespace up_validator {
+#ifndef URI_VALIDATOR_H_
+#define URI_VALIDATOR_H_
+
+#include "LongUriSerializer.h"
+
+namespace uprotocol::uri {
+
 bool valid_uri(const std::string& uri) {
-  auto uri_view = uri_factory::up_uri_factory::parseFromUri(uri);
+  auto uri_view = LongUriSerializer::deserialize(uri);
   return !uri_view.isEmpty();
 }
-}  // namespace up_validator
-#endif
+
+}  // namespace uprotocol::uri
+
+#endif // URI_VALIDATOR_H_
