@@ -22,7 +22,9 @@
 #ifndef _UPAYLOAD_H_
 #define _UPAYLOAD_H_
 
-#include <stdint.h>
+#include <memory>
+#include <cstdint>
+#include <cstring>
 
 /**
  * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
@@ -36,8 +38,14 @@ namespace uprotocol
             public:
 
                 UPayload(const uint8_t *data, size_t dataSize) {
+                  
+                    data_ = std::make_unique<uint8_t[]>(dataSize);
 
-                    data_ = data;
+                    memcpy(
+                        data_.get(),
+                        data,
+                        dataSize);
+
                     dataSize_ = dataSize;
                 }
               
@@ -45,12 +53,15 @@ namespace uprotocol
                 * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
                 * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
                 */
-                const uint8_t* data() const {
+                uint8_t* data() const {
 
-                    return data_;
+                    return data_.get();
                 }
 
-                const size_t size() const {
+                /**
+                * @return Returns the size of the data
+                */
+                size_t size() const {
 
                     return dataSize_;
                 }
@@ -64,7 +75,7 @@ namespace uprotocol
 
             private:
                 
-                const uint8_t *data_;
+                std::unique_ptr<uint8_t[]> data_;
                 size_t dataSize_;
         };
     }

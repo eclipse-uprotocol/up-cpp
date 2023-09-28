@@ -218,8 +218,8 @@ namespace uprotocol
 
                                 attributes_ = std::make_shared<UAttributes>();
 
-                                if (nullptr != attributes_)
-                                {
+                                if (nullptr != attributes_){
+                                    //once the UUID class is aligned this code needs to be changed
                                     attributes_->id_ = id;
                                     attributes_->type_ = type;
                                     attributes_->priority_ = priority;
