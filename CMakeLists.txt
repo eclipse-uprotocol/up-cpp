@@ -138,6 +138,8 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   endif()
 endif()
 
+add_definitions(-DSPDLOG_FMT_EXTERNAL)
+
 target_link_libraries(uprotocolsdk Threads::Threads 
 					${Protobuf_LIBRARIES} 
 					${RapidJSON_LIBRARIES} 
@@ -145,6 +147,7 @@ target_link_libraries(uprotocolsdk Threads::Threads
 					proto  
 					spdlog::spdlog)
 	
+	add_definitions(-DSPDLOG_FMT_EXTERNAL)
 target_link_libraries(uprotocolsdk_shared Threads::Threads 
 					${Protobuf_LIBRARIES} 
 					${RapidJSON_LIBRARIES} 

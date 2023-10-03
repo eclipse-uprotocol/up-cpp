@@ -39,6 +39,7 @@
 
 using google::protobuf::util::TimeUtil;
 using io::cloudevents::v1::CloudEvent;
+using namespace rapidjson;
 
 namespace cloudevents::format {
 
@@ -55,7 +56,7 @@ class Json_serializer : public Serializer {
     doc.SetObject();
     rapidjson::Value key;
     rapidjson::Value value;
-    auto allocator = doc.GetAllocator();
+    Document::AllocatorType allocator;//= doc.GetAllocator();
 
     if (auto result = buildJsonAttributes(cloudEvent, doc); !result) {
       return std::nullopt;
@@ -190,7 +191,7 @@ class Json_serializer : public Serializer {
       rapidjson::Document& doc) {
     rapidjson::Value key;
     rapidjson::Value value;
-    auto allocator = doc.GetAllocator();
+    Document::AllocatorType allocator; //= doc.GetAllocator();
 
     key.SetString("id", allocator);
     value.SetString(cloudEvent.id().c_str(), allocator);

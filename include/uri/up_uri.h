@@ -26,6 +26,7 @@
 #include "uri_entity.h"
 #include "uri_resource.h"
 #include "../tools/base64.h"
+#include <iostream>
 
 namespace uri_datamodel {
 class UUri {

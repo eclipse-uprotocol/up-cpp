@@ -37,6 +37,11 @@ namespace uprotocol
                          UPayload &payload, 
                          UAttributes &attributes) = 0;
                     
+                    virtual UPayload invokeMethod(
+                         UUri &uri,
+                         UPayload &payload, 
+                         UAttributes &attributes) = 0;
+
                     virtual ~UTransport() {} 
           };
     }
