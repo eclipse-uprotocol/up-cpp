@@ -25,7 +25,7 @@
 #include <optional>
 
 #include "../model/cloud_event.h"
-#include "base64.h"
+#include "base64.hpp"
 #include "google/protobuf/util/time_util.h"
 #include "spdlog/spdlog.h"
 
@@ -105,7 +105,7 @@ if (!cloudEvent.SerializeToString(
   return std::nullopt;
 }
 
-std::string encData = cloudevents::base64::base64encode(str);
+std::string encData = base64::base64encode(str);
 if (encData.empty()) {
   spdlog::error("Failed to encode cloudevent structure to base64");
   return std::nullopt;
@@ -129,8 +129,7 @@ deserialized(const formatted_event& formatedEvent) override {
     spdlog::error("formatedEvent.serialized_data.empty()\n");
     return std::nullopt;
   }
-  const std::string str(
-      cloudevents::base64::base64decode(formatedEvent.serialized_data));
+  const std::string str(base64::base64decode(formatedEvent.serialized_data));
   if (str.empty()) {
     spdlog::error("Failed to decode from base64\n");
     return std::nullopt;

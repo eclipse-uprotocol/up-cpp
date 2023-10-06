@@ -17,9 +17,9 @@
  *
  */
 
-#include "base64.h"
+#include "base64.hpp"
 
-using namespace cloudevents;
+//using namespace cloudevents;
 static const char* B64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static const int B64index[256] =

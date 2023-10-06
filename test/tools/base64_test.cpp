@@ -17,7 +17,7 @@
  *
  */
 
-#include "base64.h"
+#include "base64.hpp"
 
 #include <cgreen/cgreen.h>
 
@@ -42,8 +42,8 @@ Ensure(Base64, base64_encode_decode) {
 
   static std::string ac_output;
 
-  std::string encoded(cloudevents::base64::base64encode(std::string(ac_input)));
-  std::string decoded(cloudevents::base64::base64decode(encoded));
+  std::string encoded(base64::base64encode(std::string(ac_input)));
+  std::string decoded(base64::base64decode(encoded));
   assert_true(std::string(ac_input) == decoded);
 
 }
