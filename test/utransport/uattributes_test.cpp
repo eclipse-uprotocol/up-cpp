@@ -1,5 +1,5 @@
 #include "spdlog/spdlog.h"
-#include <include/utransport/UAttributes.h>
+#include <include/utransport/datamodel/UAttributes.h>
 #include <include/uuid/uuid_gen.h>
 #include <gtest/gtest.h>
 

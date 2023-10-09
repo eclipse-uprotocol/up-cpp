@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 #include <cstddef>
-#include "UListener.h"
-#include "UPayload.h"
-#include "UAttributes.h"
+#include "datamodel/UListener.h"
+#include "datamodel/UPayload.h"
+#include "datamodel/UAttributes.h"
 #include <include/uri/up_uri.h>
 
 using namespace uprotocol::utransport::datamodel;
