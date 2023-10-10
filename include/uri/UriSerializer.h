@@ -18,18 +18,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#ifndef _URI_VALIDATOR_H_
-#define _URI_VALIDATOR_H_
+#ifndef _URI_SERIALIZER_H_
+#define _URI_SERIALIZER_H_
 
-#include "LongUriSerializer.h"
+#include <string>
+
+#include "UAuthority.h"
+#include "UEntity.h"
+#include "UResource.h"
+#include "UUri.h"
 
 namespace uprotocol::uri {
 
-bool valid_uri(const std::string& uri) {
-    auto uri_view = LongUriSerializer::getInstance().deserialize(uri);
-    return !uri_view.isEmpty();
-}
+template <typename T>
+class UriSerializer {
+public:
+    virtual ~UriSerializer() = default;
+
+    /**
+     * Deserialize from the format to a Uri.
+     * @param uri serialized UUri.
+     * @return Returns a Uri object from the serialized format from the wire.
+     */
+    virtual UUri deserialize(const T& uri) = 0;
+
+    /**
+     * Serialize from a Uri to a specific serialization format.
+     * @param uri UUri object to be serialized to the format T.
+     * @return Returns the Uri in the transport serialized format.
+     */
+    virtual T serialize(const UUri& uri) = 0;
+}; // class UriSerializer
 
 }  // namespace uprotocol::uri
 
-#endif // _URI_VALIDATOR_H_
+#endif  // _URI_SERIALIZER_H_

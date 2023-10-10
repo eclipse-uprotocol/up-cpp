@@ -1,26 +1,28 @@
-/**
- * Copyright (c) 2023 General Motors Company
- * All rights reserved.
+/*
  * Copyright (c) 2023 General Motors GTO LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-#include "UResource.h"
-
-#include <cgreen/cgreen.h>
 
 #include <string>
+#include <cgreen/cgreen.h>
+
+#include "UResource.h"
 
 using namespace cgreen;
 using namespace uprotocol::uri;
@@ -51,23 +53,23 @@ static void testToString() {
 static void test_create_upResource() {
   UResource uResource = UResource::longFormat("door", "front_left", "Door");
   assertEquals("door", uResource.getName());
-  assertTrue(uResource.getInstance().has_value());
-  assertEquals("front_left", uResource.getInstance().value());
-  assertTrue(uResource.getMessage().has_value());
-  assertEquals("Door", uResource.getMessage().value());
+  assertFalse(uResource.getInstance().empty());
+  assertEquals("front_left", uResource.getInstance());
+  assertFalse(uResource.getMessage().empty());
+  assertEquals("Door", uResource.getMessage());
 }
 
 //@DisplayName("Test creating a up Resource with no instance and no message")
 static void test_create_upResource_with_no_instance_and_no_message() {
   UResource uResource = UResource::longFormat("door", " ", " ");
   assertEquals("door", uResource.getName());
-  assertTrue(!uResource.getInstance().has_value());
-  assertTrue(!uResource.getMessage().has_value());
+  assertTrue(uResource.getInstance().empty());
+  assertTrue(uResource.getMessage().empty());
 
   UResource uResource2 = UResource::longFormat("door", "", "");
   assertEquals("door", uResource2.getName());
-  assertTrue(!uResource.getInstance().has_value());
-  assertTrue(!uResource.getMessage().has_value());
+  assertTrue(uResource.getInstance().empty());
+  assertTrue(uResource.getMessage().empty());
 }
 
 //@DisplayName("Test creating a up Resource using the longFormat static method")
@@ -75,8 +77,8 @@ static void
 test_create_upResource_with_no_instance_and_no_message_using_fromName() {
   UResource uResource = UResource::longFormat("door");
   assertEquals("door", uResource.getName());
-  assertTrue(!uResource.getInstance().has_value());
-  assertTrue(!uResource.getMessage().has_value());
+  assertTrue(uResource.getInstance().empty());
+  assertTrue(uResource.getMessage().empty());
 }
 
 //@DisplayName("Test creating a up Resource using the longFormat
@@ -84,17 +86,17 @@ test_create_upResource_with_no_instance_and_no_message_using_fromName() {
 static void test_create_upResource_with_no_message_using_fromName() {
   UResource uResource = UResource::longFormat("door", "front_left", "");
   assertEquals("door", uResource.getName());
-  assertTrue(uResource.getInstance().has_value());
-  assertEquals("front_left", uResource.getInstance().value());
-  assertTrue(!uResource.getMessage().has_value());
+  assertFalse(uResource.getInstance().empty());
+  assertEquals("front_left", uResource.getInstance());
+  assertTrue(uResource.getMessage().empty());
 }
 
 //@DisplayName("Test creating a up Resource for an RPC command on the resource")
 static void test_create_upResource_for_rpc_commands() {
   UResource uResource = UResource::forRpcRequest("UpdateDoor");
   assertEquals("rpc", uResource.getName());
-  assertTrue(uResource.getInstance().has_value());
-  assertEquals("UpdateDoor", uResource.getInstance().value());
+  assertFalse(uResource.getInstance().empty());
+  assertEquals("UpdateDoor", uResource.getInstance());
   assertTrue(uResource.isRPCMethod());
 }
 
@@ -116,7 +118,7 @@ static void test_upResource_represents_a_resource_and_not_an_rpc_method_call() {
 static void
 test_returning_a_name_with_instance_from_uResource_when_name_and_instance_are_configured() {
   UResource uResource = UResource::longFormat("doors", "front_left", "");
-  const std::string instance = uResource.getInstance().value_or("");
+  const std::string instance = uResource.getInstance();
   assertEquals("front_left", instance);
 }
 
@@ -134,7 +136,7 @@ test_returning_a_name_with_instance_from_uResource_when_only_name_is_configured(
 static void
 test_returning_a_name_with_instance_from_uResource_when_all_properties_are_configured() {
   UResource uResource = UResource::longFormat("doors", "front_left", "Door");
-  const std::string message = uResource.getMessage().value_or("");
+  const std::string message = uResource.getMessage();
   assertEquals("Door", message);
 }
 
@@ -145,8 +147,8 @@ static void test_create_empty_using_empty() {
   auto name = uResource.getName();
   bool whiteSpacesOnly = std::all_of(name.begin(), name.end(), isspace);
   assertTrue(whiteSpacesOnly);
-  assertTrue(!uResource.getInstance().has_value());
-  assertTrue(!uResource.getMessage().has_value());
+  assertTrue(uResource.getInstance().empty());
+  assertTrue(uResource.getMessage().empty());
 }
 
 //@DisplayName("Test the isEmpty static method")

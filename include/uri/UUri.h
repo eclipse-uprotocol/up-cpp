@@ -1,21 +1,25 @@
-/**
+/*
  * Copyright (c) 2023 General Motors GTO LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-#ifndef UURI_H_
-#define UURI_H_
+#ifndef _UURI_H_
+#define _UURI_H_
 
 #include <string>
 #include <utility>
@@ -48,10 +52,10 @@ public:
      * @param uEntity The uEntity in the role of a service or in the role of an application is the software and version.
      * @param uResource The uResource is something that is manipulated by a service such as a Door.
      */
-    UUri(const UAuthority&  uAuthority,
-         const UEntity&     uEntity,
-         const UResource&   uResource)
-        : uAuthority_(uAuthority), uEntity_(uEntity), uResource_(uResource) {}
+    UUri(const UAuthority& uAuthority,
+         const UEntity& uEntity,
+         const UResource& uResource)
+         : uAuthority_(uAuthority), uEntity_(uEntity), uResource_(uResource) {}
 
     /**
      * Create a URI for a resource. This will match all the specific instances of the resource,
@@ -60,10 +64,10 @@ public:
      * @param uEntity The USE in the role of a service or in the role of an application.
      * @param uResource The resource is something that is manipulated by a service such as a Door.
      */
-    UUri(const UAuthority&  uAuthority,
-        const UEntity&     uEntity,
-        const std::string& uResource)
-        : UUri(uAuthority, uEntity, UResource::longFormat(uResource)) {}
+    UUri(const UAuthority& uAuthority,
+         const UEntity& uEntity,
+         const std::string& uResource)
+         : UUri(uAuthority, uEntity, UResource::longFormat(uResource)) {}
 
     /**
      * Create an RPC Response UUri passing the Authority and Entity information.
@@ -72,8 +76,8 @@ public:
      * @return Returns a UUri of a constructed RPC Response.
      */
     static UUri rpcResponse(UAuthority const& UAuthority,
-                            UEntity const&    UEntity) {
-      return UUri(UAuthority, UEntity, UResource::forRpcResponse());
+                            UEntity const& UEntity) {
+        return UUri(UAuthority, UEntity, UResource::forRpcResponse());
     }
 
     /**
@@ -81,8 +85,8 @@ public:
      * @return Returns an empty uri to avoid working with null.
      */
     static UUri empty() {
-      static const auto EMPTY = UUri(UAuthority::empty(), UEntity::empty(), UResource::empty());
-      return EMPTY;
+        static const auto EMPTY = UUri(UAuthority::empty(), UEntity::empty(), UResource::empty());
+        return EMPTY;
     }
 
     /**
@@ -90,7 +94,7 @@ public:
      * @return Returns true if this  URI is an empty container and has no valuable information in building uProtocol sinks or sources.
      */
     [[nodiscard]] bool isEmpty() const override {
-      return uAuthority_.isEmpty() && uEntity_.isEmpty() && uResource_.isEmpty();
+        return uAuthority_.isEmpty() && uEntity_.isEmpty() && uResource_.isEmpty();
     }
 
     /**
@@ -100,7 +104,7 @@ public:
      *      Meaning that this UUri can buree serialized to long or micro formats.
      */
     [[nodiscard]] bool isResolved() const override {
-      return uAuthority_.isResolved() && uEntity_.isResolved() && uResource_.isResolved();
+        return uAuthority_.isResolved() && uEntity_.isResolved() && uResource_.isResolved();
     }
 
     /**
@@ -108,9 +112,9 @@ public:
      * @return Returns true if this UUri can be serialized into a long form UUri.
      */
     [[nodiscard]] bool isLongForm() const override {
-      return uAuthority_.isLongForm() &&
-            (uEntity_.isLongForm() || uEntity_.isEmpty()) &&
-            (uResource_.isLongForm() || uResource_.isEmpty());
+        return uAuthority_.isLongForm() &&
+              (uEntity_.isLongForm() || uEntity_.isEmpty()) &&
+              (uResource_.isLongForm() || uResource_.isEmpty());
     }
 
     /**
@@ -118,7 +122,7 @@ public:
      * @return Returns true if this UUri can be serialized into a micro form UUri.
      */
     [[nodiscard]] bool isMicroForm() const override {
-      return uAuthority_.isMicroForm() && uEntity_.isMicroForm() && uResource_.isMicroForm();
+        return uAuthority_.isMicroForm() && uEntity_.isMicroForm() && uResource_.isMicroForm();
     }
 
     /**
@@ -142,12 +146,12 @@ public:
      * @return Returns true if and only if the specified object is a UUri whose components are equal to the components of this UUri.
      */
     bool operator==(const UUri& o) const {
-      if (this == &o) {
-        return true;
-      }
-      return (uAuthority_ == o.uAuthority_) &&
-            (uEntity_ == o.uEntity_) &&
-            (uResource_ == o.uResource_);
+        if (this == &o) {
+            return true;
+        }
+        return (uAuthority_ == o.uAuthority_) &&
+               (uEntity_ == o.uEntity_) &&
+               (uResource_ == o.uResource_);
     }
 
     /**
@@ -155,10 +159,10 @@ public:
      * @return Returns a string representation of this UUri.
      */
     [[nodiscard]] std::string tostring() const {
-      return std::string("UriPart{") +
-                        "uAuthority=" + uAuthority_.tostring() +
-                        ", uEntity=" + uEntity_.tostring() +
-                        ", uResource=" + uResource_.tostring() + '}';
+        return std::string("UriPart{") +
+                           "uAuthority=" + uAuthority_.tostring() +
+                           ", uEntity=" + uEntity_.tostring() +
+                           ", uResource=" + uResource_.tostring() + '}';
     }
 
 private:
@@ -178,4 +182,4 @@ private:
 
 }  // namespace uprotocol::uri
 
-#endif  // UURI_H_
+#endif  // _UURI_H_
