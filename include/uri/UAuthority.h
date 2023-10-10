@@ -1,21 +1,25 @@
-/**
+/*
  * Copyright (c) 2023 General Motors GTO LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-#ifndef UAUTHORITY_H_
-#define UAUTHORITY_H_
+#ifndef _UAUTHORITY_H_
+#define _UAUTHORITY_H_
 
 #include <algorithm>
 #include <cctype>
@@ -59,8 +63,8 @@ public:
      * @return Returns a uAuthority that contains the device and the domain and can only be serialized in long UUri format.
      */
     static UAuthority longRemote(const std::string& device,
-                                const std::string& domain) {
-      return UAuthority{device, domain, "", true, false};
+                                 const std::string& domain) {
+        return UAuthority{device, domain, "", true, false};
     }
 
     /**
@@ -70,7 +74,7 @@ public:
      * @return Returns a uAuthority that contains only the internet address of the device, and can only be serialized in micro UUri format.
      */
     static UAuthority microRemote(const std::string& address) {
-      return UAuthority{"", "", address, true, false};
+        return UAuthority{"", "", address, true, false};
     }
 
     /**
@@ -83,10 +87,10 @@ public:
      * @return Returns a uAuthority that contains all resolved data and so can be serialized into a long UUri or a micro UUri.
      */
     static UAuthority resolvedRemote(const std::string& device,
-                                    const std::string& domain,
-                                    const std::string& address) {
-      bool isResolved = !isBlank(device) && !address.empty();
-      return UAuthority{device, domain, address, true, isResolved};
+                                     const std::string& domain,
+                                     const std::string& address) {
+        bool isResolved = !isBlank(device) && !address.empty();
+        return UAuthority{device, domain, address, true, isResolved};
     }
 
     /**
@@ -95,32 +99,32 @@ public:
      * @return Returns an empty authority that has no domain, device, or device ip address information.
      */
     static UAuthority empty() {
-      static const auto EMPTY = UAuthority("", "", "", false, true);
-      return EMPTY;
+        static const auto EMPTY = UAuthority("", "", "", false, true);
+        return EMPTY;
     }
 
     /**
      * Accessing an optional device of the uAuthority.
      * @return Returns the device a software entity is deployed on, such as the VCU, CCU or cloud provider.
      */
-    [[nodiscard]] std::optional<std::string> getDevice() const {
-      return isBlank(device_) ? std::nullopt : std::optional<std::string>(device_);
+    [[nodiscard]] std::string getDevice() const {
+        return isBlank(device_) ? "" : device_;
     }
 
     /**
      * Accessing an optional domain of the uAuthority.
      * @return Returns the domain a software entity is deployed on, such as vehicle or backoffice.
      */
-    [[nodiscard]] std::optional<std::string> getDomain() const {
-      return isBlank(domain_) ? std::nullopt : std::optional<std::string>(domain_);
+    [[nodiscard]] std::string getDomain() const {
+        return isBlank(domain_) ? "" : domain_;
     }
 
     /**
      * Accessing an optional IP address configuration of the uAuthority.
      * @return Returns the device IP address.
      */
-    [[nodiscard]] std::optional<std::string> getAddress() const {
-      return isBlank(address_) ? std::nullopt : std::optional<std::string>(address_);
+    [[nodiscard]] std::string getAddress() const {
+        return isBlank(address_) ? "" : address_;
     }
 
     /**
@@ -128,7 +132,7 @@ public:
      * @return returns true if this uAuthority is local, meaning does not contain a device/domain for long UUri or information for micro UUri.
      */
     [[nodiscard]] bool isLocal() const {
-      return isEmpty() && !isMarkedRemote();
+        return isEmpty() && !isMarkedRemote();
     }
 
     /**
@@ -136,7 +140,7 @@ public:
      * @return Returns true if this uAuthority is remote, meaning it contains information for serialising a long UUri or a micro UUri.
      */
     [[nodiscard]] bool isRemote() const {
-      return isMarkedRemote();
+        return isMarkedRemote();
     }
 
     /**
@@ -157,7 +161,7 @@ public:
      * @return Returns true if the UAuthority can be used to serialize a UUri in long format.
      */
     [[nodiscard]] bool isLongForm() const override {
-      return isLocal() || getDevice().has_value();
+        return isLocal() || !getDevice().empty();
     }
 
     /**
@@ -165,7 +169,7 @@ public:
      * @return Returns true if the uAuthority can be serialized a UUri in micro format.
      */
     [[nodiscard]] bool isMicroForm() const override {
-      return isLocal() || getAddress().has_value();
+        return isLocal() || !getAddress().empty();
     }
 
     /**
@@ -173,7 +177,7 @@ public:
      * @return Returns true if this UAuthority is empty.
      */
     [[nodiscard]] bool isEmpty() const override {
-      return !getDevice().has_value() && !getDomain().has_value() && !getAddress().has_value();
+        return getDevice().empty() && getDomain().empty() && getAddress().empty();
     }
 
     /**
@@ -182,14 +186,14 @@ public:
      * @return Returns true if the UAuthorities are equal.
      */
     [[nodiscard]] bool operator==(const UAuthority& o) const {
-      if (this == &o) {
-        return true;
-      }
-      return (markedRemote_ == o.markedRemote_) &&
-            (markedResolved_ == o.markedResolved_) &&
-            (device_ == o.device_) &&
-            (domain_ == o.domain_) &&
-            (address_ == o.address_);
+        if (this == &o) {
+            return true;
+        }
+        return (markedRemote_ == o.markedRemote_) &&
+               (markedResolved_ == o.markedResolved_) &&
+               (device_ == o.device_) &&
+               (domain_ == o.domain_) &&
+               (address_ == o.address_);
     }
 
     /**
@@ -197,12 +201,12 @@ public:
      * @return Returns a string representation of the UAuthority.
      */
     [[nodiscard]] std::string tostring() const {
-      return std::string("uAuthority{") +
-                        "device='" + (device_.empty() ? "null" : device_) + '\'' +
-                        ", domain='" + (domain_.empty() ? "null" : domain_) + '\'' +
-                        ", address='" + (address_.empty() ? "null" : address_) + '\'' +
-                        ", markedRemote=" + (markedRemote_ ? "true" : "false") + '\'' +
-                        ", markedResolved=" + (markedResolved_ ? "true" : "false") + '}';
+        return std::string("uAuthority{") +
+                          "device='" + (device_.empty() ? "null" : device_) + '\'' +
+                          ", domain='" + (domain_.empty() ? "null" : domain_) + '\'' +
+                          ", address='" + (address_.empty() ? "null" : address_) + '\'' +
+                          ", markedRemote=" + (markedRemote_ ? "true" : "false") + '\'' +
+                          ", markedResolved=" + (markedResolved_ ? "true" : "false") + '}';
     }
 
  private:
@@ -216,23 +220,23 @@ public:
      *                          in the long format or the micro format of a UUri.
      */
     UAuthority(const std::string& device,
-              const std::string& domain,
-              const std::string& address,
-              const bool         markedRemote,
-              const bool         markedResolved)
-        : address_(address), markedRemote_(markedRemote), markedResolved_(markedResolved) {
-      if (!device.empty()) {
-        auto current = device;
-        std::transform(current.begin(), current.end(), current.begin(),
-                      [](unsigned char c) { return std::tolower(c); });
-        this->device_ = std::move(current);
-      }
-      if (!domain.empty()) {
-        auto current = domain;
-        std::transform(current.begin(), current.end(), current.begin(),
-                      [](unsigned char c) { return std::tolower(c); });
-        this->domain_ = std::move(current);
-      }
+               const std::string& domain,
+               const std::string& address,
+               const bool markedRemote,
+               const bool markedResolved)
+              : address_(address), markedRemote_(markedRemote), markedResolved_(markedResolved) {
+        if (!device.empty()) {
+            auto current = device;
+            std::transform(current.begin(), current.end(), current.begin(),
+                          [](unsigned char c) { return std::tolower(c); });
+            this->device_ = std::move(current);
+        }
+        if (!domain.empty()) {
+            auto current = domain;
+            std::transform(current.begin(), current.end(), current.begin(),
+                          [](unsigned char c) { return std::tolower(c); });
+            this->domain_ = std::move(current);
+        }
     }
 
     /**
@@ -241,7 +245,7 @@ public:
      * @return bool Returns true if the string is blank.
      */
     [[nodiscard]] static bool isBlank(std::string_view str) {
-      return std::all_of(str.begin(), str.end(), isspace);
+        return std::all_of(str.begin(), str.end(), isspace);
     }
 
     /**
@@ -273,4 +277,4 @@ public:
 
 } // namespace uprotocol::uri
 
-#endif // UAUTHORITY_H_
+#endif // _UAUTHORITY_H_

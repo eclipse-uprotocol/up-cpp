@@ -1,19 +1,25 @@
-/**
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+/*
+ * Copyright (c) 2023 General Motors GTO LLC
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-#ifndef UENTITY_H_
-#define UENTITY_H_
+#ifndef _UENTITY_H_
+#define _UENTITY_H_
 
 #include <algorithm>
 #include <cctype>
@@ -47,11 +53,11 @@ public:
      * @param id A numeric identifier for the software entity which is a one-to-one correspondence with the software name.
      * @return Returns a complete UEntity with all the information so that it can be used in long form UUri serialisation and micro form UUri serialisation.
      */
-    static UEntity resolvedFormat(const std::string&            name,
-                                  const std::optional<uint32_t> version,
+    static UEntity resolvedFormat(const std::string& name,
+                                  const std::optional<uint8_t> version,
                                   const std::optional<uint16_t> id) {
-      bool resolved = !isBlank(name) && id.has_value();
-      return UEntity{name, version, id, resolved};
+        bool resolved = !isBlank(name) && id.has_value();
+        return UEntity{name, version, id, resolved};
     }
 
     /**
@@ -61,7 +67,7 @@ public:
      *      to long UUri format.
      */
     static UEntity longFormat(const std::string& name) {
-      return UEntity{name, std::nullopt, std::nullopt, false};
+        return UEntity{name, std::nullopt, std::nullopt, false};
     }
 
     /**
@@ -71,9 +77,9 @@ public:
      * @return Returns an UEntity with the name and the version of the service and can only be serialized
      *      to long UUri format.
      */
-    static UEntity longFormat(const std::string&            name,
-                              const std::optional<uint32_t> version) {
-      return UEntity{name, version, std::nullopt, false};
+    static UEntity longFormat(const std::string& name,
+                              const std::optional<uint8_t> version) {
+        return UEntity{name, version, std::nullopt, false};
     }
 
     /**
@@ -83,7 +89,7 @@ public:
      *      to long micro UUri format.
      */
     static UEntity microFormat(const std::optional<uint16_t> id) {
-      return UEntity{"", std::nullopt, id, false};
+        return UEntity{"", std::nullopt, id, false};
     }
 
     /**
@@ -94,7 +100,7 @@ public:
      *      to micro UUri format.
      */
     static UEntity microFormat(const std::optional<uint16_t> id,
-                              const std::optional<uint32_t> version) {
+                               const std::optional<uint8_t> version) {
       return UEntity{"", version, id, false};
     }
 
@@ -103,8 +109,8 @@ public:
      * @return Returns an empty software entity that has a blank name, no unique id and no version information.
      */
     static UEntity empty() {
-      static const auto EMPTY = UEntity("", std::nullopt, std::nullopt, false);
-      return EMPTY;
+        static const auto EMPTY = UEntity("", std::nullopt, std::nullopt, false);
+        return EMPTY;
     }
 
     /**
@@ -112,7 +118,7 @@ public:
      * @return Returns true if this software entity is an empty container and has no valuable information in building uProtocol sinks or sources.
      */
     [[nodiscard]] bool isEmpty() const override {
-      return isBlank(name_) && !getVersion().has_value() && !getId().has_value();
+        return isBlank(name_) && !getVersion().has_value() && !getId().has_value();
     }
 
     /**
@@ -144,7 +150,7 @@ public:
      * @return Returns the software version if it exists.
      * If the version does not exist, the latest version of the service will be used.
      */
-    [[nodiscard]] std::optional<uint32_t> getVersion() const { return version_; }
+    [[nodiscard]] std::optional<uint8_t> getVersion() const { return version_; }
 
     /**
      * @return Returns the software id if it exists. The software id represents the numeric identifier of the uE.
@@ -156,13 +162,13 @@ public:
      * @return Returns true if the UEntitys are equal.
      */
     [[nodiscard]] bool operator==(const UEntity& o) const {
-      if (this == &o) {
-        return true;
-      }
-      return (markedResolved_ == o.markedResolved_) &&
-            (name_ == o.name_) &&
-            (version_ == o.version_) &&
-            (id_ == o.id_);
+        if (this == &o) {
+            return true;
+        }
+        return (markedResolved_ == o.markedResolved_) &&
+              (name_ == o.name_) &&
+              (version_ == o.version_) &&
+              (id_ == o.id_);
     }
 
     /**
@@ -170,13 +176,13 @@ public:
      * @return Returns a string representation of this UEntity.
      */
     [[nodiscard]] std::string tostring() const {
-      std::string versionString = (version_ == std::nullopt) ? "latest" : std::to_string(version_.value());
-      std::string idString = (id_ == std::nullopt) ? "null" : std::to_string(id_.value());
-      std::string resolvedString = markedResolved_ ? "true" : "false";
-      return std::string("uEntity{") + "name='" + name_ + '\'' +
-                        ", version='" + versionString + '\'' +
-                        ", id='" + idString + '\'' +
-                        ", markedResolved='" + resolvedString + '\'' + '}';
+        std::string versionString = (version_ == std::nullopt) ? "latest" : std::to_string(version_.value());
+        std::string idString = (id_ == std::nullopt) ? "null" : std::to_string(id_.value());
+        std::string resolvedString = markedResolved_ ? "true" : "false";
+        return std::string("uEntity{") + "name='" + name_ + '\'' +
+                           ", version='" + versionString + '\'' +
+                           ", id='" + idString + '\'' +
+                           ", markedResolved='" + resolvedString + '\'' + '}';
     }
 
 private:
@@ -187,11 +193,11 @@ private:
      * @param id A numeric identifier for the software entity which is a one-to-one correspondence with the software name.
      * @param markedResolved Indicates that this uResource was populated with intent of having all data.
      */
-    UEntity(const std::string&            name,
-            const std::optional<uint32_t> version,
+    UEntity(const std::string& name,
+            const std::optional<uint8_t> version,
             const std::optional<uint16_t> id,
-            const bool                    markedResolved)
-        : name_(name), version_(version), id_(id), markedResolved_(markedResolved) {}
+            const bool markedResolved)
+            : name_(name), version_(version), id_(id), markedResolved_(markedResolved) {}
 
     /**
      * Utility method to verify if the string is blank.
@@ -199,7 +205,7 @@ private:
      * @return bool Returns true if the string is blank.
      */
     [[nodiscard]] static bool isBlank(std::string_view str) {
-      return std::all_of(str.begin(), str.end(), isspace);
+        return std::all_of(str.begin(), str.end(), isspace);
     }
 
     /**
@@ -209,7 +215,7 @@ private:
     /**
      * The Major version of the Software Entity.
     */
-    const std::optional<uint32_t> version_;
+    const std::optional<uint8_t> version_;
     /**
      * The id of the Software Entity.
     */
@@ -222,4 +228,4 @@ private:
 
 } // namespace uprotocol::uri
 
-#endif // UENTITY_H_
+#endif // _UENTITY_H_
