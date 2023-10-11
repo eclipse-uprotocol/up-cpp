@@ -37,10 +37,12 @@
 #include "spdlog/spdlog.h"
 #include "spec_version.h"
 #include "up_validator.h"
-#include "uuid_gen.h"
+#include "UUIDv6.h"
+//#include "uuid_gen.h"
 
 namespace cloudevents::factory {
 using namespace cloudevents::format;
+using namespace uprotocol::uuid::factory;
 
 const std::string PROTOBUF_CONTENT_TYPE = "application/protobuf";
 const std::string SERIALIZED_PROTOBUF_CONTENT_TYPE = "application/x-protobuf";
@@ -532,9 +534,11 @@ struct factory {
     uint64_t duration = (now.tv_sec * 1000000) + now.tv_usec;
     auto iter = ce.attributes().find(Serializer::TTL_KEY);
     if (iter != ce.attributes().end()) {
-      auto ttl = iter->second.ce_integer();
-      uint64_t id_time =
-          uuid_v6::get_time_str(const_cast<std::string&>(ce.id())) +
+      auto ttl = iter->second.ce_integer();           
+      std::string& t_uuid_str = const_cast<std::string&>(ce.id());
+      UUIDv6 uuidv6= UUIDv6Factory::getUUIDV6Factory().fromString(t_uuid_str);
+      uint64_t id_time = 
+           UUIDv6Factory::getUUIDV6Factory().getTime(uuidv6)+
           (int64_t)ttl;
       if (id_time < duration) {
         return true;  // time passed
@@ -546,7 +550,7 @@ struct factory {
  private:
   /**
    * Set basic cloud event protobuff //            std::string *id;
-//            *id = uuid_v6::generate_str();
+//            *id = uuid_v6::generate(t_uuid_str);
 
    *   all mandatory values will be set at the caller and not here to add
 verification on them
@@ -597,8 +601,9 @@ events and mandatory or optional in the uProtocol
       attr->set_ce_string(*priority);
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
-
-    ce.set_id(uuid_v6::generate_str());
+    //st_uuid_v6_str t_uuid_str;
+    //ce.set_id(uuid_v6::generate_str());
+    ce.set_id(UUIDv6Factory::getUUIDV6Factory().toString());
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_proto_data(any);
@@ -656,8 +661,9 @@ events and mandatory or optional in the uProtocol
       attr->set_ce_string(*priority);
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
-
-    ce.set_id(uuid_v6::generate_str());
+    //st_uuid_v6_str t_uuid_str;
+    //ce.set_id(uuid_v6::generate_str());
+    ce.set_id(UUIDv6Factory::getUUIDV6Factory().toString());
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_binary_data(body);
@@ -679,5 +685,8 @@ events and mandatory or optional in the uProtocol
     return any;
   }
 };
+
+//  static UUIDv6Factory uuidv6_;
+
 }  // namespace cloudevents::factory
 #endif  // CPP_COULDEVENT_CLOUD_EVENT_FACTORY_H
