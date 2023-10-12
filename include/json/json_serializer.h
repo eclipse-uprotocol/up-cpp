@@ -26,7 +26,7 @@
 #include <optional>
 #include <unordered_map>
 
-#include "base64.hpp"
+#include "base64.h"
 #include "cloud_event.h"
 #include "cloudevents.pb.h"
 #include "google/protobuf/util/time_util.h"
@@ -72,7 +72,7 @@ class Json_serializer : public Serializer {
         doc.AddMember(
             key,
             rapidjson::Value().SetString(
-                base64::base64encode(cloudEvent.binary_data()).c_str(),
+                tools::base64::base64encode(cloudEvent.binary_data()).c_str(),
                 allocator),
             allocator);
 

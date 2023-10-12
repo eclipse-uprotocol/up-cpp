@@ -21,19 +21,16 @@
 #define _BASE64_H_
 #include <string>
 
-
-namespace cloudevents {
+namespace tools {
 class base64 {
     public:
-        static std::string base64encode(const void* data, const size_t &len);
-        static std::string base64decode(const void* data, const size_t &len);
+        static std::string base64encode(uint8_t const* data, const size_t &len);
+        static std::string base64decode(std::string_view data, const size_t &len);
         
-        static std::string base64encode(const std::string& t_str);
-        static std::string base64decode(const std::string& t_str);
+        static std::string base64encode(std::string_view t_str);
+        static std::string base64decode(std::string_view t_str);
     private:
         base64() = default;
 };
-}  // namespace cloudevents
-
-
+}  //   namespace tools
 #endif  //_BASE64_H_
