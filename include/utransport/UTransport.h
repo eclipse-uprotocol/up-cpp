@@ -8,38 +8,35 @@
 #include "datamodel/UAttributes.h"
 #include <include/uri/up_uri.h>
 
-using namespace uprotocol::utransport::datamodel;
+using namespace uprotocol::utransport;
 using namespace uri_datamodel;
 
-namespace uprotocol 
+namespace uprotocol::utransport
 {
-    namespace utransport
-    {
-          class UTransport 
-          {
-               public:
+     class UTransport 
+     {
+          public:
 
-                    virtual UStatus send(
-                         UUri &uri, 
-                         UPayload &payload,
-                         UAttributes &attributes) = 0;
+               virtual UStatus send(
+                    const UUri &uri, 
+                    const UPayload &payload,
+                    const UAttributes &attributes) = 0;
 
-                    virtual UStatus registerListener(
-                         UUri &uri,
-                         UListener &listner) = 0;
+               virtual UStatus registerListener(
+                    UUri &uri,
+                    UListener &listner) = 0;
 
-                    virtual UStatus unregisterListener(
-                         UUri &uri, 
-                         UListener &listner) = 0;
+               virtual UStatus unregisterListener(
+                    UUri &uri, 
+                    UListener &listner) = 0;
 
-                    virtual UStatus receive(
-                         UUri &uri, 
-                         UPayload &payload, 
-                         UAttributes &attributes) = 0;
-                    
-                    virtual ~UTransport() {} 
-          };
-    }
+               virtual UStatus receive(
+                    const UUri &uri, 
+                    const UPayload &payload, 
+                    const UAttributes &attributes) = 0;
+               
+               virtual ~UTransport() {} 
+     };
 }
 
 #endif /*_UTRANSPORT_*/

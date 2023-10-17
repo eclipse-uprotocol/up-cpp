@@ -29,56 +29,53 @@
 /**
  * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
  */
-namespace uprotocol 
+namespace uprotocol::utransport
 {
-    namespace utransport
+    class UPayload 
     {
-        class UPayload 
-        {
-            public:
+        public:
 
-                UPayload(const uint8_t *data, size_t dataSize) {
-                  
-                    data_ = std::make_unique<uint8_t[]>(dataSize);
-
-                    memcpy(
-                        data_.get(),
-                        data,
-                        dataSize);
-
-                    dataSize_ = dataSize;
-                }
-              
-                /**
-                * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
-                * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
-                */
-                uint8_t* data() const {
-
-                    return data_.get();
-                }
-
-                /**
-                * @return Returns the size of the data
-                */
-                size_t size() const {
-
-                    return dataSize_;
-                }
-
-                /**
-                * @return Returns true if the data in the UPayload is empty.
-                */
-                bool isEmpty() {
-                    return data_ == nullptr || dataSize_ == 0;
-                }
-
-            private:
+            UPayload(const uint8_t *data, size_t dataSize) {
                 
-                std::unique_ptr<uint8_t[]> data_;
-                size_t dataSize_;
-        };
-    }
+                data_ = std::make_unique<uint8_t[]>(dataSize);
+
+                memcpy(
+                    data_.get(),
+                    data,
+                    dataSize);
+
+                dataSize_ = dataSize;
+            }
+            
+            /**
+            * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
+            * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
+            */
+            uint8_t* data() const {
+
+                return data_.get();
+            }
+
+            /**
+            * @return Returns the size of the data
+            */
+            size_t size() const {
+
+                return dataSize_;
+            }
+
+            /**
+            * @return Returns true if the data in the UPayload is empty.
+            */
+            bool isEmpty() {
+                return data_ == nullptr || dataSize_ == 0;
+            }
+
+        private:
+            
+            std::unique_ptr<uint8_t[]> data_;
+            size_t dataSize_;
+    };
 }
 
 #endif /* _UPAYLOAD_H_ */

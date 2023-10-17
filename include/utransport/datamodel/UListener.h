@@ -8,24 +8,19 @@
 #include "UPayload.h"
 #include "UAttributes.h"
 
-using namespace uprotocol::utransport::datamodel;
-
-namespace uprotocol 
+namespace uprotocol::utransport
 {
-    namespace utransport
-    {
-		class UListener 
-		{
-			public:
+	class UListener 
+	{
+		public:
 
-				virtual UStatus onReceive(
-					UUri &uri, 
-					UPayload &payload, 
-					UAttributes &attributes) = 0; 
+			virtual UStatus onReceive(
+				UUri &uri, 
+				UPayload &payload, 
+				UAttributes &attributes) = 0; 
 
-				virtual ~UListener() {} 
-		};
-	}
+			virtual ~UListener() {} 
+	};
 }
 
 

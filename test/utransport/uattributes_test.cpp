@@ -3,7 +3,7 @@
 #include <include/uuid/uuid_gen.h>
 #include <gtest/gtest.h>
 
-using namespace uprotocol::utransport::datamodel;
+using namespace uprotocol::utransport;
 
 // Test the UAttributes class
 TEST(UAttributesTest, Class) 
@@ -21,7 +21,8 @@ TEST(UAttributesTest, Class)
     // Create a UAttributes object with some values
     UMessageType type = UMessageType::PUBLISH;
     UPriority priority = UPriority::STANDARD;
-    UAttributes::UAttributesBuilder builder(&id, type, priority);
+    UAttributesBuilder builder(id, type, priority);
+    
     builder.withTtl(100);
     builder.withToken("sample_token");
     builder.withHint(USerializationHint::JSON);
@@ -30,7 +31,7 @@ TEST(UAttributesTest, Class)
                         uri_datamodel::uri_resource::fromName("door")));
     builder.withPermissionLevel(5);
     builder.withCommStatus(200);
-    builder.withReqId(&id);
+    builder.withReqId(id);
     UAttributes nonEmptyAttributes = builder.build();
 
 

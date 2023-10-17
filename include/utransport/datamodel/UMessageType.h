@@ -25,89 +25,84 @@
 #include <iostream>
 #include <optional>
 
-namespace uprotocol 
-{
-    namespace utransport
-    {
-        namespace datamodel
-        {
-            enum class UMessageType {
-                PUBLISH = 0,    // Publish or notification event
-                REQUEST = 1,    // Request
-                RESPONSE = 2,   // Response
-                UNDEFINED = 3
-            };
+namespace uprotocol::utransport {
 
-            inline std::optional<UMessageType> UMessageTypeFromInt(int32_t value) {
+    enum class UMessageType {
+        PUBLISH = 0,    // Publish or notification event
+        REQUEST,        // Request
+        RESPONSE,       // Response
+        UNDEFINED 
+    };
 
-                switch (value) {
-                    case 0: {
-                        return UMessageType::PUBLISH;
-                    }
-                    case 1: {
-                        return UMessageType::REQUEST;
-                    }                    
-                    case 2: {
-                        return UMessageType::RESPONSE;
-                    }                    
-                    default: {
-                         return std::nullopt; 
-                    }
-                }
+    inline std::optional<UMessageType> UMessageTypeFromInt(int32_t value) {
+
+        switch (value) {
+            case 0: {
+                return UMessageType::PUBLISH;
             }
-
-            inline std::optional<UMessageType> UMessageTypeFromString(const std::string& value) {
-
-                if (value == "pub.v1") {
-                    return UMessageType::PUBLISH;
-                }
-                if (value == "req.v1") {
-                    return UMessageType::REQUEST;
-                }
-                if (value == "res.v1") {
-                    return UMessageType::RESPONSE;
-                }
-
-                return std::nullopt; 
+            case 1: {
+                return UMessageType::REQUEST;
+            }                    
+            case 2: {
+                return UMessageType::RESPONSE;
+            }                    
+            default: {
+                    return std::nullopt; 
             }
+        }
+    }
 
-            inline std::optional<std::string> UMessageTypeToString(UMessageType value) {
+    inline std::optional<UMessageType> UMessageTypeFromString(const std::string& value) {
 
-                switch (value) {
-                    case UMessageType::PUBLISH: {
-                        return "pub.v1";
-                    }
-                    case UMessageType::REQUEST: {
-                        return "req.v1";
-                    }  
-                    case UMessageType::RESPONSE: {
-                        return "res.v1";
-                    }
-                    default: {
-                         return std::nullopt; 
-                    }
-                }
+        if (value == "pub.v1") {
+            return UMessageType::PUBLISH;
+        }
+        if (value == "req.v1") {
+            return UMessageType::REQUEST;
+        }
+        if (value == "res.v1") {
+            return UMessageType::RESPONSE;
+        }
+
+        return std::nullopt; 
+    }
+
+    inline std::optional<std::string> UMessageTypeToString(UMessageType value) {
+
+        switch (value) {
+            case UMessageType::PUBLISH: {
+                return "pub.v1";
             }
+            case UMessageType::REQUEST: {
+                return "req.v1";
+            }  
+            case UMessageType::RESPONSE: {
+                return "res.v1";
+            }
+            default: {
+                    return std::nullopt; 
+            }
+        }
+    }
 
-            inline std::optional<int32_t> UMessageTypeToInt(UMessageType value) {
+    inline std::optional<int32_t> UMessageTypeToInt(UMessageType value) {
 
-                switch (value) {
-                    case UMessageType::PUBLISH: {
-                        return 0;
-                    }
-                    case UMessageType::REQUEST: {
-                        return 1;
-                    }
-                    case UMessageType::RESPONSE: {
-                        return 2;
-                    }
-                    default: {
-                         return std::nullopt; 
-                    }
-                }
+        switch (value) {
+            case UMessageType::PUBLISH: {
+                return 0;
+            }
+            case UMessageType::REQUEST: {
+                return 1;
+            }
+            case UMessageType::RESPONSE: {
+                return 2;
+            }
+            default: {
+                    return std::nullopt; 
             }
         }
     }
 }
+
 
 #endif /* _UMESSAGETYPE_H_*/

@@ -7,7 +7,6 @@
 #include <include/utransport/datamodel/UStatus.h>
 
 using namespace uprotocol::utransport;
-using namespace uprotocol::utransport::datamodel;
 using namespace uri_datamodel;
 
 class RpcClient 
