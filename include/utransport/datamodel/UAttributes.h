@@ -47,13 +47,15 @@ namespace uprotocol
                         this->id_ = nullptr;
                         this->type_ = UMessageType::UNDEFINED;
                         this->priority_ = UPriority::UNDEFINED;
-                        this->ttl_ = 0;
-                        this->token_ = "";
-                        this->hint_ = USerializationHint::UNKNOWN;
-                        this->sink_ = nullptr;
-                        this->plevel_ = 0;
-                        this->commstatus_ = 0;
-                        this->reqid_ = nullptr;
+
+                         //optional
+                        this->ttl_ = std::nullopt;             
+                        this->token_ = std::nullopt;
+                        this->hint_ = std::nullopt;
+                        this->sink_ = std::nullopt; 
+                        this->plevel_ = std::nullopt;
+                        this->commstatus_ = std::nullopt;
+                        this->reqid_ = std::nullopt; 
                     };
 
                     /**
@@ -65,33 +67,34 @@ namespace uprotocol
                     * @return Returns a constructed UAttributes.
                     */
                     UAttributes(UUID id, UMessageType type, UPriority priority) {
-                        this->id_ = id;
+                        //once the UUID class is aligned this code needs to be changed
+                        this->id_ = std::make_shared<st_uuid_v6>();
+                        
+                        std::memcpy(
+                            this->id_.get(), 
+                            id, 
+                            sizeof(st_uuid_v6));
+
                         this->type_ = type;
                         this->priority_ = priority;
-                        // optional 
-                        this->ttl_ = 0;
-                        this->token_ = "";
-                        this->hint_ = USerializationHint::UNKNOWN;
-                        this->sink_ = nullptr;
-                        this->plevel_ = 0;
-                        this->commstatus_ = 0;
-                        this->reqid_ = nullptr;
+
+                        //optional
+                        this->ttl_ = std::nullopt;             
+                        this->token_ = std::nullopt;
+                        this->hint_ = std::nullopt;
+                        this->sink_ = std::nullopt; 
+                        this->plevel_ = std::nullopt;
+                        this->commstatus_ = std::nullopt;
+                        this->reqid_ = std::nullopt; 
                     }
                                     
-                    bool isEmpty() {
-
-                        return ((this->id_ == nullptr) && (this->type_ == UMessageType::UNDEFINED) && (this->priority_ == UPriority::UNDEFINED) && 
-                            (this->ttl_ == 0) && (this->token_ == "") && (this->hint_ == USerializationHint::UNKNOWN) && (this->sink_ == nullptr) && 
-                            (this->plevel_ == 0) && (this->commstatus_ == 0) && (this->reqid_ == nullptr));
-                    }
-
                     /**
                     * Unique identifier for the message.
                     * @return Returns the unique identifier for the message.
                     */
                     UUID id() const {
 
-                        return id_;
+                        return id_.get();
                     }
 
                     /**
@@ -118,12 +121,7 @@ namespace uprotocol
                     */
                     std::optional<int32_t> ttl() const {
 
-                        if (ttl_)
-                        {
-                            return ttl_;
-                        }
-
-                        return std::nullopt;
+                        return ttl_;
                     }
 
                     /**
@@ -132,12 +130,7 @@ namespace uprotocol
                     */
                     std::optional<std::string> token() const {
 
-                        if (!token_.value().empty()) 
-                        {
-                            return token_;
-                        }
-
-                        return std::nullopt;
+                        return token_;
                     }
 
                     /**
@@ -147,12 +140,7 @@ namespace uprotocol
                     */
                     std::optional<USerializationHint> serializationHint() const {
 
-                        if (hint_)
-                        {
-                            return hint_;
-                        }
-                        
-                        return std::nullopt;
+                        return hint_;
                     }
 
                     /**
@@ -161,12 +149,7 @@ namespace uprotocol
                     */
                     std::optional<UUri> sink() const {
 
-                        if (sink_)
-                        {
-                            return *sink_;
-                        }
-                        
-                        return std::nullopt;
+                        return sink_;
                     }
 
                     /**
@@ -175,12 +158,7 @@ namespace uprotocol
                     */
                     std::optional<UUID> reqid() const {
 
-                        if (!reqid_)
-                        {
-                            return reqid_;
-                        }
-                        
-                        return std::nullopt;
+                        return reqid_;
                     }
 
                     /**
@@ -189,12 +167,7 @@ namespace uprotocol
                     */
                     std::optional<int32_t> plevel() const {
 
-                        if (plevel_)
-                        {
-                            return plevel_;
-                        }
-                        
-                        return std::nullopt;
+                        return plevel_;    
                     }
 
                     /**
@@ -203,27 +176,16 @@ namespace uprotocol
                     */
                     std::optional<int32_t> commstatus() const {
 
-                        if (commstatus_)
-                        {
-                            return commstatus_;
-                        }
-                        
-                        return std::nullopt;
+                        return commstatus_;                        
                     }
 
                     class UAttributesBuilder
                     {
                         public:
                             UAttributesBuilder(UUID id, UMessageType type, UPriority priority) {
-
-                                attributes_ = std::make_shared<UAttributes>();
-
-                                if (nullptr != attributes_){
-                                    //once the UUID class is aligned this code needs to be changed
-                                    attributes_->id_ = id;
-                                    attributes_->type_ = type;
-                                    attributes_->priority_ = priority;
-                                }
+                                attributes_ = std::make_shared<UAttributes>(id, 
+                                                                            type, 
+                                                                            priority);
                             }
 
                             UAttributesBuilder& withTtl(int ttl) {
@@ -246,8 +208,7 @@ namespace uprotocol
 
                             UAttributesBuilder& withSink(const UUri& sink) {
 
-                                std::optional<UUri> optionalUri = sink; 
-                                attributes_->sink_ = &optionalUri;
+                               // attributes_->sink_ = sink;
                                 return *this;
                             }
 
@@ -280,14 +241,14 @@ namespace uprotocol
                     
                 private:
 
-                    UUID id_;                                   // Unique identifier for the message
+                    std::shared_ptr<st_uuid_v6> id_;            // Unique identifier for the message
                     UMessageType type_;                         // Message type
                     UPriority priority_;                        // Message priority
                     // Optional Attributes 
                     std::optional<int32_t> ttl_;                // Time to live in milliseconds
                     std::optional<std::string> token_;          // Authorization token used for TAP
                     std::optional<USerializationHint> hint_;    // Hint regarding the bytes contained within the UPayload
-                    std::optional<UUri> *sink_;                 // Explicit destination URI
+                    std::optional<UUri> sink_;                  // Explicit destination URI
                     std::optional<int32_t> plevel_;             // Permission Level
                     std::optional<int32_t> commstatus_;         // Communication Status
                     std::optional<UUID> reqid_;                 // Request ID

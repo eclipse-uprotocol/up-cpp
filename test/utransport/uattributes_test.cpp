@@ -10,9 +10,6 @@ TEST(UAttributesTest, Class)
 {
     // Create an empty UAttributes object
     UAttributes attributes;
-    
-    // Test the isEmpty() method for an empty object
-    EXPECT_TRUE(attributes.isEmpty());
 
     st_uuid id;
 
@@ -36,8 +33,6 @@ TEST(UAttributesTest, Class)
     builder.withReqId(&id);
     UAttributes nonEmptyAttributes = builder.build();
 
-    // Test the isEmpty() method for a non-empty object
-    EXPECT_FALSE(nonEmptyAttributes.isEmpty());
 
     // Test getters for the attributes
     EXPECT_EQ(nonEmptyAttributes.type(), type);
