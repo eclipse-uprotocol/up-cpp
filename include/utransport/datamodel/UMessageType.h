@@ -47,7 +47,7 @@ namespace uprotocol::utransport {
                 return UMessageType::RESPONSE;
             }                    
             default: {
-                    return std::nullopt; 
+                return std::nullopt; 
             }
         }
     }
@@ -80,7 +80,7 @@ namespace uprotocol::utransport {
                 return "res.v1";
             }
             default: {
-                    return std::nullopt; 
+                return std::nullopt; 
             }
         }
     }
@@ -98,7 +98,7 @@ namespace uprotocol::utransport {
                 return 2;
             }
             default: {
-                    return std::nullopt; 
+                return std::nullopt; 
             }
         }
     }

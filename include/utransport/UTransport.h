@@ -17,23 +17,19 @@ namespace uprotocol::utransport
      {
           public:
 
-               virtual UStatus send(
-                    const UUri &uri, 
-                    const UPayload &payload,
-                    const UAttributes &attributes) = 0;
+               virtual UStatus send(const UUri &uri, 
+                                    const UPayload &payload,
+                                    const UAttributes &attributes) = 0;
 
-               virtual UStatus registerListener(
-                    UUri &uri,
-                    UListener &listner) = 0;
+               virtual UStatus registerListener(UUri &uri,
+                                                UListener &listner) = 0;
 
-               virtual UStatus unregisterListener(
-                    UUri &uri, 
-                    UListener &listner) = 0;
+               virtual UStatus unregisterListener(UUri &uri, 
+                                                  UListener &listner) = 0;
 
-               virtual UStatus receive(
-                    const UUri &uri, 
-                    const UPayload &payload, 
-                    const UAttributes &attributes) = 0;
+               virtual UStatus receive(const UUri &uri, 
+                                       const UPayload &payload, 
+                                       const UAttributes &attributes) = 0;
                
                virtual ~UTransport() {} 
      };

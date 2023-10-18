@@ -46,7 +46,7 @@ namespace uprotocol::utransport {
                 return UPriority::UNDEFINED;
             }
             default: {
-                    return std::nullopt; 
+                return std::nullopt; 
             }
         }
     }
@@ -108,8 +108,8 @@ namespace uprotocol::utransport {
             case UPriority::NETWORK_CONTROL: {
                 return "CS6";
             }
-            default:    {
-                    return std::nullopt; 
+            default: {
+                return std::nullopt; 
             }
         }
     }
@@ -139,7 +139,7 @@ namespace uprotocol::utransport {
                 return 6;
             }
             default: {
-                    return std::nullopt; 
+                return std::nullopt; 
             }
         }
     }

@@ -33,7 +33,7 @@ namespace uprotocol::utransport {
                 return USerializationHint::RAW;
             }
             default: {
-                    return std::nullopt; 
+                return std::nullopt; 
             }
         }
     }
@@ -82,7 +82,7 @@ namespace uprotocol::utransport {
                 return "application/octet-stream";
             }
             default: {
-                    return std::nullopt; 
+                return std::nullopt; 
             }
         }
     }
@@ -106,7 +106,7 @@ namespace uprotocol::utransport {
                 return 4;
             }
             default: {
-                    return std::nullopt; 
+                return std::nullopt; 
             }
         }
     }

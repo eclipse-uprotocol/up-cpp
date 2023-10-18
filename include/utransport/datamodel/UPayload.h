@@ -35,7 +35,8 @@ namespace uprotocol::utransport
     {
         public:
 
-            UPayload(const uint8_t *data, size_t dataSize) {
+            UPayload(const uint8_t *data, 
+                     size_t dataSize) {
                 
                 data_ = std::make_unique<uint8_t[]>(dataSize);
 

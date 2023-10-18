@@ -14,10 +14,9 @@ namespace uprotocol::utransport
 	{
 		public:
 
-			virtual UStatus onReceive(
-				const UUri &uri, 
-				const UPayload &payload, 
-				const UAttributes &attributes) = 0; 
+			virtual UStatus onReceive(const UUri &uri, 
+									  const UPayload &payload, 
+									  const UAttributes &attributes) = 0; 
 
 			virtual ~UListener() {} 
 	};
