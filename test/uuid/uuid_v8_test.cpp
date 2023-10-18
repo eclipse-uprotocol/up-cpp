@@ -26,7 +26,6 @@
 
 using namespace cgreen;
 using namespace uprotocol::uuid::factory;
-UUIDv8 uuidV8;
 
 
 Describe(uuid_v8_TEST);
@@ -41,6 +40,7 @@ Ensure(uuid_v8_TEST, uuid_v8_test1) {
   auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
                std::chrono::system_clock::now().time_since_epoch())
                .count();
+  UUIDv8 uuidV8;
   uuidV8.generate(t, nullptr);
   assert_true(uuidV8.getTime() == t);
   UUIDv8 uuidV8_new;
@@ -56,86 +56,35 @@ Ensure(uuid_v8_TEST, uuid_v8_test1) {
   auto str_back = uuidV8Str.toString();
   assert_true(str == str_back);
 }
-#ifdef NOT_IN_USE
+
 Ensure(uuid_v8_TEST, uuid_v8_test2) {
   auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
                std::chrono::system_clock::now().time_since_epoch())
                .count();
-
-  auto uuidV8 = uuid_v8::create_uuid_v8(t, nullptr);
-  auto t1 = uuid_v8::get_time(uuidV8);
+  UUIDv8 uuidV8;
+  uuidV8.generate(t, nullptr);
+  auto t1 = uuidV8.getTime();
   assert_true(t1 == t);
 
-  auto uuidV8_2 = uuid_v8::get_uuid_from_string(uuid_v8::to_string(uuidV8));
+  auto uuidV8_2 = uuidV8.fromString(uuidV8.toString());
 
-  assert_that(uuid_v8::get_time(uuidV8_2) == uuid_v8::get_time(uuidV8))
+  assert_that(uuidV8_2.getTime() == uuidV8.getTime())
 
-      //    auto new_time = uuid_v8::get_time(uuidV8_2) - 3;
-      auto uuidV8_new =
-          uuid_v8::create_uuid_v8(uuid_v8::get_time(uuidV8_2) - 3, &uuidV8_2);
+  //    auto new_time = uuid_v8::get_time(uuidV8_2) - 3;
+  UUIDv8 uuidV8_new;
+  uuidV8_new.generate(uuidV8_2.getTime() - 3, &uuidV8_2);
 
-  assert_that(uuid_v8::get_time(uuidV8_new) == uuid_v8::get_time(uuidV8))
-      assert_that(uuid_v8::get_count(uuidV8_new) - 1 ==
-                  uuid_v8::get_count(uuidV8))
-
-          uuid_v8::copy(uuidV8_new,
-                        uuid_v8::create_uuid_v8(uuid_v8::get_time(uuidV8_2) + 5,
-                                                &uuidV8_2));
-
-  assert_that(uuidV8_new.get_time() - 5 == uuid_v8::get_time(uuidV8))
-      assert_that(uuidV8_new.get_count() == uuidV8.get_count())
+  assert_that(uuidV8_new.getTime() == uuidV8.getTime())
+      assert_that(uuidV8_new.getCount() - 1 ==
+                  uuidV8.getCount())
 }
 
-Ensure(uuid_v8_TEST, uuid_v8_test3) {
-  auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::system_clock::now().time_since_epoch())
-               .count();
-  uuid_v8 prev;
-  auto uuidV8 = uuid_v8::create_uuid_v8(t, nullptr);
-  uuidV8.copy(prev);
-  // uuid_v8::copy(uuidV8, uuid_v8::create_uuid_v8(t, &prev));
-  uuid_v8::create_uuid_v8(t, &prev).copy(uuidV8);
-  assert_true(uuidV8.get_time() == t);
-  assert_true(prev.get_time() == t);
-
-  assert_that(uuidV8.get_count() - 1 == prev.get_count())
-}
-
-Ensure(uuid_v8_TEST, uuid_v8_test4) {
-  uuid_v8 prev;
-  auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::system_clock::now().time_since_epoch())
-               .count();
-  auto uuidV8 = uuid_v8::create_uuid_v8(t, nullptr);
-
-  uuidV8.copy(prev);
-
-  for (auto i = 0; i < 1000; i++) {
-    t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch())
-            .count();
-    uuid_v8::copy(uuidV8, uuid_v8::create_uuid_v8(t, &prev));
-    uuidV8.copy(prev);
-    // usleep(1);
-    t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch())
-            .count();
-    uuid_v8::copy(uuidV8, uuid_v8::create_uuid_v8(t, &prev));
-
-    assert_true(uuidV8.get_time() == t);
-    assert_true(uuid_v8::get_time(prev) == t);
-    assert_that(uuidV8.get_count() - 1 == prev.get_count())
-  }
-}
-#endif
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
   TestSuite* suite = create_test_suite();
 
   add_test_with_context(suite, uuid_v8_TEST, uuid_v8_test1);
-  //add_test_with_context(suite, uuid_v8_TEST, uuid_v8_test2);
-  //add_test_with_context(suite, uuid_v8_TEST, uuid_v8_test3);
-  //add_test_with_context(suite, uuid_v8_TEST, uuid_v8_test4);
+  add_test_with_context(suite, uuid_v8_TEST, uuid_v8_test2);
 
   return run_test_suite(suite, create_text_reporter());
 }
