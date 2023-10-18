@@ -80,6 +80,15 @@ public:
     void generate(uint64_t now, UUIDv8 *uuidPrev = nullptr);
 
     /**
+     * @brief This method copies current UUIDv8 object to destination UUIDv8 object that's
+    *   sent as parameter
+     * @param[out] dest UUIDv8 object is the target object
+    */
+    inline void copy(UUIDv8& dest) const {
+        dest.msb_ = this->msb_;
+        dest.lsb_ = this->lsb_;
+    }
+    /**
      * @brief converts the cuurent UUIDv8 id to string format
      * @return UUIDv8 string
      */

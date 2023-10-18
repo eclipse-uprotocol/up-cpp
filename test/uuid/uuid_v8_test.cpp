@@ -79,12 +79,31 @@ Ensure(uuid_v8_TEST, uuid_v8_test2) {
                   uuidV8.getCount())
 }
 
+Ensure(uuid_v8_TEST, uuid_v8_test3) {
+  auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
+               std::chrono::system_clock::now().time_since_epoch())
+               .count();
+  UUIDv8 prev;
+  UUIDv8 uuidV8;
+  uuidV8.generate(t, nullptr);
+  uuidV8.copy(prev);
+
+  UUIDv8 uuidV8New;
+  uuidV8New.generate(t, &prev);
+
+  uuidV8New.copy(uuidV8);
+  assert_true(uuidV8.getTime() == t);
+  assert_true(prev.getTime() == t);
+
+  assert_that(uuidV8.getCount() - 1 == prev.getCount())
+}
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
   TestSuite* suite = create_test_suite();
 
   add_test_with_context(suite, uuid_v8_TEST, uuid_v8_test1);
   add_test_with_context(suite, uuid_v8_TEST, uuid_v8_test2);
+  add_test_with_context(suite, uuid_v8_TEST, uuid_v8_test3);
 
   return run_test_suite(suite, create_text_reporter());
 }
