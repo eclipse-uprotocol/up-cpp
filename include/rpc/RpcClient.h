@@ -19,10 +19,9 @@ class RpcClient
         * @param attributes Metadata for the method invocation (i.e. priority, timeout, etc.)
         * @return Returns the CompletableFuture with the result or exception.
         */
-        virtual std::future<UPayload> invokeMethod(
-            const UUri &topic, 
-            const UPayload &payload, 
-            const UAttributes &attributes) = 0;
+        virtual std::future<UPayload> invokeMethod(const UUri &topic, 
+                                                   const UPayload &payload, 
+                                                   const UAttributes &attributes) = 0;
         
         virtual ~RpcClient() {} 
 };
