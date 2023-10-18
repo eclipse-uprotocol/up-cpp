@@ -31,13 +31,11 @@ AfterEach(UUID_V6_TEST) {
   // Dummy
 }
 
-// generate
+// getUUIDv6
 Ensure(UUID_V6_TEST, UUID_V6_TEST1) {
   UUIDv6 uuidv61;
-
-  UUIDv6Factory uuidFact = UUIDv6Factory::getUUIDV6Factory();
-  uuidv61 = uuidFact.generate();
-  assert_that(uuidv61 != nullptr);
+  uuid_t uuidv6char;
+  assert_that( uuidv61.getUUIDv6() != nullptr);
 }
 
 // getTime
@@ -45,17 +43,11 @@ Ensure(UUID_V6_TEST, UUID_V6_TEST2) {
   UUIDv6 uuidv61;
   UUIDv6 uuidv62;
   std::string uuidv6str1;
-  std::string uuidv6str2;
 
-  UUIDv6Factory uuidFact = UUIDv6Factory::getUUIDV6Factory();
-  uuidv61 = uuidFact.generate();
-  assert_that(uuidv61 != nullptr);
-  uuidv6str1 = uuidFact.toString();
+  uuidv6str1 = uuidv61.toString();
+  uuidv62.fromString(uuidv6str1);
 
-  uuidv62 = uuidFact.fromString(uuidv6str1);
-  assert_that(uuidv62 != nullptr);
-
-  assert_that(uuidFact.getTime(uuidv62) == uuidFact.getTime(uuidv61));
+  assert_that(uuidv61.getTime() == uuidv62.getTime());
 }
 
 // string compare
@@ -65,15 +57,9 @@ Ensure(UUID_V6_TEST, UUID_V6_TEST3) {
   std::string uuidv6str1;
   std::string uuidv6str2;
 
-  UUIDv6Factory uuidFact = UUIDv6Factory::getUUIDV6Factory();
-  uuidv61 = uuidFact.generate();
-  assert_that(uuidv61 != nullptr);
-  uuidv6str1 = uuidFact.toString();
-
-  uuidv62 = uuidFact.fromString(uuidv6str1);
-  assert_that(uuidv62 != nullptr);
-
-  uuidv6str2 = uuidFact.toString(uuidv62);
+  uuidv6str1 = uuidv61.toString();
+  uuidv62.fromString(uuidv6str1);
+  uuidv6str2 = uuidv62.toString();
 
   assert_that(uuidv6str1.compare(uuidv6str2) == 0);
 }

@@ -38,7 +38,6 @@
 
 namespace uprotocol::uuid::factory {
 
-using UUIDv8 = uint8_t*;
 /**
  *
  * UUIv8Factory generates UUID in v8 format and contain various utility methods
@@ -66,225 +65,234 @@ allow
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
 */
-class UUIDv8Factory {
- public:
-  /**
-   *  generate UUIDv8 ID
-   */
-  const UUIDv8 generate(uint64_t now, const UUIDv8 uuid_prev = nullptr) {
-    msb = (now << 16) | version;  // 48 bit clock 4 bits version custom_b
-    lsb = (random_generator::get_instance().get_random() & randomMask) |
-          variant;  // Set Variant to 2
-    if (uuid_prev != nullptr) {
-      if ((now <= getTime(uuid_prev)) &&
-          (now > getTime(uuid_prev) - clockDriftTolerance)) {
-        msb =
-            (getCount(uuid_prev) < maxCount)
-                ? getMSB(uuid_prev) + 1
-                : getMSB(uuid_prev);  // add to count up to MAX_COUNT (12 bits)
-        lsb = getLSB(uuid_prev);      // no need to change since we maintain the
-                                      // variant and random
-      }
-      return uuid_prev;
-    } else {  // nullptr
-      std::array<uint8_t, 16> buff{};
-      for (int i = 0; i < 8; i++) {
-        buff[i] = ((msb >> (8 * i)) & 0XFF);
-        buff[i + 8] = ((lsb >> (8 * i)) & 0XFF);
-      }
-      uuidV8_ = buff;
-      return uuidV8_.data();
+class UUIDv8 {
+public:
+    /**
+     * Constructor to build UUIDv8 object
+    */
+    UUIDv8();
+
+    /**
+     * @brief method will create the msb and lsb parts of UUIDv8 format
+     * @param now time at which UUIDv8 number is requested for checking previous UUIDv8
+     * @param uuid_prev  if exist previous UUIDv8 number for tracking pat history
+    */
+    void generate(uint64_t now, UUIDv8 *uuidPrev = nullptr);
+
+    /**
+     * @brief converts the cuurent UUIDv8 id to string format
+     * @return UUIDv8 string
+     */
+    std::string toString() const;
+
+    /**
+     * @brief uuidV8ToString utility function to convert given UUIDv8 number array to string format
+     * @param  uuid UUIDV8 number in array
+     * @return UUIDv8 string
+    */
+    static inline std::string uuidV8ToString(const uint8_t* uuid) {
+        static const char DIGITS[] = "0123456789abcdef";
+        std::string str{};
+        for (int i = 0; i < 16; i++) {
+            auto e = (std::byte)uuid[i];
+            auto shifted_e = (std::byte)uuid[i];
+            shifted_e >>= 4;
+            str += DIGITS[(std::uint8_t)(shifted_e)];
+            str += DIGITS[(std::uint8_t)(e & (std::byte)0xf)];
+            if (i == 3 || i == 5 || i == 7 || i == 9) {
+                str += '-';
+            }
+        }
+        return str;
     }
-  }
 
-  /**
-   *  generate UUIDv8 ID
-   */
-  const UUIDv8 generate() { return uuidV8_.data(); }
-  /**
-   * converts the given UUIDv8 id to string format
-   */
-  std::string toString(const UUIDv8 uuid) {
-    static const char DIGITS[] = "0123456789abcdef";
-    std::string str{};
-    for (int i = 0; i < 16; i++) {
-      auto e = (std::byte)uuid[i];
-      auto shifted_e = (std::byte)uuid[i];
-      shifted_e >>= 4;
-      str += DIGITS[(std::uint8_t)(shifted_e)];
-      str += DIGITS[(std::uint8_t)(e & (std::byte)0xf)];
-      if (i == 3 || i == 5 || i == 7 || i == 9) {
-        str += '-';
-      }
+    /**
+     * @brief  the given UUIDv8 string to UUIDv8 to 16 byte unsigned int array
+     * @param uuidStr - UUIDv8 equivalent in string format
+     * @return UUIDv8 object that contain 2 parts MSB and LSB
+     *
+     */
+    UUIDv8 fromString(std::string uuidStr);
+
+    /**
+     * @brief extracts UTC time at which current UUIDv8 number is created.
+     * @param UUIDv8 number in form of UUIDv8 object
+     * @return UTC time
+     */
+    uint64_t getTime() { return this->msb_ >> 16; }
+
+    /**
+     * @brief extracts UTC time at which given UUIDv8 id is created.
+     * @param UUIDv8 number in form of UUIDv8 object
+     * @return UTC time
+     */
+    uint64_t getTime(UUIDv8 const& uuid) {
+        return uuid.msb_ >> 16;
     }
-    return str;
-  }
-  /**
-   * Converts the given UUIDv8 string to UUIDv8 to 16 byte unsigned int array
-   */
-  const UUIDv8 fromString(std::string uuidStr) {
-    std::array<uint8_t, 16> uuid_out{};
-    //uint8_t* uuid_out;
-    uuidStr.erase(remove(uuidStr.begin(), uuidStr.end(), '-'), uuidStr.end());
-    auto i = 0;
-    for (auto c : uuidStr) {
-      uint8_t n;
-      switch (c) {
-        case '0':
-          n = 0;
-          break;
-        case '1':
-          n = 1;
-          break;
-        case '2':
-          n = 2;
-          break;
-        case '3':
-          n = 3;
-          break;
-        case '4':
-          n = 4;
-          break;
-        case '5':
-          n = 5;
-          break;
-        case '6':
-          n = 6;
-          break;
-        case '7':
-          n = 7;
-          break;
-        case '8':
-          n = 8;
-          break;
-        case '9':
-          n = 9;
-          break;
-        case 'a':
-          n = 10;
-          break;
-        case 'b':
-          n = 11;
-          break;
-        case 'c':
-          n = 12;
-          break;
-        case 'd':
-          n = 13;
-          break;
-        case 'e':
-          n = 14;
-          break;
-        case 'f':
-          n = 15;
-          break;
-        case 'A':
-          n = 10;
-          break;
-        case 'B':
-          n = 11;
-          break;
-        case 'C':
-          n = 12;
-          break;
-        case 'D':
-          n = 13;
-          break;
-        case 'E':
-          n = 14;
-          break;
-        case 'F':
-          n = 15;
-          break;
-        default:
-          n = 0xff;
-      }
-      if (n == 0xff) {
-        return nullptr;
-      }
 
-      if ((i & 1) == 0) {
-        uuid_out[i >> 1] =
-            (std::uint8_t)((std::byte)n << 4);  // even i => hi 4 bits
-      } else {
-        uuid_out[i >> 1] = (std::uint8_t)(((std::byte)uuid_out[i >> 1]) |
-                                          (std::byte)n);  // odd i => lo 4 bits
-      }
-      i++;
+    /**
+     * @brief the random number that's part of UUIDv8 number
+     * @param UUIDv8
+     * @return  random number
+     */
+    uint64_t getRandom(const UUIDv8 uuid) { return uuid.lsb_ & randomMask_; }
+
+    /**
+     * @brief Returns version of UUIDv8 format
+     * @param UUIDv8 given UUIDv8 number in UUIDv8 object
+     * @return version
+     * @note The 4 bit UUIDv8 version (1000). Occupies bits 48 through 51.
+     */
+    uint64_t getVersion(UUIDv8 const& uuid) {
+        return ( uuid.msb_ >> 12) & 0xf;
     }
-    return uuid_out.data();
-  }
-
-  /**
-   * extracts the time at which UUIDv8 id is created.
-   */
-  uint64_t getTime(const UUIDv8 uuid) { return getMSB(uuid) >> 16; }
-
-  /**
-   * Returns the random number that's part of UUIDv8
-   */
-  uint64_t getRandom(const UUIDv8 uuid) { return getLSB(uuid) & randomMask; }
-
-  /**
-   * returns version
-   * The 4 bit UUIDv8 version (1000). Occupies bits 48 through 51.
-   */
-  uint64_t getVersion(UUIDv8 const& uuid) {
-    return ((getMSB(uuid)) >> 12) & 0xf;
-  }
-  /**
-   * Returns 2-bit UUID variant (10)
-   */
-  uint64_t getVariant(UUIDv8 const& uuid) {
-    return ((getLSB(uuid)) >> 62) & 0x3;
-  }
-
-  uint64_t getCount(UUIDv8 const& uuid) { return (getMSB(uuid) & 0xFFFL); }
-  /**
-   * get MSB part from given UUIDv8
-   */
-  uint64_t getMSB(UUIDv8 const& uuid) {
-    uint64_t msb_num = 0;
-    for (auto i = 7; i >= 0; i--) {
-      msb_num <<= 8;
-      msb_num |= (uint64_t)uuid[i];
+    /**
+     * @brief Returns 2-bit UUID variant of UUIDv8 format (10)
+     * @param UUIDv8 object
+     * @return variant of given UUIDv8 number format
+     */
+    uint64_t getVariant(UUIDv8 const& uuid) {
+        return (uuid.lsb_ >> 62) & 0x3;
     }
-    return msb_num;
-  }
-  /**
-   * get LSB part from given UUIDv8
-   */
-  uint64_t getLSB(UUIDv8 const& uuid) {
-    uint64_t lsb_num = 0;
-    for (auto i = 7; i >= 0; i--) {
-      lsb_num <<= 8;
-      lsb_num |= (uint64_t)uuid[i + 8];
+
+    /** @brief return current count of UUIDv8 numbers generated
+     * @return count
+    */
+    uint64_t getCount() { return (this->msb_ & 0xFFFL); }
+
+    /** @brief return count of UUIDv8 numbers generated from given UUIDv8
+     * @param UUIDv8 node
+     * @return count
+    */
+    uint64_t getCount(UUIDv8 const& uuid) { return (uuid.msb_ & 0xFFFL); }
+
+    /** @brief get MSB part from given UUIDv8
+     * @return msb_
+    */
+    uint64_t getMSB() { return msb_; }
+
+    /** @brief get LSB part from given UUIDv8
+     * @return lsb_
+      */
+    uint64_t getLSB() { return lsb_; }
+
+
+private:
+    /** uuidV8FromString - utility function to convert UUIDv8 string to uint8_t pointer array
+     * @param str input UUIDv8 string that needs to be converted to UUIdv8
+     * @param[out] uuidOut - will contain UUIDv8 number
+    */
+    inline int uuidV8FromString(std::string str, uint8_t* uuidOut) {
+        str.erase(remove(str.begin(), str.end(), '-'), str.end());
+        auto i = 0;
+        for (auto c : str) {
+            uint8_t n;
+            switch (c) {
+                case '0':
+                  n = 0;
+                  break;
+                case '1':
+                  n = 1;
+                  break;
+                case '2':
+                  n = 2;
+                  break;
+                case '3':
+                  n = 3;
+                  break;
+                case '4':
+                  n = 4;
+                  break;
+                case '5':
+                  n = 5;
+                  break;
+                case '6':
+                  n = 6;
+                  break;
+                case '7':
+                  n = 7;
+                  break;
+                case '8':
+                  n = 8;
+                  break;
+                case '9':
+                  n = 9;
+                  break;
+                case 'a':
+                  n = 10;
+                  break;
+                case 'b':
+                  n = 11;
+                  break;
+                case 'c':
+                  n = 12;
+                  break;
+                case 'd':
+                  n = 13;
+                  break;
+                case 'e':
+                  n = 14;
+                  break;
+                case 'f':
+                  n = 15;
+                  break;
+                case 'A':
+                  n = 10;
+                  break;
+                case 'B':
+                  n = 11;
+                  break;
+                case 'C':
+                  n = 12;
+                  break;
+                case 'D':
+                  n = 13;
+                  break;
+                case 'E':
+                  n = 14;
+                  break;
+                case 'F':
+                  n = 15;
+                  break;
+                default:
+                  n = 0xff;
+            }
+            if (n == 0xff) {
+                return -1;
+            }
+
+            if ((i & 1) == 0) {
+                uuidOut[i >> 1] =
+                    (std::uint8_t)((std::byte)n << 4);  // even i => hi 4 bits
+            } else {
+                uuidOut[i >> 1] = (std::uint8_t)(((std::byte)uuidOut[i >> 1]) |
+                                                  (std::byte)n);  // odd i => lo 4 bits
+            }
+            i++;
+        }
+        return 0;
     }
-    return lsb_num;
-  }
 
- private:
-  static constexpr auto uuidSize_ = 16U;
+    /** Represents allowable clock drift tolerance    */
+    static constexpr uint64_t clockDriftTolerance_ = 10000000;
 
-  static constexpr auto uuidStrSize_ =
-      sizeof("00000000-0000-0000-0000-000000000000"); /* 37 */
+    /**  Represents UUIDv8 version- 4 bits(1000). Occupies bits 48 through 51. */
+    static constexpr uint64_t version_ = 8L << 12;
 
-  static constexpr auto clockDriftTolerance = 10000000;
+    /** Represents UUIDv8 variant 2 bit (10)    */
+    static constexpr uint64_t variant_ = 0x8000000000000000L;
 
-  static constexpr auto version = 8L << 12;
+    /** Its used for masking bits in random number */
+    static constexpr uint64_t randomMask_ = 0x3fffffffffffffffL;
 
-  static constexpr auto variant = 0x8000000000000000L;
+    /** Represents the maxCount of UUIDv8 nodes to track previous history  */
+    static constexpr uint64_t maxCount_ = 0xfff;
 
-  static constexpr auto randomMask = 0x3fffffffffffffffL;
+    /** Represents MSB part of UUIDv8 */
+    uint64_t msb_{};
 
-  static constexpr auto maxCount = 0xfff;
-
-  /** */
-  uint64_t msb{};
-  /** */
-  uint64_t lsb{};
-  /**  */
-  std::array<uint8_t, uuidSize_> uuidV8_{};
+    /** Represents LSB part of UUIDv8 */
+    uint64_t lsb_{};
 };
 
 }  // namespace uprotocol::uuid::factory

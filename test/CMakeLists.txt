@@ -110,3 +110,8 @@ add_executable(up_uri_factory_test
 target_compile_options(up_uri_factory_test PRIVATE -g -O0)
 target_link_libraries(up_uri_factory_test ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-13-up-uri_factory-test"  up_uri_factory_test)
+
+add_executable(uuid_v6_test 
+	${TESTS_PATH}/uuid/uuid_v6_test.cpp)
+target_link_libraries(uuid_v6_test ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-14-uuid_v6_test" uuid_v6_test)

@@ -26,7 +26,7 @@
 
 using namespace cgreen;
 using namespace uprotocol::uuid::factory;
-UUIDv8Factory uuidv8Factory;
+UUIDv8 uuidV8;
 
 
 Describe(uuid_v8_TEST);
@@ -41,22 +41,19 @@ Ensure(uuid_v8_TEST, uuid_v8_test1) {
   auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
                std::chrono::system_clock::now().time_since_epoch())
                .count();
+  uuidV8.generate(t, nullptr);
+  assert_true(uuidV8.getTime() == t);
+  UUIDv8 uuidV8_new;
+  uuidV8_new.generate(t - 3, &uuidV8);
 
-  // auto uuidV8 = std::make_unique<uuid_v8>(t);
-  UUIDv8 uuidV8 = uuidv8Factory.generate(t, nullptr);
-  assert_true(uuidv8Factory.getTime(uuidV8) == t);
-  UUIDv8 uuidV8_new = uuidv8Factory.generate(t - 3, uuidV8);
-  // auto uuidV8_new = new uuid_v8(new_time, uuidV8);
-
-  assert_that(uuidv8Factory.getTime(uuidV8_new) == uuidv8Factory.getTime(uuidV8))
-  assert_that(uuidv8Factory.getCount(uuidV8_new) - 1 ==
-                  uuidv8Factory.getCount(uuidV8))
+  assert_that(uuidV8_new.getTime() == uuidV8.getTime())
+  assert_that(uuidV8_new.getCount() - 1 == uuidV8.getCount())
 
   std::string str = "0080b636-8303-8701-8ebe-7a9a9e767a9f";
 
-  auto new_uuid = uuidv8Factory.fromString(str);
+  UUIDv8 uuidV8Str = uuidV8.fromString(str);
 
-  auto str_back = uuidv8Factory.toString(new_uuid);
+  auto str_back = uuidV8Str.toString();
   assert_true(str == str_back);
 }
 #ifdef NOT_IN_USE

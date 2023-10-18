@@ -20,21 +20,13 @@
  */
 #ifndef _UUIDV1_H_
 #define _UUIDV1_H_
+
 #include <uuid/uuid.h>
-#include <cassert>
-#include <iostream>
 #include <string>
-
-//#include "../tools/tools.h"
-#include "spdlog/spdlog.h"
-
 namespace uprotocol::uuid::factory {
-
-using UUIDv1 = uint8_t*;
-
 /**
  * Universally Unique Identifier (UUID) is a 128-bit label used for information
- * in computer systems. 
+ * in computer systems.
  * UUID Version-1 is based on the current time and the MAC
  * address for the computer or "node" generating the UUID.
  *
@@ -43,65 +35,41 @@ using UUIDv1 = uint8_t*;
  * https://www.ietf.org/rfc/rfc4122.txt
  *
  */
-class UUIDv1Factory {
- public:
-  UUIDv1Factory() { uuidv1_ = new u_int8_t[uuidSize_]; }
-  ~UUIDv1Factory() { delete[] uuidv1_; }
+class UUIDv1 {
+public:
+    /** @brief Constructor for building UUIDV1 object   */
+    UUIDv1();
 
-  /** generates the unique id based on UUID v1 format.
-   */
-  UUIDv1 generate() {
-    uuid_t t_uuid;
+    /**
+     * @brief generates UUIDv1 number
+     * @param[out] tUUid
+    */
+    void generate_uuid(uuid_t tUuid);
 
-    assert(uuidv1_);
+    /** @brief converts current UUIDv1 number in string format
+     *  @return uuidv1 in string
+    */
+    std::string toString();
 
-    if (nullptr == uuidv1_) {
-      spdlog::error("Precondition failed: uuidv1_ is nullptr");
-      return nullptr;
-    }
+    /** @brief Gets the UUIDv1 number
+     * @return UUIDv1 number
+    */
+    unsigned char* getUUIDv1() { return uuid_;  }
 
-    uuid_clear(t_uuid);
-
-    if (-1 == uuid_generate_time_safe(t_uuid)) {
-      spdlog::error(
-          "Failure to generate safe uuid in uuid_generate_time_safe. Fallback "
-          "to "
-          "unsafe version");
-      uuid_generate_time(t_uuid);
-    }
-
-    (void)memcpy(uuidv1_, t_uuid, sizeof(uuidv1_));
-
-    return uuidv1_;
-  }
-  /** generates UUID in string format based on the given UUIDv1
-   *  input id
-   * */
-  std::string toString(UUIDv1 pt_uuidv1) {
-    char uuidStr[UUIDv1Factory::uuidStrSize_];  // 36 characters + null
-                                                // terminator
-
-    if (nullptr == pt_uuidv1) {
-      spdlog::error("pt_uuidv1 is nullptr");
-      return false;
-    }
-    uuid_unparse(pt_uuidv1, uuidStr);
-    return std::string(uuidStr);
-  }
-
- private:
-  static constexpr auto uuidSize_ = 16U;
-
-  static constexpr auto uuidStrSize_ =
+    /**
+     * uuidStrSize_ represents size of uuid, is a constant string size 37 in the character array
+    */
+    static constexpr auto uuidStrSize_ =
       sizeof("00000000-0000-0000-0000-000000000000"); /* 37 */
 
-  /**
-   * Represents unique id(in UUIDv1 format) in 16 unsigned integer byte array
-   */
-  UUIDv1 uuidv1_;
-};
+private:
+    /**
+     * uuid_ will store UUID of version1 (type uuid_t from Linux library libuuid)
+    */
+    uuid_t uuid_;
+
+}; //class UUIDv1
 
 }  // namespace uprotocol::uuid::factory
-
 
 #endif  // _UUIDV1_H_
