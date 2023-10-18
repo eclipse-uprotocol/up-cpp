@@ -20,9 +20,9 @@ class RpcClient
         * @return Returns the CompletableFuture with the result or exception.
         */
         virtual std::future<UPayload> invokeMethod(
-            UUri &topic, 
-            UPayload &payload, 
-            UAttributes &attributes) = 0;
+            const UUri &topic, 
+            const UPayload &payload, 
+            const UAttributes &attributes) = 0;
         
         virtual ~RpcClient() {} 
 };
