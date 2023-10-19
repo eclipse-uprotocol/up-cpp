@@ -88,6 +88,18 @@ public:
         dest.msb_ = this->msb_;
         dest.lsb_ = this->lsb_;
     }
+
+    /**
+     ** @brief Utility function copies org UUIDv8 object to destination UUIDv8 object that's
+    *   sent as parameter
+    *   @param[in] org UUIDv8 object is the source object
+     * @param[out] dest UUIDv8 object is the target object
+    */
+    static inline void copy(UUIDv8& dest, UUIDv8 const& org) {
+        dest.msb_ = org.msb_;
+        dest.lsb_ = org.lsb_;
+    }
+
     /**
      * @brief converts the cuurent UUIDv8 id to string format
      * @return UUIDv8 string
@@ -124,18 +136,17 @@ public:
     UUIDv8 fromString(std::string uuidStr);
 
     /**
-     * @brief extracts UTC time at which current UUIDv8 number is created.
-     * @param UUIDv8 number in form of UUIDv8 object
+     * @brief extracts UTC time at from current UUIDv8 object
      * @return UTC time
      */
     uint64_t getTime() { return this->msb_ >> 16; }
 
     /**
-     * @brief extracts UTC time at which given UUIDv8 id is created.
-     * @param UUIDv8 number in form of UUIDv8 object
+     * @brief Utility function extracts UTC time from the given UUIDv8
+     * @param UUIDv8 object
      * @return UTC time
      */
-    uint64_t getTime(UUIDv8 const& uuid) {
+    static uint64_t getTime(UUIDv8 const& uuid) {
         return uuid.msb_ >> 16;
     }
 
