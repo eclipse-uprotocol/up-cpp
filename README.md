@@ -36,7 +36,12 @@ $ sudo apt-get install build-essential \
       lcov \
       uuid-dev \
       openssl \ 
-      libssl-dev
+      libssl-dev \
+      rapidjson-dev \
+      libprotobuf-dev \
+      libprotoc-dev \
+      protobuf-compiler\
+      libspdlog-dev
 ```
 #### Install cgreen testing library
 
@@ -51,19 +56,6 @@ In this package we're using the cgreen testing library.
 
 It should appear in /usr/local/lib and in /usr/local/include
 
-#### Microsoft vcpkg installation
-
-Now for C++ depedencies we're using Microsoft vcpkg manager.
-```
-$ cd $HOME
-$ git clone https://github.com/Microsoft/vcpkg.git
-$ .\vcpkg\bootstrap-vcpkg.bat
-$ export PATH=$PATH:~/vcpkg
-$ vcpkg install openssl
-$ vcpkg install rapidjson
-$ vcpkg install protobuf protobuf[zlib]
-$ vcpkg install spdlog 
-```
 
 #### Setup SDK local repository, build and test
 ```
