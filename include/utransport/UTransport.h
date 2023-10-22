@@ -21,11 +21,11 @@ namespace uprotocol::utransport
                                     const UPayload &payload,
                                     const UAttributes &attributes) = 0;
 
-               virtual UStatus registerListener(UUri &uri,
-                                                UListener &listner) = 0;
+               virtual UStatus registerListener(const UUri &uri,
+                                                const UListener &listner) = 0;
 
-               virtual UStatus unregisterListener(UUri &uri, 
-                                                  UListener &listner) = 0;
+               virtual UStatus unregisterListener(const UUri &uri, 
+                                                  const UListener &listner) = 0;
 
                virtual UStatus receive(const UUri &uri, 
                                        const UPayload &payload, 
