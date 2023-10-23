@@ -35,6 +35,14 @@ namespace uprotocol::utransport {
 
     class UAttributesBuilder;
 
+    /**
+    * When sending data over uTransport the basic API for send uses a source topic and the UPayload as the data.
+    * Any other information about the message is placed in the UAttributes class.
+    * The UAttributes class holds the additional information along with business methods for understanding more about the actual message sent.
+    * {@link UAttributes} is the class that defines the Payload. It is the place for configuring time to live, priority, security tokens and more.
+    * Each UAttributes class defines a different type of message payload. The payload can represent a simple published payload with some state change,
+    * Payload representing an RPC request or Payload representing an RPC response.
+    */
     class UAttributes
     {               
         public:
@@ -65,7 +73,6 @@ namespace uprotocol::utransport {
             UAttributes(const UUID id,
                         const UMessageType type,
                         const UPriority priority) {
-                //once the UUID class is aligned this code needs to be changed
                 
                 this->id_ = id;
                 this->type_ = type;

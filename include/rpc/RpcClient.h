@@ -9,6 +9,13 @@
 using namespace uprotocol::utransport;
 using namespace uri_datamodel;
 
+/**
+ * RpcClient is an interface used by code generators for uProtocol services defined in proto files such as
+ * the core uProtocol services found in https://github.com/eclipse-uprotocol/uprotocol-core-api. the interface 
+ * provides a clean contract for all transports to implement to be able to support RPC on their platform. Each
+ * platform MUST implement this interface. For more details please refer to
+ * https://github.com/eclipse-uprotocol/uprotocol-spec/blob/main/up-l2/README.adoc[RpcClient Specifications]
+ */
 class RpcClient 
 {
     public:

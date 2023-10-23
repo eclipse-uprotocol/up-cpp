@@ -27,6 +27,9 @@
 
 namespace uprotocol::utransport {
 
+    /**
+    * uProtocol defines message types. Using the message type, validation can be performed to ensure transport validity of the data in the {@link UAttributes}.
+    */
     enum class UMessageType {
         PUBLISH = 0,    // Publish or notification event
         REQUEST,        // Request

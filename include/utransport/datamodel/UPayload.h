@@ -26,11 +26,11 @@
 #include <cstdint>
 #include <cstring>
 
-/**
- * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
- */
 namespace uprotocol::utransport
 {
+    /**
+    * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
+    */
     class UPayload 
     {
         public:

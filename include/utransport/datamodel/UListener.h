@@ -14,6 +14,13 @@ namespace uprotocol::utransport
 	{
 		public:
 
+			/**
+			* Method called to handle/process events.
+			* @param topic Topic the underlying source of the message.
+			* @param payload Payload of the message.
+			* @param attributes Transportation attributes
+			* @return Returns an Ack every time a message is received and processed.
+			*/
 			virtual UStatus onReceive(const UUri &uri, 
 									  const UPayload &payload, 
 									  const UAttributes &attributes) = 0; 
