@@ -19,8 +19,9 @@
  * under the License.
  */
 #include "UUIDv8.h"
+#include "spdlog/spdlog.h"
 
-namespace uprotocol::uuid::factory {
+namespace uprotocol::uuid {
 
 /**
  * Constructor to build UUIDv8 object
@@ -77,9 +78,13 @@ std::string UUIDv8::toString() const {
  *
  */
 UUIDv8 UUIDv8::fromString(std::string uuidStr) {
+    UUIDv8 uuidV8;
     std::array<uint8_t, 16> buff{};
     if (auto ret = uuidV8FromString(uuidStr, buff.data()); ret < 0) {
-        // dummy
+        //dummy
+        spdlog::error("UUIDv8 string contains invalid data. This can result"
+        "in Invalid UUIDv8 number, so returning an instant UUIDv8 number.");
+        return uuidV8;
     }
 
     uint64_t msbNum = 0;
@@ -90,11 +95,9 @@ UUIDv8 UUIDv8::fromString(std::string uuidStr) {
         msbNum |= (uint64_t)buff[i];
         lsbNum |= (uint64_t)buff[i + 8];
     }
-
-    UUIDv8 uuidV8;
     uuidV8.msb_ = msbNum;
     uuidV8.lsb_ = lsbNum;
     return uuidV8;
 }
 
-} //namespace uprotocol::uuid::factory
+} //namespace uprotocol::uuid

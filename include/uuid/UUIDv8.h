@@ -36,7 +36,7 @@
 
 #include "random_gen.h"
 
-namespace uprotocol::uuid::factory {
+namespace uprotocol::uuid {
 
 /**
  *
@@ -201,6 +201,8 @@ private:
     /** uuidV8FromString - utility function to convert UUIDv8 string to uint8_t pointer array
      * @param str input UUIDv8 string that needs to be converted to UUIdv8
      * @param[out] uuidOut - will contain UUIDv8 number
+     * @return ret - status of the conversion being success or not. <0 is error condition
+     *              which mostly likely will not occur
     */
     inline int uuidV8FromString(std::string str, uint8_t* uuidOut) {
         str.erase(remove(str.begin(), str.end(), '-'), str.end());
@@ -315,6 +317,6 @@ private:
     uint64_t lsb_{};
 };
 
-}  // namespace uprotocol::uuid::factory
+}  // namespace uprotocol::uuid
 
 #endif /* _UUIDV8_H_ */

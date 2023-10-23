@@ -21,19 +21,19 @@
 #include "UUIDv6.h"
 #include "spdlog/spdlog.h"
 
-namespace uprotocol::uuid::factory {
+namespace uprotocol::uuid {
 /**
  * @brief Constructor for building UUIDv6
 */
 UUIDv6::UUIDv6() {
-    generate_uuid(uuidV6_);
+    generateUUID(uuidV6_);
 }
 /**
  * @brief This method has the logic to compute and generates UUIDv6
  * @param[out] uuid - contains UUIDv6 so that calling function will have the unique id.
  * @note Here constructor calls this method to set member @uuidV6_
 */
-void UUIDv6::generate_uuid(uuid_t uUIDV6) {
+void UUIDv6::generateUUID(uuid_t uUIDV6) {
     uint64_t u64UT;
     uint8_t* pu8UP;
 
@@ -41,13 +41,13 @@ void UUIDv6::generate_uuid(uuid_t uUIDV6) {
     if (-1 == uuid_generate_time_safe(uUIDV6)) {
         spdlog::error(
         "Failure to generate safe uuid in uuid_generate_time_safe. Fallback "
-        "to "
-        "unsafe version");
+        "to unsafe version");
         uuid_generate_time(uUIDV6);
     }
 
     //UUID v6 algorithm from here.
-    pu8UP = (unsigned char*)uUIDV6;
+    //pu8UP = (unsigned char*)uUIDV6;
+     pu8UP = static_cast<unsigned char*>(uUIDV6);
     // load u64UT with the first 64 bits of the UUID
     u64UT = ((uint64_t)swap32(*((uint32_t*)pu8UP))) << 32;
     u64UT |= ((uint64_t)swap32(*((uint32_t*)&pu8UP[4])));
@@ -94,4 +94,4 @@ uint64_t UUIDv6::getTime() {
     return *pu64UTCTimeMicroseconds;
 }
 
-} // namespace uprotocol::uuid::factory
+} // namespace uprotocol::uuid

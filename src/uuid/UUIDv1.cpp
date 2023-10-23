@@ -21,18 +21,18 @@
 #include "UUIDv1.h"
 #include "spdlog/spdlog.h"
 
-namespace uprotocol::uuid::factory {
+namespace uprotocol::uuid {
 
 /** @brief Constructor for building UUIDV1 object   */
 UUIDv1::UUIDv1(){
-    generate_uuid(uuid_);
+    generateUUID(uuid_);
 }
 
 /**
  * @brief generates UUIDv1 number
  * @param[out] tUUid
 */
-void UUIDv1::generate_uuid(uuid_t tUuid) {
+void UUIDv1::generateUUID(uuid_t tUuid) {
     uuid_clear(tUuid);
     if (-1 == uuid_generate_time_safe(tUuid)) {
         spdlog::error(
@@ -53,4 +53,4 @@ std::string UUIDv1::toString(){
     return std::string(uuidStr);
 }
 
-} //uprotocol::uuid::factory
+} //uprotocol::uuid

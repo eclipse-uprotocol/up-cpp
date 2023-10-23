@@ -25,7 +25,7 @@
 #include "../tools/byte_order.h"
 #include "../tools/tools.h"
 
-namespace uprotocol::uuid::factory {
+namespace uprotocol::uuid {
 
 /**
  * Universally Unique Identifier (UUID) is a 128-bit label used for information
@@ -52,7 +52,7 @@ public:
      * @param uuid - contains UUIDv6 so that calling function will have the unique id.
      *  Here constructor calls this method to set member @uuidV6_
     */
-    void generate_uuid(uuid_t uUIDV6);
+    void generateUUID(uuid_t uUIDV6);
 
     /**
      * convert uuidv6 id to string format
@@ -79,17 +79,18 @@ public:
     */
     unsigned char* getUUIDv6() { return uuidV6_; }
 
+private:
+    /** Stores UUIDv6 number(uuid_t type from Linux library libuuid) */
+    uuid_t uuidV6_;
+
     /**
      * uuidStrSize_ represents size of uuid, is a constant string size 37 in the character array
     */
     static constexpr auto uuidStrSize_ =
     sizeof("00000000-0000-0000-0000-000000000000"); /* 37 */
 
-private:
-    /** Stores UUIDv6 number(uuid_t type from Linux library libuuid) */
-    uuid_t uuidV6_;
 };
 
-}  // namespace uprotocol::uuid::factory
+}  // namespace uprotocol::uuid
 
 #endif /* _UUIDV6_H_ */

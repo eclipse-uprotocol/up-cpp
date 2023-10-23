@@ -23,7 +23,7 @@
 
 #include <uuid/uuid.h>
 #include <string>
-namespace uprotocol::uuid::factory {
+namespace uprotocol::uuid {
 /**
  * Universally Unique Identifier (UUID) is a 128-bit label used for information
  * in computer systems.
@@ -44,7 +44,7 @@ public:
      * @brief generates UUIDv1 number
      * @param[out] tUUid
     */
-    void generate_uuid(uuid_t tUuid);
+    void generateUUID(uuid_t tUuid);
 
     /** @brief converts current UUIDv1 number in string format
      *  @return uuidv1 in string
@@ -56,20 +56,20 @@ public:
     */
     unsigned char* getUUIDv1() { return uuid_;  }
 
-    /**
-     * uuidStrSize_ represents size of uuid, is a constant string size 37 in the character array
-    */
-    static constexpr auto uuidStrSize_ =
-      sizeof("00000000-0000-0000-0000-000000000000"); /* 37 */
-
 private:
     /**
      * uuid_ will store UUID of version1 (type uuid_t from Linux library libuuid)
     */
     uuid_t uuid_;
 
+    /**
+     * uuidStrSize_ represents size of uuid, is a constant string size 37 in the character array
+    */
+    static constexpr auto uuidStrSize_ =
+      sizeof("00000000-0000-0000-0000-000000000000"); /* 37 */
+
 }; //class UUIDv1
 
-}  // namespace uprotocol::uuid::factory
+}  // namespace uprotocol::uuid
 
 #endif  // _UUIDV1_H_

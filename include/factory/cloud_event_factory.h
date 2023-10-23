@@ -38,11 +38,10 @@
 #include "spec_version.h"
 #include "up_validator.h"
 #include "UUIDv6.h"
-//#include "uuid_gen.h"
 
 namespace cloudevents::factory {
 using namespace cloudevents::format;
-using namespace uprotocol::uuid::factory;
+using namespace uprotocol::uuid;
 
 const std::string PROTOBUF_CONTENT_TYPE = "application/protobuf";
 const std::string SERIALIZED_PROTOBUF_CONTENT_TYPE = "application/x-protobuf";
@@ -536,7 +535,7 @@ struct factory {
     auto iter = ce.attributes().find(Serializer::TTL_KEY);
     if (iter != ce.attributes().end()) {
       auto ttl = iter->second.ce_integer();
-      std::string& t_uuid_str = const_cast<std::string&>(ce.id());
+      std::string t_uuid_str = const_cast<std::string&>(ce.id());
       uuidV6.fromString(t_uuid_str);
       uint64_t id_time = uuidV6.getTime()+
           (int64_t)ttl;
@@ -602,8 +601,6 @@ events and mandatory or optional in the uProtocol
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
     UUIDv6 uuidV6;
-    //st_uuid_v6_str t_uuid_str;
-    //ce.set_id(uuid_v6::generate_str());
     ce.set_id(uuidV6.toString());
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
