@@ -660,8 +660,6 @@ events and mandatory or optional in the uProtocol
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
     UUIDv6 uuidV6;
-    //st_uuid_v6_str t_uuid_str;
-    //ce.set_id(uuid_v6::generate_str());
     ce.set_id(uuidV6.toString());
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
