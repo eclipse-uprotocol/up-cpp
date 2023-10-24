@@ -21,7 +21,6 @@
 #ifndef _URI_FORMAT_H_
 #define _URI_FORMAT_H_
 
-
 namespace uprotocol::uri {
 
 /**
@@ -56,6 +55,7 @@ public:
      * @return Returns true if the Uri part can be serialized into micro form.
      */
     virtual bool isMicroForm() const = 0;
+
 }; // class UriFormat
 
 } // namespace uprotocol::uri

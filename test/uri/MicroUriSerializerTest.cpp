@@ -18,21 +18,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <string>
+#include <cgreen/cgreen.h>
 #include "MicroUriSerializer.h"
 #include "UUri.h"
 #include "UAuthority.h"
 #include "UEntity.h"
 #include "UResource.h"
 
-#include <spdlog/spdlog.h>
-
-#include <cgreen/cgreen.h>
-
-#include <string>
-
 using namespace cgreen;
 using namespace uprotocol::uri;
 
+#define assertTrue(a) assert_true(a)
 #define assertEquals(a, b) assert_true(b == a)
 #define assertFalse(a) assert_false(a)
 
@@ -46,41 +43,17 @@ AfterEach(MicroUriSerializer) {
     // Dummy
 }
 
-/**
- * Get IPv6 address from string
- * @param address IPv6 address in string format.
- * @return Returns the IPv6 address in byte array format.
-*/
-std::vector<uint8_t> parseIpV6Address(std::string_view address) {
-    std::vector<uint8_t> ip;
-
-    size_t start{0};
-    size_t end{0};
-    std::string token;
-    while ((end = address.find(":", start)) != std::string::npos) {
-        token = address.substr(start, end);
-        start = end + 1;
-        ip.push_back(static_cast<uint8_t>(std::stoi(token, nullptr, 16) >> 8));
-        ip.push_back(static_cast<uint8_t>(std::stoi(token, nullptr, 16)));
-    }
-    token = address.substr(start, end);
-    ip.push_back(static_cast<uint8_t>(std::stoi(token, nullptr, 16) >> 8));
-    ip.push_back(static_cast<uint8_t>(std::stoi(token, nullptr, 16)));
-
-    return ip;
-}
-
-//("Test serialize and deserialize empty content")
-static void test_empty() {
+// Test serialize and deserialize empty content.
+static void testEmptyUri() {
     auto uURi = UUri::empty();
     auto uri = MicroUriSerializer::getInstance().serialize(uURi);
-    assert_true(uri.empty());
+    assertTrue(uri.empty());
     auto uUri2 = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_true(uUri2.isEmpty());
+    assertTrue(uUri2.isEmpty());
 }
 
-//("Test happy path Byte serialization of local UUri")
-static void test_serialize_uri() {
+// Test happy path Byte serialization of local UUri.
+static void testSerializeUri() {
     UAuthority uAuthority = UAuthority::local();
     UEntity uEntity = UEntity::microFormat(2, 1);
     UResource uResource = UResource::microFormat(3);
@@ -90,8 +63,8 @@ static void test_serialize_uri() {
     assertEquals(uUri, uUri2);
 }
 
-//("Test happy path with null version")
-static void test_serialize_uri_without_version() {
+// Test happy path with null version.
+static void testSerializeUriWithoutVersion() {
     UAuthority uAuthority = UAuthority::local();
     UEntity uEntity = UEntity::microFormat(2, std::nullopt);
     UResource uResource = UResource::microFormat(3);
@@ -101,8 +74,8 @@ static void test_serialize_uri_without_version() {
     assertEquals(uUri, uUri2);
 }
 
-//("Test Serialize a remote UUri to micro without the address")
-static void test_serialize_remote_uri_without_address() {
+// Test Serialize a remote UUri to micro without the address.
+static void testSerializeRemoteUriWithoutAddress() {
     UAuthority uAuthority = UAuthority::longRemote("vcu", "vin");
     UEntity uEntity = UEntity::microFormat(2, 1);
     UResource uResource = UResource::microFormat(3);
@@ -111,8 +84,8 @@ static void test_serialize_remote_uri_without_address() {
     assertEquals(uri.size(), 0);
 }
 
-//("Test serialize invalid UUris")
-static void test_serialize_invalid_uuris() {
+// Test serialize invalid UUris.
+static void testSerializeInvalidUris() {
     auto uUri = UUri(UAuthority::local(), UEntity::microFormat(1, std::nullopt), UResource::empty());
     auto uri = MicroUriSerializer::getInstance().serialize(uUri);
     assertEquals(uri.size(), 0);
@@ -130,8 +103,38 @@ static void test_serialize_invalid_uuris() {
     assertEquals(uri4.size(), 0);
 }
 
-//("Test serialize and deserialize IPv4 UUris")
-static void test_serialize_ipv4_uri() {
+// Test serialize uri with invalid ip address type.
+static void testSerializeWithInvalidIpAddressType() {
+    UAuthority uAuthority = UAuthority::microRemote("1234567890");
+    UEntity uEntity = UEntity::microFormat(2, 1);
+    UResource uResource = UResource::microFormat(3);
+    auto uUri = UUri(uAuthority, uEntity, uResource);
+    auto uri = MicroUriSerializer::getInstance().serialize(uUri);
+    assertEquals(uri.size(), 0);
+}
+
+// Test serialize uri with invalid IPv4 address.
+static void testSerializeWithInvalidIpv4Address() {
+    UAuthority uAuthority = UAuthority::microRemote("123.456.789.0");
+    UEntity uEntity = UEntity::microFormat(2, 1);
+    UResource uResource = UResource::microFormat(3);
+    auto uUri = UUri(uAuthority, uEntity, uResource);
+    auto uri = MicroUriSerializer::getInstance().serialize(uUri);
+    assertEquals(uri.size(), 0);
+}
+
+// Test serialize uri with invalid IPv6 address.
+static void testSerializeWithInvalidIpv6Address() {
+    UAuthority uAuthority = UAuthority::microRemote("1234:5678:90ab:cdef:1234");
+    UEntity uEntity = UEntity::microFormat(2, 1);
+    UResource uResource = UResource::microFormat(3);
+    auto uUri = UUri(uAuthority, uEntity, uResource);
+    auto uri = MicroUriSerializer::getInstance().serialize(uUri);
+    assertEquals(uri.size(), 0);
+}
+
+// Test serialize and deserialize IPv4 UUris.
+static void testSerializeIpv4Uri() {
     UAuthority uAuthority = UAuthority::microRemote("192.168.1.100");
     UEntity uEntity = UEntity::microFormat(2, 1);
     UResource uResource = UResource::microFormat(3);
@@ -139,155 +142,174 @@ static void test_serialize_ipv4_uri() {
     auto uri = MicroUriSerializer::getInstance().serialize(uUri);
     auto uUri2 = MicroUriSerializer::getInstance().deserialize(uri);
     assertEquals(uUri, uUri2);
+
+    uAuthority = UAuthority::microRemote("0.0.0.01");
+    auto uUri3 = UUri(uAuthority, uEntity, uResource);
+    uri = MicroUriSerializer::getInstance().serialize(uUri3);
+    auto uUri4 = MicroUriSerializer::getInstance().deserialize(uri);
+    assertTrue(uUri4.isEmpty());
 }
 
-//("Test serialize and deserialize IPv6 UUris")
-static void test_serialize_ipv6_uri() {
-    UAuthority uAuthority = UAuthority::microRemote("2001:db8:85a3:0:0:8a2e:370:7334");
+// Test serialize and deserialize IPv6 UUris.
+static void testSerializeIpv6Uri() {
+    UAuthority uAuthority = UAuthority::microRemote("2001:DB8:85a3:0:0:8a2e:370:7334");
     UEntity uEntity = UEntity::microFormat(2, 1);
     UResource uResource = UResource::microFormat(3);
     auto uUri = UUri(uAuthority, uEntity, uResource);
     auto uri = MicroUriSerializer::getInstance().serialize(uUri);
     auto uUri2 = MicroUriSerializer::getInstance().deserialize(uri);
     assertEquals(uUri, uUri2);
+
+    uAuthority = UAuthority::microRemote("2001:db8:85a3::8a2e:370:7334");
+    auto uUri3 = UUri(uAuthority, uEntity, uResource);
+    uri = MicroUriSerializer::getInstance().serialize(uUri);
+    auto uUri4 = MicroUriSerializer::getInstance().deserialize(uri);
+    assertEquals(uUri3, uUri4);
+
+    uAuthority = UAuthority::microRemote("2001:db8:85a3:0:0:8a2e:370:7334");
+    auto uUri5 = UUri(uAuthority, uEntity, uResource);
+    uri = MicroUriSerializer::getInstance().serialize(uUri);
+    auto uUri6 = MicroUriSerializer::getInstance().deserialize(uri);
+    assertEquals(uUri5, uUri6);
 }
 
-//("Test deserialize with valid local micro uri")
-static void test_deserialize_with_valid_local_uri() {
+// Test deserialize with valid local micro uri.
+static void testDeserializeWithValidLocalUri() {
     std::vector<uint8_t> uri{0x1, 0x0, 0x0, 0x5, 0x0, 0x2, 0x1, 0x0};
     UUri uUri = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_false(uUri.isEmpty());
-    assert_true(uUri.isMicroForm());
-    assert_false(uUri.isResolved());
-    assert_false(uUri.isLongForm());
-    assert_true(uUri.getUAuthority().isLocal());
-    assert_true(uUri.getUEntity().getVersion().has_value());
+    assertFalse(uUri.isEmpty());
+    assertTrue(uUri.isMicroForm());
+    assertFalse(uUri.isResolved());
+    assertFalse(uUri.isLongForm());
+    assertTrue(uUri.getUAuthority().isLocal());
+    assertTrue(uUri.getUEntity().getVersion().has_value());
     assertEquals(uUri.getUEntity().getVersion().value(), 1);
-    assert_true(uUri.getUEntity().getId().has_value());
+    assertTrue(uUri.getUEntity().getId().has_value());
     assertEquals(uUri.getUEntity().getId().value(), 2);
-    assert_true(uUri.getUResource().getId().has_value());
+    assertTrue(uUri.getUResource().getId().has_value());
     assertEquals(uUri.getUResource().getId().value(), 5);
 }
 
-//("Test deserialize with valid IPv4 micro uri")
-static void test_deserialize_with_valid_ipv4_uri() {
+// Test deserialize with valid IPv4 micro uri.
+static void testDeserializeWithValidIpv4Uri() {
     std::vector<uint8_t> uri = {0x1, 0x1, 0x0, 0x5, 192, 168, 1, 100, 0x0, 0x2, 0x1, 0x0};
     auto uUri = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_false(uUri.isEmpty());
-    assert_true(uUri.isMicroForm());
-    assert_false(uUri.isResolved());
-    assert_false(uUri.isLongForm());
-    assert_true(uUri.getUAuthority().isRemote());
-    assert_true(uUri.getUEntity().getVersion().has_value());
+    assertFalse(uUri.isEmpty());
+    assertTrue(uUri.isMicroForm());
+    assertFalse(uUri.isResolved());
+    assertFalse(uUri.isLongForm());
+    assertTrue(uUri.getUAuthority().isRemote());
+    assertTrue(uUri.getUEntity().getVersion().has_value());
     assertEquals(uUri.getUEntity().getVersion(), 1);
-    assert_true(uUri.getUEntity().getId().has_value());
+    assertTrue(uUri.getUEntity().getId().has_value());
     assertEquals(uUri.getUEntity().getId(), 2);
-    assert_true(uUri.getUResource().getId().has_value());
+    assertTrue(uUri.getUResource().getId().has_value());
     assertEquals(uUri.getUResource().getId(), 5);
-    assert_false(uUri.getUAuthority().getAddress().empty());
+    assertFalse(uUri.getUAuthority().getAddress().empty());
     assertEquals(uUri.getUAuthority().getAddress(), "192.168.1.100");
 }
 
-//("Test deserialize with valid IPv6 micro uri")
-static void test_deserialize_with_valid_ipv6_uri() {
-    std::string ipv6 = "2001:db8:85a3:0:0:8a2e:370:7334";
-    std::vector<uint8_t> ipv6Bytes = parseIpV6Address("2001:db8:85a3:0:0:8a2e:370:7334");
+// Test deserialize with valid IPv6 micro uri.
+static void testDeserializeWithValidIpv6Uri() {
+    std::string ipv6 = "2001:db8:85a3::8a2e:370:7334";
+    IpAddress ipAddress(ipv6);
+    std::vector<uint8_t> ipv6Bytes = ipAddress.getBytes();
     std::vector<uint8_t> header = {0x1, 0x2, 0x0, 0x5};
     std::vector<uint8_t> footer = {0x0, 0x2, 0x1, 0x0};
-    std::vector<uint8_t> outputStream;
-    outputStream.reserve(header.size() + ipv6Bytes.size() + footer.size());
-    outputStream.insert(outputStream.end(), header.begin(), header.end());
-    outputStream.insert(outputStream.end(), ipv6Bytes.begin(), ipv6Bytes.end());
-    outputStream.insert(outputStream.end(), footer.begin(), footer.end());
+    std::vector<uint8_t> uri;
+    uri.reserve(header.size() + ipv6Bytes.size() + footer.size());
+    uri.insert(uri.end(), header.begin(), header.end());
+    uri.insert(uri.end(), ipv6Bytes.begin(), ipv6Bytes.end());
+    uri.insert(uri.end(), footer.begin(), footer.end());
 
-    std::vector<uint8_t> uri = outputStream;
     UUri uUri = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_false(uUri.isEmpty());
-    assert_true(uUri.isMicroForm());
-    assert_false(uUri.isResolved());
-    assert_false(uUri.isLongForm());
-    assert_true(uUri.getUAuthority().isRemote());
-    assert_true(uUri.getUEntity().getVersion().has_value());
+    assertFalse(uUri.isEmpty());
+    assertTrue(uUri.isMicroForm());
+    assertFalse(uUri.isResolved());
+    assertFalse(uUri.isLongForm());
+    assertTrue(uUri.getUAuthority().isRemote());
+    assertTrue(uUri.getUEntity().getVersion().has_value());
     assertEquals(uUri.getUEntity().getVersion(), 1);
-    assert_true(uUri.getUEntity().getId().has_value());
+    assertTrue(uUri.getUEntity().getId().has_value());
     assertEquals(uUri.getUEntity().getId(), 2);
-    assert_true(uUri.getUResource().getId().has_value());
+    assertTrue(uUri.getUResource().getId().has_value());
     assertEquals(uUri.getUResource().getId(), 5);
-    assert_false(uUri.getUAuthority().getAddress().empty());
+    assertFalse(uUri.getUAuthority().getAddress().empty());
     assertEquals(uUri.getUAuthority().getAddress(), ipv6);
 }
 
-static void test_deserialize_with_invalid_version() {
+// Test deserialize with invalid version.
+static void testDeserializeWithInvalidVersion() {
     std::vector<uint8_t> uri = {0x9, 0x0, 0x0, 0x5, 0x0, 0x2, 0x1, 0x0};
     UUri uUri = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_true(uUri.isEmpty());
-    assert_false(uUri.isMicroForm());
-    assert_false(uUri.isResolved());
+    assertTrue(uUri.isEmpty());
+    assertFalse(uUri.isMicroForm());
+    assertFalse(uUri.isResolved());
 }
 
-//("Test deserialize with invalid type")
-static void test_deserialize_with_invalid_type() {
+// Test deserialize with invalid type.
+static void testDeserializeWithInvalidType() {
     std::vector<uint8_t> uri = {0x1, 0x9, 0x0, 0x5, 0x0, 0x2, 0x1, 0x0};
     UUri uUri = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_true(uUri.isEmpty());
-    assert_false(uUri.isMicroForm());
-    assert_false(uUri.isResolved());
+    assertTrue(uUri.isEmpty());
+    assertFalse(uUri.isMicroForm());
+    assertFalse(uUri.isResolved());
 }
 
-//("Test deserialize with wrong size for local micro URI")
-static void test_deserialize_with_wrong_size_for_local_micro_uri() {
+// Test deserialize with wrong size for local micro URI.
+static void testDeserializeWithWrongSizeForLocalMicroUri() {
     std::vector<uint8_t> uri = {0x1, 0x0, 0x0, 0x5, 0x0, 0x2, 0x1, 0x0, 0x0};
     UUri uUri = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_true(uUri.isEmpty());
-    assert_false(uUri.isMicroForm());
-    assert_false(uUri.isResolved());
+    assertTrue(uUri.isEmpty());
+    assertFalse(uUri.isMicroForm());
+    assertFalse(uUri.isResolved());
 }
 
-//("Test deserialize with wrong size for IPv4 micro URI")
-static void test_deserialize_with_wrong_size_for_ipv4_micro_uri() {
+// Test deserialize with wrong size for IPv4 micro URI.
+static void testDeserializeWithWrongSizeForIpv4MicroUri() {
     std::vector<uint8_t> uri = {0x1, 0x1, 0x0, 0x5, 192, 168, 1, 100, 0x0, 0x2, 0x1, 0x0, 0x0};
     UUri uUri = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_true(uUri.isEmpty());
-    assert_false(uUri.isMicroForm());
-    assert_false(uUri.isResolved());
+    assertTrue(uUri.isEmpty());
+    assertFalse(uUri.isMicroForm());
+    assertFalse(uUri.isResolved());
 }
 
-//("Test deserialize with wrong size for IPv6 micro URI")
-static void test_deserialize_with_wrong_size_for_ipv6_micro_uri() {
+// Test deserialize with wrong size for IPv6 micro URI.
+static void testDeserializeWithWrongSizeForIpv6MicroUri() {
     std::vector<uint8_t> ipv6Bytes(30, 0);
-
     std::vector<uint8_t> header = {0x1, 0x2, 0x0, 0x5};
     std::vector<uint8_t> footer = {0x0, 0x2, 0x1, 0x0};
+    std::vector<uint8_t> uri;
+    uri.reserve(header.size() + ipv6Bytes.size() + footer.size());
+    uri.insert(uri.end(), header.begin(), header.end());
+    uri.insert(uri.end(), ipv6Bytes.begin(), ipv6Bytes.end());
+    uri.insert(uri.end(), footer.begin(), footer.end());
 
-    std::vector<uint8_t> outputStream;
-    outputStream.reserve(header.size() + ipv6Bytes.size() + footer.size());
-    outputStream.insert(outputStream.end(), header.begin(), header.end());
-    outputStream.insert(outputStream.end(), ipv6Bytes.begin(), ipv6Bytes.end());
-    outputStream.insert(outputStream.end(), footer.begin(), footer.end());
-
-    std::vector<uint8_t> uri = outputStream;
     UUri uUri = MicroUriSerializer::getInstance().deserialize(uri);
-    assert_true(uUri.isEmpty());
-    assert_false(uUri.isMicroForm());
-    assert_false(uUri.isResolved());
+    assertTrue(uUri.isEmpty());
+    assertFalse(uUri.isMicroForm());
+    assertFalse(uUri.isResolved());
 }
 
 Ensure(MicroUriSerializer, all_tests) {
-    test_empty();
-    test_serialize_uri();
-    test_serialize_uri_without_version();
-    test_serialize_remote_uri_without_address();
-    test_serialize_invalid_uuris();
-    test_serialize_ipv4_uri();
-    test_serialize_ipv6_uri();
-    test_deserialize_with_valid_local_uri();
-    test_deserialize_with_valid_ipv4_uri();
-    test_deserialize_with_valid_ipv6_uri();
-    test_deserialize_with_invalid_version();
-    test_deserialize_with_invalid_type();
-    test_deserialize_with_wrong_size_for_local_micro_uri();
-    test_deserialize_with_wrong_size_for_ipv4_micro_uri();
-    test_deserialize_with_wrong_size_for_ipv6_micro_uri();
+    testEmptyUri();
+    testSerializeUri();
+    testSerializeUriWithoutVersion();
+    testSerializeRemoteUriWithoutAddress();
+    testSerializeInvalidUris();
+    testSerializeWithInvalidIpAddressType();
+    testSerializeWithInvalidIpv4Address();
+    testSerializeWithInvalidIpv6Address();
+    testSerializeIpv4Uri();
+    testSerializeIpv6Uri();
+    testDeserializeWithValidLocalUri();
+    testDeserializeWithValidIpv4Uri();
+    testDeserializeWithValidIpv6Uri();
+    testDeserializeWithInvalidVersion();
+    testDeserializeWithInvalidType();
+    testDeserializeWithWrongSizeForLocalMicroUri();
+    testDeserializeWithWrongSizeForIpv4MicroUri();
+    testDeserializeWithWrongSizeForIpv6MicroUri();
 }
 
 

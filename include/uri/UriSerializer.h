@@ -22,7 +22,6 @@
 #define _URI_SERIALIZER_H_
 
 #include <string>
-
 #include "UAuthority.h"
 #include "UEntity.h"
 #include "UResource.h"
@@ -48,6 +47,7 @@ public:
      * @return Returns the Uri in the transport serialized format.
      */
     virtual T serialize(const UUri& uri) = 0;
+
 }; // class UriSerializer
 
 }  // namespace uprotocol::uri
