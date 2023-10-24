@@ -37,16 +37,13 @@ void UUIDv6::generateUUID(uuid_t uUIDV6) {
     uint64_t u64UT;
     uint8_t* pu8UP;
 
-    uuid_generate_time_safe(uUIDV6);
     if (-1 == uuid_generate_time_safe(uUIDV6)) {
-        spdlog::error(
-        "Failure to generate safe uuid in uuid_generate_time_safe. Fallback "
-        "to unsafe version");
+        spdlog::error("Failure to generate safe uuid in uuid_generate_time_safe."
+        " Fallback to unsafe version");
         uuid_generate_time(uUIDV6);
     }
 
     //UUID v6 algorithm from here.
-    //pu8UP = (unsigned char*)uUIDV6;
      pu8UP = static_cast<unsigned char*>(uUIDV6);
     // load u64UT with the first 64 bits of the UUID
     u64UT = ((uint64_t)swap32(*((uint32_t*)pu8UP))) << 32;
@@ -78,6 +75,7 @@ std::string UUIDv6::toString(){
  * @param[in] uuidStr
  */
 void UUIDv6::fromString(std::string uuidStr) {
+    //It will override the existing UUIDV6 id
     uuid_parse(uuidStr.c_str(), uuidV6_);
 }
 /**

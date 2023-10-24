@@ -107,27 +107,6 @@ public:
     std::string toString() const;
 
     /**
-     * @brief uuidV8ToString utility function to convert given UUIDv8 number array to string format
-     * @param  uuid UUIDV8 number in array
-     * @return UUIDv8 string
-    */
-    static inline std::string uuidV8ToString(const uint8_t* uuid) {
-        static const char DIGITS[] = "0123456789abcdef";
-        std::string str{};
-        for (int i = 0; i < 16; i++) {
-            auto e = (std::byte)uuid[i];
-            auto shifted_e = (std::byte)uuid[i];
-            shifted_e >>= 4;
-            str += DIGITS[(std::uint8_t)(shifted_e)];
-            str += DIGITS[(std::uint8_t)(e & (std::byte)0xf)];
-            if (i == 3 || i == 5 || i == 7 || i == 9) {
-                str += '-';
-            }
-        }
-        return str;
-    }
-
-    /**
      * @brief  the given UUIDv8 string to UUIDv8 to 16 byte unsigned int array
      * @param uuidStr - UUIDv8 equivalent in string format
      * @return UUIDv8 object that contain 2 parts MSB and LSB
@@ -150,7 +129,27 @@ public:
         return uuid.msb_ >> 16;
     }
 
-    /**
+    /** @brief return current count of UUIDv8 numbers generated
+     * @return count
+    */
+    uint64_t getCount() { return (this->msb_ & 0xFFFL); }
+
+    /** @brief return count of UUIDv8 numbers generated from given UUIDv8
+     * @param UUIDv8 node
+     * @return count
+    */
+    uint64_t getCount(UUIDv8 const& uuid) { return (uuid.msb_ & 0xFFFL); }
+
+private:
+    /** uuidV8FromString - utility function to convert UUIDv8 string to uint8_t pointer array
+     * @param str input UUIDv8 string that needs to be converted to UUIdv8
+     * @param[out] uuidOut - will contain UUIDv8 number
+     * @return ret - status of the conversion being success or not. <0 is error condition
+     *              which mostly likely will not occur
+    */
+    int uuidV8FromString(std::string str, uint8_t* uuidOut);
+
+        /**
      * @brief the random number that's part of UUIDv8 number
      * @param UUIDv8
      * @return  random number
@@ -166,6 +165,7 @@ public:
     uint64_t getVersion(UUIDv8 const& uuid) {
         return ( uuid.msb_ >> 12) & 0xf;
     }
+
     /**
      * @brief Returns 2-bit UUID variant of UUIDv8 format (10)
      * @param UUIDv8 object
@@ -174,17 +174,6 @@ public:
     uint64_t getVariant(UUIDv8 const& uuid) {
         return (uuid.lsb_ >> 62) & 0x3;
     }
-
-    /** @brief return current count of UUIDv8 numbers generated
-     * @return count
-    */
-    uint64_t getCount() { return (this->msb_ & 0xFFFL); }
-
-    /** @brief return count of UUIDv8 numbers generated from given UUIDv8
-     * @param UUIDv8 node
-     * @return count
-    */
-    uint64_t getCount(UUIDv8 const& uuid) { return (uuid.msb_ & 0xFFFL); }
 
     /** @brief get MSB part from given UUIDv8
      * @return msb_
@@ -196,104 +185,13 @@ public:
       */
     uint64_t getLSB() { return lsb_; }
 
-
-private:
-    /** uuidV8FromString - utility function to convert UUIDv8 string to uint8_t pointer array
-     * @param str input UUIDv8 string that needs to be converted to UUIdv8
-     * @param[out] uuidOut - will contain UUIDv8 number
-     * @return ret - status of the conversion being success or not. <0 is error condition
-     *              which mostly likely will not occur
+    /**
+     * @brief uuidV8ToString utility function to convert given UUIDv8 number array to string format
+     * @param  uuid UUIDV8 number in array
+     * @return UUIDv8 string
     */
-    inline int uuidV8FromString(std::string str, uint8_t* uuidOut) {
-        str.erase(remove(str.begin(), str.end(), '-'), str.end());
-        auto i = 0;
-        for (auto c : str) {
-            uint8_t n;
-            switch (c) {
-                case '0':
-                  n = 0;
-                  break;
-                case '1':
-                  n = 1;
-                  break;
-                case '2':
-                  n = 2;
-                  break;
-                case '3':
-                  n = 3;
-                  break;
-                case '4':
-                  n = 4;
-                  break;
-                case '5':
-                  n = 5;
-                  break;
-                case '6':
-                  n = 6;
-                  break;
-                case '7':
-                  n = 7;
-                  break;
-                case '8':
-                  n = 8;
-                  break;
-                case '9':
-                  n = 9;
-                  break;
-                case 'a':
-                  n = 10;
-                  break;
-                case 'b':
-                  n = 11;
-                  break;
-                case 'c':
-                  n = 12;
-                  break;
-                case 'd':
-                  n = 13;
-                  break;
-                case 'e':
-                  n = 14;
-                  break;
-                case 'f':
-                  n = 15;
-                  break;
-                case 'A':
-                  n = 10;
-                  break;
-                case 'B':
-                  n = 11;
-                  break;
-                case 'C':
-                  n = 12;
-                  break;
-                case 'D':
-                  n = 13;
-                  break;
-                case 'E':
-                  n = 14;
-                  break;
-                case 'F':
-                  n = 15;
-                  break;
-                default:
-                  n = 0xff;
-            }
-            if (n == 0xff) {
-                return -1;
-            }
+    static std::string uuidV8ToString(const uint8_t* uuid);
 
-            if ((i & 1) == 0) {
-                uuidOut[i >> 1] =
-                    (std::uint8_t)((std::byte)n << 4);  // even i => hi 4 bits
-            } else {
-                uuidOut[i >> 1] = (std::uint8_t)(((std::byte)uuidOut[i >> 1]) |
-                                                  (std::byte)n);  // odd i => lo 4 bits
-            }
-            i++;
-        }
-        return 0;
-    }
 
     /** Represents allowable clock drift tolerance    */
     static constexpr uint64_t clockDriftTolerance_ = 10000000;
@@ -309,6 +207,9 @@ private:
 
     /** Represents the maxCount of UUIDv8 nodes to track previous history  */
     static constexpr uint64_t maxCount_ = 0xfff;
+
+    /** UUID array size */
+    static constexpr int uuidSize_ = 16;
 
     /** Represents MSB part of UUIDv8 */
     uint64_t msb_{};

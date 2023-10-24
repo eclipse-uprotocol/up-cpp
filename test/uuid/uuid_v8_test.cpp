@@ -25,7 +25,7 @@
 #include <iostream>
 
 using namespace cgreen;
-using namespace uprotocol::uuid::factory;
+using namespace uprotocol::uuid;
 
 
 Describe(uuid_v8_TEST);
@@ -35,7 +35,7 @@ BeforeEach(uuid_v8_TEST) {
 AfterEach(uuid_v8_TEST) {
   // Dummy
 }
-
+// Test for generate(), getTime(),getCount()
 Ensure(uuid_v8_TEST, uuid_v8_test1) {
     auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch())
@@ -57,6 +57,7 @@ Ensure(uuid_v8_TEST, uuid_v8_test1) {
     assert_true(str == str_back);
 }
 
+// Test for fromString(),toString()
 Ensure(uuid_v8_TEST, uuid_v8_test2) {
     auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch())
@@ -75,10 +76,10 @@ Ensure(uuid_v8_TEST, uuid_v8_test2) {
     uuidV8_new.generate(uuidV8_2.getTime() - 3, &uuidV8_2);
 
     assert_that(uuidV8_new.getTime() == uuidV8.getTime())
-      assert_that(uuidV8_new.getCount() - 1 ==
+    assert_that(uuidV8_new.getCount() - 1 ==
                   uuidV8.getCount())
 }
-
+// Test for copy(),getCount()
 Ensure(uuid_v8_TEST, uuid_v8_test3) {
     auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(
                   std::chrono::system_clock::now().time_since_epoch())
@@ -97,7 +98,7 @@ Ensure(uuid_v8_TEST, uuid_v8_test3) {
 
     assert_that(uuidV8.getCount() - 1 == prev.getCount())
 }
-
+// Loopt Test for utility getTime(), copy(),getCount()
 Ensure(uuid_v8_TEST, uuid_v8_test4) {
     UUIDv8 prev;
     auto t = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(

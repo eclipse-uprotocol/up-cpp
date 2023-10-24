@@ -40,12 +40,6 @@ public:
     /** @brief Constructor for building UUIDV1 object   */
     UUIDv1();
 
-    /**
-     * @brief generates UUIDv1 number
-     * @param[out] tUUid
-    */
-    void generateUUID(uuid_t tUuid);
-
     /** @brief converts current UUIDv1 number in string format
      *  @return uuidv1 in string
     */
@@ -54,9 +48,16 @@ public:
     /** @brief Gets the UUIDv1 number
      * @return UUIDv1 number
     */
-    unsigned char* getUUIDv1() { return uuid_;  }
+    uint8_t* getUUIDv1() { return uuid_;  }
 
 private:
+
+   /**
+     * @brief generates UUIDv1 number
+     * @param[out] tUUid
+    */
+    void generateUUID(uuid_t tUuid);
+
     /**
      * uuid_ will store UUID of version1 (type uuid_t from Linux library libuuid)
     */

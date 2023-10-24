@@ -48,13 +48,6 @@ public:
     UUIDv6();
 
     /**
-     * This method has the logic to compute and generates UUIDv6
-     * @param uuid - contains UUIDv6 so that calling function will have the unique id.
-     *  Here constructor calls this method to set member @uuidV6_
-    */
-    void generateUUID(uuid_t uUIDV6);
-
-    /**
      * convert uuidv6 id to string format
      * @return Returns uuidv6's string equivalent of uuidv6 which is stored in @uuidV6_
      */
@@ -77,9 +70,17 @@ public:
      * Getter function to return UUIDv6
      * @return @uuid_ which contains UUID of Version 6
     */
-    unsigned char* getUUIDv6() { return uuidV6_; }
+    uint8_t* getUUIDv6() { return uuidV6_; }
 
 private:
+
+    /**
+     * This method has the logic to compute and generates UUIDv6
+     * @param uuid - contains UUIDv6 so that calling function will have the unique id.
+     *  Here constructor calls this method to set member @uuidV6_
+    */
+    void generateUUID(uuid_t uUIDV6);
+
     /** Stores UUIDv6 number(uuid_t type from Linux library libuuid) */
     uuid_t uuidV6_;
 

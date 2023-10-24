@@ -35,10 +35,8 @@ UUIDv1::UUIDv1(){
 void UUIDv1::generateUUID(uuid_t tUuid) {
     uuid_clear(tUuid);
     if (-1 == uuid_generate_time_safe(tUuid)) {
-        spdlog::error(
-        "Failure to generate safe uuid in uuid_generate_time_safe. Fallback "
-        "to "
-        "unsafe version");
+        spdlog::error("Failure to generate safe uuid in uuid_generate_time_safe."
+        " Fallback to unsafe version");
         uuid_generate_time(tUuid);
     }
 }

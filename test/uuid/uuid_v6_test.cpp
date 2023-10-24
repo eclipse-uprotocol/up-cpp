@@ -21,7 +21,7 @@
 #include "UUIDv6.h"
 
 using namespace cgreen;
-using namespace uprotocol::uuid::factory;
+using namespace uprotocol::uuid;
 
 Describe(UUID_V6_TEST);
 BeforeEach(UUID_V6_TEST) {
@@ -31,14 +31,13 @@ AfterEach(UUID_V6_TEST) {
   // Dummy
 }
 
-// getUUIDv6
+// Test getUUIDv6
 Ensure(UUID_V6_TEST, UUID_V6_TEST1) {
   UUIDv6 uuidv61;
-  uuid_t uuidv6char;
   assert_that( uuidv61.getUUIDv6() != nullptr);
 }
 
-// getTime
+// Test getTime
 Ensure(UUID_V6_TEST, UUID_V6_TEST2) {
   UUIDv6 uuidv61;
   UUIDv6 uuidv62;
@@ -50,7 +49,7 @@ Ensure(UUID_V6_TEST, UUID_V6_TEST2) {
   assert_that(uuidv61.getTime() == uuidv62.getTime());
 }
 
-// string compare
+// string compare, covers testing of toString() and fromString()
 Ensure(UUID_V6_TEST, UUID_V6_TEST3) {
   UUIDv6 uuidv61;
   UUIDv6 uuidv62;
