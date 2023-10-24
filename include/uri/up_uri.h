@@ -32,7 +32,7 @@ class UUri {
  public:
   static const std::string SCHEME;
 
-  UUri(const uri_authority& uAuthority, uri_entity uEntity,
+  UUri(const uri_authority& uAuthority, UEntity uEntity,
          const uri_resource& uResource)
       : uAuthority(uAuthority),
         uEntity(std::move(uEntity)),
@@ -42,7 +42,7 @@ class UUri {
         _base64uri = cloudevents::base64::encode(tostring());
       }
 
-  UUri(const uri_authority& uAuthority, const uri_entity& uEntity,
+  UUri(const uri_authority& uAuthority, const UEntity& uEntity,
          const std::string& uResource)
       : UUri(uAuthority, uEntity, uri_resource::fromName(uResource))
       {
@@ -52,7 +52,7 @@ class UUri {
   static UUri empty() {
     static const auto EMPTY =
         uri_datamodel::UUri(uri_datamodel::uri_authority::empty(),
-                              uri_datamodel::uri_entity::empty(),
+                              uri_datamodel::UEntity::empty(),
                               uri_datamodel::uri_resource::empty());
     return EMPTY;
   }
@@ -64,7 +64,7 @@ class UUri {
 
   [[nodiscard]] uri_authority getUAuthority() const { return uAuthority; }
 
-  [[nodiscard]] uri_entity getUEntity() const { return uEntity; }
+  [[nodiscard]] UEntity getUEntity() const { return uEntity; }
 
   [[nodiscard]] uri_resource getUResource() const { return uResource; }
 
@@ -100,7 +100,7 @@ class UUri {
 
  private:
   const uri_authority uAuthority;
-  const uri_entity uEntity;
+  const UEntity uEntity;
   const uri_resource uResource;
   size_t _hash;
   std::string _base64uri;

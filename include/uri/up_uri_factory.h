@@ -61,7 +61,7 @@ class up_uri_factory {
 
   static std::string buildUProtocolUri(
       const uri_datamodel::uri_authority& uAuthority,
-      const uri_datamodel::uri_entity& uEntity,
+      const uri_datamodel::UEntity& uEntity,
       const uri_datamodel::uri_resource& uResource) {
     return buildUProtocolUri(
         uri_datamodel::UUri(uAuthority, uEntity, uResource));
@@ -69,7 +69,7 @@ class up_uri_factory {
 
   static std::string buildUriForRpc(
       uri_datamodel::uri_authority const& uAuthority,
-      uri_datamodel::uri_entity const& uEntitySource) {
+      uri_datamodel::UEntity const& uEntitySource) {
     std::string sb(std::string("up:"));
 
     sb.append(buildAuthorityPartOfUri(uAuthority));
@@ -85,7 +85,7 @@ class up_uri_factory {
 
   static std::string buildMethodUri(
       uri_datamodel::uri_authority const& uAuthority,
-      uri_datamodel::uri_entity const& uEntity, std::string const& methodName) {
+      uri_datamodel::UEntity const& uEntity, std::string const& methodName) {
     std::string sb(std::string("up:"));
 
     sb.append(buildAuthorityPartOfUri(uAuthority));
@@ -124,7 +124,7 @@ class up_uri_factory {
       return isLocal ? uri_datamodel::UUri::empty()
                      : uri_datamodel::UUri(
                            uri_datamodel::uri_authority::remote("", ""),
-                           uri_datamodel::uri_entity::empty(),
+                           uri_datamodel::UEntity::empty(),
                            uri_datamodel::uri_resource::empty());
     }
 
@@ -168,13 +168,13 @@ class up_uri_factory {
         }
       } else {
         return uri_datamodel::UUri{uAuthority,
-                                     uri_datamodel::uri_entity::empty(),
+                                     uri_datamodel::UEntity::empty(),
                                      uri_datamodel::uri_resource::empty()};
       }
     }
 
     return uri_datamodel::UUri{
-        uAuthority, uri_datamodel::uri_entity(useName, useVersion), uResource};
+        uAuthority, uri_datamodel::UEntity(useName, useVersion), uResource};
   }
 
   static bool isValidupUri(const std::string& uProtocolUri) {
@@ -260,7 +260,7 @@ class up_uri_factory {
   }
 
   static std::string buildupSoftwareEntityPartOfUri(
-      const uri_datamodel::uri_entity& use) {
+      const uri_datamodel::UEntity& use) {
     std::string sb = trim_copy(use.getName());
     sb.append("/");
     if (use.getVersion().has_value()) {

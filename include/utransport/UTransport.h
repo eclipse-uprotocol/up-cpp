@@ -18,6 +18,15 @@ namespace uprotocol::utransport
           public:
 
                /**
+               * API used to authenticate with the underlining transport layer that the uEntity passed
+               * matches the transport specific identity. MUST pass a resolved UUri.
+               * @param uEntity Resolved UEntity
+               * @return Returns OKSTATUS if authenticate was successful, FAILSTATUS if the calling uE 
+               * is not authenticated.
+               */
+               UStatus authenticate (UEntity uEntity) ;
+               
+               /**
                * Transmit UPayload to the topic using the attributes defined in UTransportAttributes.
                * @param topic Resolved UUri topic to send the payload to.
                * @param payload Actual payload.

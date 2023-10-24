@@ -27,7 +27,7 @@ TEST(UAttributesTest, Class)
     builder.withToken("sample_token");
     builder.withHint(USerializationHint::JSON);
     builder.withSink(UUri(uri_datamodel::uri_authority::local(), 
-                        uri_datamodel::uri_entity::fromName("body.access"),
+                        uri_datamodel::UEntity::fromName("body.access"),
                         uri_datamodel::uri_resource::fromName("door")));
     builder.withPermissionLevel(5);
     builder.withCommStatus(200);
