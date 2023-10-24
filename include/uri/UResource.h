@@ -25,7 +25,6 @@
 #include <cctype>
 #include <optional>
 #include <string>
-
 #include "UriFormat.h"
 
 namespace uprotocol::uri {
@@ -154,7 +153,7 @@ public:
      * @return Returns true if this resource is an empty container and has no valuable information in building uProtocol URI.
      */
     [[nodiscard]] bool isEmpty() const override {
-        return (isBlank(name_) || "rpc" == name_) &&
+        return (name_.empty() || "rpc" == name_) &&
                 instance_.empty() && message_.empty() && !id_.has_value();
     }
 
@@ -174,18 +173,14 @@ public:
      * @return Returns the resource instance of the resource if it exists.
      * If the instance does not exist, it is assumed that all the instances of the resource are wanted.
      */
-    [[nodiscard]] std::string getInstance() const {
-        return isBlank(instance_) ? "" : instance_;
-    }
+    [[nodiscard]] std::string getInstance() const { return instance_; }
 
     /**
      * The Message type matches the protobuf service IDL that defines structured data types.
      * A message is a data structure type used to define data that is passed in  events and rpc methods.
      * @return Returns the Message type matches the protobuf service IDL that defines structured data types.
      */
-    [[nodiscard]] std::string getMessage() const {
-        return isBlank(message_) ? "" : message_;
-    }
+    [[nodiscard]] std::string getMessage() const { return message_; }
 
     /**
      * Return true if this resource contains both ID and names.
@@ -203,7 +198,7 @@ public:
         if (name_ == std::string("rpc")) {
             return !getInstance().empty();
         }
-        return !isBlank(name_);
+        return !name_.empty();
     }
 
     /**
@@ -231,12 +226,12 @@ public:
      * Convert this UResource to a string.
      * @return Returns a string representation of this UResource.
      */
-    [[nodiscard]] std::string tostring() const {
-        return std::string("uResource{") +  "name='" + name_ + '\'' +
-                           ", instance='" + (instance_.empty() ? "null" : instance_) + '\'' +
-                           ", message='" + (message_.empty() ? "null" : message_) + '\'' +
-                           ", id='" + (id_.has_value() ? std::to_string(id_.value()) : "null") + '\'' +
-                           ", markedResolved='" + (markedResolved_ ? "true" : "false") + '\'' + '}';
+    [[nodiscard]] std::string toString() const {
+        return std::string("UResource{") +  "name='" + name_ + "', " +
+                           "instance='" + (instance_.empty() ? "null" : instance_) + "', " +
+                           "message='" + (message_.empty() ? "null" : message_) + "', " +
+                           "id=" + (id_.has_value() ? std::to_string(id_.value()) : "null") + ", " +
+                           "markedResolved=" + (markedResolved_ ? "true" : "false") + "}";
     }
 
 private:
@@ -254,7 +249,11 @@ private:
               const std::string& message,
               const std::optional<uint16_t> id,
               const bool markedResolved)
-              : name_(name), instance_(instance), message_(message), id_(id), markedResolved_(markedResolved) {}
+              : id_(id), markedResolved_(markedResolved) {
+        name_ = isBlank(name) ? "" : name;
+        instance_ = isBlank(instance) ? "" : instance;
+        message_ = isBlank(message) ? "" : message;
+    }
 
     /**
      * Utility method to verify if the string is blank.
@@ -267,24 +266,25 @@ private:
 
     /**
      * The name of the resource such as "door".
-    */
+     */
     std::string name_;
     /**
      * The instance of the resource such as "front_left".
-    */
+     */
     std::string instance_;
     /**
      * The message type of the resource.
-    */
+     */
     std::string message_;
     /**
      * The id of the resource.
-    */
+     */
     std::optional<uint16_t> id_;
     /**
      * Indicates that this uResource was populated with intent of having all data.
-    */
+     */
     bool markedResolved_;
+
 }; // class UResource
 
 } // namespace uprotocol::uri

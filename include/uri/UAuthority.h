@@ -25,7 +25,9 @@
 #include <cctype>
 #include <optional>
 #include <string>
-
+#include <array>
+#include <arpa/inet.h>
+#include <spdlog/spdlog.h>
 #include "UriFormat.h"
 
 namespace uprotocol::uri {
@@ -56,7 +58,7 @@ public:
      * Static factory method for creating a remote authority supporting the long serialization information representation of a UUri.<br>
      * Building a UAuthority with this method will create an unresolved uAuthority that can only be serialised in long UUri format.
      * An uri with a long representation of uAUthority can be serialised as follows:
-     * <pre> //&lt;device&gt;.&lt;domain&gt;/&lt;service&gt;/&lt;version&gt;/&lt;resource&gt;#&lt;Message&gt; </pre>
+     *      //<device>.<domain>/<service>/<version>/<resource>#<Message>
      * @param device The device a software entity is deployed on, such as the VCU, CCU or cloud provider.
      * @param domain The domain a software entity is deployed on, such as vehicle or Cloud (PaaS).
      * Vehicle Domain name <b>MUST</b> be that of the vehicle VIN.
@@ -89,7 +91,7 @@ public:
     static UAuthority resolvedRemote(const std::string& device,
                                      const std::string& domain,
                                      const std::string& address) {
-        bool isResolved = !isBlank(device) && !address.empty();
+        bool isResolved = !isBlank(device) && !isBlank(address);
         return UAuthority{device, domain, address, true, isResolved};
     }
 
@@ -107,25 +109,19 @@ public:
      * Accessing an optional device of the uAuthority.
      * @return Returns the device a software entity is deployed on, such as the VCU, CCU or cloud provider.
      */
-    [[nodiscard]] std::string getDevice() const {
-        return isBlank(device_) ? "" : device_;
-    }
+    [[nodiscard]] std::string getDevice() const { return device_; }
 
     /**
      * Accessing an optional domain of the uAuthority.
      * @return Returns the domain a software entity is deployed on, such as vehicle or backoffice.
      */
-    [[nodiscard]] std::string getDomain() const {
-        return isBlank(domain_) ? "" : domain_;
-    }
+    [[nodiscard]] std::string getDomain() const { return domain_; }
 
     /**
      * Accessing an optional IP address configuration of the uAuthority.
      * @return Returns the device IP address.
      */
-    [[nodiscard]] std::string getAddress() const {
-        return isBlank(address_) ? "" : address_;
-    }
+    [[nodiscard]] std::string getAddress() const { return address_; }
 
     /**
      * Support for determining if this uAuthority is defined for a local deployment.
@@ -200,13 +196,13 @@ public:
      * Utility method to convert the UAuthority to a string.
      * @return Returns a string representation of the UAuthority.
      */
-    [[nodiscard]] std::string tostring() const {
-        return std::string("uAuthority{") +
-                          "device='" + (device_.empty() ? "null" : device_) + '\'' +
-                          ", domain='" + (domain_.empty() ? "null" : domain_) + '\'' +
-                          ", address='" + (address_.empty() ? "null" : address_) + '\'' +
-                          ", markedRemote=" + (markedRemote_ ? "true" : "false") + '\'' +
-                          ", markedResolved=" + (markedResolved_ ? "true" : "false") + '}';
+    [[nodiscard]] std::string toString() const {
+        return std::string("UAuthority{") +
+                           "device='" + (device_.empty() ? "null" : device_) + "', " +
+                           "domain='" + (domain_.empty() ? "null" : domain_) + "', " +
+                           "address=" + (address_.empty() ? "null" : address_) + ", " +
+                           "markedRemote=" + (markedRemote_ ? "true" : "false") + ", " +
+                           "markedResolved=" + (markedResolved_ ? "true" : "false") + "}";
     }
 
  private:
@@ -214,7 +210,7 @@ public:
      * Constructor for building a UAuthority.
      * @param device        The device a software entity is deployed on, such as the VCU, CCU or cloud provider.
      * @param domain        The domain a software entity is deployed on, such as vehicle or Cloud (PaaS).
-     * @param address      The device IP address of the device.
+     * @param address       The device IP address of the device.
      * @param markedRemote  Indicates if this UAuthority was implicitly marked as remote.
      * @param markedResolved Indicates that this uAuthority has all the information needed to be serialised
      *                          in the long format or the micro format of a UUri.
@@ -224,18 +220,32 @@ public:
                const std::string& address,
                const bool markedRemote,
                const bool markedResolved)
-              : address_(address), markedRemote_(markedRemote), markedResolved_(markedResolved) {
+               : markedRemote_(markedRemote), markedResolved_(markedResolved) {
         if (!device.empty()) {
-            auto current = device;
+            auto current = isBlank(device) ? "" : device;
             std::transform(current.begin(), current.end(), current.begin(),
-                          [](unsigned char c) { return std::tolower(c); });
+                           [](unsigned char c) { return std::tolower(c); });
             this->device_ = std::move(current);
         }
         if (!domain.empty()) {
-            auto current = domain;
+            auto current = isBlank(domain) ? "" : domain;
             std::transform(current.begin(), current.end(), current.begin(),
-                          [](unsigned char c) { return std::tolower(c); });
+                           [](unsigned char c) { return std::tolower(c); });
             this->domain_ = std::move(current);
+        }
+        address_ = isBlank(address) ? "" : address;
+        // To have a unified format for ipv6 addressing.
+        try {
+            if (std::array<uint8_t, sizeof(struct in6_addr)> ipv6{0}; inet_pton(AF_INET6, address.c_str(), &ipv6) == 1) {
+                std::string ipv6str(INET6_ADDRSTRLEN, '\0');
+                if (inet_ntop(AF_INET6, &ipv6, ipv6str.data(), INET6_ADDRSTRLEN) != nullptr) {
+                    address_ = ipv6str.data();
+                } else {
+                    address_ = "";
+                }
+            }
+        } catch (const std::invalid_argument& e) {
+            spdlog::error("Invalid IP: {}, {}", address, e.what());
         }
     }
 
@@ -263,7 +273,7 @@ public:
      * The device IP address. Represents the micro version of a UAuthority.
      */
     std::string address_;
-    /**
+        /**
      * An UAuthority starting with // is a remote configuration of a URI, and we mark the uAuthority implicitly as remote.
      * This is never exposed externally and is used internally to indicate remote or local deployments.
      */
@@ -273,6 +283,7 @@ public:
      * A resolved UAuthority means that it has all the information needed to be serialised in the long format or the micro format of a UUri.
      */
     bool markedResolved_;
+
 }; // class UAuthority
 
 } // namespace uprotocol::uri

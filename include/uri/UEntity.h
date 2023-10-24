@@ -25,7 +25,6 @@
 #include <cctype>
 #include <optional>
 #include <string>
-
 #include "UriFormat.h"
 
 namespace uprotocol::uri {
@@ -118,7 +117,7 @@ public:
      * @return Returns true if this software entity is an empty container and has no valuable information in building uProtocol sinks or sources.
      */
     [[nodiscard]] bool isEmpty() const override {
-        return isBlank(name_) && !getVersion().has_value() && !getId().has_value();
+        return name_.empty() && !getVersion().has_value() && !getId().has_value();
     }
 
     /**
@@ -133,7 +132,7 @@ public:
      * Determine if this software entity can be serialised into a long UUri form.
      * @return Returns true if this software entity can be serialised into a long UUri form, meaning it has at least a name.
      */
-    [[nodiscard]] bool isLongForm() const override { return !isBlank(name_); }
+    [[nodiscard]] bool isLongForm() const override { return !name_.empty(); }
 
     /**
      * Returns true if the Uri part contains the id's which will allow the Uri part to be serialized into micro form.
@@ -175,14 +174,14 @@ public:
      * Convert this UEntity to a string representation.
      * @return Returns a string representation of this UEntity.
      */
-    [[nodiscard]] std::string tostring() const {
-        std::string versionString = (version_ == std::nullopt) ? "latest" : std::to_string(version_.value());
+    [[nodiscard]] std::string toString() const {
+        std::string versionString = (version_ == std::nullopt) ? "null" : std::to_string(version_.value());
         std::string idString = (id_ == std::nullopt) ? "null" : std::to_string(id_.value());
         std::string resolvedString = markedResolved_ ? "true" : "false";
-        return std::string("uEntity{") + "name='" + name_ + '\'' +
-                           ", version='" + versionString + '\'' +
-                           ", id='" + idString + '\'' +
-                           ", markedResolved='" + resolvedString + '\'' + '}';
+        return std::string("UEntity{") + "name='" + name_ + "', " +
+                           "version=" + versionString + ", " +
+                           "id=" + idString + ", "
+                           "markedResolved=" + resolvedString + "}";
     }
 
 private:
@@ -197,7 +196,9 @@ private:
             const std::optional<uint8_t> version,
             const std::optional<uint16_t> id,
             const bool markedResolved)
-            : name_(name), version_(version), id_(id), markedResolved_(markedResolved) {}
+            : version_(version), id_(id), markedResolved_(markedResolved) {
+        name_ = isBlank(name) ? "" : name;
+    }
 
     /**
      * Utility method to verify if the string is blank.
@@ -211,7 +212,7 @@ private:
     /**
      * The name of the Software Entity.
     */
-    const std::string name_;
+    std::string name_;
     /**
      * The Major version of the Software Entity.
     */
@@ -224,6 +225,7 @@ private:
      * Indicates if this UEntity is resolved.
     */
     const bool markedResolved_ = false;
+
 }; // class UEntity
 
 } // namespace uprotocol::uri

@@ -26,13 +26,11 @@
 #include <string>
 #include <vector>
 #include <spdlog/spdlog.h>
-
 #include "UriSerializer.h"
 #include "UUri.h"
 #include "UAuthority.h"
 #include "UEntity.h"
 #include "UResource.h"
-
 
 namespace uprotocol::uri {
 
@@ -82,67 +80,19 @@ public:
             return UUri::empty();
         }
 
-        static const std::regex schemaPattern("up:", std::regex_constants::icase);
-
-        std::string uri = std::regex_replace(uProtocolUri, schemaPattern, std::string(""),
-                                             std::regex_constants::format_first_only);
-
+        std::string uri = uProtocolUri;
         std::replace(uri.begin(), uri.end(), '\\', '/');
-
         bool isLocal = (uri.find("//") != 0);  // local if does not start with "//"
-
         const auto uriParts = split(uri, "/");
-        auto numberOfPartsInUri = uriParts.size();
 
-        if (numberOfPartsInUri == 0 || numberOfPartsInUri == 1) {
+        if (uriParts.size() < 2) {
             // if split result is 0 or 1 (it means there is no valid address) return
-            return isLocal ? UUri::empty()
-                           : UUri(UAuthority::longRemote("", ""), UEntity::empty(), UResource::empty());
-        }
-
-        std::string entityName;
-        std::string entityVersion;
-        UResource uResource;
-        UAuthority uAuthority;
-
-        if (isLocal) {
-            uAuthority = UAuthority::local();
-            entityName = uriParts[1];
-            if (numberOfPartsInUri > 2) {
-                entityVersion = uriParts[2];
-                uResource = (numberOfPartsInUri > 3) ? parseFromString(uriParts[3]) : UResource::empty();
-            } else {
-                uResource = UResource::empty();
-            }
+            return UUri::empty();
+        } else if (isLocal) {
+            return parseLocalUUri(uriParts);
         } else {
-            auto authorityParts = split(uriParts[2], ".");
-            std::string device = authorityParts[0];
-            std::string domain;
-            if (authorityParts.size() > 1) {
-                domain = authorityParts[1];
-            }
-            uAuthority = UAuthority::longRemote(device, domain);
-
-            if (uriParts.size() > 3) {
-                entityName = uriParts[3];
-                if (numberOfPartsInUri > 4) {
-                    entityVersion = uriParts[4];
-                    uResource = numberOfPartsInUri > 5 ? parseFromString(uriParts[5]) : UResource::empty();
-                } else {
-                    uResource = UResource::empty();
-                }
-            } else {
-                return UUri{uAuthority, UEntity::empty(), UResource::empty()};
-            }
+            return parseRemoteUUri(uriParts);
         }
-
-        std::optional<uint32_t> versionInt = std::nullopt;
-        try {
-            versionInt = entityVersion.empty() ? std::nullopt : std::optional<uint32_t>(std::stoi(entityVersion));
-        } catch (const std::invalid_argument& e) {
-            spdlog::error("Error parsing version: {}", e.what());
-        }
-        return UUri{uAuthority, UEntity::longFormat(entityName, versionInt), uResource};
     }
 
 private:
@@ -265,29 +215,25 @@ private:
     }
 
     /**
-     * Create the authority part of the uProtocol URI from an  authority object.
-     * @param Authority represents the deployment location of a specific  Software Entity in the Ultiverse.
-     * @return Returns the String representation of the  Authority in the uProtocol URI.
+     * Create authority part of the URI from the given UAuthority object.
+     * @param uAuthority UAuthority object of the UUri.
+     * @return Returns the string representation of Authority.
      */
-    static std::string buildAuthorityPartOfUri(const UAuthority& upAuthority) {
-        if (upAuthority.isLocal()) {
-            return "/";
-        }
-
-        std::string partialURI("//");
-        const std::string device = upAuthority.getDevice();
-        const std::string domain = upAuthority.getDomain();
-        if (!device.empty()) {
-            partialURI.append(device);
-            if (!domain.empty()) {
-              partialURI.append(".");
+    static std::string buildAuthorityPartOfUri(const UAuthority& uAuthority) {
+        std::string authority;
+        if (uAuthority.isLocal()) {
+            authority = "/";
+        } else {
+            authority = "//";
+            const std::string device = uAuthority.getDevice();
+            const std::string domain = uAuthority.getDomain();
+            if (!device.empty()) {
+                authority += device;
+                authority += domain.empty() ? "" : ".";
             }
+            authority += domain;
         }
-        if (!domain.empty()) {
-            partialURI.append(domain);
-        }
-
-        return partialURI;
+        return authority;
     }
 
     /**
@@ -296,7 +242,7 @@ private:
      * @param resourceString String that contains the UResource information.
      * @return Returns a UResource object.
      */
-    static UResource parseFromString(const std::string& resourceString) {
+    static UResource parseUAuthority(const std::string& resourceString) {
         auto parts = split(resourceString, "#");
         std::string nameAndInstance = parts[0];
         auto nameAndInstanceParts = split(nameAndInstance, ".");
@@ -304,6 +250,86 @@ private:
         std::string resourceInstance = nameAndInstanceParts.size() > 1 ? nameAndInstanceParts[1] : "";
         std::string resourceMessage = parts.size() > 1 ? parts[1] : "";
         return UResource::longFormat(resourceName, resourceInstance, resourceMessage);
+    }
+
+    /**
+     * Static factory method for creating a UEntity using a string that contains
+     * name and version.
+     * @param entity String that contains the UEntity information.
+     * @param version String that contains the UEntity version.
+     * @return Returns a UEntity object.
+     */
+    static UEntity parseUEntity(std::string_view entity, std::string_view version) {
+        std::optional<uint8_t> entityVersion = std::nullopt;
+        try {
+            entityVersion = version.empty() ? std::nullopt : std::optional<uint8_t>(std::stoi(version.data()));
+        } catch (const std::invalid_argument& e) {
+            spdlog::error("Error parsing version:{}, {}", version, e.what());
+        }
+        return UEntity::longFormat(entity.data(), entityVersion);
+    }
+
+    /**
+     * Static factory method for creating a UUri using a vector of strings that contains
+     * the Local UUri information.
+     * @param uriParts Vector of strings that contains the Local UUri information.
+     * @return Returns a UUri object.
+     */
+    static UUri parseLocalUUri(const std::vector<std::string>& uriParts) {
+        std::string entityName;
+        std::string version;
+        UResource uResource = UResource::empty();
+        auto numberOfPartsInUri = uriParts.size();
+
+        if (numberOfPartsInUri < 2) {
+            return UUri::empty();
+        }
+        entityName = uriParts[1];
+        if (numberOfPartsInUri > 2) {
+            version = uriParts[2];
+            if (numberOfPartsInUri > 3) {
+                uResource = parseUAuthority(uriParts[3]);
+            }
+        }
+        UEntity uEntity = parseUEntity(entityName, version);
+
+        return UUri{UAuthority::local(), uEntity, uResource};
+    }
+
+    /**
+     * Static factory method for creating a UUri using a vector of strings that contains
+     * the Remote UUri information.
+     * @param uriParts Vector of strings that contains the Remote UUri information.
+     * @return Returns a UUri object.
+    */
+    static UUri parseRemoteUUri(const std::vector<std::string>& uriParts) {
+        std::string entityName;
+        std::string version;
+        auto numberOfPartsInUri = uriParts.size();
+
+        if (numberOfPartsInUri < 3) {
+            return UUri::empty();
+        }
+        auto authorityParts = split(uriParts[2], ".");
+        std::string device = authorityParts[0];
+        std::string domain;
+        if (authorityParts.size() > 1) {
+            domain = authorityParts[1];
+        }
+        UAuthority uAuthority = UAuthority::longRemote(device, domain);
+
+        if (uriParts.size() > 3) {
+            UResource uResource = UResource::empty();
+            entityName = uriParts[3];
+            if (numberOfPartsInUri > 4) {
+                version = uriParts[4];
+                uResource = numberOfPartsInUri > 5 ? parseUAuthority(uriParts[5]) : UResource::empty();
+            }
+            UEntity uEntity = parseUEntity(entityName, version);
+            return UUri{uAuthority, uEntity, uResource};
+        } else {
+            return UUri{uAuthority, UEntity::empty(), UResource::empty()};
+        }
     }
 }; // class LongUriSerializer
 

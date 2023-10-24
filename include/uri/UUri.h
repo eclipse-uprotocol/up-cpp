@@ -23,7 +23,6 @@
 
 #include <string>
 #include <utility>
-
 #include "UriFormat.h"
 #include "UAuthority.h"
 #include "UEntity.h"
@@ -39,10 +38,7 @@ namespace uprotocol::uri {
  * Defining a common URI for the system allows applications and/or services to publish and discover each other
  * as well as maintain a database/repository of microservices in the various vehicles.<br>
  * Example for long format serialization:
- * <pre>
- *     //&lt;device&gt;.&lt;domain&gt;/&lt;service&gt;/&lt;version&gt;/&lt;resource&gt;#&lt;message&gt;
- * </pre>
- *
+ *     //<device>.<domain>/<service>/<version>/<resource>#<message>
  */
 class UUri : public UriFormat {
 public:
@@ -113,8 +109,8 @@ public:
      */
     [[nodiscard]] bool isLongForm() const override {
         return uAuthority_.isLongForm() &&
-              (uEntity_.isLongForm() || uEntity_.isEmpty()) &&
-              (uResource_.isLongForm() || uResource_.isEmpty());
+               (uEntity_.isLongForm() || uEntity_.isEmpty()) &&
+               (uResource_.isLongForm() || uResource_.isEmpty());
     }
 
     /**
@@ -158,11 +154,11 @@ public:
      * Converts this UUri to a String.
      * @return Returns a string representation of this UUri.
      */
-    [[nodiscard]] std::string tostring() const {
+    [[nodiscard]] std::string toString() const {
         return std::string("UriPart{") +
-                           "uAuthority=" + uAuthority_.tostring() +
-                           ", uEntity=" + uEntity_.tostring() +
-                           ", uResource=" + uResource_.tostring() + '}';
+                           "uAuthority=" + uAuthority_.toString() +
+                           ", uEntity=" + uEntity_.toString() +
+                           ", uResource=" + uResource_.toString() + '}';
     }
 
 private:
@@ -178,6 +174,7 @@ private:
      * UResource represents something that is manipulated by a service such as a Door.
      */
     const UResource uResource_;
+
 }; // class UUri
 
 }  // namespace uprotocol::uri
