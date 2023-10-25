@@ -6,10 +6,10 @@
 #include "datamodel/UListener.h"
 #include "datamodel/UPayload.h"
 #include "datamodel/UAttributes.h"
-#include <include/uri/up_uri.h>
+#include <include/uri/UUri.h>
 
 using namespace uprotocol::utransport;
-using namespace uri_datamodel;
+using namespace uprotocol::uri;
 
 namespace uprotocol::utransport
 {
@@ -60,19 +60,12 @@ namespace uprotocol::utransport
                virtual UStatus unregisterListener(const UUri &uri, 
                                                   const UListener &listner) = 0;
 
-                    virtual UStatus receive(
-                         UUri &uri, 
-                         UPayload &payload, 
-                         UAttributes &attributes) = 0;
-                    
-                    virtual UPayload invokeMethod(
-                         UUri &uri,
-                         UPayload &payload, 
-                         UAttributes &attributes) = 0;
+               virtual UStatus receive(const UUri &uri, 
+                                       const UPayload &payload, 
+                                       const UAttributes &attributes) = 0;
 
-                    virtual ~UTransport() {} 
-          };
-    }
+               virtual ~UTransport() {} 
+     };
 }
 
 #endif /*_UTRANSPORT_*/

@@ -7,7 +7,7 @@
 #include <include/utransport/datamodel/UStatus.h>
 
 using namespace uprotocol::utransport;
-using namespace uri_datamodel;
+using namespace uprotocol::uri;
 
 /**
  * RpcClient is an interface used by code generators for uProtocol services defined in proto files such as

@@ -23,13 +23,13 @@
 #define _UATTRIBUTES_
 
 #include <memory>
-#include <include/uri/up_uri.h>
+#include <include/uri/UUri.h>
 #include <include/uuid/uuid_gen.h>
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"
 
-using namespace uri_datamodel;
+using namespace uprotocol::uri;
 
 namespace uprotocol::utransport {
 

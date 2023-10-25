@@ -1,12 +1,13 @@
 #ifndef _ULISTENER_H_
 #define _ULISTENER_H_
 
-#include <include/uri/up_uri.h>
-#include <include/uri/up_uri_factory.h>
+#include <include/uri/UUri.h>
 #include <include/model/attributes.h>
 #include "UStatus.h"
 #include "UPayload.h"
 #include "UAttributes.h"
+
+using namespace uprotocol::uri;
 
 namespace uprotocol::utransport
 {

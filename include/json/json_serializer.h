@@ -39,7 +39,6 @@
 
 using google::protobuf::util::TimeUtil;
 using io::cloudevents::v1::CloudEvent;
-using namespace rapidjson;
 
 namespace cloudevents::format {
 
@@ -48,74 +47,6 @@ class Json_serializer : public Serializer {
   [[nodiscard]] std::optional<std::unique_ptr<formatted_event>> serialize(
       const io::cloudevents::v1::CloudEvent& cloudEvent) override {
       return std::nullopt;
-    }
-
-    //
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Value key;
-    rapidjson::Value value;
-    Document::AllocatorType allocator;//= doc.GetAllocator();
-
-    if (auto result = buildJsonAttributes(cloudEvent, doc); !result) {
-      return std::nullopt;
-    }
-
-    auto ev = std::make_unique<formatted_event>();
-    switch (cloudEvent.data_case()) {
-      case CloudEvent::DataCase::kBinaryData: {
-        key.SetString(Serializer::DATA_CONTENT_TYPE_KEY.c_str(), allocator);
-        value.SetString("application/json", allocator);
-        doc.AddMember(key, value, allocator);
-
-        key.SetString("data_base64", allocator);
-        doc.AddMember(
-            key,
-            rapidjson::Value().SetString(
-                cloudevents::base64::encode(cloudEvent.binary_data()).c_str(),
-                allocator),
-            allocator);
-
-        ev->type = DATA_TYPE_E::JSON;
-        break;
-      }
-      case CloudEvent::DataCase::kTextData: {
-        key.SetString(Serializer::DATA_CONTENT_TYPE_KEY.c_str(), allocator);
-        value.SetString("application/json", allocator);
-        doc.AddMember(key, value, allocator);
-
-        key.SetString("data", allocator);
-        doc.AddMember(key,
-                      rapidjson::Value().SetString(
-                          cloudEvent.text_data().c_str(), allocator),
-                      allocator);
-        ev->type = DATA_TYPE_E::JSON;
-        break;
-      }
-      case CloudEvent::DataCase::kProtoData: {
-        key.SetString(Serializer::DATA_CONTENT_TYPE_KEY.c_str(), allocator);
-        value.SetString(Serializer::PROTO_CONTENT_TYPE.c_str(), allocator);
-        doc.AddMember(key, value, allocator);
-        key.SetString("data", allocator);
-        doc.AddMember(
-            key,
-            rapidjson::Value().SetString(
-                cloudEvent.proto_data().SerializeAsString().c_str(), allocator),
-            allocator);
-        ev->type = DATA_TYPE_E::JSON;
-        break;
-      }
-      case CloudEvent::DataCase::DATA_NOT_SET: {
-        spdlog::warn("DATA Not Set");
-        return std::nullopt;
-      }
-    }
-
-    rapidjson::StringBuffer s;
-    rapidjson::Writer writer(s);
-    doc.Accept(writer);
-    ev->serialized_data = s.GetString();
-    return ev;
   }
 
   [[nodiscard]] std::optional<std::unique_ptr<io::cloudevents::v1::CloudEvent>>
@@ -188,80 +119,7 @@ class Json_serializer : public Serializer {
   [[nodiscard]] static bool buildJsonAttributes(
       const io::cloudevents::v1::CloudEvent& cloudEvent,
       rapidjson::Document& doc) {
-    rapidjson::Value key;
-    rapidjson::Value value;
-    Document::AllocatorType allocator; //= doc.GetAllocator();
-
-    key.SetString("id", allocator);
-    value.SetString(cloudEvent.id().c_str(), allocator);
-    doc.AddMember(key, value, allocator);
-    key.SetString("source", allocator);
-    value.SetString(cloudEvent.source().c_str(), allocator);
-    doc.AddMember(key, value, allocator);
-    key.SetString("specversion", allocator);
-    value.SetString(cloudEvent.spec_version().c_str(), allocator);
-    doc.AddMember(key, value, allocator);
-    key.SetString("type", allocator);
-    value.SetString(cloudEvent.type().c_str(), allocator);
-    doc.AddMember(key, value, allocator);
-
-    if (cloudEvent.attributes_size()) {
-      for (const auto& [attrKey, val] : cloudEvent.attributes()) {
-        key.SetString(attrKey.c_str(), allocator);
-        switch (val.attr_case()) {
-          case io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
-              AttrCase::kCeBoolean:
-            doc.AddMember(key, rapidjson::Value().SetBool(val.ce_boolean()),
-                          allocator);
-            break;
-          case io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
-              AttrCase::kCeInteger:
-            doc.AddMember(key, rapidjson::Value().SetInt(val.ce_integer()),
-                          allocator);
-            break;
-          case io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
-              AttrCase::kCeString:
-            doc.AddMember(key,
-                          rapidjson::Value().SetString(val.ce_string().c_str(),
-                                                       allocator),
-                          allocator);
-            break;
-          case io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
-              AttrCase::kCeBytes:
-            doc.AddMember(
-                key,
-                rapidjson::Value().SetString(val.ce_bytes().c_str(), allocator),
-                allocator);
-            break;
-          case io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
-              AttrCase::kCeUri:
-            doc.AddMember(
-                key,
-                rapidjson::Value().SetString(val.ce_uri().c_str(), allocator),
-                allocator);
-            break;
-          case io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
-              AttrCase::kCeUriRef:
-            doc.AddMember(key,
-                          rapidjson::Value().SetString(val.ce_uri_ref().c_str(),
-                                                       allocator),
-                          allocator);
-            break;
-          case io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
-              AttrCase::kCeTimestamp:
-            doc.AddMember(key,
-                          rapidjson::Value().SetString(
-                              (TimeUtil::ToString(val.ce_timestamp())).c_str(),
-                              allocator),
-                          allocator);
-            break;
-          case io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
-              AttrCase::ATTR_NOT_SET:
-            spdlog::info("Attribute {} type was not set\n", attrKey.c_str());
-            return false;
-        }
-      }
-    }
+    
     return true;
   }
 
