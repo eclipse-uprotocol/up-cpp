@@ -47,7 +47,6 @@ class Json_serializer : public Serializer {
  public:
   [[nodiscard]] std::optional<std::unique_ptr<formatted_event>> serialize(
       const io::cloudevents::v1::CloudEvent& cloudEvent) override {
-    if (!is_valid_event(cloudEvent)) {
       return std::nullopt;
     }
 

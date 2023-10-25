@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <include/utransport/UPayload.h>
+#include <include/utransport/datamodel/UPayload.h>
 
 using namespace uprotocol::utransport;
 

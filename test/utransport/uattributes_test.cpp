@@ -1,18 +1,15 @@
 #include "spdlog/spdlog.h"
-#include <include/utransport/UAttributes.h>
+#include <include/utransport/datamodel/UAttributes.h>
 #include <include/uuid/uuid_gen.h>
 #include <gtest/gtest.h>
 
-using namespace uprotocol::utransport::datamodel;
+using namespace uprotocol::utransport;
 
 // Test the UAttributes class
 TEST(UAttributesTest, Class) 
 {
     // Create an empty UAttributes object
     UAttributes attributes;
-    
-    // Test the isEmpty() method for an empty object
-    EXPECT_TRUE(attributes.isEmpty());
 
     st_uuid id;
 
@@ -24,20 +21,19 @@ TEST(UAttributesTest, Class)
     // Create a UAttributes object with some values
     UMessageType type = UMessageType::PUBLISH;
     UPriority priority = UPriority::STANDARD;
-    UAttributes::UAttributesBuilder builder(&id, type, priority);
+    UAttributesBuilder builder(id, type, priority);
+    
     builder.withTtl(100);
     builder.withToken("sample_token");
     builder.withHint(USerializationHint::JSON);
     builder.withSink(UUri(uri_datamodel::uri_authority::local(), 
-                        uri_datamodel::uri_entity::fromName("body.access"),
+                        uri_datamodel::UEntity::fromName("body.access"),
                         uri_datamodel::uri_resource::fromName("door")));
     builder.withPermissionLevel(5);
     builder.withCommStatus(200);
-    builder.withReqId(&id);
+    builder.withReqId(id);
     UAttributes nonEmptyAttributes = builder.build();
 
-    // Test the isEmpty() method for a non-empty object
-    EXPECT_FALSE(nonEmptyAttributes.isEmpty());
 
     // Test getters for the attributes
     EXPECT_EQ(nonEmptyAttributes.type(), type);

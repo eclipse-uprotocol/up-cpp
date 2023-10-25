@@ -43,8 +43,8 @@ AfterEach(up_uri) {
 static void test_create_full_local_uri() {
   uri_datamodel::uri_authority uAuthority =
       uri_datamodel::uri_authority::local();
-  uri_datamodel::uri_entity use =
-      uri_datamodel::uri_entity::fromName("body.access");
+  uri_datamodel::UEntity use =
+      uri_datamodel::UEntity::fromName("body.access");
   uri_datamodel::uri_resource uResource =
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left");
 
@@ -59,7 +59,7 @@ static void test_create_full_local_uri() {
 static void test_create_full_remote_uri() {
   uri_datamodel::uri_authority uAuthority =
       uri_datamodel::uri_authority::remote("VCU", "MY_VIN");
-  uri_datamodel::uri_entity use("body.access", "1");
+  uri_datamodel::UEntity use("body.access", "1");
   uri_datamodel::uri_resource uResource("door", "front_left", "Door");
 
   uri_datamodel::UUri uri(uAuthority, use, uResource);
@@ -74,7 +74,7 @@ static void test_create_full_remote_uri() {
 static void test_create_uri_no_message_with_constructor() {
   uri_datamodel::uri_authority uAuthority =
       uri_datamodel::uri_authority::remote("VCU", "MY_VIN");
-  uri_datamodel::uri_entity use("body.access", "1");
+  uri_datamodel::UEntity use("body.access", "1");
   uri_datamodel::uri_resource uResource =
       uri_datamodel::uri_resource::fromName("door");
 
@@ -88,7 +88,7 @@ static void test_create_uri_no_message_with_constructor() {
 //@DisplayName("Test creating a uri with a empty up authority, expect creation
 // with an empty up authority")
 static void test_create_uri_null_authority() {
-  uri_datamodel::uri_entity use("body.access", "1");
+  uri_datamodel::UEntity use("body.access", "1");
   uri_datamodel::uri_resource uResource =
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left");
 
@@ -105,9 +105,9 @@ static void test_create_uri_null_use() {
   uri_datamodel::uri_resource uResource =
       uri_datamodel::uri_resource::fromNameWithInstance("door", "front_left");
 
-  uri_datamodel::UUri uri(uAuthority, uri_datamodel::uri_entity::empty(),
+  uri_datamodel::UUri uri(uAuthority, uri_datamodel::UEntity::empty(),
                             uResource);
-  assertEquals(uri_datamodel::uri_entity::empty(), uri.getUEntity());
+  assertEquals(uri_datamodel::UEntity::empty(), uri.getUEntity());
 }
 
 //@DisplayName("Test creating a uri with a null ulitfi resource, expect creation
@@ -115,7 +115,7 @@ static void test_create_uri_null_use() {
 static void test_create_uri_null_uResource() {
   uri_datamodel::uri_authority uAuthority =
       uri_datamodel::uri_authority::remote("VCU", "MY_VIN");
-  uri_datamodel::uri_entity use("body.access", "1");
+  uri_datamodel::UEntity use("body.access", "1");
   uri_datamodel::uri_resource uResource = uri_datamodel::uri_resource::empty();
 
   uri_datamodel::UUri uri(uAuthority, use, uResource);
@@ -138,7 +138,7 @@ static void test_is_empty() {
 
   uri_datamodel::uri_authority uAuthority =
       uri_datamodel::uri_authority::empty();
-  uri_datamodel::uri_entity use = uri_datamodel::uri_entity::empty();
+  uri_datamodel::UEntity use = uri_datamodel::UEntity::empty();
   uri_datamodel::uri_resource uResource = uri_datamodel::uri_resource::empty();
 
   uri_datamodel::UUri uri2(uAuthority, use, uResource);
