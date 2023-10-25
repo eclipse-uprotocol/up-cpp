@@ -38,14 +38,19 @@ namespace uprotocol::utransport
             UPayload(const uint8_t *data, 
                      size_t dataSize) {
                 
-                data_ = std::make_unique<uint8_t[]>(dataSize);
+                if (nullptr != data) && (0 != dataSize) {
+                    data_ = std::make_unique<uint8_t[]>(dataSize);
 
-                memcpy(
-                    data_.get(),
-                    data,
-                    dataSize);
+                    memcpy(
+                        data_.get(),
+                        data,
+                        dataSize);
 
-                dataSize_ = dataSize;
+                    dataSize_ = dataSize;
+                }  else {
+                    data_ = nullptr;
+                    dataSize = 0;
+                }
             }
             
             /**

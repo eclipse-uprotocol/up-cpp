@@ -24,7 +24,7 @@ namespace uprotocol::utransport
                * @return Returns OKSTATUS if authenticate was successful, FAILSTATUS if the calling uE 
                * is not authenticated.
                */
-               UStatus authenticate(const UEntity &uEntity) ;
+               UStatus authenticate(const UEntity &uEntity);
                
                /**
                * Transmit UPayload to the topic using the attributes defined in UTransportAttributes.
