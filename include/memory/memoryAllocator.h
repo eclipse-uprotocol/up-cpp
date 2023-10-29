@@ -1,6 +1,12 @@
 #ifndef _MEMORY_ALLOCATOR_H_
 #define _MEMORY_ALLOCATOR_H_
 
+#include <vector>
+#include <include/utransport/datamodel/UStatus.h>
+
+using namespace std;
+using namespace uprotocol::utransport;
+
 class MemoryAllocator
 {
     public:
@@ -9,32 +15,32 @@ class MemoryAllocator
         * initialize memory handler
         * @return OK on success , error on failure
         */
-        UStatus initialize() = 0;
+        virtual UStatus initialize() = 0;
  
         /**
         * terminate memory handler
         * @return OK on success , error on failure
         */
-        UStatus terminate() = 0;
+        virtual UStatus terminate() = 0;
          
         /**
         * allocate shared memory buffer (ref counter will be increased)
         * @return pointer to a shared memory buffer, nullptr in case of failure
         */
-        uint8_t* allocate() = 0;
+        virtual uint8_t* allocate() = 0;
          
         /**
         * free shared memory buffer in case that the memory was not used  (ref counter will be decreased)
         * @param addr - address to free
         * @return OK on success , error on failure
         */
-        UStatus free(uint8_t &addr) = 0;
+        virtual UStatus free(uint8_t *addr) = 0;
  
         /**
         * ged addresses of all memory addresses (ref counter will not be increased)
         * @return vector on success , nullopt on failure
         */
-        std::optional<std::vector<uint8_t*>> getAddresses() noexcept;
-}
+        virtual std::optional<std::vector<uint8_t*>> getAddresses() = 0;
+};
 
 #endif /* _MEMORY_ALLOCATOR_H_ */

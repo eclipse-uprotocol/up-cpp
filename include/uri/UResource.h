@@ -261,7 +261,7 @@ private:
      * @return bool Returns true if the string is blank.
      */
     [[nodiscard]] static bool isBlank(std::string_view str) {
-        return std::all_of(str.begin(), str.end(), isspace);
+        return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) || c == '\0'; });
     }
 
     /**
