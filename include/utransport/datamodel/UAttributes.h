@@ -24,12 +24,13 @@
 
 #include <memory>
 #include <include/uri/UUri.h>
-#include <include/uuid/uuid_gen.h>
+#include <include/uuid/uuid.h>
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"
 
 using namespace uprotocol::uri;
+using namespace uprotocol::uuid;
 
 namespace uprotocol::utransport {
 
