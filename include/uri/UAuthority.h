@@ -21,10 +21,12 @@
 #ifndef _UAUTHORITY_H_
 #define _UAUTHORITY_H_
 
+#include <stdio.h>
 #include <algorithm>
 #include <cctype>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <array>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
@@ -255,7 +257,7 @@ public:
      * @return bool Returns true if the string is blank.
      */
     [[nodiscard]] static bool isBlank(std::string_view str) {
-        return std::all_of(str.begin(), str.end(), isspace);
+        return std::all_of(str.begin(), str.end(), [](char c) { return std::isspace(c) || c == '\0'; });
     }
 
     /**
