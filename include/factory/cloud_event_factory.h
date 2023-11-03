@@ -37,7 +37,8 @@
 #include "spdlog/spdlog.h"
 #include "spec_version.h"
 #include "up_validator.h"
-#include "UUIDv6.h"
+
+#include "uuid.h"
 
 namespace cloudevents::factory {
 using namespace cloudevents::format;
@@ -528,7 +529,6 @@ struct factory {
   [[nodiscard]] static inline bool is_time_passed(CE& ce) {
     struct timeval now;
     gettimeofday(&now, nullptr);
-    UUIDv6 uuidV6;
     // C++ type in nano
     // auto start = std::chrono::high_resolution_clock::now();
     uint64_t duration = (now.tv_sec * 1000000) + now.tv_usec;
@@ -536,8 +536,8 @@ struct factory {
     if (iter != ce.attributes().end()) {
       auto ttl = iter->second.ce_integer();
       std::string t_uuid_str = const_cast<std::string&>(ce.id());
-      uuidV6.fromString(t_uuid_str);
-      uint64_t id_time = uuidV6.getTime()+
+      UUID uuid(t_uuid_str);
+      uint64_t id_time = uuid.getTime()+
           (int64_t)ttl;
       if (id_time < duration) {
         return true;  // time passed
@@ -600,8 +600,8 @@ events and mandatory or optional in the uProtocol
       attr->set_ce_string(*priority);
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
-    UUIDv6 uuidV6;
-    ce.set_id(uuidV6.toString());
+    UUID uuid;
+    ce.set_id(uuid.toString());
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_proto_data(any);
@@ -659,8 +659,8 @@ events and mandatory or optional in the uProtocol
       attr->set_ce_string(*priority);
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
-    UUIDv6 uuidV6;
-    ce.set_id(uuidV6.toString());
+    UUID uuid;
+    ce.set_id(uuid.toString());
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_binary_data(body);
