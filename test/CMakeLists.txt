@@ -1,5 +1,5 @@
 set(TESTS_PATH ../test)
-## setting the compiler
+setting the compiler
 if(CMAKE_COMPILER_IS_GNUCXX)
 
 	find_program(GCOV_TOOL gcov-11)
@@ -72,12 +72,10 @@ add_executable(uuid_gen_test
 target_link_libraries(uuid_gen_test ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-05-uuid-gen-test" uuid_gen_test)
 
-
-add_executable(base64_test ${TESTS_PATH}/tools/base64_test.cpp)
-
-target_link_libraries(base64_test ${OPENSSL_LIBRARIES} ${CGREEN_LIBRARY} uprotocolsdk)
-
-add_test("t-06-base64-test" base64_test)
+add_executable(base64_test 
+	${TESTS_PATH}/tools/base64_test.cpp)
+target_link_libraries(base64_test gtest gtest_main uprotocolsdk)
+add_test("t-06-base64-test" base64_test)	
 
 add_executable(ce_factory_test 	${CGREEN_INCLUDE_DIR} ${TEST_PROTO_SRCS} ${TEST_PROTO_HDRS}
 		${TESTS_PATH}/factory/cloud_event_factory_test.cpp)

@@ -25,12 +25,15 @@ namespace tools {
 class base64 {
     public:
         static std::string base64encode(uint8_t const* data, const size_t &len);
-        static std::string base64decode(std::string_view data, const size_t &len);
+        static std::string base64decode(uint8_t const* data, const size_t &len);
         
-        static std::string base64encode(std::string_view t_str);
-        static std::string base64decode(std::string_view t_str);
+        static std::string base64encode(std::string const& t_str);
+        static std::string base64decode(std::string const& t_str);
+
     private:
         base64() = default;
+        static unsigned int posOfChar(const uint8_t chr);
+        static constexpr char* B64chars = (char*)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 };
 }  //   namespace tools
 #endif  //_BASE64_H_

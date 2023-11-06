@@ -18,40 +18,19 @@
  */
 
 #include "base64.h"
-
-#include <cgreen/cgreen.h>
-
+#include <gtest/gtest.h>
 #include <array>
 
-using namespace cgreen;
+TEST(Base64, base64_encode_decode) {
+    static const char inputData[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghi"
+        "jklmnopqrstuvwxyz!@#$%^&*()";
 
-Describe(Base64);
+    std::string invalidEncodeData{"QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXohQCMkJV4mKigprs"};
 
-BeforeEach(Base64) {
-  // Dummy
-}
-
-AfterEach(Base64) {
-  // Dummy
-}
-
-Ensure(Base64, base64_encode_decode) {
-  static const char ac_input[] =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghi"
-      "jklmnopqrstuvwxyz!@#$%^&*()";
-
-  static std::string ac_output;
-
-  std::string encoded(tools::base64::base64encode(std::string(ac_input)));
-  std::string decoded(tools::base64::base64decode(encoded));
-  assert_true(std::string(ac_input) == decoded);
-
-}
-
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
-  TestSuite* suite = create_test_suite();
-
-  add_test_with_context(suite, Base64, base64_encode_decode);
-
-  return run_test_suite(suite, create_text_reporter());
+    std::string encoded(tools::base64::base64encode(std::string(inputData)));
+    std::string decoded(tools::base64::base64decode(encoded));
+  
+    ASSERT_EQ(std::string(inputData), decoded);
+    ASSERT_NE(tools::base64::base64decode(invalidEncodeData), decoded);
 }
