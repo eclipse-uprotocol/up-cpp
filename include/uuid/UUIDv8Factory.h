@@ -73,32 +73,6 @@ public:
     static UUID create();
 
 private:
-    /**
-    * @brief the random number that's part of UUID number
-    * @param UUID
-    * @return  random number
-    */
-    uint64_t getRandom(const UUID uuid) { return uuid.getLSB() & randomMask_; }
-
-    /**
-    * @brief Returns version of UUID format
-    * @param UUID given UUID number in UUID object
-    * @return version
-    * @note The 4 bit UUID version (1000). Occupies bits 48 through 51.
-    */
-    uint64_t getVersion(UUID const& uuid) {
-        return ( uuid.getMSB() >> 12) & 0xf;
-    }
-
-    /**
-    * @brief Returns 2-bit UUID variant of UUID format (10)
-    * @param UUID object
-    * @return variant of given UUID number format
-    */
-    uint64_t getVariant(UUID const& uuid) {
-        return (uuid.getLSB() >> 62) & 0x3;
-    }
-
     /** Represents allowable clock drift tolerance    */
     static constexpr uint64_t clockDriftTolerance_ = 10000000;
 
@@ -115,10 +89,10 @@ private:
     static constexpr uint64_t maxCount_ = 0xfff;
 
     /** Represents MSB part of UUID */
-    static uint64_t msb_;
+    static inline uint64_t msb_;
 
     /** Represents LSB part of UUID */
-    static uint64_t lsb_;
+    static inline uint64_t lsb_;
 
 }; // class UUIDv8Factory
 

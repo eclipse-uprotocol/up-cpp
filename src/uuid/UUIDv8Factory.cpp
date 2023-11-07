@@ -25,38 +25,6 @@
 #include "UUIDv8Factory.h"
 
 namespace uprotocol::uuid {
-/*
-    UUIDHelper maintain the previous UUID - follows single instance
-*/
-class UUIDHelper {
-public:
-    static UUIDHelper& instance(void) noexcept {
-        static UUIDHelper helper;
-        return helper;
-    }
-
-    void set(uint64_t &msb, uint64_t &lsb) {
-        msb_ = msb;
-        lsb_ = lsb;
-    }
-
-    uint64_t getMsb() {
-        return msb_;
-    }
-
-    uint64_t getLsb() {
-        return lsb_;
-    }
-
-private:
-    /* Using atomic, so we need not implment locking */
-    std::atomic<uint64_t> msb_ = 0;
-    std::atomic<uint64_t> lsb_ = 0;
-};
-
-//static member initialization
-uint64_t UUIDv8Factory::msb_ {};
-uint64_t UUIDv8Factory::lsb_ {};
 
 UUID UUIDv8Factory::create(){
     // Get the current time from the monotonic clock
@@ -68,8 +36,8 @@ UUID UUIDv8Factory::create(){
     msb_ = (now << 16) | version_;  // 48 bit clock 4 bits version_ custom_b
     lsb_ = (random_generator::get_instance().get_random() & randomMask_) | variant_;  // Set Variant to 2
 
-    auto prevMsb = UUIDHelper::instance().getMsb();
-    auto prevLsb = UUIDHelper::instance().getLsb();
+    auto prevMsb = UUID::getLastMsb();
+    auto prevLsb = UUID::getLastLsb();
 
     auto time = prevMsb >> 16;
     auto count = prevMsb & 0xFFFL;
@@ -84,8 +52,8 @@ UUID UUIDv8Factory::create(){
         lsb_ = prevLsb;
     }
 
-    UUIDHelper::instance().set(msb_,
-                               lsb_);
+    UUID::set(msb_,
+                  lsb_);
     return UUID(msb_,
                 lsb_);
 }

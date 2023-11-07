@@ -60,12 +60,60 @@ public:
     */
     uint64_t getLSB() const  { return lsb_; }
 
+    /**
+     * static utility function to set last msb and last lsb,
+     * will be shared across all UUID instanaces
+    */
+    static void set(uint64_t msb,
+                        uint64_t lsb) { lastMsb_ = msb; lastLsb_ = lsb; }
+
+    static uint64_t getLastMsb() { return lastMsb_; }
+
+    static uint64_t getLastLsb() { return lastLsb_; }
+
 private:
+    /**
+    * @brief the random number that's part of UUID number
+    * @param UUID
+    * @return  random number
+    */
+    uint64_t getRandom(const UUID uuid) const { return uuid.getLSB() & randomMask_; }
+
+    /**
+    * @brief Returns version of UUID format
+    * @param UUID given UUID number in UUID object
+    * @return version
+    * @note The 4 bit UUID version (1000). Occupies bits 48 through 51.
+    */
+    uint64_t getVersion(UUID const& uuid) const {
+        return ( uuid.getMSB() >> 12) & 0xf;
+    }
+
+    /**
+    * @brief Returns 2-bit UUID variant of UUID format (10)
+    * @param UUID object
+    * @return variant of given UUID number format
+    */
+    uint64_t getVariant(UUID const& uuid) const {
+        return (uuid.getLSB() >> 62) & 0x3;
+    }
+
+    /** Represents MSB part of UUID */
+    static inline uint64_t lastMsb_;
+
+    /** Represents LSB part of UUID */
+    static inline uint64_t lastLsb_;
+
+    /** Its used for masking bits in random number */
+    static constexpr uint64_t randomMask_ = 0x3fffffffffffffffL;
+
     /** Represents MSB part of UUID */
     const uint64_t msb_{};
 
     /** Represents LSB part of UUID */
     const uint64_t lsb_{};
+
+
 }; // class UUID
 
 }  // namespace uprotocol::uuid
