@@ -39,6 +39,8 @@
 #include "up_validator.h"
 
 #include "uuid.h"
+#include "UUIDSerializer.h"
+#include "UUIDv8Factory.h"
 
 namespace cloudevents::factory {
 using namespace cloudevents::format;
@@ -536,7 +538,7 @@ struct factory {
     if (iter != ce.attributes().end()) {
       auto ttl = iter->second.ce_integer();
       std::string t_uuid_str = const_cast<std::string&>(ce.id());
-      UUID uuid(t_uuid_str);
+      UUID uuid = UUIDSerializer::instance().deserialize(t_uuid_str);
       uint64_t id_time = uuid.getTime()+
           (int64_t)ttl;
       if (id_time < duration) {
@@ -600,8 +602,8 @@ events and mandatory or optional in the uProtocol
       attr->set_ce_string(*priority);
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
-    UUID uuid;
-    ce.set_id(uuid.toString());
+    UUID uuid = UUIDv8Factory::create();
+    ce.set_id(UUIDSerializer::instance().serializeToString(uuid));
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_proto_data(any);
@@ -659,8 +661,9 @@ events and mandatory or optional in the uProtocol
       attr->set_ce_string(*priority);
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
-    UUID uuid;
-    ce.set_id(uuid.toString());
+
+    UUID uuid = UUIDv8Factory::create();
+    ce.set_id(UUIDSerializer::instance().serializeToString(uuid));
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_binary_data(body);

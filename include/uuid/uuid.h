@@ -21,134 +21,52 @@
 #ifndef _UUID_H_
 #define _UUID_H_
 
-#include <algorithm>
-#include <bitset>
-#include <chrono>
-#include <cstddef>
-#include <ios>
-#include <iostream>
-#include <memory>
-#include <random>
-#include <sstream>
-#include <string>
-
-#include "random_gen.h"
-
-
 namespace uprotocol::uuid {
-
+/*
+* Data model representation of <b>UUID</b>
+* UUID (Universal Unique Identifier) is a 128-bit value used to uniquely
+* identify an object or entity on the internet.
+* UUID(in here) represented as two long integers(64-bit) MSB and LSB(64 bit)
+* Class is designed as immutable
+*/
 class UUID {
+public:
+    /**
+    * Constructor to build UUID object - from msb and lsb
+    */
+    UUID(uint64_t msb,
+        uint64_t lsb)
+        : msb_(msb), lsb_(lsb) { }
 
-    public:
+    /**
+    * @brief extracts UTC time at from current UUID object
+    * @return UTC time
+    */
+    uint64_t getTime() const { return this->msb_ >> 16; }
 
-        /**
-        * Constructor to build UUID object - the UUID generated internally
-        */
-        UUID();
+    /**
+    * @brief return current count of UUID numbers generated
+    * @return count
+    */
+    uint64_t getCount() const { return (this->msb_ & 0xFFFL); }
 
-        /**
-        * Constructor to build UUID object - the UUID generated from input string
-        */
-        UUID(std::string &uuidStr);
+    /** @brief get MSB part from given UUID
+    * @return msb_
+    */
+    uint64_t getMSB() const { return msb_; }
 
-        /**
-        * Constructor to build UUID object - the UUID generated from byte array
-        *
-        */
-        UUID(uint8_t* bytes);
+    /** @brief get LSB part from given UUID
+    * @return lsb_
+    */
+    uint64_t getLSB() const  { return lsb_; }
 
-        /**
-        * @brief converts the cuurent UUID id to string format
-        * @return UUID string
-        */
-        std::string toString() const;
+private:
+    /** Represents MSB part of UUID */
+    const uint64_t msb_{};
 
-        /** toByteArray - utility function to convert UUID string to byte array
-        * @return ret - uint8_t vector
-        */
-        std::vector<uint8_t> toByteArray();
-
-        /**
-        * @brief extracts UTC time at from current UUID object
-        * @return UTC time
-        */
-        uint64_t getTime() { return this->msb_ >> 16; }
-
-        /**
-        * @brief return current count of UUID numbers generated
-        * @return count
-        */
-        uint64_t getCount() { return (this->msb_ & 0xFFFL); }
-
-    private:
-        /**
-        * @brief takes uuid in the string form and writes it to uuidOut
-        * @param str uuid in string
-        * @param[out]  uuidOut result of uuid
-        */
-        int uuidFromString(std::string str,
-                           uint8_t* uuidOut);
-
-       /**
-        * @brief the random number that's part of UUID number
-        * @param UUID
-        * @return  random number
-        */
-        uint64_t getRandom(const UUID uuid) { return uuid.lsb_ & randomMask_; }
-
-        /**
-        * @brief Returns version of UUID format
-        * @param UUID given UUID number in UUID object
-        * @return version
-        * @note The 4 bit UUID version (1000). Occupies bits 48 through 51.
-        */
-        uint64_t getVersion(UUID const& uuid) {
-            return ( uuid.msb_ >> 12) & 0xf;
-        }
-
-        /**
-        * @brief Returns 2-bit UUID variant of UUID format (10)
-        * @param UUID object
-        * @return variant of given UUID number format
-        */
-        uint64_t getVariant(UUID const& uuid) {
-            return (uuid.lsb_ >> 62) & 0x3;
-        }
-
-        /** @brief get MSB part from given UUID
-        * @return msb_
-        */
-        uint64_t getMSB() { return msb_; }
-
-        /** @brief get LSB part from given UUID
-        * @return lsb_
-        */
-        uint64_t getLSB() { return lsb_; }
-
-        /** Represents allowable clock drift tolerance    */
-        static constexpr uint64_t clockDriftTolerance_ = 10000000;
-
-        /**  Represents UUID version- 4 bits(1000). Occupies bits 48 through 51. */
-        static constexpr uint64_t version_ = 8L << 12;
-
-        /** Represents UUID variant 2 bit (10)    */
-        static constexpr uint64_t variant_ = 0x8000000000000000L;
-
-        /** Its used for masking bits in random number */
-        static constexpr uint64_t randomMask_ = 0x3fffffffffffffffL;
-
-        /** Represents the maxCount of UUID nodes to track previous history  */
-        static constexpr uint64_t maxCount_ = 0xfff;
-
-        /** UUID array size */
-        static constexpr int uuidSize_ = 16;
-
-        /** Represents MSB part of UUID */
-        uint64_t msb_{};
-
-        /** Represents LSB part of UUID */
-        uint64_t lsb_{};
-};
+    /** Represents LSB part of UUID */
+    const uint64_t lsb_{};
+}; // class UUID
 
 }  // namespace uprotocol::uuid
 

@@ -98,7 +98,8 @@ file(GLOB SRC_HDR_TOOLS 	"include/tools/*.h")
 
 set(uprotocol_src src/tools/byte_order.cpp
 		src/tools/base64.cpp
-		src/uuid/uuid.cpp
+		src/uuid/UUIDv8Factory.cpp
+		src/uuid/UUIDSerializer.cpp
 		${PROTO_CPP}
 		${PROTO_HPP}
 		${SRC_HDR_MODEL}

@@ -1,49 +1,51 @@
 #include <gtest/gtest.h>
 
 #include "uuid.h"
+#include "UUIDSerializer.h"
+#include "UUIDv8Factory.h"
 
 using namespace uprotocol::uuid;
 
-//UUID constructors, toByteArray(),getTime(), getCount(),toString()
+//UUID create, serilize and deserialize
 TEST(UUIDTest, Class)
 {
-    UUID uuId;
-
-    UUID uuIdFromByteArr(uuId.toByteArray().data());
+    UUID uuId = UUIDv8Factory::create();
+    std::vector<uint8_t> vectUuid = UUIDSerializer::instance().serializeToBytes(uuId);
+    UUID uuIdFromByteArr = UUIDSerializer::instance().deserialize(vectUuid.data());
     EXPECT_TRUE(uuId.getTime() == uuIdFromByteArr.getTime());
     EXPECT_TRUE(uuId.getCount() == uuIdFromByteArr.getCount());
 
     std::string str = "0080b636-8303-8701-8ebe-7a9a9e767a9f";
-    UUID uuIdNew(str);
-    EXPECT_EQ(uuIdNew.toString(), str);
+    UUID uuIdNew = UUIDSerializer::instance().deserialize(str);
+    EXPECT_EQ(UUIDSerializer::instance().serializeToString(uuIdNew), str);
 }
-
+//Negative test - serialize and deserialize
 TEST(UUIDTest, NegStringConstructor)
 {
     std::string str = "0080b636-8303-8701-8ebe-7a9a9e767a9f";
-    UUID uuIdNew(str);
+    UUID uuIdNew = UUIDSerializer::instance().deserialize(str);
     str = "test" +str;
-    EXPECT_NE(uuIdNew.toString(), str);
+    EXPECT_NE(UUIDSerializer::instance().serializeToString(uuIdNew), str);
 }
-
+//Negative test - empty string
 TEST(UUIDTest, NegEmptyString)
 {
     //Empty String
     std::string str = "";
-    UUID uuId(str);
-    EXPECT_NE(uuId.toString(), str);
+    UUID uuId = UUIDSerializer::instance().deserialize(str);
+    EXPECT_NE(UUIDSerializer::instance().serializeToString(uuId), str);
     EXPECT_EQ(uuId.getCount(), uint64_t(0));
 }
-
+//Negative test - Empty Byte Array
 TEST(UUIDTest, NegEmptyByteArray)
 {
     std::array<uint8_t, 16> buff{};
-    UUID uuIdFromByteArr(buff.data());
+    UUID uuIdFromByteArr = UUIDSerializer::instance().deserialize( buff.data() );
     uint64_t val(0);
 
     EXPECT_EQ(uuIdFromByteArr.getCount(), val);
 }
-
+//Negative test - Invalid Byte array
 TEST(UUIDTest, NegInvalidByteArray)
 {
     std::array<uint8_t, 16> buff{};
@@ -53,11 +55,11 @@ TEST(UUIDTest, NegInvalidByteArray)
         buff[i] = msb ;
         buff[i + 8] = lsb;
     }
-    UUID uuIdFromByteArr(buff.data());
+    UUID uuIdFromByteArr = UUIDSerializer::instance().deserialize( buff.data() );
     uint64_t val(1);
     std::string str = "";
 
-    EXPECT_NE(uuIdFromByteArr.toString(), str);
+    EXPECT_NE(UUIDSerializer::instance().serializeToString(uuIdFromByteArr), str);
     EXPECT_NE(uuIdFromByteArr.getCount(), val);
 }
 
