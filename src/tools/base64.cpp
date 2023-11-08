@@ -24,18 +24,20 @@
 
 using namespace uprotocol::tools;
 
-uint32_t base64::posOfChar(const uint8_t chr) {
+uint32_t Base64::posOfChar(const uint8_t chr) {
     if      (chr >= 'A' && chr <= 'Z') return chr - 'A';
     else if (chr >= 'a' && chr <= 'z') return chr - 'a' + ('Z' - 'A')               + 1;
     else if (chr >= '0' && chr <= '9') return chr - '0' + ('Z' - 'A') + ('z' - 'a') + 2;
     else if (chr == '+' || chr == '-') return 62; 
     else if (chr == '/' || chr == '_') return 63; 
-    else
+    else {
         spdlog::error("Input is not valid base64-encoded data.");
+        return 0;
+    }
 }
 
-std::string base64::base64encode(uint8_t const* inputString,
-                                 const size_t &len)
+std::string Base64::base64encode(uint8_t const* inputString,
+                                 const size_t len)
 {
     if ((inputString == NULL) || (len == 0 )) {
         spdlog::error("Invalid data");
@@ -75,8 +77,8 @@ std::string base64::base64encode(uint8_t const* inputString,
     return opString;
 };
 
-std::string base64::base64decode(uint8_t const* encodedString, 
-                                 const size_t &len)
+std::string Base64::base64decode(uint8_t const* encodedString, 
+                                 const size_t len)
 {
     if ((encodedString == NULL) || (len == 0) ) {
         spdlog::error("Invalid data");
@@ -107,13 +109,13 @@ std::string base64::base64decode(uint8_t const* encodedString,
     return result;
 };
 
-std::string base64::base64encode(std::string const& t_str)
+std::string Base64::base64encode(std::string const& t_str)
 {
-    return base64::base64encode(reinterpret_cast<uint8_t const *>(t_str.data()),
+    return Base64::base64encode(reinterpret_cast<uint8_t const *>(t_str.data()),
                                 t_str.length());
 };
-std::string base64::base64decode(std::string const& t_str)
+std::string Base64::base64decode(std::string const& t_str)
 {
-    return base64::base64decode(reinterpret_cast<uint8_t const *>(t_str.data()),
+    return Base64::base64decode(reinterpret_cast<uint8_t const *>(t_str.data()),
                                 t_str.length());
 }

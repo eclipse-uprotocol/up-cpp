@@ -1,5 +1,5 @@
 set(TESTS_PATH ../test)
-setting the compiler
+## setting the compiler
 if(CMAKE_COMPILER_IS_GNUCXX)
 
 	find_program(GCOV_TOOL gcov-11)
