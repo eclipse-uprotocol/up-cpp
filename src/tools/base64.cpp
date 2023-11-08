@@ -22,7 +22,7 @@
 #include "base64.h"
 #include "spdlog/spdlog.h"
 
-using namespace tools;
+using namespace uprotocol::tools;
 
 uint32_t base64::posOfChar(const uint8_t chr) {
     if      (chr >= 'A' && chr <= 'Z') return chr - 'A';

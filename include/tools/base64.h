@@ -21,7 +21,7 @@
 #define _BASE64_H_
 #include <string>
 
-namespace tools {
+namespace uprotocol::tools {
 class base64 {
     public:
         static std::string base64encode(uint8_t const* data, const size_t &len);
@@ -35,5 +35,5 @@ class base64 {
         static unsigned int posOfChar(const uint8_t chr);
         static constexpr char* B64chars = (char*)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 };
-}  //   namespace tools
+}  //   namespace uprotocol::tools
 #endif  //_BASE64_H_

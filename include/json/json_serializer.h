@@ -72,7 +72,7 @@ class Json_serializer : public Serializer {
         doc.AddMember(
             key,
             rapidjson::Value().SetString(
-                tools::base64::base64encode(cloudEvent.binary_data()).c_str(),
+                uprotocol::tools::base64::base64encode(cloudEvent.binary_data()).c_str(),
                 allocator),
             allocator);
 
