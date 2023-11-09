@@ -19,17 +19,17 @@
  * under the License.
  */
 
-#include "UUIDSerializer.h"
+#include "UuidSerializer.h"
 
 namespace uprotocol::uuid {
 
-std::string UUIDSerializer::serializeToString(UUID uuid) {
+std::string UuidSerializer::serializeToString(UUID uuid) {
     std::array<uint8_t, uuidSize_> buff{};
     std::string buff_str{};
 
     for (int i = 0; i < 8; i++) {
-        buff[i] = ((uuid.getMSB() >> (8 * i)) & 0XFF);
-        buff[i + 8] = ((uuid.getLSB() >> (8 * i)) & 0XFF);
+        buff[i] = ((uuid.msb() >> (8 * i)) & 0XFF);
+        buff[i + 8] = ((uuid.lsb() >> (8 * i)) & 0XFF);
     }
 
     static const char DIGITS[] = "0123456789abcdef";
@@ -47,25 +47,25 @@ std::string UUIDSerializer::serializeToString(UUID uuid) {
     return str;
 }
 
-std::vector<uint8_t>  UUIDSerializer::serializeToBytes(UUID uuid) {
+std::vector<uint8_t> UuidSerializer::serializeToBytes(UUID uuid) {
     std::vector<std::uint8_t> byteArray(uuidSize_);
 
     for (int i = 0; i < 8; i++) {
-        byteArray[i] = ((uuid.getMSB() >> (8 * i)) & 0XFF);
-        byteArray[i + 8] = ((uuid.getLSB() >> (8 * i)) & 0XFF);
+        byteArray[i] = ((uuid.msb() >> (8 * i)) & 0XFF);
+        byteArray[i + 8] = ((uuid.lsb() >> (8 * i)) & 0XFF);
     }
 
     return byteArray;
 }
 
-UUID UUIDSerializer::deserialize(std::string uuidStr) {
+UUID UuidSerializer::deserializeFromString(std::string uuidStr) {
     std::array<uint8_t, 16> buff{};
 
     if (-1 == uuidFromString(uuidStr,
                             buff.data())) {
         spdlog::error("UUID string contains invalid data. This can result"
         "in Invalid UUID number, so returning an instant UUID number.");
-        return UUID(0,0);
+        return createUUID(0,0);
     }
 
     uint64_t msbNum = 0;
@@ -76,30 +76,28 @@ UUID UUIDSerializer::deserialize(std::string uuidStr) {
         msbNum |= (uint64_t)buff[i];
         lsbNum |= (uint64_t)buff[i + 8];
     }
-    return UUID(msbNum,
-                lsbNum);
+    return createUUID(msbNum, lsbNum);
 }
 
-UUID UUIDSerializer::deserialize(uint8_t* bytes) {
+UUID UuidSerializer::deserializeFromBytes(uint8_t* bytes) {
     uint64_t msbNum = 0;
     uint64_t lsbNum = 0;
+
     if (bytes == nullptr) {
         spdlog::error("UUID in bytes contains invalid data. This can result"
         "in Invalid UUID number, so returning an instant UUID number.");
-        return UUID(0,0);
+        return createUUID(0,0);
     }
-
     for (auto i = 7; i >= 0; i--) {
         msbNum <<= 8;
         lsbNum <<= 8;
         msbNum |= (uint64_t)bytes[i];
         lsbNum |= (uint64_t)bytes[i + 8];
     }
-    return UUID(msbNum,
-                lsbNum);
+    return createUUID(msbNum, lsbNum);
 }
 
-int UUIDSerializer::uuidFromString(std::string str,
+int UuidSerializer::uuidFromString(std::string str,
                         uint8_t* uuidOut) {
     str.erase(remove(str.begin(),
                     str.end(),
@@ -127,6 +125,14 @@ int UUIDSerializer::uuidFromString(std::string str,
         i++;
     }
     return 0;
+}
+
+UUID UuidSerializer::createUUID(uint64_t msb,
+                    uint64_t lsb) {
+    UUID uuid;
+    uuid.set_msb(msb);
+    uuid.set_lsb(lsb);
+    return uuid;
 }
 
 } //uprotocol::uuid

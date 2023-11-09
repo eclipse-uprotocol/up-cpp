@@ -21,20 +21,9 @@
 #ifndef _UUID_V8_FACTORY_H_
 #define _UUID_V8_FACTORY_H_
 
-#include <algorithm>
-#include <bitset>
-#include <chrono>
-#include <cstddef>
-#include <ios>
-#include <iostream>
-#include <memory>
-#include <random>
-#include <sstream>
-#include <string>
-
 #include "random_gen.h"
-#include "uuid.h"
-
+#include "uuid.pb.h"
+#include "UuidFactory.h"
 
 namespace uprotocol::uuid {
 /*
@@ -68,9 +57,12 @@ namespace uprotocol::uuid {
 * |rand_b      | MUST 62 bits random number that is generated at initialization time of the uE only and reused otherwise |
 *
 * */
-class UUIDv8Factory {
+class Uuidv8Factory : public UuidFactory {
 public:
+    /** factory function that generates the UUID */
     static UUID create();
+    /** Retrieves the past UUID's MSB part    */
+    static uint64_t getLastMsb() { return lastMsb_; }
 
 private:
     /** Represents allowable clock drift tolerance    */
@@ -88,6 +80,13 @@ private:
     /** Represents the maxCount of UUID nodes to track previous history  */
     static constexpr uint64_t maxCount_ = 0xfff;
 
+    /* Using atomic, so we need not implment locking
+    *  lastMsb_ to maintain the previous values of msb
+    *  so that they help in tracking the past UUID's time and count.
+    *  It will be shared across all UUID instanaces
+    */
+    static inline std::atomic<uint64_t> lastMsb_;
+
     /** Represents MSB part of UUID */
     static inline uint64_t msb_;
 
@@ -96,5 +95,6 @@ private:
 
 }; // class UUIDv8Factory
 
-}
+} //namespace  uprotocol::uuid
+
 #endif //_UUID_V8_FACTORY_H_

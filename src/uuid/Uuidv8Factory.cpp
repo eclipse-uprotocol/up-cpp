@@ -18,15 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#include <atomic>
-#include <chrono>
-#include "spdlog/spdlog.h"
 
-#include "UUIDv8Factory.h"
+#include "Uuidv8Factory.h"
 
 namespace uprotocol::uuid {
 
-UUID UUIDv8Factory::create(){
+UUID Uuidv8Factory::create() {
     // Get the current time from the monotonic clock
     std::chrono::time_point<std::chrono::steady_clock> currentTime = std::chrono::steady_clock::now();
     // Convert the time point to a duration in milliseconds
@@ -35,9 +32,7 @@ UUID UUIDv8Factory::create(){
 
     msb_ = (now << 16) | version_;  // 48 bit clock 4 bits version_ custom_b
     lsb_ = (random_generator::get_instance().get_random() & randomMask_) | variant_;  // Set Variant to 2
-
-    auto prevMsb = UUID::getLastMsb();
-    auto prevLsb = UUID::getLastLsb();
+    auto prevMsb = getLastMsb();
 
     auto time = prevMsb >> 16;
     auto count = prevMsb & 0xFFFL;
@@ -49,13 +44,12 @@ UUID UUIDv8Factory::create(){
         msb_ =  (count < maxCount_)
                 ? prevMsb + 1
                 : prevMsb;
-        lsb_ = prevLsb;
     }
-
-    UUID::set(msb_,
-                  lsb_);
-    return UUID(msb_,
-                lsb_);
+    lastMsb_ = msb_;
+    UUID uuid;
+    uuid.set_msb(msb_);
+    uuid.set_lsb(lsb_);
+    return uuid;
 }
 
-}
+} //uprotocol::uuid

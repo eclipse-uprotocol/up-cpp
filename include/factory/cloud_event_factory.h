@@ -38,13 +38,14 @@
 #include "spec_version.h"
 #include "up_validator.h"
 
-#include "uuid.h"
-#include "UUIDSerializer.h"
-#include "UUIDv8Factory.h"
+#include "uuid.pb.h"
+#include "UuidSerializer.h"
+#include "Uuidv8Factory.h"
 
 namespace cloudevents::factory {
 using namespace cloudevents::format;
 using namespace uprotocol::uuid;
+using namespace uprotocol::v1;
 
 const std::string PROTOBUF_CONTENT_TYPE = "application/protobuf";
 const std::string SERIALIZED_PROTOBUF_CONTENT_TYPE = "application/x-protobuf";
@@ -538,8 +539,8 @@ struct factory {
     if (iter != ce.attributes().end()) {
       auto ttl = iter->second.ce_integer();
       std::string t_uuid_str = const_cast<std::string&>(ce.id());
-      UUID uuid = UUIDSerializer::instance().deserialize(t_uuid_str);
-      uint64_t id_time = uuid.getTime()+
+      UUID uuid = UuidSerializer::instance().deserializeFromString(t_uuid_str);
+      uint64_t id_time = UuidSerializer::instance().getTime(uuid) +
           (int64_t)ttl;
       if (id_time < duration) {
         return true;  // time passed
@@ -602,8 +603,8 @@ events and mandatory or optional in the uProtocol
       attr->set_ce_string(*priority);
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
-    UUID uuid = UUIDv8Factory::create();
-    ce.set_id(UUIDSerializer::instance().serializeToString(uuid));
+    UUID uuid = Uuidv8Factory::create();
+    ce.set_id(UuidSerializer::instance().serializeToString(uuid));
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_proto_data(any);
@@ -662,8 +663,8 @@ events and mandatory or optional in the uProtocol
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
 
-    UUID uuid = UUIDv8Factory::create();
-    ce.set_id(UUIDSerializer::instance().serializeToString(uuid));
+    UUID uuid = Uuidv8Factory::create();
+    ce.set_id(UuidSerializer::instance().serializeToString(uuid));
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_binary_data(body);

@@ -20,26 +20,30 @@
  */
 #ifndef _UUID_SERIALIZER_H_
 #define _UUID_SERIALIZER_H_
-#include <iostream>
 
-#include "uuid.h"
+#include "uuid.pb.h"
 #include "spdlog/spdlog.h"
 
 namespace uprotocol::uuid {
+using namespace uprotocol::v1;
 /**
 * UUIDSerializer class is to provided serialize/de serilize functions for UUID
 * UUID to a string or UUID to byte stream and vice versa
+* Also provides  helper functions on UUID
 *
 */
-class UUIDSerializer {
+class UuidSerializer {
 public:
-    static UUIDSerializer instance() {
-        static const auto INSTANCE = UUIDSerializer();
+    /**
+     * @brief Returns the static instance
+    */
+    static UuidSerializer instance() {
+        static const auto INSTANCE = UuidSerializer();
         return INSTANCE;
     }
 
     /**
-     * Support for serializing UUID objects into their String format.
+     * @brief Support for serializing UUID objects into their String format.
      * @param uuid UUID object  to be serialized to the String format.
      * @return Returns the String format of the supplied UUID
      */
@@ -47,29 +51,52 @@ public:
 
     /**
      *
-     * Support for serializing UUID objects into their byte stream format.
+     * @brief Support for serializing UUID objects into their Byte stream.
      * @param uuid UUID object  to be serialized to the byte array format.
      * @return Returns  UUIDv8 in  vector of byte stream
      *
      */
-    std::vector<uint8_t>  serializeToBytes(UUID uuid);
+    std::vector<uint8_t> serializeToBytes(UUID uuid);
 
     /**
-     * Deserialize a String into a UUID object.
+     * @brief Deserialize a String into a UUID object.
      * @param uuid String equivalent UUID
      * @return Returns an UUID data object.
      */
-    UUID deserialize(std::string uuidStr);
+    UUID deserializeFromString(std::string uuidStr);
 
     /**
-     * Deserialize a byte stream into a UUID object.
+     * @brief Deserialize a byte stream into a UUID object.
      * @param uuid UUID represented in byte stream equivalent
      * @return Returns an UUID data object.
      */
-    UUID deserialize(uint8_t* bytes);
+    UUID deserializeFromBytes(uint8_t* bytes);
+
+    /**
+    * @brief extracts UTC time at from current UUID object
+    * @param uuid UUID object
+    * @return UTC time
+    */
+    uint64_t getTime(UUID uuid) const { return uuid.msb() >> 16; }
+
+    /**
+    * @brief return current count of UUID numbers generated
+    * @param uuid UUID object
+    * @return count
+    */
+    uint64_t getCount(UUID uuid) const { return (uuid.msb() & 0xFFFL); }
+
+    /**
+     * @brief Utility function to set msb and lsb and create UUID object
+     * @param msb 64 bit MSB part of UUID
+     * @param lsb 64 bit LSB part of UUID
+     * @return UUID
+    */
+    static UUID createUUID(uint64_t msb,
+                        uint64_t lsb);
 
 private:
-    UUIDSerializer() = default;
+    UuidSerializer() = default;
 
     /**
     * @brief takes uuid in the string form and writes it to uuidOut
@@ -77,12 +104,13 @@ private:
     * @param[out]  uuidOut result of uuid
     */
     int uuidFromString(std::string str,
-                         uint8_t* uuidOut);
+                       uint8_t* uuidOut);
 
     /** UUID array size */
     static constexpr int uuidSize_ = 16;
 
-}; // UUIDSerializer
+}; // UuidSerializer
 
-}
+} // namespace uprotocol::uuid
+
 #endif //_UUID_SERIALIZER_H_
