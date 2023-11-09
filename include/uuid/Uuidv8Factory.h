@@ -91,7 +91,8 @@ private:
     static inline uint64_t msb_;
 
     /** Represents LSB part of UUID */
-    static inline uint64_t lsb_;
+    static inline uint64_t lsb_ = (random_generator::get_instance().get_random()
+                                   & randomMask_) | variant_;
 
 }; // class UUIDv8Factory
 

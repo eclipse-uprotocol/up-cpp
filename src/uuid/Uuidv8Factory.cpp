@@ -31,7 +31,6 @@ UUID Uuidv8Factory::create() {
     uint64_t now = ms.count();
 
     msb_ = (now << 16) | version_;  // 48 bit clock 4 bits version_ custom_b
-    lsb_ = (random_generator::get_instance().get_random() & randomMask_) | variant_;  // Set Variant to 2
     auto prevMsb = getLastMsb();
 
     auto time = prevMsb >> 16;

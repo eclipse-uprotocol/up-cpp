@@ -26,10 +26,11 @@ namespace uprotocol::uuid {
 std::string UuidSerializer::serializeToString(UUID uuid) {
     std::array<uint8_t, uuidSize_> buff{};
     std::string buff_str{};
-
+    uint64_t msb = uuid.msb();
+    uint64_t lsb = uuid.lsb();
     for (int i = 0; i < 8; i++) {
-        buff[i] = ((uuid.msb() >> (8 * i)) & 0XFF);
-        buff[i + 8] = ((uuid.lsb() >> (8 * i)) & 0XFF);
+        buff[i] = ((msb >> (8 * i)) & 0XFF);
+        buff[i + 8] = ((lsb >> (8 * i)) & 0XFF);
     }
 
     static const char DIGITS[] = "0123456789abcdef";
@@ -49,10 +50,12 @@ std::string UuidSerializer::serializeToString(UUID uuid) {
 
 std::vector<uint8_t> UuidSerializer::serializeToBytes(UUID uuid) {
     std::vector<std::uint8_t> byteArray(uuidSize_);
+    uint64_t msb = uuid.msb();
+    uint64_t lsb = uuid.lsb();
 
     for (int i = 0; i < 8; i++) {
-        byteArray[i] = ((uuid.msb() >> (8 * i)) & 0XFF);
-        byteArray[i + 8] = ((uuid.lsb() >> (8 * i)) & 0XFF);
+        byteArray[i] = ((msb >> (8 * i)) & 0XFF);
+        byteArray[i + 8] = ((lsb >> (8 * i)) & 0XFF);
     }
 
     return byteArray;
