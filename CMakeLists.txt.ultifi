@@ -1,0 +1,14 @@
+#/*
+# * Copyright (C) General Motors Company. All rights reserved.
+# * This information is confidential and proprietary to GM Company and may not be used, modified, copied or distributed.
+# */
+cmake_minimum_required(VERSION 3.20.0)
+project(Ultifi-uprotocol-sdk-cpp VERSION 0.0.1 LANGUAGES C CXX)
+
+# This lines should be included in any project to be able to use common Ultifi cmake functionality. --- Start
+# if no CONANFILES_ROOT root set ${CMAKE_CURRENT_SOURCE_DIR}/conanFiles path will be used
+set(CONANFILES_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol-sdk-cpp/conanFiles)
+include(cmake/CmakeCommonInit.cmake)
+
+# add your repository or module
+add_repo(uprotocol-sdk-cpp)
