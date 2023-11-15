@@ -70,7 +70,7 @@ public:
      * @param uuid UUID represented in byte stream equivalent
      * @return Returns an UUID data object.
      */
-    UUID deserializeFromBytes(uint8_t* bytes);
+    UUID deserializeFromBytes(std::vector<uint8_t> bytes);
 
     /**
     * @brief extracts UTC time at from current UUID object
@@ -86,6 +86,10 @@ public:
     */
     uint64_t getCount(UUID uuid) const { return (uuid.msb() & 0xFFFL); }
 
+
+private:
+    UuidSerializer() = default;
+
     /**
      * @brief Utility function to set msb and lsb and create UUID object
      * @param msb 64 bit MSB part of UUID
@@ -95,16 +99,13 @@ public:
     static UUID createUUID(uint64_t msb,
                         uint64_t lsb);
 
-private:
-    UuidSerializer() = default;
-
     /**
     * @brief takes uuid in the string form and writes it to uuidOut
     * @param str uuid in string
     * @param[out]  uuidOut result of uuid
     */
     int uuidFromString(std::string str,
-                       uint8_t* uuidOut);
+                       std::vector<uint8_t> &uuidOut);
 
     /** UUID array size */
     static constexpr int uuidSize_ = 16;

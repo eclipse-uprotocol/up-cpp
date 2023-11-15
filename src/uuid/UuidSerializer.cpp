@@ -62,10 +62,10 @@ std::vector<uint8_t> UuidSerializer::serializeToBytes(UUID uuid) {
 }
 
 UUID UuidSerializer::deserializeFromString(std::string uuidStr) {
-    std::array<uint8_t, 16> buff{};
+    std::vector<uint8_t>  buffVect(uuidSize_);
 
     if (-1 == uuidFromString(uuidStr,
-                            buff.data())) {
+                            buffVect)) {
         spdlog::error("UUID string contains invalid data. This can result"
         "in Invalid UUID number, so returning an instant UUID number.");
         return createUUID(0,0);
@@ -76,22 +76,23 @@ UUID UuidSerializer::deserializeFromString(std::string uuidStr) {
     for (auto i = 7; i >= 0; i--) {
         msbNum <<= 8;
         lsbNum <<= 8;
-        msbNum |= (uint64_t)buff[i];
-        lsbNum |= (uint64_t)buff[i + 8];
+        msbNum |= (uint64_t)buffVect[i];
+        lsbNum |= (uint64_t)buffVect[i + 8];
     }
     return createUUID(msbNum, lsbNum);
 }
 
-UUID UuidSerializer::deserializeFromBytes(uint8_t* bytes) {
+UUID UuidSerializer::deserializeFromBytes(std::vector<uint8_t> bytes) {
     uint64_t msbNum = 0;
     uint64_t lsbNum = 0;
+    int size = bytes.size();
 
-    if (bytes == nullptr) {
-        spdlog::error("UUID in bytes contains invalid data. This can result"
-        "in Invalid UUID number, so returning an instant UUID number.");
-        return createUUID(0,0);
-    }
     for (auto i = 7; i >= 0; i--) {
+        if( size != uuidSize_ || i > size || ((i + 8) > size)) {
+            spdlog::error("UUID in bytes contains invalid data. This can result"
+            "in Invalid UUID number, so returning an instant UUID number.");
+            return createUUID(0,0);
+        }
         msbNum <<= 8;
         lsbNum <<= 8;
         msbNum |= (uint64_t)bytes[i];
@@ -101,7 +102,7 @@ UUID UuidSerializer::deserializeFromBytes(uint8_t* bytes) {
 }
 
 int UuidSerializer::uuidFromString(std::string str,
-                        uint8_t* uuidOut) {
+                    std::vector<uint8_t> &uuidOut) {
     str.erase(remove(str.begin(),
                     str.end(),
                     '-'),
