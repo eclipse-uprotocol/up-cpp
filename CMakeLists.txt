@@ -44,8 +44,11 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	
 endif()
 
-include (CTest)
-enable_testing()
+if(BUILD_TESTING)
+	include (CTest)
+	enable_testing()
+	find_package(cgreen REQUIRED)
+endif()
 
 find_package(RapidJSON CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -53,7 +56,6 @@ find_package(protobuf CONFIG REQUIRED)
 find_package(Threads REQUIRED)
 find_package(libuuid REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-find_package(cgreen REQUIRED)
 
 
 add_subdirectory(proto)
@@ -131,5 +133,6 @@ target_link_libraries(uprotocolsdk_shared Threads::Threads
 					libuuid::libuuid 
 					spdlog::spdlog)
 
-
-add_subdirectory(test)
+if(BUILD_TESTING)
+	add_subdirectory(test)
+endif()
