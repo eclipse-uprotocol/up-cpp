@@ -8,8 +8,10 @@ endif ()
 cmake_minimum_required(VERSION 3.18.0)
 
 
+
 file(STRINGS "VERSION" VERSION_STRING)
 project(uprotocol-sdk-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX )
+
 
 set(CMAKE_BUILD_TYPE_INIT Release)
 set(CMAKE_CXX_STANDARD 20)
@@ -78,6 +80,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/tools)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/factory)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uri)
 include_directories(${CGREEN_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/main/proto)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L/usr/local/lib -I../ -pthread -Wall -Wpedantic")
@@ -140,22 +143,38 @@ endif()
 
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
-target_link_libraries(uprotocolsdk Threads::Threads 
+
+
+target_link_libraries(uprotocolsdk 
+					Threads::Threads 
 					${Protobuf_LIBRARIES} 
 					${RapidJSON_LIBRARIES} 
 					${UUID_LIBRARY}
 					proto  
 					spdlog::spdlog)
-	
-	add_definitions(-DSPDLOG_FMT_EXTERNAL)
-target_link_libraries(uprotocolsdk_shared Threads::Threads 
+
+target_link_libraries(uprotocolsdk_shared 
+					Threads::Threads 
 					${Protobuf_LIBRARIES} 
 					${RapidJSON_LIBRARIES} 
 					${UUID_LIBRARY} 
 					proto 
 					spdlog::spdlog)
 
+include(ExternalProject)
+
+
+ExternalProject_Add(
+	uprotocol-core-api
+	PREFIX uprotocol-core-api-prefix
+	SOURCE_DIR "/home/xz62px/projects_dev_sdv/uSpace/ultifi/uprotocol-core-api"
+	#BINARY_DIR "/path/to/build/uprotocol-core-api" # Specify the build directory
+	INSTALL_COMMAND "" # No install step if not needed
+)
+
 add_dependencies(uprotocolsdk proto)
 add_dependencies(uprotocolsdk_shared proto)
+add_dependencies(uprotocolsdk uprotocol-core-api)
+add_dependencies(uprotocolsdk_shared uprotocol-core-api)
 
 add_subdirectory(test)
