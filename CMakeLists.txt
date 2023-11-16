@@ -80,7 +80,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/tools)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/factory)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uri)
 include_directories(${CGREEN_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/main/proto)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}../uprotocol-core-api/src/main/proto)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L/usr/local/lib -I../ -pthread -Wall -Wpedantic")
