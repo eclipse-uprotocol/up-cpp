@@ -57,38 +57,47 @@ find_package(Threads REQUIRED)
 find_package(libuuid REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-
 add_subdirectory(proto)
 
+macro(uProtocol_SOURCES_PLAT out name platform)
+	source_group("${name}\\Source Files" FILES ${ARGN})
+	list(APPEND ${out} ${ARGN})
+	if(NOT(${platform}))
+		set_source_files_properties(${ARGN} PROPERTIES HEADER_FILE_ONLY TRUE)
+	endif()
+endmacro()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uuid)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/json)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/binary)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/model)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/tools)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/factory)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uri)
+macro(uProtocol_SOURCES out name)
+    uProtocol_SOURCES_PLAT( ${out} ${name} ON ${ARGN})
+endmacro()
 
-file(GLOB SRC_HDR_BINARY 	"include/binary/*.h")
-file(GLOB SRC_HDR_JSON 	 	"include/json/*.h")
-file(GLOB SRC_HDR_MODEL  	"include/model/*.h")
-file(GLOB SRC_HDR_FACTORY 	"include/factory/*.h")
-file(GLOB SRC_HDR_URI 		"include/uri/*.h")
-file(GLOB SRC_HDR_UUID 		"include/uuid/*.h")
-file(GLOB SRC_HDR_TOOLS 	"include/tools/*.h")
+macro(uProtocol_HEADERS out name)
+	set_source_files_properties(${ARGN} PROPERTIES HEADER_FILE_ONLY TRUE)
+	source_group("${name}\\Header Files" FILES ${ARGN})
+	list(APPEND ${out} ${ARGN})
+endmacro()
 
+# Headers
+uProtocol_HEADERS(H_SRCS RegExp 
+include/uuid
+include/json
+include/binary
+include/tools
+include/factory
+include/uri)
 
-set(uprotocol_src src/tools/byte_order.cpp
-		src/tools/base64.cpp
-		src/uuid/uuid.cpp
-		${SRC_HDR_MODEL}
-		${SRC_HDR_BINARY}
-		${SRC_HDR_JSON}
-		${SRC_HDR_FACTORY}
-		${SRC_HDR_URI}
-		${SRC_HDR_UUID}
-		${SRC_HDR_TOOLS}
-		)
+# Sources
+file(GLOB SRCS_G "src/*/*.cpp")
+uProtocol_SOURCES(SRCS RegExp ${SRCS_G})
+foreach(component ${H_SRCS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${component})
+message(STATUS "Including header directories: ${component}")
+endforeach()
+
+foreach(component ${SRCS})
+set(uprotocol_src ${component})
+message(STATUS "set source file: ${component}")
+endforeach()
 
 add_library(uprotocollib OBJECT ${uprotocol_src})
 target_link_libraries(uprotocollib PRIVATE libuuid::libuuid protobuf::libprotobuf spdlog::spdlog)
@@ -136,3 +145,30 @@ target_link_libraries(uprotocolsdk_shared Threads::Threads
 if(BUILD_TESTING)
 	add_subdirectory(test)
 endif()
+
+file(GLOB_RECURSE HDRS_G "include/*/*.h")
+set(source_regex "${CMAKE_CURRENT_SOURCE_DIR}/include/")
+foreach(component ${HDRS_G})
+message(STATUS "Collect header file for installation: ${component}")
+STRING(REGEX REPLACE "${source_regex}" "" after_source ${INSTALL_PATH} "${component}")
+string(REPLACE "/" ";" list_string ${list_string} "${after_source}")
+list (GET list_string -1 TAIL)
+STRING(REGEX REPLACE "/${TAIL}" "" directory_name ${INSTALL_PATH} "${after_source}")
+set(include_destination "${CMAKE_INSTALL_PREFIX}uprotocolsdk/include/${directory_name}")
+install(
+	FILES "${component}"
+	DESTINATION "${include_destination}"
+	COMPONENT Devel
+	OPTIONAL)
+endforeach()
+
+set(lib "${CMAKE_INSTALL_PREFIX}lib")
+message(STATUS "Writting to lib location : ${lib}")
+install(TARGETS uprotocolsdk_shared
+        LIBRARY DESTINATION "${lib}"
+		ARCHIVE DESTINATION "${lib}")
+
+install(TARGETS uprotocolsdk
+        LIBRARY DESTINATION "${lib}"
+		ARCHIVE DESTINATION "${lib}")
+		
