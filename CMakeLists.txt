@@ -167,7 +167,7 @@ include(ExternalProject)
 ExternalProject_Add(
 	uprotocol-core-api
 	PREFIX uprotocol-core-api-prefix
-	SOURCE_DIR "/home/xz62px/projects_dev_sdv/uSpace/ultifi/uprotocol-core-api"
+	SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api"
 	#BINARY_DIR "/path/to/build/uprotocol-core-api" # Specify the build directory
 	INSTALL_COMMAND "" # No install step if not needed
 )
