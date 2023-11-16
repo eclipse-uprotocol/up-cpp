@@ -35,20 +35,21 @@ protected:
     std::string encoded{};
     std::string encodedCharStr{};
     std::string decodedCharStr{};
+    std::string emptyString{};
 
     void SetUp( ) override { 
 
-        size_t inputDataLen = sizeof(inputData);
-        size_t encodeCharArrLen = sizeof(encodeCharArr);
-        size_t invalidEncodeCharArrLen = sizeof(invalidEncodeCharArr);
+        size_t inputDataLen = strlen(inputData);
+        size_t encodeCharArrLen = strlen(encodeCharArr);
+        size_t invalidEncodeCharArrLen = strlen(invalidEncodeCharArr);
 
         encoded = uprotocol::tools::Base64::base64encode(std::string(inputData));
         decoded = uprotocol::tools::Base64::base64decode(encoded);
-        encodedCharStr = uprotocol::tools::Base64::base64encode((uint8_t *)inputData,
+        encodedCharStr = uprotocol::tools::Base64::base64encode(inputData,
                                                                 inputDataLen);
-        decodedCharStr = uprotocol::tools::Base64::base64decode((uint8_t *)encodeCharArr,
+        decodedCharStr = uprotocol::tools::Base64::base64decode(encodeCharArr,
                                                                 encodeCharArrLen);
-        invalidDecodedCharStr = uprotocol::tools::Base64::base64decode((uint8_t *)invalidEncodeCharArr,
+        invalidDecodedCharStr = uprotocol::tools::Base64::base64decode(invalidEncodeCharArr,
                                                                               invalidEncodeCharArrLen);
 
     }
@@ -61,7 +62,7 @@ protected:
 TEST_F(Base64EncodeDecodeTests, base64_encode_decode_positive){
     ASSERT_EQ(encoded, encodeString);
     ASSERT_EQ(std::string(inputData), decoded);
-    ASSERT_EQ(std::string(encodeCharArr), encodedCharStr);
+    ASSERT_EQ(encodedCharStr, encodeString);
     ASSERT_EQ(decodedCharStr.data(), std::string(inputData));
 };
 
@@ -82,7 +83,7 @@ TEST_F(Base64EncodeDecodeTests, inputType_UTF8format){
         "René Nyffenegger\n"
         "http://www.renenyffenegger.ch\n"
         "passion for data\n";
-    std::string encodedStr = uprotocol::tools::Base64::base64encode(reinterpret_cast<const unsigned char*>(orig.c_str()), orig.length());
+    std::string encodedStr = uprotocol::tools::Base64::base64encode(reinterpret_cast<const char*>(orig.c_str()), orig.length());
     ASSERT_EQ(encodedStr,"UmVuw6kgTnlmZmVuZWdnZXIKaHR0cDovL3d3dy5yZW5lbnlmZmVuZWdnZXIuY2gKcGFzc2lvbiBmb3IgZGF0YQo=");
 
     std::string decodedStr = uprotocol::tools::Base64::base64decode(encodedStr);
@@ -209,23 +210,25 @@ TEST_F(Base64EncodeDecodeTests, emptyInputData){
 TEST_F(Base64EncodeDecodeTests, invalid_encoded_decoded_datalength){
    
     static const char origStr[] = "abcdefg";
-    size_t origStrLen = sizeof(origStr);
+    size_t origStrLen = strlen(origStr);
     size_t origStrInvalidLen = 5;
     ASSERT_NE(origStrLen, origStrInvalidLen);
 
-    std::string encodedStrVal = uprotocol::tools::Base64::base64encode((uint8_t *)origStr,
+    std::string encodedStrVal = uprotocol::tools::Base64::base64encode((char *)origStr,
                                                                 origStrLen);
-    std::string encodedStrInVal = uprotocol::tools::Base64::base64encode((uint8_t *)origStr,
+    std::string encodedStrInVal = uprotocol::tools::Base64::base64encode((char *)origStr,
                                                                 origStrInvalidLen);
+    ASSERT_EQ(encodedStrInVal, emptyString);
     ASSERT_NE(encodedStrVal, encodedStrInVal);
 
     size_t encodedStrInValLen = 5;
     std::string encodedStr = uprotocol::tools::Base64::base64encode(origStr);
-    std::string decodedValStr = uprotocol::tools::Base64::base64decode((uint8_t *)encodedStrVal.data(),
+    std::string decodedValStr = uprotocol::tools::Base64::base64decode((char *)encodedStrVal.data(),
                                                                     encodedStrVal.length());
-    std::string decodedInValStr = uprotocol::tools::Base64::base64decode((uint8_t *)encodedStrVal.data(),
+    std::string decodedInValStr = uprotocol::tools::Base64::base64decode((char *)encodedStrVal.data(),
                                                                        encodedStrInValLen);
                                                                     
+    ASSERT_EQ(decodedInValStr, emptyString);
     ASSERT_NE(decodedValStr, decodedInValStr);
     ASSERT_EQ(decodedValStr.data(), std::string(origStr));
 };
@@ -237,23 +240,25 @@ TEST_F(Base64EncodeDecodeTests, invalid_encoded_decoded_datalength){
 TEST_F(Base64EncodeDecodeTests, invalid_encoded_decoded_overFlowDatalength){
    
     static const char origStr[] = "abcdefg";
-    size_t origStrLen = sizeof(origStr);
+    size_t origStrLen = strlen(origStr);
     size_t origStrInvalidLen = 15;
     ASSERT_NE(origStrLen, origStrInvalidLen);
 
-    std::string encodedStrVal = uprotocol::tools::Base64::base64encode((uint8_t *)origStr,
+    std::string encodedStrVal = uprotocol::tools::Base64::base64encode(origStr,
                                                                 origStrLen);
-    std::string encodedStrInVal = uprotocol::tools::Base64::base64encode((uint8_t *)origStr,
+    std::string encodedStrInVal = uprotocol::tools::Base64::base64encode(origStr,
                                                                 origStrInvalidLen);
+    ASSERT_EQ(encodedStrInVal, emptyString);
     ASSERT_NE(encodedStrVal, encodedStrInVal);
 
     size_t encodedStrInValLen = 15;
     std::string encodedStr = uprotocol::tools::Base64::base64encode(origStr);
-    std::string decodedValStr = uprotocol::tools::Base64::base64decode((uint8_t *)encodedStrVal.data(),
+    std::string decodedValStr = uprotocol::tools::Base64::base64decode((char *)encodedStrVal.data(),
                                                                     encodedStrVal.length());
-    std::string decodedInValStr = uprotocol::tools::Base64::base64decode((uint8_t *)encodedStrVal.data(),
+    std::string decodedInValStr = uprotocol::tools::Base64::base64decode((char *)encodedStrVal.data(),
                                                                        encodedStrInValLen);
                                                                     
+    ASSERT_EQ(decodedInValStr, emptyString);
     ASSERT_NE(decodedValStr, decodedInValStr);
     ASSERT_EQ(decodedValStr.data(), std::string(origStr));
 };
@@ -264,16 +269,16 @@ TEST_F(Base64EncodeDecodeTests, invalid_encoded_decoded_overFlowDatalength){
 */
 TEST_F(Base64EncodeDecodeTests, null_data){
    
-    static const uint8_t* origStr = nullptr;
+    static const char* origStr = nullptr;
     size_t origStrLen = sizeof(origStr);
 
     std::string encodedStrVal = uprotocol::tools::Base64::base64encode(origStr,
                                                                        origStrLen);
-    ASSERT_EQ(encodedStrVal, "");
+    ASSERT_EQ(encodedStrVal, emptyString);
 
     std::string decodedValStr = uprotocol::tools::Base64::base64decode(origStr,
                                                                        encodedStrVal.length());
-    ASSERT_EQ(decodedValStr, "");
+    ASSERT_EQ(decodedValStr, emptyString);
 };
 
 /**
@@ -285,11 +290,11 @@ TEST_F(Base64EncodeDecodeTests, length_0){
     static const char origStr[] = "abcdefg";
     size_t origStrLen = 0;
 
-    std::string encodedStrVal = uprotocol::tools::Base64::base64encode((uint8_t *)origStr,
+    std::string encodedStrVal = uprotocol::tools::Base64::base64encode(origStr,
                                                                        origStrLen);
-    ASSERT_EQ(encodedStrVal, "");
+    ASSERT_EQ(encodedStrVal, emptyString);
 
-    std::string decodedValStr = uprotocol::tools::Base64::base64decode((uint8_t *)encodedStrVal.data(),
+    std::string decodedValStr = uprotocol::tools::Base64::base64decode(encodedStrVal.data(),
                                                                        encodedStrVal.length());
-    ASSERT_EQ(decodedValStr, "");
+    ASSERT_EQ(decodedValStr, emptyString);
 };

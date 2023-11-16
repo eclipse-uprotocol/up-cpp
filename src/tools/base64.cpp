@@ -37,11 +37,11 @@ uint32_t Base64::posOfChar(const uint8_t chr) {
     }
 }
 
-std::string Base64::base64encode(uint8_t const* inputString,
+std::string Base64::base64encode(const char* inputString,
                                  const size_t len)
 {
-    if ((inputString == NULL) || (len == 0 )) {
-        spdlog::error("Invalid data");
+    if ((inputString == NULL) || (len == 0 ) || (strlen(inputString) != len)) {
+        spdlog::error("Invalid data or length");
         return std::string();
     }
 
@@ -51,44 +51,38 @@ std::string Base64::base64encode(uint8_t const* inputString,
     uint32_t pos = 0;
     constexpr int encodeWordLen = 3;
     
-    try {
-        while (pos < len) {
-            opString.push_back(base64chars[(inputString[pos] & 0xfc) >> 2]);
+    while (pos < len) {
+        opString.push_back(base64chars[(inputString[pos] & 0xfc) >> 2]);
 
-            if (pos+1 < len) {
-                opString.push_back(base64chars[((inputString[pos] & 0x03) << 4) + ((inputString[pos + 1] & 0xf0) >> 4)]);
+        if (pos+1 < len) {
+            opString.push_back(base64chars[((inputString[pos] & 0x03) << 4) + ((inputString[pos + 1] & 0xf0) >> 4)]);
 
-                if (pos+2 < len) {
-                    opString.push_back(base64chars[((inputString[pos + 1] & 0x0f) << 2) + ((inputString[pos + 2] & 0xc0) >> 6)]);
-                    opString.push_back(base64chars[inputString[pos + 2] & 0x3f]);
-                }
-                else {
-                    opString.push_back(base64chars[(inputString[pos + 1] & 0x0f) << 2]);
-                    opString.push_back('=');
-                }
+            if (pos+2 < len) {
+                opString.push_back(base64chars[((inputString[pos + 1] & 0x0f) << 2) + ((inputString[pos + 2] & 0xc0) >> 6)]);
+                opString.push_back(base64chars[inputString[pos + 2] & 0x3f]);
             }
             else {
-                opString.push_back(base64chars[(inputString[pos] & 0x03) << 4]);
-                opString.push_back('=');
+                opString.push_back(base64chars[(inputString[pos + 1] & 0x0f) << 2]);
                 opString.push_back('=');
             }
-
-            pos += encodeWordLen;
         }
-    } 
-    catch (...) {
-        spdlog::error("Invalid memory access.");
-        return std::string();
+        else {
+            opString.push_back(base64chars[(inputString[pos] & 0x03) << 4]);
+            opString.push_back('=');
+            opString.push_back('=');
+        }
+
+        pos += encodeWordLen;
     }
 
     return opString;
 };
 
-std::string Base64::base64decode(uint8_t const* encodedString, 
+std::string Base64::base64decode(const char* encodedString, 
                                  const size_t len)
 {
-    if ((encodedString == NULL) || (len == 0) ) {
-        spdlog::error("Invalid data");
+    if ((encodedString == NULL) || (len == 0) || (strlen(encodedString) != len) ) {
+        spdlog::error("Invalid data or length");
         return std::string();
     }
     
@@ -97,26 +91,20 @@ std::string Base64::base64decode(uint8_t const* encodedString,
     result.reserve(len / 4 * 3);
     constexpr int decodeWordLen = 4;
 
-    try {
-        while (pos < len) {
-            size_t posOfChar1 = posOfChar(encodedString[pos+1]);
-            result.push_back(static_cast<std::string::value_type>( ( (posOfChar(encodedString[pos+0]) << 2 ) + ( (posOfChar1 & 0x30 ) >> 4))));
+    while (pos < len) {
+        size_t posOfChar1 = posOfChar(encodedString[pos+1]);
+        result.push_back(static_cast<std::string::value_type>( ( (posOfChar(encodedString[pos+0]) << 2 ) + ( (posOfChar1 & 0x30 ) >> 4))));
 
-            if ( ( pos + 2 < len ) &&  encodedString[pos + 2] != '=' ) {
-                uint32_t posOfChar2 = posOfChar(encodedString[pos + 2]);
-                result.push_back(static_cast<std::string::value_type>( (( posOfChar1 & 0x0f) << 4) + (( posOfChar2 & 0x3c) >> 2)));
+        if ( ( pos + 2 < len ) &&  encodedString[pos + 2] != '=' ) {
+            uint32_t posOfChar2 = posOfChar(encodedString[pos + 2]);
+            result.push_back(static_cast<std::string::value_type>( (( posOfChar1 & 0x0f) << 4) + (( posOfChar2 & 0x3c) >> 2)));
 
-                if ( ( pos + 3 < len ) &&  (encodedString[pos + 3]) != '=' ) {
-                    result.push_back(static_cast<std::string::value_type>( ( (posOfChar2 & 0x03 ) << 6 ) + posOfChar(encodedString[pos + 3]) ));
-                }
+            if ( ( pos + 3 < len ) &&  (encodedString[pos + 3]) != '=' ) {
+                result.push_back(static_cast<std::string::value_type>( ( (posOfChar2 & 0x03 ) << 6 ) + posOfChar(encodedString[pos + 3]) ));
             }
-
-            pos += decodeWordLen;
         }
-    }
-    catch (...) {
-        spdlog::error("Invalid memory access.");
-        return std::string();
+
+        pos += decodeWordLen;
     }
 
     return result;
@@ -124,11 +112,11 @@ std::string Base64::base64decode(uint8_t const* encodedString,
 
 std::string Base64::base64encode(std::string const& t_str)
 {
-    return Base64::base64encode(reinterpret_cast<uint8_t const *>(t_str.data()),
+    return Base64::base64encode(reinterpret_cast<const char*>(t_str.c_str()),
                                 t_str.length());
 };
 std::string Base64::base64decode(std::string const& t_str)
 {
-    return Base64::base64decode(reinterpret_cast<uint8_t const *>(t_str.data()),
+    return Base64::base64decode(reinterpret_cast<const char*>(t_str.c_str()),
                                 t_str.length());
 }

@@ -24,8 +24,8 @@
 namespace uprotocol::tools {
 class Base64 {
     public:
-        static std::string base64encode(uint8_t const* data, const size_t len);
-        static std::string base64decode(uint8_t const* data, const size_t len);
+        static std::string base64encode(const char* data, const size_t len);
+        static std::string base64decode(const char* data, const size_t len);
         
         static std::string base64encode(std::string const& t_str);
         static std::string base64decode(std::string const& t_str);
