@@ -51,11 +51,11 @@ find_package(CGreen REQUIRED)
 set(protobuf_MODULE_COMPATIBLE TRUE)
 
 set(PROTOS
-    ${CMAKE_CURRENT_SOURCE_DIR}/proto/cloudevents.proto	
+    ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto/cloudevents.proto
 )
-set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/proto)
-set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/proto)
-add_subdirectory(proto)
+set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
+set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/uprotocol/proto)
+add_subdirectory(${CMAKE_SOURCE_DIR}/uprotocol/proto)
 
 
 file(GLOB PROTO_CPP "${PROTO_BINARY_DIR}/*.cc")
@@ -70,13 +70,15 @@ include_directories(${RapidJSON_INCLUDE_DIRS})
 include_directories(${UUID_INCLUDE_DIRS})
 
 include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uuid)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/json)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/binary)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/model)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/tools)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/factory)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uri)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/datamodel)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/factory)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/serialize)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/tools)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/datamodel)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/serializer)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/validator)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid)
 include_directories(${CGREEN_INCLUDE_DIR})
 
 
@@ -86,25 +88,19 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 	add_compile_options(-g)
 endif()
 
-file(GLOB SRC_HDR_BINARY 	"include/binary/*.h")
-file(GLOB SRC_HDR_JSON 	 	"include/json/*.h")
-file(GLOB SRC_HDR_MODEL  	"include/model/*.h")
-file(GLOB SRC_HDR_FACTORY 	"include/factory/*.h")
-file(GLOB SRC_HDR_URI 		"include/uri/*.h")
-file(GLOB SRC_HDR_UUID 		"include/uuid/*.h")
-file(GLOB SRC_HDR_TOOLS 	"include/tools/*.h")
+file(GLOB SRC_HDR_CLOUDEVENT "uprotocol/cloudevent/*.h")
+file(GLOB SRC_HDR_URI 		"uprotocol/uri/*.h")
+file(GLOB SRC_HDR_UUID 		"uprotocol/uuid/*.h")
+file(GLOB SRC_HDR_TOOLS 	"uprotocol/tools/*.h")
 
 
 
-set(uprotocol_src src/tools/byte_order.cpp
-		src/tools/base64.cpp
-		src/uuid/uuid_gen.cpp
+set(uprotocol_src uprotocol/tools/byte_order.cpp
+		uprotocol/tools/base64.cpp
+		uprotocol/uuid/uuid_gen.cpp
 		${PROTO_CPP}
 		${PROTO_HPP}
-		${SRC_HDR_MODEL}
-		${SRC_HDR_BINARY}
-		${SRC_HDR_JSON}
-		${SRC_HDR_FACTORY}
+		${SRC_HDR_CLOUDEVENT}
 		${SRC_HDR_URI}
 		${SRC_HDR_UUID}
 		${SRC_HDR_TOOLS}
@@ -138,18 +134,18 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   endif()
 endif()
 
-target_link_libraries(uprotocolsdk Threads::Threads 
-					${Protobuf_LIBRARIES} 
-					${RapidJSON_LIBRARIES} 
+target_link_libraries(uprotocolsdk Threads::Threads
+					${Protobuf_LIBRARIES}
+					${RapidJSON_LIBRARIES}
 					${UUID_LIBRARY}
-					proto  
+					proto
 					spdlog::spdlog)
-	
-target_link_libraries(uprotocolsdk_shared Threads::Threads 
-					${Protobuf_LIBRARIES} 
-					${RapidJSON_LIBRARIES} 
-					${UUID_LIBRARY} 
-					proto 
+
+target_link_libraries(uprotocolsdk_shared Threads::Threads
+					${Protobuf_LIBRARIES}
+					${RapidJSON_LIBRARIES}
+					${UUID_LIBRARY}
+					proto
 					spdlog::spdlog)
 
 add_dependencies(uprotocolsdk proto)

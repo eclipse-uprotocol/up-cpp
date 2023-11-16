@@ -24,7 +24,7 @@
 #include <memory>
 #include <optional>
 
-#include "../model/cloud_event.h"
+#include "cloud_event.h"
 #include "base64.h"
 #include "google/protobuf/util/time_util.h"
 #include "spdlog/spdlog.h"
