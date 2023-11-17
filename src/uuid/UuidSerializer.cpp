@@ -92,11 +92,6 @@ UUID UuidSerializer::deserializeFromBytes(std::vector<uint8_t> bytes) {
     }
 
     for (auto i = 7; i >= 0; i--) {
-        if( i > size || ((i + 8) > size) ) {
-            spdlog::error("UUID in bytes contains invalid data. This can result"
-            "in Invalid UUID number, so returning an instant UUID number.");
-            return createUUID(0,0);
-        }
         msbNum <<= 8;
         lsbNum <<= 8;
         msbNum |= (uint64_t)bytes[i];
