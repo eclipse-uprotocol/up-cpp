@@ -51,7 +51,7 @@ find_package(CGreen REQUIRED)
 set(protobuf_MODULE_COMPATIBLE TRUE)
 
 set(PROTOS
-    ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto/cloudevents.proto	
+    ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto/cloudevents.proto
 )
 set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
 set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/uprotocol/proto)
@@ -92,7 +92,6 @@ file(GLOB SRC_HDR_CLOUDEVENT "uprotocol/cloudevent/*.h")
 file(GLOB SRC_HDR_URI 		"uprotocol/uri/*/*.*")
 file(GLOB SRC_HDR_UUID 		"uprotocol/uuid/*.h")
 file(GLOB SRC_HDR_TOOLS 	"uprotocol/tools/*.h")
-
 
 set(uprotocol_src uprotocol/tools/byte_order.cpp
 		uprotocol/tools/base64.cpp
