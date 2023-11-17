@@ -85,10 +85,14 @@ UUID UuidSerializer::deserializeFromString(std::string uuidStr) {
 UUID UuidSerializer::deserializeFromBytes(std::vector<uint8_t> bytes) {
     uint64_t msbNum = 0;
     uint64_t lsbNum = 0;
-    int size = bytes.size();
+    const int size = bytes.size();
+    if( size != uuidSize_ ) {
+        spdlog::error("UUID byte array with invalid size: {}", size);
+        return createUUID(0,0);
+    }
 
     for (auto i = 7; i >= 0; i--) {
-        if( size != uuidSize_ || i > size || ((i + 8) > size)) {
+        if( i > size || ((i + 8) > size) ) {
             spdlog::error("UUID in bytes contains invalid data. This can result"
             "in Invalid UUID number, so returning an instant UUID number.");
             return createUUID(0,0);
@@ -119,11 +123,17 @@ int UuidSerializer::uuidFromString(std::string str,
             return -1; // Invalid character
         }
 
+        //uuidOut of size 16, index should not go beyond 15.
+        int index = i >> 1;
+        if(index > 15) {
+            return -1;
+        }
+
         if ((i & 1) == 0) {
-            uuidOut[i >> 1] =
+            uuidOut[index] =
                 (std::uint8_t)((std::byte)n << 4);  // even i => hi 4 bits
         } else {
-            uuidOut[i >> 1] = (std::uint8_t)(((std::byte)uuidOut[i >> 1]) |
+            uuidOut[index] = (std::uint8_t)(((std::byte)uuidOut[index]) |
                                                 (std::byte)n);  // odd i => lo 4 bits
         }
         i++;

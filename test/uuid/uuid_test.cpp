@@ -20,6 +20,7 @@ TEST(UUIDTest, Class)
     UUID uuIdNew = UuidSerializer::instance().deserializeFromString(str);
     EXPECT_EQ(UuidSerializer::instance().serializeToString(uuIdNew), str);
 }
+
 //Negative test - serialize and deserialize
 TEST(UUIDTest, NegStringConstructor)
 {
@@ -28,6 +29,7 @@ TEST(UUIDTest, NegStringConstructor)
     str = "test" +str;
     EXPECT_NE(UuidSerializer::instance().serializeToString(uuIdNew), str);
 }
+
 //Negative test - empty string
 TEST(UUIDTest, NegEmptyString)
 {
@@ -37,6 +39,16 @@ TEST(UUIDTest, NegEmptyString)
     EXPECT_NE(UuidSerializer::instance().serializeToString(uuId), str);
     EXPECT_EQ(UuidSerializer::instance().getCount(uuId), uint64_t(0));
 }
+
+//Negative test - deserializeFromString - Invalid String with more than 32 hex characters
+TEST(UUIDTest, NegStringWithMoreThan32HexCharsTest)
+{
+    std::string str = "0080b636-8303-8701-8ebe-7a9a9e767a9f-1abc";
+    UUID uuId = UuidSerializer::instance().deserializeFromString(str);
+    EXPECT_NE(UuidSerializer::instance().serializeToString(uuId), str);
+    EXPECT_EQ(UuidSerializer::instance().getCount(uuId), uint64_t(0));
+}
+
 //Negative test deserializeFromBytes - Empty Byte vector
 TEST(UUIDTest, NegEmptyByteVector)
 {
@@ -46,13 +58,14 @@ TEST(UUIDTest, NegEmptyByteVector)
 
     EXPECT_EQ(UuidSerializer::instance().getCount(uuIdFromByteArr), val);
 }
+
 //Negative test  deserializeFromBytes - Greater than 16
 TEST(UUIDTest, NegGreaterThanDefinedSize)
 {
     std::vector<uint8_t> vect(18);
     uint64_t msb(1);
     uint64_t lsb(1);
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 8; i++) {
         vect[i] = msb ;
         vect[i + 8] = lsb;
     }
@@ -62,6 +75,7 @@ TEST(UUIDTest, NegGreaterThanDefinedSize)
 
     EXPECT_EQ(UuidSerializer::instance().getCount(uuIdFromByteArr), val);
 }
+
 //Negative test deserializeFromBytes - Invalid Byte vector
 TEST(UUIDTest, NegInvalidByteVector)
 {

@@ -102,7 +102,8 @@ private:
     /**
     * @brief takes uuid in the string form and writes it to uuidOut
     * @param str uuid in string
-    * @param[out]  uuidOut result of uuid
+    * @param[out]  uuidOut  uuid is stored in vector of size 16
+    * @return int - failure status
     */
     int uuidFromString(std::string str,
                        std::vector<uint8_t> &uuidOut);
