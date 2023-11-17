@@ -89,7 +89,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 endif()
 
 file(GLOB SRC_HDR_CLOUDEVENT "uprotocol/cloudevent/*.h")
-file(GLOB SRC_HDR_URI 		"uprotocol/uri/*.h")
+file(GLOB SRC_HDR_URI 		"uprotocol/uri/*/*.*")
 file(GLOB SRC_HDR_UUID 		"uprotocol/uuid/*.h")
 file(GLOB SRC_HDR_TOOLS 	"uprotocol/tools/*.h")
 

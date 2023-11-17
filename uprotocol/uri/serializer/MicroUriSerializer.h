@@ -21,20 +21,8 @@
 #ifndef _MICRO_URI_SERIALIZER_H_
 #define _MICRO_URI_SERIALIZER_H_
 
-#include <optional>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <arpa/inet.h>
 #include "UriSerializer.h"
 #include "UUri.h"
-#include "UAuthority.h"
-#include "UEntity.h"
-#include "UResource.h"
-#include "IpAddress.h"
-
-using uprotocol::uri::IpAddress;
-using AddressType = IpAddress::AddressType;
 
 namespace uprotocol::uri {
 
@@ -44,105 +32,25 @@ namespace uprotocol::uri {
  */
 class MicroUriSerializer : public UriSerializer<std::vector<uint8_t>> {
 public:
-    static MicroUriSerializer getInstance() {
-        static const auto INSTANCE = MicroUriSerializer();
-        return INSTANCE;
-    }
+    /**
+     * Get the Singleton instance for the MicroUriSerializer.
+     * @return Instance of MicroUriSerializer.
+     */
+    static MicroUriSerializer getInstance();
 
     /**
      * Serialize a UUri into a vector<uint8_t> following the Micro-URI specifications.
      * @param uUri The UUri data object.
      * @return Returns a vector<uint8_t> representing the serialized UUri.
      */
-    std::vector<uint8_t> serialize(const UUri& uUri) override {
-        if (uUri.isEmpty() || !uUri.isMicroForm()) {
-            return std::vector<uint8_t>();
-        }
-
-        std::vector<uint8_t> uri;
-        std::string address = uUri.getUAuthority().getAddress();
-        uint16_t entityId = uUri.getUEntity().getId().value_or(0);
-        uint8_t entityVersion = uUri.getUEntity().getVersion().value_or(0);
-        uint16_t resourceId = uUri.getUResource().getId().value_or(0);
-
-        // UP_VERSION
-        uri.push_back(UP_VERSION);
-
-        // IPADDRESS_TYPE
-        IpAddress ipAddress(address);
-        if (AddressType addressType = ipAddress.getType(); addressType == AddressType::Invalid) {
-            return std::vector<uint8_t>();
-        } else {
-            uri.push_back(static_cast<uint8_t>(addressType));
-        }
-
-        // URESOURCE_ID
-        uri.push_back(static_cast<uint8_t>(resourceId >> 8));
-        uri.push_back(static_cast<uint8_t>(resourceId & 0xFF));
-
-        // UAUTORITY_ADDRESS
-        std::vector<uint8_t> ip = ipAddress.getBytes();
-        uri.insert(uri.end(), ip.begin(), ip.end());
-
-        // UENTITY_ID
-        uri.push_back(static_cast<uint8_t>(entityId >> 8));
-        uri.push_back(static_cast<uint8_t>(entityId & 0xFF));
-
-        // UENTITY_VERSION
-        uri.push_back(entityVersion);
-
-        // UNUSED
-        uri.push_back(0);
-
-        return uri;
-    }
+    std::vector<uint8_t> serialize(const UUri& uUri) override;
 
     /**
      * Deserialize a vector<uint8_t> into a UUri object.
      * @param microUri A vector<uint8_t> uProtocol micro URI.
      * @return Returns an UUri data object from the serialized format of a microUri.
      */
-    UUri deserialize(std::vector<uint8_t> const& microUri) override {
-        if (microUri.empty() || microUri.size() < LOCAL_MICRO_URI_LENGTH) {
-            return UUri::empty();
-        }
-
-        if (microUri[0] != UP_VERSION) {
-        return UUri::empty();
-        }
-
-        // IPADDRESS_TYPE
-        auto addressType = static_cast<AddressType>(microUri[1]);
-
-        // UAUTORITY_ADDRESS
-        UAuthority uAuthority;
-        auto position = IPADDRESS_START_POSITION;
-        std::vector<uint8_t> ip(microUri.begin() + IPADDRESS_START_POSITION, microUri.end());
-        IpAddress ipAddress(ip, addressType);
-        if ((addressType == AddressType::Local) && (microUri.size() == LOCAL_MICRO_URI_LENGTH)) {
-            uAuthority = UAuthority::local();
-        } else if ((addressType == AddressType::IpV4) && (microUri.size() == IPV4_MICRO_URI_LENGTH)) {
-            uAuthority = UAuthority::microRemote(ipAddress.getString());
-            position += IpAddress::IPV4_ADDRESS_BYTES;
-        }  else if ((addressType == AddressType::IpV6) && (microUri.size() == IPV6_MICRO_URI_LENGTH)) {
-            uAuthority = UAuthority::microRemote(ipAddress.getString());
-            position += IpAddress::IPV6_ADDRESS_BYTES;
-        } else {
-            return UUri::empty();
-        }
-
-        // UENTITY_ID
-        auto entityId = (static_cast<uint16_t>(microUri[position]) << 8) | microUri[position + 1];
-
-        // UE_VERSION
-        uint8_t version = microUri[position + 2];
-        std::optional<uint8_t> entityVersion = (version == 0) ? std::nullopt : std::optional<int8_t>(version);
-
-        // URESOURCE_ID
-        auto resourceId = (static_cast<uint16_t>(microUri[2]) << 8) | (microUri[3]);
-
-        return UUri(uAuthority, UEntity::microFormat(entityId, entityVersion), UResource::microFormat(resourceId));
-    }
+    UUri deserialize(std::vector<uint8_t> const& microUri) override;
 
 private:
     /**

@@ -25,6 +25,7 @@
 #include "UAuthority.h"
 #include "UEntity.h"
 #include "UResource.h"
+#include "IpAddress.h"
 
 using namespace cgreen;
 using namespace uprotocol::uri;

@@ -21,11 +21,6 @@
 #ifndef _IP_ADDRESS_H_
 #define _IP_ADDRESS_H_
 
-#include <string>
-#include <vector>
-#include <arpa/inet.h>
-#include <spdlog/spdlog.h>
-
 namespace uprotocol::uri {
 
 /**
@@ -86,47 +81,12 @@ private:
     /**
      * Updates the byte format of IP address and type, from the string format.
      */
-    void toBytes() {
-        try {
-            std::array<uint8_t, IpAddress::IPV6_ADDRESS_BYTES> bytes = {0};
-            auto length = 0;
-
-            if (ipString_.empty()) {
-                type_ = AddressType::Local;
-            } else if (1 == inet_pton(AF_INET, ipString_.data(), &bytes)) {
-                type_ = AddressType::IpV4;
-                length = IpAddress::IPV4_ADDRESS_BYTES;
-            } else if (1 == inet_pton(AF_INET6, ipString_.data(), &bytes)) {
-                type_ = AddressType::IpV6;
-                length = IpAddress::IPV6_ADDRESS_BYTES;
-            } else {
-                type_ = AddressType::Invalid;
-            }
-
-            for (auto i = 0; i < length; i++) {
-                this->ipBytes_.push_back(bytes[i]);
-            }
-        } catch(const std::invalid_argument& e) {
-            spdlog::error("Invalid IP: {}, {}", ipString_, e.what());
-        }
-    }
+    void toBytes();
 
     /**
      * Updates the string format of IP address.
      */
-    void toString() {
-        if (!ipBytes_.empty()) {
-            try {
-                auto inetType = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
-                if (std::string ipString(INET6_ADDRSTRLEN, '\0');
-                    inet_ntop(inetType, &ipBytes_[0], ipString.data(), INET6_ADDRSTRLEN) != nullptr) {
-                    ipString_ = ipString.data();
-                }
-            } catch (const std::invalid_argument& e) {
-                spdlog::error("Invalid IP: {}", e.what());
-            }
-        }
-    }
+    void toString();
 
     /**
      * Type of the IP addess.
