@@ -51,10 +51,7 @@ find_package(CGreen REQUIRED)
 set(protobuf_MODULE_COMPATIBLE TRUE)
 
 set(PROTOS
-    ${CMAKE_CURRENT_SOURCE_DIR}/proto/cloudevents.proto
-)
-set(PROTOS
-    ${CMAKE_CURRENT_SOURCE_DIR}/proto/uuid.proto
+    ${CMAKE_CURRENT_SOURCE_DIR}/proto/cloudevents.proto	
 )
 set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/proto)
 set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/proto)
