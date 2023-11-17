@@ -62,7 +62,7 @@ $ export PATH=$PATH:~/vcpkg
 $ vcpkg install openssl
 $ vcpkg install rapidjson
 $ vcpkg install protobuf protobuf[zlib]
-$ vcpkg install spdlog 
+$ vcpkg install spdlog
 ```
 
 #### Setup SDK local repository, build and test
