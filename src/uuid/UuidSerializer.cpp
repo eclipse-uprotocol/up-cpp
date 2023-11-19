@@ -64,10 +64,10 @@ std::vector<uint8_t> UuidSerializer::serializeToBytes(UUID uuid) {
 UUID UuidSerializer::deserializeFromString(std::string uuidStr) {
     std::vector<uint8_t>  buffVect(uuidSize_);
 
-    if (-1 == uuidFromString(uuidStr,
-                            buffVect)) {
+    if (-1 == UuidSerializer::uuidFromString(uuidStr,
+                                             buffVect)) {
         spdlog::error("UUID string contains invalid data. This can result"
-        "in Invalid UUID number, so returning an instant UUID number.");
+                      "in Invalid UUID number, so returning an instant UUID number.");
         return createUUID(0,0);
     }
 
@@ -101,7 +101,7 @@ UUID UuidSerializer::deserializeFromBytes(std::vector<uint8_t> bytes) {
 }
 
 int UuidSerializer::uuidFromString(std::string str,
-                    std::vector<uint8_t> &uuidOut) {
+                                   std::vector<uint8_t> &uuidOut) {
     str.erase(remove(str.begin(),
                     str.end(),
                     '-'),
@@ -137,7 +137,7 @@ int UuidSerializer::uuidFromString(std::string str,
 }
 
 UUID UuidSerializer::createUUID(uint64_t msb,
-                    uint64_t lsb) {
+                                uint64_t lsb) {
     UUID uuid;
     uuid.set_msb(msb);
     uuid.set_lsb(lsb);

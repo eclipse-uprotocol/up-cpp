@@ -539,8 +539,8 @@ struct factory {
     if (iter != ce.attributes().end()) {
       auto ttl = iter->second.ce_integer();
       std::string t_uuid_str = const_cast<std::string&>(ce.id());
-      UUID uuid = UuidSerializer::instance().deserializeFromString(t_uuid_str);
-      uint64_t id_time = UuidSerializer::instance().getTime(uuid) +
+      UUID uuid = UuidSerializer::deserializeFromString(t_uuid_str);
+      uint64_t id_time = UuidSerializer::getTime(uuid) +
           (int64_t)ttl;
       if (id_time < duration) {
         return true;  // time passed
@@ -604,7 +604,7 @@ events and mandatory or optional in the uProtocol
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
     UUID uuid = Uuidv8Factory::create();
-    ce.set_id(UuidSerializer::instance().serializeToString(uuid));
+    ce.set_id(UuidSerializer::serializeToString(uuid));
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_proto_data(any);
@@ -664,7 +664,7 @@ events and mandatory or optional in the uProtocol
     }
 
     UUID uuid = Uuidv8Factory::create();
-    ce.set_id(UuidSerializer::instance().serializeToString(uuid));
+    ce.set_id(UuidSerializer::serializeToString(uuid));
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_binary_data(body);
