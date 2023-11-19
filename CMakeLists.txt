@@ -100,7 +100,8 @@ file(GLOB SRC_HDR_TOOLS 	"uprotocol/uuid/tools/*.h")
 
 set(uprotocol_src uprotocol/tools/byte_order.cpp
 		uprotocol/tools/base64.cpp
-		uprotocol/uuid/uuid_gen.cpp
+		src/uuid/Uuidv8Factory.cpp
+		src/uuid/UuidSerializer.cpp
 		${PROTO_CPP}
 		${PROTO_HPP}
 		${SRC_HDR_MODEL}
@@ -126,13 +127,13 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	target_compile_options(uprotocolsdk_shared PRIVATE -Wall -Wextra -Werror -stdlib=libc++ -fsanitize=address -fprofile-arcs -ftest-coverage -fno-omit-frame-pointer -v)
   else()
     target_compile_options(uprotocolsdk PRIVATE -Wall -Wextra -Werror -stdlib=libc++ -v)
-	target_compile_options(uprotocolsdk_shared PRIVATE -Wall -Wextra -Werror -stdlib=libc++ -v)
+	target_compile_options(uprotocolsdk_shared PRIVATE -fPIC -Wall -Wextra -Werror -stdlib=libc++ -v)
   endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # using GCC
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_options(uprotocolsdk PRIVATE -Wall -Wextra -Werror -g -O0 -fprofile-arcs -ftest-coverage)
-  target_compile_options(uprotocolsdk_shared PRIVATE -Wall -Wextra -Werror -g -O0 -fprofile-arcs -ftest-coverage)
+  target_compile_options(uprotocolsdk_shared PRIVATE -fPIC -Wall -Wextra -Werror -g -O0 -fprofile-arcs -ftest-coverage)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov -coverage")
   else()
   target_compile_options(uprotocolsdk PRIVATE -Wall -Wextra -Werror)
@@ -146,14 +147,14 @@ target_link_libraries(uprotocolsdk Threads::Threads
 					${Protobuf_LIBRARIES} 
 					${RapidJSON_LIBRARIES} 
 					${UUID_LIBRARY}
-					proto  
+					proto
 					spdlog::spdlog)
-	
-target_link_libraries(uprotocolsdk_shared Threads::Threads 
-					${Protobuf_LIBRARIES} 
-					${RapidJSON_LIBRARIES} 
-					${UUID_LIBRARY} 
-					proto 
+
+target_link_libraries(uprotocolsdk_shared Threads::Threads
+					${Protobuf_LIBRARIES}
+					${RapidJSON_LIBRARIES}
+					${UUID_LIBRARY}
+					proto
 					spdlog::spdlog)
 
 add_dependencies(uprotocolsdk proto)

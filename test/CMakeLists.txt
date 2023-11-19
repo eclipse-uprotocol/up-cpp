@@ -135,3 +135,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(userializationhint_test
 	${TESTS_PATH}/utransport/userializationhint_test.cpp)
 target_link_libraries(userializationhint_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+add_executable(uuid_v6_test 
+	${TESTS_PATH}/uuid/uuid_v6_test.cpp)
+target_link_libraries(uuid_v6_test ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-14-uuid_v6_test" uuid_v6_test)
