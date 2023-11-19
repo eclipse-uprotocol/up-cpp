@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <include/utransport/datamodel/USerializationHint.h>
+#include <uprotocol/transport/datamodel/USerializationHint.h>
 
 using namespace uprotocol::utransport;
 

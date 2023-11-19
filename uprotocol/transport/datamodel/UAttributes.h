@@ -23,8 +23,8 @@
 #define _UATTRIBUTES_
 
 #include <memory>
-#include <include/uri/up_uri.h>
-#include <include/uuid/uuid_gen.h>
+#include <uprotocol/uri/datamodel/up_uri.h>
+#include <uprotocol/uuid/uuid_gen.h>
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"

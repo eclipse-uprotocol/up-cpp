@@ -1,6 +1,6 @@
 #include "spdlog/spdlog.h"
-#include <include/utransport/datamodel/UAttributes.h>
-#include <include/uuid/uuid_gen.h>
+#include <uprotocol/transport/datamodel/UAttributes.h>
+#include <uprotocol/uuid/uuid_gen.h>
 #include <gtest/gtest.h>
 
 using namespace uprotocol::utransport;
