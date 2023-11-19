@@ -97,7 +97,7 @@ private:
      * @return UUID
     */
     static UUID createUUID(uint64_t msb,
-                        uint64_t lsb);
+                           uint64_t lsb);
 
     /**
     * @brief takes uuid in the string form and writes it to uuidOut

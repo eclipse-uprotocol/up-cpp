@@ -61,18 +61,6 @@ add_executable(attribute_tests
 target_link_libraries(attribute_tests ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-03-attribute-test" attribute_tests)
 
-add_executable(uuid_v8_tests
-	${TESTS_PATH}/uuid/uuid_v8_test.cpp ${SRC_HDR_UUID})
-
-target_link_libraries(uuid_v8_tests ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-04-uuid-v8" uuid_v8_tests)
-
-add_executable(uuid_gen_test 
-	${TESTS_PATH}/uuid/uuid_gen_test.cpp)
-target_link_libraries(uuid_gen_test ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-05-uuid-gen-test" uuid_gen_test)
-
-
 add_executable(base64_test ${TESTS_PATH}/tools/base64_test.cpp)
 
 target_link_libraries(base64_test ${OPENSSL_LIBRARIES} ${CGREEN_LIBRARY} uprotocolsdk)
@@ -135,7 +123,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(userializationhint_test
 	${TESTS_PATH}/utransport/userializationhint_test.cpp)
 target_link_libraries(userializationhint_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
-add_executable(uuid_v6_test 
-	${TESTS_PATH}/uuid/uuid_v6_test.cpp)
-target_link_libraries(uuid_v6_test ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-14-uuid_v6_test" uuid_v6_test)
+

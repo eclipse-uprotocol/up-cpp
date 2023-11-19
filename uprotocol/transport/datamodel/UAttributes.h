@@ -24,12 +24,14 @@
 
 #include <memory>
 #include <uprotocol/uri/datamodel/up_uri.h>
-#include <uprotocol/uuid/uuid_gen.h>
+#include <uprotocol/uuid/factory/UuidFactory.h>
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"
+#include "uuid.pb.h"
 
 using namespace uri_datamodel;
+using namespace uprotocol::v1;
 
 namespace uprotocol::utransport {
 

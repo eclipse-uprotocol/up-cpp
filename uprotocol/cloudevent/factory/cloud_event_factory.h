@@ -39,8 +39,8 @@
 #include "up_validator.h"
 
 #include "uuid.pb.h"
-#include "UuidSerializer.h"
-#include "Uuidv8Factory.h"
+#include <uprotocol/uuid/serializer/UuidSerializer.h>
+#include <uprotocol/uuid/factory/Uuidv8Factory.h>
 
 namespace cloudevents::factory {
 using namespace cloudevents::format;

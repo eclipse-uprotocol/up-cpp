@@ -19,7 +19,7 @@
  * under the License.
  */
 
-#include "Uuidv8Factory.h"
+#include <uprotocol/uuid/factory/Uuidv8Factory.h>
 
 namespace uprotocol::uuid {
 

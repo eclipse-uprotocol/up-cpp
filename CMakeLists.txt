@@ -7,7 +7,6 @@ endif ()
 
 cmake_minimum_required(VERSION 3.18.0)
 
-
 file(STRINGS "VERSION" VERSION_STRING)
 project(uprotocol-sdk-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX )
 
@@ -44,9 +43,6 @@ find_package(UUID REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(CGreen REQUIRED)
 
-
-
-
 # proto generation
 set(protobuf_MODULE_COMPATIBLE TRUE)
 
@@ -79,6 +75,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/datamodel)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/factory)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/validator)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto)
 include_directories(${CGREEN_INCLUDE_DIR})
 
 
@@ -95,23 +92,23 @@ file(GLOB SRC_HDR_FACTORY 	"uprotocol/cloudevent/factory/*.h")
 file(GLOB SRC_HDR_URI 		"uprotocol/uri/**/*.h")
 file(GLOB SRC_HDR_UUID 		"uprotocol/uuid/*.h")
 file(GLOB SRC_HDR_TOOLS 	"uprotocol/uuid/tools/*.h")
-
-
+file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
 
 set(uprotocol_src uprotocol/tools/byte_order.cpp
-		uprotocol/tools/base64.cpp
-		src/uuid/Uuidv8Factory.cpp
-		src/uuid/UuidSerializer.cpp
-		${PROTO_CPP}
-		${PROTO_HPP}
-		${SRC_HDR_MODEL}
-		${SRC_HDR_BINARY}
-		${SRC_HDR_JSON}
-		${SRC_HDR_FACTORY}
-		${SRC_HDR_URI}
-		${SRC_HDR_UUID}
-		${SRC_HDR_TOOLS}
-		)
+	uprotocol/tools/base64.cpp
+	src/uuid/Uuidv8Factory.cpp
+	src/uuid/UuidSerializer.cpp
+	${PROTO_CPP}
+	${PROTO_HPP}
+	${SRC_HDR_MODEL}
+	${SRC_HDR_BINARY}
+	${SRC_HDR_JSON}
+	${SRC_HDR_FACTORY}
+	${SRC_HDR_URI}
+	${SRC_HDR_UUID}
+	${SRC_HDR_TOOLS}
+	${SRC_PROTO_CORE_API}
+	)
 
 add_library(uprotocollib OBJECT ${uprotocol_src})
 
@@ -157,7 +154,20 @@ target_link_libraries(uprotocolsdk_shared Threads::Threads
 					proto
 					spdlog::spdlog)
 
+
+include(ExternalProject)
+
+ExternalProject_Add(
+	uprotocol-core-api
+	PREFIX uprotocol-core-api-prefix
+	SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api"
+	BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api" 
+	INSTALL_COMMAND "" # No install step if not needed
+)
+
 add_dependencies(uprotocolsdk proto)
 add_dependencies(uprotocolsdk_shared proto)
+add_dependencies(uprotocolsdk uprotocol-core-api)
+add_dependencies(uprotocolsdk_shared uprotocol-core-api)
 
 add_subdirectory(test)

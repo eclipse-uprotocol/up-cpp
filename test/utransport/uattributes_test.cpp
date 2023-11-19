@@ -1,9 +1,10 @@
 #include "spdlog/spdlog.h"
 #include <uprotocol/transport/datamodel/UAttributes.h>
-#include <uprotocol/uuid/uuid_gen.h>
+#include <uprotocol/uuid/factory/UuidFactory.h>
 #include <gtest/gtest.h>
 
 using namespace uprotocol::utransport;
+using namespace uprotocol::uuid;
 
 // Test the UAttributes class
 TEST(UAttributesTest, Class) 
@@ -11,12 +12,7 @@ TEST(UAttributesTest, Class)
     // Create an empty UAttributes object
     UAttributes attributes;
 
-    st_uuid id;
-
-    if (false == uuid_v6_generate(&id))
-    {
-        spdlog::error("uuid_v6_generate_str failed");
-    }
+    auto id = UuidFactory::create();
 
     // Create a UAttributes object with some values
     UMessageType type = UMessageType::PUBLISH;

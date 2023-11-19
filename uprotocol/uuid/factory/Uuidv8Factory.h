@@ -21,7 +21,7 @@
 #ifndef _UUID_V8_FACTORY_H_
 #define _UUID_V8_FACTORY_H_
 
-#include "random_gen.h"
+#include "RandomGen.h"
 #include "uuid.pb.h"
 #include "UuidFactory.h"
 
@@ -91,7 +91,7 @@ private:
     static inline uint64_t msb_;
 
     /** Represents LSB part of UUID */
-    static inline uint64_t lsb_ = (random_generator::get_instance().get_random()
+    static inline uint64_t lsb_ = (RandomGenerator::GenerateRandom()
                                    & randomMask_) | variant_;
 
 }; // class UUIDv8Factory
