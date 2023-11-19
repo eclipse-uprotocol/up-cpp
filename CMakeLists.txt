@@ -82,8 +82,8 @@ file(GLOB SRC_HDR_UUID 				 "uprotocol/uuid/*.h")
 file(GLOB SRC_HDR_TOOLS 			 "uprotocol/uuid/tools/*.h")
 file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
 
-set(uprotocol_src uprotocol/tools/byte_order.cpp
-	uprotocol/tools/base64.cpp
+set(uprotocol_src 
+	src/base64/base64.cpp
 	src/uuid/Uuidv8Factory.cpp
 	src/uuid/UuidSerializer.cpp
 	${PROTO_CPP}

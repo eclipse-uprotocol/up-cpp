@@ -25,7 +25,9 @@
 #include "uri_authority.h"
 #include "uri_entity.h"
 #include "uri_resource.h"
-#include "../tools/base64.h"
+#include <uprotocol/tools/base64.h>
+
+using namespace uprotocol::tools;
 
 namespace uri_datamodel {
 class UUri {
@@ -39,7 +41,7 @@ class UUri {
         uResource(uResource) 
       {
         _hash = std::hash<std::string>{}(tostring());
-        _base64uri = cloudevents::base64::encode(tostring());
+        _base64uri = Base64::encode(tostring());
       }
 
   UUri(const uri_authority& uAuthority, const UEntity& uEntity,

@@ -1,37 +1,16 @@
 set(TESTS_PATH ../test)
-## setting the compiler
-#if(CMAKE_COMPILER_IS_GNUCXX)
-#
-#	find_program(GCOV_TOOL gcov-11)
-#	if (NOT GCOV_TOOL)
-#    	message(FATAL_ERROR "Impossible to generate coverge report. Install gcov-11.")
-#	endif()
-#    add_custom_target("coverage"
-#        COMMAND "lcov" --directory ${TESTS_PATH} --zerocounters
-#        COMMAND ctest --test-dir ${TESTS_PATH}
-#        COMMAND "lcov" --directory ${TESTS_PATH} --capture --output-file coverage.info --gcov-tool ${GCOV_TOOL}
-#        COMMAND "lcov" --remove coverage.info "'/t/*'" "'/usr/*'" --output-file coverage.info.cleaned
-#        COMMAND "rm" coverage.info
-#
-#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-#    )
-#    add_custom_target("coverage-report"
-#        COMMAND "genhtml" -o coverage coverage.info.cleaned
-#        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-#        DEPENDS "coverage"
-#    )
-#endif()
-
 
 include_directories(../uprotocol/proto)
-add_executable(json_serializer_test
-		${TESTS_PATH}/json/json_serializer_test.cpp
-		${CGREEN_INCLUDE_DIR}
-		${SRC_HDR_MODEL}
-		${SRC_HDR_JSON}
-		${PROTO_HDR_FILE}
-		${PROTO_CPP_FILE})
 
+add_executable(json_serializer_test
+			   ${TESTS_PATH}/json/json_serializer_test.cpp
+			   ${CGREEN_INCLUDE_DIR}
+			   ${SRC_HDR_MODEL}
+			   ${SRC_HDR_JSON}
+			   ${PROTO_HDR_FILE}
+			   ${PROTO_CPP_FILE})
+
+add_dependencies(json_serializer_test uprotocol-core-api)
 target_link_libraries(json_serializer_test ${CGREEN_LIBRARY} ${RapidJSON_LIBRARIES} uprotocolsdk)
 
 find_package(Protobuf REQUIRED)
@@ -41,13 +20,14 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 protobuf_generate_cpp(TEST_PROTO_SRCS TEST_PROTO_HDRS ${TESTS_PATH}/factory/test.proto)
 
 add_executable(binary_serializer_test
-		${TESTS_PATH}/binary/binary_test.cpp
-		${SRC_HDR_MODEL}
-		${SRC_HDR_BINARY}
-		${PROTO_HDR_FILE}
-		${PROTO_CPP_FILE}
-		)
+				${TESTS_PATH}/binary/binary_test.cpp
+				${SRC_HDR_MODEL}
+				${SRC_HDR_BINARY}
+				${PROTO_HDR_FILE}
+				${PROTO_CPP_FILE}
+				)
 
+add_dependencies(binary_serializer_test uprotocol-core-api)
 target_link_libraries(binary_serializer_test ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-01-binary-serializer" binary_serializer_test)
 
@@ -68,6 +48,9 @@ add_test("t-06-base64-test" base64_test)
 
 add_executable(ce_factory_test 	${CGREEN_INCLUDE_DIR} ${TEST_PROTO_SRCS} ${TEST_PROTO_HDRS}
 		${TESTS_PATH}/factory/cloud_event_factory_test.cpp)
+
+add_dependencies(ce_factory_test uprotocol-core-api)
+
 target_link_libraries(ce_factory_test ${OPENSSL_LIBRARIES} ${CGREEN_LIBRARY} uprotocolsdk)
 
 add_test("t-07-ce-factory-test" base64_test)

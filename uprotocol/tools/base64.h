@@ -24,16 +24,22 @@
 namespace uprotocol::tools {
 class Base64 {
     public:
-        static std::string base64encode(const char* data, const size_t len);
-        static std::string base64decode(const char* data, const size_t len);
+        static std::string encode(const char* string, 
+                                  const size_t len);
+
+        static std::string decode(const char* string, 
+                                  const size_t len);
         
-        static std::string base64encode(std::string const& t_str);
-        static std::string base64decode(std::string const& t_str);
+        static std::string encode(std::string const& str);
+        
+        static std::string decode(std::string const& str);
+
+        static size_t encodedLen(size_t len);
+
+        static size_t decodedLen(const char* string);
 
     private:
         Base64() = default;
-        static unsigned int posOfChar(const uint8_t chr);
-        static constexpr char* B64chars = (char*)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 };
 }  //   namespace uprotocol::tools
 #endif  //_BASE64_H_
