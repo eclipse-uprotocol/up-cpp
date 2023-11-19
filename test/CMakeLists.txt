@@ -61,11 +61,10 @@ add_executable(attribute_tests
 target_link_libraries(attribute_tests ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-03-attribute-test" attribute_tests)
 
-add_executable(base64_test ${TESTS_PATH}/tools/base64_test.cpp)
-
-target_link_libraries(base64_test ${OPENSSL_LIBRARIES} ${CGREEN_LIBRARY} uprotocolsdk)
-
-add_test("t-06-base64-test" base64_test)
+add_executable(base64_test 
+	${TESTS_PATH}/tools/base64_test.cpp)
+target_link_libraries(base64_test gtest gtest_main uprotocolsdk)
+add_test("t-06-base64-test" base64_test)	
 
 add_executable(ce_factory_test 	${CGREEN_INCLUDE_DIR} ${TEST_PROTO_SRCS} ${TEST_PROTO_HDRS}
 		${TESTS_PATH}/factory/cloud_event_factory_test.cpp)
