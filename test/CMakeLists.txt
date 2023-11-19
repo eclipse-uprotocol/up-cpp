@@ -23,7 +23,7 @@ set(TESTS_PATH ../test)
 #endif()
 
 
-include_directories(../proto)
+include_directories(../uprotocol/proto)
 add_executable(json_serializer_test
 		${TESTS_PATH}/json/json_serializer_test.cpp
 		${CGREEN_INCLUDE_DIR}
