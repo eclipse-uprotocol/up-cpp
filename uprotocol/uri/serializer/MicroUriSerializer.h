@@ -21,7 +21,6 @@
 #ifndef _MICRO_URI_SERIALIZER_H_
 #define _MICRO_URI_SERIALIZER_H_
 
-#include "UriSerializer.h"
 #include "UUri.h"
 
 namespace uprotocol::uri {
@@ -30,27 +29,21 @@ namespace uprotocol::uri {
  * UUri Serializer that serializes a UUri to a vector<uint8_t> (micro format) per
  * <a href="https://github.com/eclipse-uprotocol/uprotocol-spec/blob/main/basics/uri.adoc">...</a>
  */
-class MicroUriSerializer : public UriSerializer<std::vector<uint8_t>> {
+class MicroUriSerializer {
 public:
-    /**
-     * Get the Singleton instance for the MicroUriSerializer.
-     * @return Instance of MicroUriSerializer.
-     */
-    static MicroUriSerializer getInstance();
-
     /**
      * Serialize a UUri into a vector<uint8_t> following the Micro-URI specifications.
      * @param uUri The UUri data object.
      * @return Returns a vector<uint8_t> representing the serialized UUri.
      */
-    std::vector<uint8_t> serialize(const UUri& uUri) override;
+    static std::vector<uint8_t> serialize(const UUri& uUri);
 
     /**
      * Deserialize a vector<uint8_t> into a UUri object.
      * @param microUri A vector<uint8_t> uProtocol micro URI.
      * @return Returns an UUri data object from the serialized format of a microUri.
      */
-    UUri deserialize(std::vector<uint8_t> const& microUri) override;
+    static UUri deserialize(std::vector<uint8_t> const& microUri);
 
 private:
     /**

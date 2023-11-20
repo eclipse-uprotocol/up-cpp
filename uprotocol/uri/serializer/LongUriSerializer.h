@@ -21,7 +21,6 @@
 #ifndef _LONG_URI_SERIALIZER_H_
 #define _LONG_URI_SERIALIZER_H_
 
-#include "UriSerializer.h"
 #include "UUri.h"
 #include "UAuthority.h"
 #include "UEntity.h"
@@ -33,28 +32,22 @@ namespace uprotocol::uri {
  * UUri Serializer that serializes a UUri to a string (long format) per
  * https://github.com/eclipse-uprotocol/uprotocol-spec/blob/main/basics/uri.adoc
  */
-class LongUriSerializer : public UriSerializer<std::string> {
+class LongUriSerializer {
 public:
-    /**
-     * Get the Singleton instance for the LongUriSerializer.
-     * @return Instance of LongUriSerializer.
-     */
-    static LongUriSerializer getInstance();
-
     /**
      * Support for serializing UUri objects into their String format.
      * @param uUri UUri object to be serialized to the String format.
      * @return Returns the String format of the supplied UUri that can be used as a sink or a source
      * in a uProtocol publish communication.
      */
-    std::string serialize(const UUri& uUri) override;
+    static std::string serialize(const UUri& uUri);
 
     /**
      * Deserialize a String into a UUri object.
      * @param uProtocolUri A long format uProtocol URI.
      * @return Returns an UUri data object.
      */
-    UUri deserialize(std::string const& uProtocolUri) override;
+    static UUri deserialize(std::string const& uProtocolUri);
 
 private:
     LongUriSerializer() = default;

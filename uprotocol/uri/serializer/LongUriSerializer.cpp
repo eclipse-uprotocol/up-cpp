@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 #include <spdlog/spdlog.h>
-#include "UriSerializer.h"
 #include "UUri.h"
 #include "UAuthority.h"
 #include "UEntity.h"
@@ -32,15 +31,6 @@
 #include "LongUriSerializer.h"
 
 using namespace uprotocol::uri;
-
-/**
- * Get the Singleton instance for the LongUriSerializer.
- * @return Instance of LongUriSerializer.
- */
-LongUriSerializer LongUriSerializer::getInstance() {
-    static const auto INSTANCE = LongUriSerializer();
-    return INSTANCE;
-}
 
 /**
  * Support for serializing UUri objects into their String format.

@@ -31,15 +31,6 @@ using AddressType = IpAddress::AddressType;
 using namespace uprotocol::uri;
 
 /**
- * Get the Singleton instance for the MicroUriSerializer.
- * @return Instance of MicroUriSerializer.
- */
-MicroUriSerializer MicroUriSerializer::getInstance() {
-    static const auto INSTANCE = MicroUriSerializer();
-    return INSTANCE;
-}
-
-/**
  * Serialize a UUri into a vector<uint8_t> following the Micro-URI specifications.
  * @param uUri The UUri data object.
  * @return Returns a vector<uint8_t> representing the serialized UUri.

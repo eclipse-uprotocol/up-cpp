@@ -26,7 +26,7 @@
 namespace uprotocol::uri {
 
 bool valid_uri(const std::string& uri) {
-    auto uri_view = LongUriSerializer::getInstance().deserialize(uri);
+    auto uri_view = LongUriSerializer::deserialize(uri);
     return !uri_view.isEmpty();
 }
 
