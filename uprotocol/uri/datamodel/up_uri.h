@@ -17,32 +17,44 @@
 #ifndef UP_URI_H_
 #define UP_URI_H_
 
+#pragma once 
+
 #include <string>
 #include <utility>
 
 #include "uri_authority.h"
 #include "uri_entity.h"
 #include "uri_resource.h"
+#include <uprotocol/tools/base64.h>
+
+using namespace uprotocol::tools;
 
 namespace uri_datamodel {
-class up_uri {
+class UUri {
  public:
   static const std::string SCHEME;
 
-  up_uri(const uri_authority& uAuthority, uri_entity uEntity,
+  UUri(const uri_authority& uAuthority, UEntity uEntity,
          const uri_resource& uResource)
       : uAuthority(uAuthority),
         uEntity(std::move(uEntity)),
-        uResource(uResource) {}
+        uResource(uResource) 
+      {
+        _hash = std::hash<std::string>{}(tostring());
+        _base64uri = Base64::encode(tostring());
+      }
 
-  up_uri(const uri_authority& uAuthority, const uri_entity& uEntity,
+  UUri(const uri_authority& uAuthority, const UEntity& uEntity,
          const std::string& uResource)
-      : up_uri(uAuthority, uEntity, uri_resource::fromName(uResource)) {}
+      : UUri(uAuthority, uEntity, uri_resource::fromName(uResource))
+      {
+        _hash = std::hash<std::string>{}(tostring());
+      }
 
-  static up_uri empty() {
+  static UUri empty() {
     static const auto EMPTY =
-        uri_datamodel::up_uri(uri_datamodel::uri_authority::empty(),
-                              uri_datamodel::uri_entity::empty(),
+        uri_datamodel::UUri(uri_datamodel::uri_authority::empty(),
+                              uri_datamodel::UEntity::empty(),
                               uri_datamodel::uri_resource::empty());
     return EMPTY;
   }
@@ -54,11 +66,11 @@ class up_uri {
 
   [[nodiscard]] uri_authority getUAuthority() const { return uAuthority; }
 
-  [[nodiscard]] uri_entity getUEntity() const { return uEntity; }
+  [[nodiscard]] UEntity getUEntity() const { return uEntity; }
 
   [[nodiscard]] uri_resource getUResource() const { return uResource; }
 
-  bool operator==(const up_uri& o) const {
+  bool operator==(const UUri& o) const {
     if (this == &o) {
       return true;
     }
@@ -73,13 +85,30 @@ class up_uri {
            ", uResource=" + uResource.tostring() + '}';
   }
 
+  size_t getHash() const
+  {
+      return _hash;
+  }
+  
+  std::string getBase64() const
+  {
+      return _base64uri;
+  }
+
+  std::string getTopic() const
+  {
+      return "";
+  }
+
  private:
   const uri_authority uAuthority;
-  const uri_entity uEntity;
+  const UEntity uEntity;
   const uri_resource uResource;
+  size_t _hash;
+  std::string _base64uri;
+
 };
 
-const std::string up_uri::SCHEME = std::string("up:");
 }  // namespace uri_datamodel
 
 #endif  // up_URI_H_

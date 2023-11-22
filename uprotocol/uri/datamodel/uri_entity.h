@@ -21,19 +21,19 @@
 #include <string>
 
 namespace uri_datamodel {
-class uri_entity {
+class UEntity {
  public:
-  uri_entity() : uri_entity("", "") {}
+  UEntity() : UEntity("", "") {}
 
-  uri_entity(const std::string& name, const std::string& version)
+  UEntity(const std::string& name, const std::string& version)
       : name(name), version(version) {}
 
-  static uri_entity fromName(const std::string& name) {
-    return uri_entity{name, ""};
+  static UEntity fromName(const std::string& name) {
+    return UEntity{name, ""};
   }
 
-  static uri_entity empty() {
-    static const auto EMPTY = uri_datamodel::uri_entity("", "");
+  static UEntity empty() {
+    static const auto EMPTY = uri_datamodel::UEntity("", "");
     return EMPTY;
   }
 
@@ -50,7 +50,7 @@ class uri_entity {
                            : std::optional<std::string>(version);
   }
 
-  bool operator==(const uri_entity& o) const {
+  bool operator==(const UEntity& o) const {
     if (this == &o) {
       return true;
     }

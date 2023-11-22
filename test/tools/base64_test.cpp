@@ -18,69 +18,168 @@
  */
 
 #include "base64.h"
-
-#include <cgreen/cgreen.h>
-
+#include <gtest/gtest.h>
 #include <array>
 
-using namespace cgreen;
+class encodeDecodeTests: public ::testing::Test { 
+protected:
 
-Describe(Base64);
+    static constexpr char inputData[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()";
+    
+    static constexpr char encodeCharArr[] = "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXohQCMkJV4mKigpAA==";
+    static constexpr char invalidEncodeCharArr[] = "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5YWJjZGdferVmZ2hpamtsbW5vcHFyc3R1dnd4eXohQCMkJV4mKigpAA==";
+    std::string encodeString{"QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXohQCMkJV4mKigp"};
+    std::string invalidEncodeData{"QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXohQCMkJV4mKigprs"};
+    std::string invalidDecodedCharStr{};
+    std::string decoded{};
+    std::string encoded{};
+    std::string encodedCharStr{};
+    std::string decodedCharStr{};
+    std::string emptyString{};
 
-BeforeEach(Base64) {
-  // Dummy
-}
+    void SetUp( ) override { 
 
-AfterEach(Base64) {
-  // Dummy
-}
+        size_t inputDataLen = strlen(inputData);
+        size_t encodeCharArrLen = strlen(encodeCharArr);
+        size_t invalidEncodeCharArrLen = strlen(invalidEncodeCharArr);
 
-Ensure(Base64, base64_encode_decode) {
-  static const char ac_input[] =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghi"
-      "jklmnopqrstuvwxyz!@#$%^&*()";
-  // static char ac_output[sizeof(ac_input)];
-  static std::array<char, sizeof(ac_input)> ac_output;
+        encoded = uprotocol::tools::Base64::encode(std::string(inputData));
+        decoded = uprotocol::tools::Base64::decode(encoded);
+        encodedCharStr = uprotocol::tools::Base64::encode(inputData,
+                                                          inputDataLen);
+        decodedCharStr = uprotocol::tools::Base64::decode(encodeCharArr,
+                                                          encodeCharArrLen);
+        invalidDecodedCharStr = uprotocol::tools::Base64::decode(invalidEncodeCharArr,
+                                                                 invalidEncodeCharArrLen);
 
-  int i_val = Base64encode_len(sizeof(ac_input));
-  assert_true(i_val >= 0);
+    }
 
-  auto sz_size = (size_t)i_val;
+ };
 
-  auto* pc_buffer = new char[sz_size];
-  assert_true(pc_buffer != nullptr);
+/**
+* Test Case: Postivie test cases 
+*/
+TEST_F(encodeDecodeTests, base64_encode_decode_positive){
 
-  i_val = Base64encode(pc_buffer, ac_input,
-                       /*strlen(ac_input)*/ sizeof(ac_input) - 1);
-  assert_true(i_val >= 0);
+    ASSERT_EQ(encoded.length(), encodeString.length());
+    ASSERT_EQ(std::string(inputData), decoded);
+    ASSERT_EQ(encodedCharStr, encodeString);
+    ASSERT_EQ(decodedCharStr.data(), std::string(inputData));
+};
 
-  assert_true(((sz_size - 4) == ((size_t)i_val)) ||
-              (((size_t)i_val) == sz_size));
+/**
+* Test Case: Negitive test cases 
+*/
+TEST_F(encodeDecodeTests, base64_encode_decode_negitive){
+    
+    ASSERT_NE(uprotocol::tools::Base64::decode(invalidEncodeData), decoded);
+    ASSERT_NE(invalidDecodedCharStr, decodedCharStr);
+};
 
-  sz_size = Base64decode_len(pc_buffer);
+/**
+* Test Case: inputType_UTF8format is tests base64 encode and decode by taking input in UTF-8 format
+*/
+TEST_F(encodeDecodeTests, inputType_UTF8format){
+    const std::string orig =
+        "René Nyffenegger\n"
+        "http://www.renenyffenegger.ch\n"
+        "passion for data\n";
+    std::string encodedStr = uprotocol::tools::Base64::encode(reinterpret_cast<const char*>(orig.c_str()), orig.length());
+    ASSERT_EQ(encodedStr,"UmVuw6kgTnlmZmVuZWdnZXIKaHR0cDovL3d3dy5yZW5lbnlmZmVuZWdnZXIuY2gKcGFzc2lvbiBmb3IgZGF0YQo=");
 
-  assert_true(sz_size == sizeof(ac_output));
+    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    ASSERT_EQ(decodedStr,orig);
+};
 
-  assert_true((size_t)Base64decode(ac_output.data(), pc_buffer) ==
-              /*strlen(ac_input)*/ sizeof(ac_input) - 1);
+/**
+* Padding(=) will be added in the encoded string when input string doesn't have enough bits.
+* Test all possibilites of fill bytes (none, one =, two ==)
+* Test case:enocodeString_nopadding is tests nopadding in the base64 encoded string
+*/
+TEST_F(encodeDecodeTests, enocodeString_nopadding){
 
-  assert_true(strncmp(ac_input, ac_output.data(), sizeof(ac_input)) == 0);
+    std::string inputStr2 = "abc";
+    std::string encodedResStr2 = "YWJj";
 
-  delete (pc_buffer);
-  // pc_buffer = nullptr;
+    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr2);
+    ASSERT_EQ(encodedStr,encodedResStr2);
 
-  std::string encoded(cloudevents::base64::encode(std::string(ac_input)));
+    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    ASSERT_EQ(decodedStr,inputStr2);
+};
 
-  (void)memset(ac_output.data(), 0, sizeof(ac_output));
-  std::string decoded(cloudevents::base64::decode(encoded));
+/**
+* Test Case: enocodeString_twopadding is tests adding two paddings in the base64 encoded string
+*/
+TEST_F(encodeDecodeTests, enocodeString_twopadding){
 
-  assert_true(std::string(ac_input) == decoded);
-}
+    std::string inputStr3 = "abcd";
+    std::string encodedResStr3 = "YWJjZA==";
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
-  TestSuite* suite = create_test_suite();
+    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr3);
+    ASSERT_EQ(encodedStr,encodedResStr3);
 
-  add_test_with_context(suite, Base64, base64_encode_decode);
+    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    ASSERT_EQ(decodedStr,inputStr3);
+};
 
-  return run_test_suite(suite, create_text_reporter());
-}
+/**
+* Test Case: enocodeString_onepadding is tests adding one padding in the base64 encoded string
+*/
+TEST_F(encodeDecodeTests, enocodeString_onepadding){
+
+    std::string inputStr4 = "abcde";
+    std::string encodedResStr4 = "YWJjZGU=";
+
+    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr4);
+    ASSERT_EQ(encodedStr,encodedResStr4);
+
+    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    ASSERT_EQ(decodedStr,inputStr4);
+};
+
+/**
+* Test Case: Data that is 17 bytes long requires one padding byte when base-64 encoded. 
+*/
+TEST_F(encodeDecodeTests, a_17byteData){
+
+    std::string inputStr5 = "aaaaaaaaaaaaaaaaa";
+
+    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr5);
+    ASSERT_EQ(encodedStr,"YWFhYWFhYWFhYWFhYWFhYWE=");
+
+    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    ASSERT_EQ(decodedStr,inputStr5);
+};
+
+/**
+* Test case: characters 63 and 64 + / URL encoding
+*/
+TEST_F(encodeDecodeTests, inputChar_6364){
+
+    std::string inputStr6 = "\x03" "\xef" "\xff" "\xf9";
+
+    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr6);
+    ASSERT_EQ(encodedStr,"A+//+Q==");
+
+    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    ASSERT_EQ(decodedStr,inputStr6);
+};
+
+/**
+* Test Case: Unpadded input - 'missing' "=="
+*/
+TEST_F(encodeDecodeTests, base64_decode_unpaddedInput){
+    std::string origStr = "abcdefg";
+    
+
+    std::string encodeStr = uprotocol::tools::Base64::encode(origStr); //encoded str is YWJjZGVmZw==
+    std::string encodeStrNoPadding = "YWJjZGVmZw"; // Note the 'missing' "=="
+    ASSERT_NE(encodeStr, encodeStrNoPadding);
+
+    std::string decodedStr = uprotocol::tools::Base64::decode(encodeStr);
+    ASSERT_EQ(decodedStr, origStr);
+
+    std::string decodedStrNoPadding = uprotocol::tools::Base64::decode(encodeStrNoPadding);
+    ASSERT_EQ(decodedStrNoPadding, origStr);
+};

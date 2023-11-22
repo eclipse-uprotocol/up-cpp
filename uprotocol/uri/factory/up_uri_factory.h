@@ -35,12 +35,12 @@
 namespace uri_factory {
 class up_uri_factory {
  public:
-  static std::string buildUProtocolUri(const uri_datamodel::up_uri& upUri) {
+  static std::string buildUProtocolUri(const uri_datamodel::UUri& upUri) {
     if (upUri.isEmpty()) {
-      return uri_datamodel::up_uri::SCHEME;
+      return std::string("up:");
     }
 
-    std::string sb(uri_datamodel::up_uri::SCHEME);
+    std::string sb(std::string("up:"));
 
     sb.append(buildAuthorityPartOfUri(upUri.getUAuthority()));
 
@@ -61,16 +61,16 @@ class up_uri_factory {
 
   static std::string buildUProtocolUri(
       const uri_datamodel::uri_authority& uAuthority,
-      const uri_datamodel::uri_entity& uEntity,
+      const uri_datamodel::UEntity& uEntity,
       const uri_datamodel::uri_resource& uResource) {
     return buildUProtocolUri(
-        uri_datamodel::up_uri(uAuthority, uEntity, uResource));
+        uri_datamodel::UUri(uAuthority, uEntity, uResource));
   }
 
   static std::string buildUriForRpc(
       uri_datamodel::uri_authority const& uAuthority,
-      uri_datamodel::uri_entity const& uEntitySource) {
-    std::string sb(uri_datamodel::up_uri::SCHEME);
+      uri_datamodel::UEntity const& uEntitySource) {
+    std::string sb(std::string("up:"));
 
     sb.append(buildAuthorityPartOfUri(uAuthority));
 
@@ -85,8 +85,8 @@ class up_uri_factory {
 
   static std::string buildMethodUri(
       uri_datamodel::uri_authority const& uAuthority,
-      uri_datamodel::uri_entity const& uEntity, std::string const& methodName) {
-    std::string sb(uri_datamodel::up_uri::SCHEME);
+      uri_datamodel::UEntity const& uEntity, std::string const& methodName) {
+    std::string sb(std::string("up:"));
 
     sb.append(buildAuthorityPartOfUri(uAuthority));
 
@@ -101,9 +101,9 @@ class up_uri_factory {
     return sb;
   }
 
-  static uri_datamodel::up_uri parseFromUri(std::string const& uProtocolUri) {
+  static uri_datamodel::UUri parseFromUri(std::string const& uProtocolUri) {
     if (uProtocolUri.empty()) {
-      return uri_datamodel::up_uri::empty();
+      return uri_datamodel::UUri::empty();
     }
 
     static const std::regex schemaPattern("up:", std::regex_constants::icase);
@@ -121,10 +121,10 @@ class up_uri_factory {
 
     if (numberOfPartsInUri == 0 || numberOfPartsInUri == 1) {
       // if split result is 0 or 1 (it means there is no valid address) return
-      return isLocal ? uri_datamodel::up_uri::empty()
-                     : uri_datamodel::up_uri(
+      return isLocal ? uri_datamodel::UUri::empty()
+                     : uri_datamodel::UUri(
                            uri_datamodel::uri_authority::remote("", ""),
-                           uri_datamodel::uri_entity::empty(),
+                           uri_datamodel::UEntity::empty(),
                            uri_datamodel::uri_resource::empty());
     }
 
@@ -167,14 +167,14 @@ class up_uri_factory {
           uResource = uri_datamodel::uri_resource::empty();
         }
       } else {
-        return uri_datamodel::up_uri{uAuthority,
-                                     uri_datamodel::uri_entity::empty(),
+        return uri_datamodel::UUri{uAuthority,
+                                     uri_datamodel::UEntity::empty(),
                                      uri_datamodel::uri_resource::empty()};
       }
     }
 
-    return uri_datamodel::up_uri{
-        uAuthority, uri_datamodel::uri_entity(useName, useVersion), uResource};
+    return uri_datamodel::UUri{
+        uAuthority, uri_datamodel::UEntity(useName, useVersion), uResource};
   }
 
   static bool isValidupUri(const std::string& uProtocolUri) {
@@ -260,7 +260,7 @@ class up_uri_factory {
   }
 
   static std::string buildupSoftwareEntityPartOfUri(
-      const uri_datamodel::uri_entity& use) {
+      const uri_datamodel::UEntity& use) {
     std::string sb = trim_copy(use.getName());
     sb.append("/");
     if (use.getVersion().has_value()) {

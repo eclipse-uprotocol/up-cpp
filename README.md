@@ -63,8 +63,24 @@ $ vcpkg install openssl
 $ vcpkg install rapidjson
 $ vcpkg install protobuf protobuf[zlib]
 $ vcpkg install spdlog
+$ vcpkg install gtest 
 ```
-
+#### installing dependencies without vcpkg
+```
+$ sudo apt-get install libgtest-dev
+$ sudo apt-get install openssl-devel
+$ sudo apt-get install libuuid-devel
+$ sudo apt-get install rapidjson-devel
+$ install spdlog : https://github.com/gabime/spdlog
+$ install cgreen : https://github.com/cgreen-devs/cgreen/blob/master/INSTALL.md 
+$ install protobuf : git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
+       mkdir build & cd build\
+       cmake ../cmake \
+      -DCMAKE_BUILD_TYPE=Release \
+      -Dprotobuf_BUILD_SHARED_LIBS=ON \
+      -Dprotobuf_BUILD_TESTS=OFF; \
+      sudo make -j4 install
+```
 #### Setup SDK local repository, build and test
 ```
 $ git clone https://github.com/eclipse-uprotocol/uprotocol-sdk-cpp.git

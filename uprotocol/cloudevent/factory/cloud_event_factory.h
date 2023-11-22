@@ -37,10 +37,15 @@
 #include "spdlog/spdlog.h"
 #include "spec_version.h"
 #include "up_validator.h"
-#include "uuid_gen.h"
+
+#include "uuid.pb.h"
+#include <uprotocol/uuid/serializer/UuidSerializer.h>
+#include <uprotocol/uuid/factory/Uuidv8Factory.h>
 
 namespace cloudevents::factory {
 using namespace cloudevents::format;
+using namespace uprotocol::uuid;
+using namespace uprotocol::v1;
 
 const std::string PROTOBUF_CONTENT_TYPE = "application/protobuf";
 const std::string SERIALIZED_PROTOBUF_CONTENT_TYPE = "application/x-protobuf";
@@ -67,7 +72,7 @@ struct factory {
    */
   [[nodiscard]] static inline bool publish_factory(
       google::protobuf::Message& msg, const std::string& rpcUri,
-      CE_Attributes& attributes, CE& ce) {
+      UAttributes& attributes, CE& ce) {
     auto any = new google::protobuf::Any();
     any->PackFrom(msg);
 
@@ -102,7 +107,7 @@ struct factory {
    */
   [[nodiscard]] static inline bool publish_factory(std::string* msg,
                                                    const std::string& rpcUri,
-                                                   CE_Attributes& attributes,
+                                                   UAttributes& attributes,
                                                    CE& ce) {
     auto ok = createBaseCE(ServiceType::MessageType_E::PUBLISH, rpcUri, msg,
                            attributes, ce);
@@ -136,7 +141,7 @@ struct factory {
    */
   [[nodiscard]] static inline bool notify_factory(
       google::protobuf::Message& msg, const std::string& rpcUri,
-      const std::string& sinkUri, CE_Attributes& attributes, CE& ce) {
+      const std::string& sinkUri, UAttributes& attributes, CE& ce) {
     if (unlikely(rpcUri.empty())) {
       spdlog::error("RPCURI shuld not be empty, in {}\n", __func__);
       return false;
@@ -192,7 +197,7 @@ struct factory {
   [[nodiscard]] static inline bool notify_factory(std::string* msg,
                                                   const std::string& rpcUri,
                                                   const std::string& sinkUri,
-                                                  CE_Attributes& attributes,
+                                                  UAttributes& attributes,
                                                   CE& ce) {
     if (unlikely(rpcUri.empty())) {
       spdlog::error("RPCURI shuld not be empty, in {}\n", __func__);
@@ -247,7 +252,7 @@ struct factory {
   [[nodiscard]] static inline bool file_factory(google::protobuf::Message& msg,
                                                 const std::string& rpcUri,
                                                 const std::string& sinkUri,
-                                                CE_Attributes& attributes,
+                                                UAttributes& attributes,
                                                 CE& ce) {
     auto any = new google::protobuf::Any();
     any->PackFrom(msg);
@@ -293,7 +298,7 @@ struct factory {
   [[nodiscard]] static inline bool file_factory(std::string* msg,
                                                 const std::string& rpcUri,
                                                 const std::string& sinkUri,
-                                                CE_Attributes& attributes,
+                                                UAttributes& attributes,
                                                 CE& ce) {
     auto ok = createBaseCE(ServiceType::MessageType_E::FILE, rpcUri, msg,
                            attributes, ce);
@@ -336,7 +341,7 @@ struct factory {
    */
   [[nodiscard]] static inline bool request_factory(
       google::protobuf::Message& msg, const std::string& rpcUri,
-      const std::string& sinkUri, CE_Attributes& attributes, CE& ce) {
+      const std::string& sinkUri, UAttributes& attributes, CE& ce) {
     auto any = new google::protobuf::Any();
     any->PackFrom(msg);
 
@@ -383,7 +388,7 @@ struct factory {
   [[nodiscard]] static inline bool request_factory(std::string* msg,
                                                    const std::string& rpcUri,
                                                    const std::string& sinkUri,
-                                                   CE_Attributes& attributes,
+                                                   UAttributes& attributes,
                                                    CE& ce) {
     auto ok = createBaseCE(ServiceType::MessageType_E::REQUEST, rpcUri, msg,
                            attributes, ce);
@@ -432,7 +437,7 @@ struct factory {
   [[nodiscard]] static inline bool response_factory(
       google::protobuf::Message& msg, const std::string& rpcUri,
       const std::string& sinkUri, const std::string& reqId,
-      CE_Attributes& attributes, CE& ce) {
+      UAttributes& attributes, CE& ce) {
     auto any = new google::protobuf::Any();
     any->PackFrom(msg);
 
@@ -478,7 +483,7 @@ struct factory {
 
   [[nodiscard]] static inline bool response_factory(
       std::string* msg, const std::string& rpcUri, const std::string& sinkUri,
-      const std::string& reqId, CE_Attributes& attributes, CE& ce) {
+      const std::string& reqId, UAttributes& attributes, CE& ce) {
     auto ok = createBaseCE(ServiceType::MessageType_E::REQUEST, sinkUri, msg,
                            attributes, ce);
     if (unlikely(!ok)) {
@@ -533,8 +538,9 @@ struct factory {
     auto iter = ce.attributes().find(Serializer::TTL_KEY);
     if (iter != ce.attributes().end()) {
       auto ttl = iter->second.ce_integer();
-      uint64_t id_time =
-          uuid_v6::get_time_str(const_cast<std::string&>(ce.id())) +
+      std::string t_uuid_str = const_cast<std::string&>(ce.id());
+      UUID uuid = UuidSerializer::deserializeFromString(t_uuid_str);
+      uint64_t id_time = UuidSerializer::getTime(uuid) +
           (int64_t)ttl;
       if (id_time < duration) {
         return true;  // time passed
@@ -546,7 +552,7 @@ struct factory {
  private:
   /**
    * Set basic cloud event protobuff //            std::string *id;
-//            *id = uuid_v6::generate_str();
+//            *id = uuid_v6::generate(t_uuid_str);
 
    *   all mandatory values will be set at the caller and not here to add
 verification on them
@@ -562,7 +568,7 @@ events and mandatory or optional in the uProtocol
   [[nodiscard]] static inline bool createBaseCE(ServiceType::MessageType_E type,
                                                 const std::string& rpcUri,
                                                 google::protobuf::Any* any,
-                                                CE_Attributes& attributs,
+                                                UAttributes& attributs,
                                                 CE& ce) {
     if (likely(up_validator::valid_uri(rpcUri))) {
       ce.set_source(rpcUri);
@@ -597,8 +603,8 @@ events and mandatory or optional in the uProtocol
       attr->set_ce_string(*priority);
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
-
-    ce.set_id(uuid_v6::generate_str());
+    UUID uuid = Uuidv8Factory::create();
+    ce.set_id(UuidSerializer::serializeToString(uuid));
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_proto_data(any);
@@ -618,7 +624,7 @@ events and mandatory or optional in the uProtocol
   [[nodiscard]] static inline bool createBaseCE(ServiceType::MessageType_E type,
                                                 const std::string& rpcUri,
                                                 std::string* body,
-                                                CE_Attributes& attributs,
+                                                UAttributes& attributs,
                                                 CE& ce) {
     if (likely(up_validator::valid_uri(rpcUri))) {
       ce.set_source(rpcUri);
@@ -657,7 +663,8 @@ events and mandatory or optional in the uProtocol
       (*(ce).mutable_attributes())[Serializer::PRIORITY_KEY] = *attr;
     }
 
-    ce.set_id(uuid_v6::generate_str());
+    UUID uuid = Uuidv8Factory::create();
+    ce.set_id(UuidSerializer::serializeToString(uuid));
     ce.set_spec_version(SpecVersion::ToString(SpecVersion::SpecVersion_E::V1));
     ce.set_type(ServiceType::ToString(type));
     ce.set_allocated_binary_data(body);
@@ -679,5 +686,7 @@ events and mandatory or optional in the uProtocol
     return any;
   }
 };
+
+
 }  // namespace cloudevents::factory
 #endif  // CPP_COULDEVENT_CLOUD_EVENT_FACTORY_H
