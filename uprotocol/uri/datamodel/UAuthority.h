@@ -235,17 +235,13 @@ public:
         }
         address_ = isBlank(address) ? "" : address;
         // To have a unified format for ipv6 addressing.
-        try {
-            if (std::array<uint8_t, sizeof(struct in6_addr)> ipv6{0}; inet_pton(AF_INET6, address.c_str(), &ipv6) == 1) {
-                std::string ipv6str(INET6_ADDRSTRLEN, '\0');
-                if (inet_ntop(AF_INET6, &ipv6, ipv6str.data(), INET6_ADDRSTRLEN) != nullptr) {
-                    address_ = ipv6str.data();
-                } else {
-                    address_ = "";
-                }
+        if (std::array<uint8_t, sizeof(struct in6_addr)> ipv6{0}; inet_pton(AF_INET6, address.c_str(), &ipv6) == 1) {
+            std::string ipv6str(INET6_ADDRSTRLEN, '\0');
+            if (inet_ntop(AF_INET6, &ipv6, ipv6str.data(), INET6_ADDRSTRLEN) != nullptr) {
+                address_ = ipv6str.data();
+            } else {
+                address_ = "";
             }
-        } catch (const std::invalid_argument& e) {
-            spdlog::error("Invalid IP: {}, {}", address, e.what());
         }
     }
 

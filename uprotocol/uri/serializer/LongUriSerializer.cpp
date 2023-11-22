@@ -72,7 +72,8 @@ UUri LongUriSerializer::deserialize(std::string const& uProtocolUri) {
     bool isLocal = (uri.find("//") != 0);  // local if does not start with "//"
     const auto uriParts = split(uri, "/");
 
-    if (uriParts.size() < 2) {
+    constexpr auto minimumParts = 2;
+    if (uriParts.size() < minimumParts) {
         // if split result is 0 or 1 (it means there is no valid address) return
         return UUri::empty();
     } else if (isLocal) {
@@ -90,7 +91,7 @@ UUri LongUriSerializer::deserialize(std::string const& uProtocolUri) {
  * @return Returns a vector of strings.
  */
 std::vector<std::string> LongUriSerializer::split(std::string str,
-                                        const std::string_view& delimiter) {
+                                                  const std::string_view& delimiter) {
     std::vector<std::string> vec;
     size_t pos{};
     std::string token;

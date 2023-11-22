@@ -31,27 +31,23 @@ using namespace uprotocol::uri;
  * Updates the byte format of IP address and type, from the string format.
  */
 void IpAddress::toBytes() {
-    try {
-        std::array<uint8_t, IpAddress::IPV6_ADDRESS_BYTES> bytes = {0};
-        auto length = 0;
+    std::array<uint8_t, IpAddress::IPV6_ADDRESS_BYTES> bytes = {0};
+    auto length = 0;
 
-        if (ipString_.empty()) {
-            type_ = AddressType::Local;
-        } else if (1 == inet_pton(AF_INET, ipString_.data(), &bytes)) {
-            type_ = AddressType::IpV4;
-            length = IpAddress::IPV4_ADDRESS_BYTES;
-        } else if (1 == inet_pton(AF_INET6, ipString_.data(), &bytes)) {
-            type_ = AddressType::IpV6;
-            length = IpAddress::IPV6_ADDRESS_BYTES;
-        } else {
-            type_ = AddressType::Invalid;
-        }
+    if (ipString_.empty()) {
+        type_ = AddressType::Local;
+    } else if (1 == inet_pton(AF_INET, ipString_.data(), &bytes)) {
+        type_ = AddressType::IpV4;
+        length = IpAddress::IPV4_ADDRESS_BYTES;
+    } else if (1 == inet_pton(AF_INET6, ipString_.data(), &bytes)) {
+        type_ = AddressType::IpV6;
+        length = IpAddress::IPV6_ADDRESS_BYTES;
+    } else {
+        type_ = AddressType::Invalid;
+    }
 
-        for (auto i = 0; i < length; i++) {
-            this->ipBytes_.push_back(bytes[i]);
-        }
-    } catch(const std::invalid_argument& e) {
-        spdlog::error("Invalid IP: {}, {}", ipString_, e.what());
+    for (auto i = 0; i < length; i++) {
+        this->ipBytes_.push_back(bytes[i]);
     }
 }
 
