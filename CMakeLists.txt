@@ -86,6 +86,9 @@ set(uprotocol_src
 	src/base64/base64.cpp
 	src/uuid/Uuidv8Factory.cpp
 	src/uuid/UuidSerializer.cpp
+	src/uri/IpAddress.cpp
+	src/uri/LongUriSerializer.cpp
+	src/uri/MicroUriSerializer.cpp
 	${PROTO_CPP}
 	${PROTO_HPP}
 	${SRC_HDR_MODEL}

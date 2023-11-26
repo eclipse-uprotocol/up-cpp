@@ -2,6 +2,9 @@ set(TESTS_PATH ../test)
 
 include_directories(../uprotocol/proto)
 
+file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
+
+
 add_executable(json_serializer_test
 			   ${TESTS_PATH}/json/json_serializer_test.cpp
 			   ${CGREEN_INCLUDE_DIR}
@@ -37,7 +40,8 @@ target_link_libraries(priority_enum_test ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-02-priority-enum-test" priority_enum_test)
 
 add_executable(attribute_tests
-		${TESTS_PATH}/model/attributes_test.cpp)
+		${TESTS_PATH}/model/attributes_test.cpp
+		${SRC_PROTO_CORE_API})
 target_link_libraries(attribute_tests ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-03-attribute-test" attribute_tests)
 
