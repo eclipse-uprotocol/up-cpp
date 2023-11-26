@@ -189,11 +189,18 @@ UResource LongUriSerializer::parseUAuthority(const std::string& resourceString) 
  */
 UEntity LongUriSerializer::parseUEntity(std::string_view entity, std::string_view version) {
     std::optional<uint8_t> entityVersion = std::nullopt;
-    try {
-        entityVersion = version.empty() ? std::nullopt : std::optional<uint8_t>(std::stoi(version.data()));
-    } catch (const std::invalid_argument& e) {
-        spdlog::error("Error parsing version:{}, {}", version, e.what());
+        
+    if (true == version.empty()) {
+        entityVersion = std::nullopt;
+    } else {
+        char* endptr;
+
+        entityVersion = std::optional<uint8_t>(std::strtol(version.data(), &endptr, 10));
+        if (*endptr != '\0') {
+            spdlog::error("Invalid conversion for version");
+        }
     }
+   
     return UEntity::longFormat(entity.data(), entityVersion);
 }
 
