@@ -57,29 +57,33 @@ add_test("t-07-ce-factory-test" base64_test)
 add_executable(service_type_test ${TESTS_PATH}/model/serviceType_test.cpp)
 target_link_libraries(service_type_test ${CGREEN_LIBRARY} uprotocolsdk)
 
-add_test("t-09-service-type-test" service_type_test)
+add_test("t-08-service-type-test" service_type_test)
 
-add_executable(uri_authority_test
-	${TESTS_PATH}/uri/uri_authority_test.cpp)
-target_link_libraries(uri_authority_test ${CGREEN_LIBRARY} uprotocolsdk)
+add_executable(UAuthorityTest
+	${TESTS_PATH}/uri/datamodel/UAuthorityTest.cpp)
+target_link_libraries(UAuthorityTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-09-UAuthorityTest" UAuthorityTest)
 
-add_test("t-10-uri-authority-test" uri_authority_test)
+add_executable(UEntityTest
+		${TESTS_PATH}/uri/datamodel/UEntityTest.cpp)
+target_link_libraries(UEntityTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-10-UEntityTest" UEntityTest)
 
-add_executable(uri_entity_test
-		${TESTS_PATH}/uri/uri_entity_test.cpp)
-target_link_libraries(uri_entity_test ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-11-uri-entity-test" uri_entity_test)
+add_executable(UResourceTest
+	${TESTS_PATH}/uri/datamodel/UResourceTest.cpp)
+target_link_libraries(UResourceTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-11-UResourceTest" UResourceTest)
 
-add_executable(up_uri_test
-	${TESTS_PATH}/uri/up_uri_test.cpp)
-target_link_libraries(up_uri_test ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-12-up-uri-test" up_uri_test)
+add_executable(UUriTest
+	${TESTS_PATH}/uri/datamodel/UUriTest.cpp)
+target_link_libraries(UUriTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-12-UUriTest" UUriTest)
 
-add_executable(up_uri_factory_test
-	${TESTS_PATH}/uri/up_uri_factory_test.cpp)
-target_compile_options(up_uri_factory_test PRIVATE -g -O0)
-target_link_libraries(up_uri_factory_test ${CGREEN_LIBRARY} uprotocolsdk)
-add_test("t-13-up-uri_factory-test"  up_uri_factory_test)
+add_executable(LongUriSerializerTest
+		${TESTS_PATH}/uri/serializer/LongUriSerializerTest.cpp)
+target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
+target_link_libraries(LongUriSerializerTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-13-LongUriSerializerTest"  LongUriSerializerTest)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(uattributes_test
