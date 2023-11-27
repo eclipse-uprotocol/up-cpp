@@ -23,14 +23,14 @@
 #define _UATTRIBUTES_
 
 #include <memory>
-#include <uprotocol/uri/datamodel/up_uri.h>
+#include <uprotocol/uri/datamodel/UUri.h>
 #include <uprotocol/uuid/factory/UuidFactory.h>
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"
 #include "uuid.pb.h"
 
-using namespace uri_datamodel;
+using namespace uprotocol::uri;
 using namespace uprotocol::v1;
 
 namespace uprotocol::utransport {

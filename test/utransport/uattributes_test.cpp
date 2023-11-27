@@ -1,6 +1,7 @@
 #include "spdlog/spdlog.h"
 #include <uprotocol/transport/datamodel/UAttributes.h>
 #include <uprotocol/uuid/factory/UuidFactory.h>
+#include <uprotocol/uri/datamodel/UUri.h>
 #include <gtest/gtest.h>
 
 using namespace uprotocol::utransport;
@@ -22,9 +23,9 @@ TEST(UAttributesTest, Class)
     builder.withTtl(100);
     builder.withToken("sample_token");
     builder.withHint(USerializationHint::JSON);
-    builder.withSink(UUri(uri_datamodel::uri_authority::local(), 
-                        uri_datamodel::UEntity::fromName("body.access"),
-                        uri_datamodel::uri_resource::fromName("door")));
+    builder.withSink(UUri(UAuthority::local(), 
+                          UEntity::longFormat("body.access"),
+                          UResource::longFormat("door")));
     builder.withPermissionLevel(5);
     builder.withCommStatus(200);
     builder.withReqId(id);

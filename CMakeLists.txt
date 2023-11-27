@@ -65,7 +65,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/serialize)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/tools)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/datamodel)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/factory)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/serializer)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/validator)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto)
@@ -86,6 +86,9 @@ set(uprotocol_src
 	src/base64/base64.cpp
 	src/uuid/Uuidv8Factory.cpp
 	src/uuid/UuidSerializer.cpp
+	src/uri/IpAddress.cpp
+	src/uri/LongUriSerializer.cpp
+	src/uri/MicroUriSerializer.cpp
 	${PROTO_CPP}
 	${PROTO_HPP}
 	${SRC_HDR_MODEL}
