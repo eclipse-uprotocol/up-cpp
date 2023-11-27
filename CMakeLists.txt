@@ -154,7 +154,7 @@ STRING(REGEX REPLACE "${source_regex}" "" after_source ${INSTALL_PATH} "${compon
 string(REPLACE "/" ";" list_string ${list_string} "${after_source}")
 list (GET list_string -1 TAIL)
 STRING(REGEX REPLACE "/${TAIL}" "" directory_name ${INSTALL_PATH} "${after_source}")
-set(include_destination "${CMAKE_INSTALL_PREFIX}uprotocolsdk/include/${directory_name}")
+set(include_destination "${CMAKE_INSTALL_PREFIX}include/uprotocolsdk/${directory_name}")
 install(
 	FILES "${component}"
 	DESTINATION "${include_destination}"
@@ -172,4 +172,3 @@ install(TARGETS uprotocolsdk
         LIBRARY DESTINATION "${lib}"
 		ARCHIVE DESTINATION "${lib}")
 		
-
