@@ -78,22 +78,27 @@ macro(uProtocol_HEADERS out name)
 endmacro()
 
 # Headers
-uProtocol_HEADERS(H_SRCS RegExp 
-include/uuid
-include/json
-include/binary
-include/tools
-include/factory
-include/uri)
+file(GLOB_RECURSE HDRS_G "include/*/*.h")
+uProtocol_HEADERS(H_SRCS RegExp ${HDRS_G})
+set(source_regex "${CMAKE_CURRENT_SOURCE_DIR}/include/")
+foreach(component ${H_SRCS})
+message(STATUS "Collect header file for installation: ${component}")
+STRING(REGEX REPLACE "${source_regex}" "" after_source ${INSTALL_PATH} "${component}")
+string(REPLACE "/" ";" list_string ${list_string} "${after_source}")
+list (GET list_string -1 TAIL)
+STRING(REGEX REPLACE "/${TAIL}" "" directory_name ${INSTALL_PATH} "${after_source}")
+set(include_destination "${CMAKE_INSTALL_PREFIX}include/uprotocolsdk/${directory_name}")
+include_directories("include/${directory_name}")
+install(
+	FILES "${component}"
+	DESTINATION "${include_destination}"
+	COMPONENT Devel
+	OPTIONAL)
+endforeach()
 
 # Sources
 file(GLOB SRCS_G "src/*/*.cpp")
 uProtocol_SOURCES(SRCS RegExp ${SRCS_G})
-foreach(component ${H_SRCS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${component})
-message(STATUS "Including header directories: ${component}")
-endforeach()
-
 foreach(component ${SRCS})
 set(uprotocol_src ${component})
 message(STATUS "set source file: ${component}")
@@ -145,22 +150,6 @@ target_link_libraries(uprotocolsdk_shared Threads::Threads
 if(BUILD_TESTING)
 	add_subdirectory(test)
 endif()
-
-file(GLOB_RECURSE HDRS_G "include/*/*.h")
-set(source_regex "${CMAKE_CURRENT_SOURCE_DIR}/include/")
-foreach(component ${HDRS_G})
-message(STATUS "Collect header file for installation: ${component}")
-STRING(REGEX REPLACE "${source_regex}" "" after_source ${INSTALL_PATH} "${component}")
-string(REPLACE "/" ";" list_string ${list_string} "${after_source}")
-list (GET list_string -1 TAIL)
-STRING(REGEX REPLACE "/${TAIL}" "" directory_name ${INSTALL_PATH} "${after_source}")
-set(include_destination "${CMAKE_INSTALL_PREFIX}include/uprotocolsdk/${directory_name}")
-install(
-	FILES "${component}"
-	DESTINATION "${include_destination}"
-	COMPONENT Devel
-	OPTIONAL)
-endforeach()
 
 set(lib "${CMAKE_INSTALL_PREFIX}lib")
 message(STATUS "Writting to lib location : ${lib}")
