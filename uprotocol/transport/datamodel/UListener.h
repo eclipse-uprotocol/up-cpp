@@ -1,9 +1,8 @@
 #ifndef _ULISTENER_H_
 #define _ULISTENER_H_
 
-#include <include/uri/up_uri.h>
-#include <include/uri/up_uri_factory.h>
-#include <include/model/attributes.h>
+#include <uri/datamodel/UUri.h>
+#include <transport/datamodel/UAttributes.h>
 #include "UStatus.h"
 #include "UPayload.h"
 #include "UAttributes.h"
@@ -23,7 +22,7 @@ namespace uprotocol::utransport
 			*/
 			virtual UStatus onReceive(const UUri &uri, 
 									  const UPayload &payload, 
-									  const UAttributes &attributes) = 0; 
+									  const UAttributes &attributes) const = 0; 
 
 			virtual ~UListener() {} 
 	};
