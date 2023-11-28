@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <include/utransport/datamodel/UPayload.h>
+#include <uprotocol/transport/datamodel/UPayload.h>
 
 using namespace uprotocol::utransport;
 
@@ -12,7 +12,7 @@ protected:
     const size_t testDataSize = 13;
     uprotocol::utransport::UPayload payload;
 
-    UPayloadTest() : payload(testData, testDataSize) {}
+    UPayloadTest() : payload(testData, testDataSize, UPayloadType::VALUE) {}
 };
 
 // Test the data() method
@@ -36,7 +36,7 @@ TEST_F(UPayloadTest, IsEmptyFalse)
 // Test the isEmpty() method with an empty payload
 TEST(UPayloadTest, IsEmptyTrue) 
 {
-    uprotocol::utransport::UPayload emptyPayload(nullptr, 0);
+    uprotocol::utransport::UPayload emptyPayload(nullptr, 0, UPayloadType::VALUE);
     EXPECT_TRUE(emptyPayload.isEmpty());
 }
 
