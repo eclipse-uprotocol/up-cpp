@@ -20,296 +20,258 @@
  */
 #include <string>
 #include <optional>
-#include <cgreen/cgreen.h>
+#include <gtest/gtest.h>
 #include "UEntity.h"
 
-using namespace cgreen;
 using namespace uprotocol::uri;
 
-#define assertTrue(a) assert_true(a)
-#define assertEquals(a, b) assert_true(b == a)
-#define assertFalse(a) assert_false(a)
-
-Describe(UEntity);
-
-BeforeEach(UEntity) {
-    // Dummy
-}
-
-AfterEach(UEntity) {
-    // Dummy
-}
-
 // Make sure the toString works.
-static void testToString() {
+TEST(UEntityTest, ToString) {
     UEntity uEntity = UEntity::longFormat("body.access", 1);
-    assertEquals("body.access", uEntity.getName());
-    assertTrue(uEntity.getVersion().has_value());
-    assertEquals(1, uEntity.getVersion().value());
+    EXPECT_EQ("body.access", uEntity.getName());
+    EXPECT_TRUE(uEntity.getVersion().has_value());
+    EXPECT_EQ(1, uEntity.getVersion().value());
 
     std::string expected = "UEntity{name='body.access', version=1, id=null, markedResolved=false}";
-    assertEquals(expected, uEntity.toString());
+    EXPECT_EQ(expected, uEntity.toString());
 
     UEntity uEntity2 = UEntity::longFormat("body.access");
     expected = "UEntity{name='body.access', version=null, id=null, markedResolved=false}";
-    assertEquals(expected, uEntity2.toString());
+    EXPECT_EQ(expected, uEntity2.toString());
 }
 
 // Test creating an empty USE using the empty static method.
-static void testEmptyEntity() {
+TEST(UEntityTest, EmptyEntity) {
     UEntity uEntity = UEntity::empty();
-    assertTrue(uEntity.getName().empty());
-    assertFalse(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertTrue(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_TRUE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in long format UUri with name.
-static void testLongFormatWithName() {
+TEST(UEntityTest, LongFormatWithName) {
     UEntity uEntity = UEntity::longFormat("body.access");
-    assertEquals("body.access", uEntity.getName());
-    assertFalse(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertTrue(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_EQ("body.access", uEntity.getName());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_TRUE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in long format UUri with name that is blank.
-static void testLongFormatWithBlankName() {
+TEST(UEntityTest, LongFormatWithBlankName) {
     UEntity uEntity = UEntity::longFormat("  ");
-    assertTrue(uEntity.getName().empty());
-    assertFalse(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertTrue(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_TRUE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in long format UUri with name that is null, expect exception.
-static void testLongFormatWithEmptyName() {
+TEST(UEntityTest, LongFormatWithEmptyName) {
     UEntity uEntity = UEntity::longFormat("");
-    assertTrue(uEntity.getName().empty());
-    assertFalse(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertTrue(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_TRUE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in long format UUri with name and version.
-static void testLongFormatWithNameAndVersion() {
+TEST(UEntityTest, LongFormatWithNameAndVersion) {
     UEntity uEntity = UEntity::longFormat("body.access", 1);
-    assertEquals("body.access", uEntity.getName());
-    assertEquals(1, uEntity.getVersion().value_or(-1));
-    assertFalse(uEntity.getId().has_value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertTrue(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_EQ("body.access", uEntity.getName());
+    EXPECT_EQ(1, uEntity.getVersion().value_or(-1));
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_TRUE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in long format UUri with blank name and null version.
-static void testLongFormatWithEmptyNameAndNoVersion() {
+TEST(UEntityTest, LongFormatWithEmptyNameAndNoVersion) {
     UEntity uEntity = UEntity::longFormat("", std::nullopt);
-    assertTrue(uEntity.getName().empty());
-    assertFalse(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertTrue(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_TRUE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in long format UUri with blank name and null version.
-static void testLongFormatWithNameAndNoVersion() {
+TEST(UEntityTest, LongFormatWithNameAndNoVersion) {
     UEntity uEntity = UEntity::longFormat("body.access", std::nullopt);
-    assertEquals("body.access", uEntity.getName());
-    assertFalse(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertTrue(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_EQ("body.access", uEntity.getName());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_TRUE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in long format UUri with name and version, null name, expect exception.
-static void testLongFormatWithVersionAndNoName() {
+TEST(UEntityTest, LongFormatWithVersionAndNoName) {
     UEntity uEntity = UEntity::longFormat("", 1);
-    assertTrue(uEntity.getName().empty());
-    assertTrue(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_TRUE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in micro format UUri with id.
-static void testMicroFormatWithId() {
+TEST(UEntityTest, MicroFormatWithId) {
     uint16_t id = 42;
     UEntity uEntity = UEntity::microFormat(id);
-    assertTrue(uEntity.getName().empty());
-    assertFalse(uEntity.getVersion().has_value());
-    assertEquals(id, uEntity.getId().value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertTrue(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_EQ(id, uEntity.getId().value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_TRUE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in micro format UUri with null id.
-static void testMicroFormatWithNoId() {
+TEST(UEntityTest, MicroFormatWithNoId) {
     UEntity uEntity = UEntity::microFormat(std::nullopt);
-    assertTrue(uEntity.getName().empty());
-    assertFalse(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertTrue(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_TRUE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in micro format UUri with id and version.
-static void testMicroFormatWithIdAndVersion() {
+TEST(UEntityTest, MicroFormatWithIdAndVersion) {
     uint16_t id = 42;
     uint16_t version = 1;
     UEntity uEntity = UEntity::microFormat(id, version);
-    assertTrue(uEntity.getName().empty());
-    assertEquals(version, uEntity.getVersion().value());
-    assertEquals(id, uEntity.getId().value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertTrue(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_EQ(version, uEntity.getVersion().value());
+    EXPECT_EQ(id, uEntity.getId().value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_TRUE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in micro format UUri with id and null version.
-static void testMicroFormatWithIdAndNoVersion() {
+TEST(UEntityTest, MicroFormatWithIdAndNoVersion) {
     uint16_t id = 42;
     UEntity uEntity = UEntity::microFormat(id, std::nullopt);
-    assertTrue(uEntity.getName().empty());
-    assertFalse(uEntity.getVersion().has_value());
-    assertEquals(id, uEntity.getId().value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertTrue(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_EQ(id, uEntity.getId().value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_TRUE(uEntity.isMicroForm());
 }
 
 // Test creating a software entity for use in micro format UUri with null id and version.
-static void testMicroFormatWithVersionAndNoId() {
+TEST(UEntityTest, MicroFormatWithVersionAndNoId) {
     uint8_t version = 1;
     UEntity uEntity = UEntity::microFormat(std::nullopt, version);
-    assertTrue(uEntity.getName().empty());
-    assertTrue(uEntity.getVersion().value());
-    assertFalse(uEntity.getId().has_value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_TRUE(uEntity.getVersion().value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
 // Test creating a resolved software entity for use in long format and micro format UUri.
-static void testResolvedFormat() {
+TEST(UEntityTest, ResolvedFormat) {
     uint16_t id = 42;
     uint8_t version = 1;
     UEntity uEntity = UEntity::resolvedFormat("body.access", version, id);
-    assertEquals("body.access", uEntity.getName());
-    assertEquals(version, uEntity.getVersion().value());
-    assertEquals(id, uEntity.getId().value());
-    assertFalse(uEntity.isEmpty());
-    assertTrue(uEntity.isResolved());
-    assertTrue(uEntity.isLongForm());
-    assertTrue(uEntity.isMicroForm());
+    EXPECT_EQ("body.access", uEntity.getName());
+    EXPECT_EQ(version, uEntity.getVersion().value());
+    EXPECT_EQ(id, uEntity.getId().value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_TRUE(uEntity.isResolved());
+    EXPECT_TRUE(uEntity.isLongForm());
+    EXPECT_TRUE(uEntity.isMicroForm());
 }
 
 // Test creating a resolved software entity for use in long format and micro format UUri when name is empty.
-static void testResolvedFormatWithEmptyName() {
+TEST(UEntityTest, ResolvedFormatWithEmptyName) {
     uint16_t id = 42;
     uint8_t version = 1;
     UEntity uEntity = UEntity::resolvedFormat(" ", 1, id);
-    assertTrue(uEntity.getName().empty());
-    assertEquals(version, uEntity.getVersion().value());
-    assertEquals(id, uEntity.getId().value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertTrue(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_EQ(version, uEntity.getVersion().value());
+    EXPECT_EQ(id, uEntity.getId().value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_TRUE(uEntity.isMicroForm());
 }
 
 // Test creating a resolved software entity for use in long format and micro format UUri when name is null.
-static void testResolvedFormatWithNoName() {
+TEST(UEntityTest, ResolvedFormatWithNoName) {
     uint16_t id = 42;
     uint8_t version = 1;
     UEntity uEntity = UEntity::resolvedFormat("", version, id);
-    assertTrue(uEntity.getName().empty());
-    assertEquals(version, uEntity.getVersion().value());
-    assertEquals(id, uEntity.getId().value());
-    assertFalse(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertTrue(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_EQ(version, uEntity.getVersion().value());
+    EXPECT_EQ(id, uEntity.getId().value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_TRUE(uEntity.isMicroForm());
 }
 
 // Test creating a resolved software entity for use in long format and micro format UUri with missing version.
-static void testResolvedFormatWithNoVersion() {
+TEST(UEntityTest, ResolvedFormatWithNoVersion) {
     std::string name = "body.access";
     uint16_t id = 42;
     UEntity uEntity = UEntity::resolvedFormat(name, std::nullopt, id);
-    assertEquals(name, uEntity.getName());
-    assertFalse(uEntity.getVersion().has_value());
-    assertEquals(id, uEntity.getId().value());
-    assertFalse(uEntity.isEmpty());
-    assertTrue(uEntity.isResolved());
-    assertTrue(uEntity.isLongForm());
-    assertTrue(uEntity.isMicroForm());
+    EXPECT_EQ(name, uEntity.getName());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_EQ(id, uEntity.getId().value());
+    EXPECT_FALSE(uEntity.isEmpty());
+    EXPECT_TRUE(uEntity.isResolved());
+    EXPECT_TRUE(uEntity.isLongForm());
+    EXPECT_TRUE(uEntity.isMicroForm());
 }
 
 // Test creating a resolved software entity for use in long format and micro format UUri when all elements are empty.
-static void testResolvedFormatEmpty() {
+TEST(UEntityTest, ResolvedFormatEmpty) {
     UEntity uEntity = UEntity::resolvedFormat("  ", std::nullopt, std::nullopt);
-    assertTrue(uEntity.getName().empty());
-    assertFalse(uEntity.getVersion().has_value());
-    assertFalse(uEntity.getId().has_value());
-    assertTrue(uEntity.isEmpty());
-    assertFalse(uEntity.isResolved());
-    assertFalse(uEntity.isLongForm());
-    assertFalse(uEntity.isMicroForm());
+    EXPECT_TRUE(uEntity.getName().empty());
+    EXPECT_FALSE(uEntity.getVersion().has_value());
+    EXPECT_FALSE(uEntity.getId().has_value());
+    EXPECT_TRUE(uEntity.isEmpty());
+    EXPECT_FALSE(uEntity.isResolved());
+    EXPECT_FALSE(uEntity.isLongForm());
+    EXPECT_FALSE(uEntity.isMicroForm());
 }
 
-Ensure(UEntity, all_tests) {
-    testToString();
-    testEmptyEntity();
-    testLongFormatWithName();
-    testLongFormatWithBlankName();
-    testLongFormatWithEmptyName();
-    testLongFormatWithNameAndVersion();
-    testLongFormatWithEmptyNameAndNoVersion();
-    testLongFormatWithNameAndNoVersion();
-    testLongFormatWithVersionAndNoName();
-    testMicroFormatWithId();
-    testMicroFormatWithNoId();
-    testMicroFormatWithIdAndVersion();
-    testMicroFormatWithIdAndNoVersion();
-    testMicroFormatWithVersionAndNoId();
-    testResolvedFormat();
-    testResolvedFormatWithEmptyName();
-    testResolvedFormatWithNoName();
-    testResolvedFormatWithNoVersion();
-    testResolvedFormatEmpty();
-}
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
-    TestSuite* suite = create_test_suite();
-
-    add_test_with_context(suite, UEntity, all_tests);
-
-    return run_test_suite(suite, create_text_reporter());
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

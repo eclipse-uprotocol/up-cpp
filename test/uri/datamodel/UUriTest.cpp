@@ -20,28 +20,13 @@
  */
 #include <iostream>
 #include <string>
-#include <cgreen/cgreen.h>
+#include <gtest/gtest.h>
 #include "UUri.h"
 
-using namespace cgreen;
 using namespace uprotocol::uri;
 
-#define assertTrue(a) assert_true(a)
-#define assertEquals(a, b) assert_true(b == a)
-#define assertFalse(a) assert_false(a)
-
-Describe(UUri);
-
-BeforeEach(UUri) {
-    // Dummy
-}
-
-AfterEach(UUri) {
-    // Dummy
-}
-
 // Make sure the toString works.
-static void testToString() {
+TEST(UUriTest, ToString) {
     UAuthority uAuthorityLocal = UAuthority::local();
     UAuthority uAuthorityRemote = UAuthority::longRemote("VCU", "MY_VIN");
     UEntity uEntity = UEntity::longFormat("body.access", 1);
@@ -53,7 +38,7 @@ static void testToString() {
                            "uEntity=UEntity{name='body.access', version=1, id=null, markedResolved=false}, "\
                            "uResource=UResource{name='door', instance='front_left', "\
                            "message='null', id=null, markedResolved=false}}";
-    assertEquals(expected, uriLocal.toString());
+    EXPECT_EQ(expected, uriLocal.toString());
 
     auto uriRemote = UUri(uAuthorityRemote, uEntity, uResource);
     expected = "UriPart{uAuthority=UAuthority{device='vcu', domain='my_vin', "\
@@ -61,249 +46,234 @@ static void testToString() {
                "uEntity=UEntity{name='body.access', version=1, id=null, markedResolved=false}, "\
                "uResource=UResource{name='door', instance='front_left', message='null', "\
                "id=null, markedResolved=false}}";
-    assertEquals(expected, uriRemote.toString());
+    EXPECT_EQ(expected, uriRemote.toString());
 
     auto uri = UUri(uAuthorityRemote, uEntity, UResource::empty());
     expected = "UriPart{uAuthority=UAuthority{device='vcu', domain='my_vin', "\
                "address=null, markedRemote=true, markedResolved=false}, "\
                "uEntity=UEntity{name='body.access', version=1, id=null, markedResolved=false}, "\
                "uResource=UResource{name='', instance='null', message='null', id=null, markedResolved=false}}";
-    assertEquals(expected, uri.toString());
+    EXPECT_EQ(expected, uri.toString());
 }
 
 // Test creating full local uri.
-static void testLocalUri() {
+TEST(UUriTest, LocalUri) {
     UAuthority uAuthority = UAuthority::local();
     UEntity uEntity = UEntity::longFormat("body.access");
     UResource uResource = UResource::longFormat("door", "front_left", "");
     UUri uri(uAuthority, uEntity, uResource);
-    assertEquals(uAuthority, uri.getUAuthority());
-    assertEquals(uEntity, uri.getUEntity());
-    assertEquals(uResource, uri.getUResource());
-    assertFalse(uri.isEmpty());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
-    assertFalse(uri.isResolved());
+    EXPECT_EQ(uAuthority, uri.getUAuthority());
+    EXPECT_EQ(uEntity, uri.getUEntity());
+    EXPECT_EQ(uResource, uri.getUResource());
+    EXPECT_FALSE(uri.isEmpty());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
 }
 
 // Test creating full remote uri.
-static void testRemoteUri() {
+TEST(UUriTest, RemoteUri) {
     UAuthority uAuthority = UAuthority::longRemote("VCU", "MY_VIN");
     UEntity uEntity = UEntity::longFormat("body.access", 1);
     UResource uResource = UResource::longFormat("door", "front_left", "Door");
     UUri uri(uAuthority, uEntity, uResource);
-    assertEquals(uAuthority, uri.getUAuthority());
-    assertEquals(uEntity, uri.getUEntity());
-    assertEquals(uResource, uri.getUResource());
-    assertFalse(uri.isEmpty());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
-    assertFalse(uri.isResolved());
+    EXPECT_EQ(uAuthority, uri.getUAuthority());
+    EXPECT_EQ(uEntity, uri.getUEntity());
+    EXPECT_EQ(uResource, uri.getUResource());
+    EXPECT_FALSE(uri.isEmpty());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
 }
 
 // Test creating rpc response uri.
-static void testRpcResponseUri() {
+TEST(UUriTest, RpcResponseUri) {
     UAuthority uAuthority = UAuthority::longRemote("VCU", "MY_VIN");
     UEntity uEntity = UEntity::longFormat("body.access", 1);
     UUri uri = UUri::rpcResponse(uAuthority, uEntity);
-    assertEquals(uAuthority, uri.getUAuthority());
-    assertEquals(uEntity, uri.getUEntity());
-    assertTrue(uri.getUResource().isRPCMethod());
-    assertFalse(uri.isEmpty());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
-    assertFalse(uri.isResolved());
+    EXPECT_EQ(uAuthority, uri.getUAuthority());
+    EXPECT_EQ(uEntity, uri.getUEntity());
+    EXPECT_TRUE(uri.getUResource().isRPCMethod());
+    EXPECT_FALSE(uri.isEmpty());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
 }
 
 // Test creating full uri with resource but no message using the constructor.
-static void testRemoteUriWithoutMessage() {
+TEST(UUriTest, RemoteUriWithoutMessage) {
     UAuthority uAuthority = UAuthority::longRemote("VCU", "MY_VIN");
     UEntity uEntity = UEntity::longFormat("body.access", 1);
     UResource uResource = UResource::longFormat("door");
     UUri uri(uAuthority, uEntity, "door");
-    assertEquals(uAuthority, uri.getUAuthority());
-    assertEquals(uEntity, uri.getUEntity());
-    assertEquals(uResource, uri.getUResource());
-    assertFalse(uri.isEmpty());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
-    assertFalse(uri.isResolved());
+    EXPECT_EQ(uAuthority, uri.getUAuthority());
+    EXPECT_EQ(uEntity, uri.getUEntity());
+    EXPECT_EQ(uResource, uri.getUResource());
+    EXPECT_FALSE(uri.isEmpty());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
 }
 
 // Test creating a uri with empty authority.
-static void testUriWithEmptyAuthority() {
+TEST(UUriTest, UriWithEmptyAuthority) {
     UEntity uEntity = UEntity::longFormat("body.access", 1);
     UResource uResource = UResource::longFormat("door", "front_left", "");
     UUri uri(UAuthority::empty(), uEntity, uResource);
-    assertEquals(UAuthority::empty(), uri.getUAuthority());
-    assertFalse(uri.isEmpty());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
-    assertFalse(uri.isResolved());
+    EXPECT_EQ(UAuthority::empty(), uri.getUAuthority());
+    EXPECT_FALSE(uri.isEmpty());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
 }
 
 // Test creating a uri with empty software entity.
-static void testUriWithEmptyEntity() {
+TEST(UUriTest, UriWithEmptyEntity) {
     UAuthority uAuthority = UAuthority::longRemote("VCU", "MY_VIN");
     UResource uResource = UResource::longFormat("door", "front_left", "");
     UUri uri(uAuthority, UEntity::empty(), uResource);
-    assertEquals(UEntity::empty(), uri.getUEntity());
-    assertFalse(uri.isEmpty());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
-    assertFalse(uri.isResolved());
+    EXPECT_EQ(UEntity::empty(), uri.getUEntity());
+    EXPECT_FALSE(uri.isEmpty());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
 }
 
 
 // Test creating a uri with empty resource.
-static void testUriWithEmptyResource() {
+TEST(UUriTest, UriWithEmptyResource) {
     UAuthority uAuthority = UAuthority::longRemote("VCU", "MY_VIN");
     UEntity uEntity = UEntity::longFormat("body.access", 1);
     UResource uResource = UResource::empty();
     UUri uri(uAuthority, uEntity, uResource);
-    assertEquals(UResource::empty(), uri.getUResource());
-    assertFalse(uri.isEmpty());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
-    assertFalse(uri.isResolved());
+    EXPECT_EQ(UResource::empty(), uri.getUResource());
+    EXPECT_FALSE(uri.isEmpty());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
 }
 
 // Test creating an empty uri using the empty static method.
-static void testEmptyUri() {
+TEST(UUriTest, EmptyUri) {
     UUri uri = UUri::empty();
-    assertTrue(uri.getUAuthority().isLocal());
-    assertTrue(uri.getUEntity().isEmpty());
-    assertTrue(uri.getUResource().isEmpty());
-    assertTrue(uri.isEmpty());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
-    assertFalse(uri.isResolved());
+    EXPECT_TRUE(uri.getUAuthority().isLocal());
+    EXPECT_TRUE(uri.getUEntity().isEmpty());
+    EXPECT_TRUE(uri.getUResource().isEmpty());
+    EXPECT_TRUE(uri.isEmpty());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
     auto uri2 = UUri(UAuthority::empty(), UEntity::empty(), UResource::empty());
-    assertEquals(uri, uri2);
+    EXPECT_EQ(uri, uri2);
 }
 
 // Test isResolved and isLongForm for valid URIs.
-static void testResolvedUri() {
+TEST(UUriTest, ResolvedUri) {
     UUri uri = UUri::empty();
-    assertFalse(uri.isResolved());
-    assertTrue(uri.isLongForm());
-    assertFalse(uri.isMicroForm());
+    EXPECT_FALSE(uri.isResolved());
+    EXPECT_TRUE(uri.isLongForm());
+    EXPECT_FALSE(uri.isMicroForm());
 
     UResource uResource = UResource::forRpcRequest("ExecuteDoorCommand");
     UEntity uEntity = UEntity::longFormat("body.access");
     auto uri2 = UUri(UAuthority::local(), UEntity::longFormat("body.access"), uResource);
-    assertFalse(uri2.isResolved());
-    assertTrue(uri2.isLongForm());
-    assertFalse(uri2.isMicroForm());
+    EXPECT_FALSE(uri2.isResolved());
+    EXPECT_TRUE(uri2.isLongForm());
+    EXPECT_FALSE(uri2.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
     auto uri3 = UUri(UAuthority::local(), UEntity::longFormat("body.access"), uResource);
-    assertFalse(uri3.isResolved());
-    assertTrue(uri3.isLongForm());
-    assertFalse(uri3.isMicroForm());
+    EXPECT_FALSE(uri3.isResolved());
+    EXPECT_TRUE(uri3.isLongForm());
+    EXPECT_FALSE(uri3.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
     auto uri4 = UUri(UAuthority::local(), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
-    assertTrue(uri4.isResolved());
-    assertTrue(uri4.isLongForm());
-    assertFalse(uri3.isMicroForm());
+    EXPECT_TRUE(uri4.isResolved());
+    EXPECT_TRUE(uri4.isLongForm());
+    EXPECT_FALSE(uri3.isMicroForm());
 
     uResource = UResource::forRpcRequest("ExecuteDoorCommand");
     auto uri11 = UUri(UAuthority::local(), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
-    assertFalse(uri11.isResolved());
-    assertTrue(uri11.isLongForm());
-    assertFalse(uri11.isMicroForm());
+    EXPECT_FALSE(uri11.isResolved());
+    EXPECT_TRUE(uri11.isLongForm());
+    EXPECT_FALSE(uri11.isMicroForm());
 
     uResource = UResource::forRpcRequest("ExecuteDoorCommand");
     auto uri5 = UUri(UAuthority::resolvedRemote("vcu", "vin", ""), UEntity::longFormat("body.access"), uResource);
-    assertFalse(uri5.isResolved());
-    assertTrue(uri5.isLongForm());
-    assertFalse(uri5.isMicroForm());
+    EXPECT_FALSE(uri5.isResolved());
+    EXPECT_TRUE(uri5.isLongForm());
+    EXPECT_FALSE(uri5.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
     auto uri6 = UUri(UAuthority::resolvedRemote("vcu", "vin", ""), UEntity::longFormat("body.access"), uResource);
-    assertFalse(uri6.isResolved());
-    assertTrue(uri6.isLongForm());
-    assertFalse(uri6.isMicroForm());
+    EXPECT_FALSE(uri6.isResolved());
+    EXPECT_TRUE(uri6.isLongForm());
+    EXPECT_FALSE(uri6.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
     auto uri7 = UUri(UAuthority::resolvedRemote("vcu", "vin", ""), UEntity::longFormat("body.access"), uResource);
-    assertFalse(uri7.isResolved());
-    assertTrue(uri7.isLongForm());
-    assertFalse(uri7.isMicroForm());
+    EXPECT_FALSE(uri7.isResolved());
+    EXPECT_TRUE(uri7.isLongForm());
+    EXPECT_FALSE(uri7.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
     auto uri14 = UUri(UAuthority::resolvedRemote("vcu", "vin", ""), UEntity::resolvedFormat("body.access", 1, 2), uResource);
-    assertFalse(uri14.isResolved());
-    assertTrue(uri14.isLongForm());
-    assertFalse(uri14.isMicroForm());
+    EXPECT_FALSE(uri14.isResolved());
+    EXPECT_TRUE(uri14.isLongForm());
+    EXPECT_FALSE(uri14.isMicroForm());
 
     uResource = UResource::forRpcRequest("ExecuteDoorCommand");
     auto uri8 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::longFormat("body.access"), uResource);
-    assertFalse(uri8.isResolved());
-    assertTrue(uri8.isLongForm());
-    assertFalse(uri8.isMicroForm());
+    EXPECT_FALSE(uri8.isResolved());
+    EXPECT_TRUE(uri8.isLongForm());
+    EXPECT_FALSE(uri8.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
     auto uri9 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::longFormat("body.access"), uResource);
-    assertFalse(uri9.isResolved());
-    assertTrue(uri9.isLongForm());
-    assertFalse(uri9.isMicroForm());
+    EXPECT_FALSE(uri9.isResolved());
+    EXPECT_TRUE(uri9.isLongForm());
+    EXPECT_FALSE(uri9.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
     auto uri10 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
-    assertTrue(uri10.isResolved());
-    assertTrue(uri10.isLongForm());
-    assertTrue(uri10.isMicroForm());
+    EXPECT_TRUE(uri10.isResolved());
+    EXPECT_TRUE(uri10.isLongForm());
+    EXPECT_TRUE(uri10.isMicroForm());
 
     uResource = UResource::microFormat(2);
     auto uri12 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
-    assertFalse(uri12.isResolved());
-    assertFalse(uri12.isLongForm());
-    assertTrue(uri12.isMicroForm());
+    EXPECT_FALSE(uri12.isResolved());
+    EXPECT_FALSE(uri12.isLongForm());
+    EXPECT_TRUE(uri12.isMicroForm());
 
     uResource = UResource::microFormat(2);
     auto uri19 = UUri(UAuthority::microRemote("192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
-    assertFalse(uri19.isResolved());
-    assertFalse(uri19.isLongForm());
-    assertTrue(uri19.isMicroForm());
+    EXPECT_FALSE(uri19.isResolved());
+    EXPECT_FALSE(uri19.isLongForm());
+    EXPECT_TRUE(uri19.isMicroForm());
 
     uResource = UResource::microFormat(2);
     auto uri16 = UUri(UAuthority::local(), UEntity::microFormat((short)2, 1), uResource);
-    assertFalse(uri16.isResolved());
-    assertFalse(uri16.isLongForm());
-    assertTrue(uri16.isMicroForm());
+    EXPECT_FALSE(uri16.isResolved());
+    EXPECT_FALSE(uri16.isLongForm());
+    EXPECT_TRUE(uri16.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
     auto uri17 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::microFormat(2, 1), uResource);
-    assertFalse(uri17.isResolved());
-    assertFalse(uri17.isLongForm());
-    assertTrue(uri17.isMicroForm());
+    EXPECT_FALSE(uri17.isResolved());
+    EXPECT_FALSE(uri17.isLongForm());
+    EXPECT_TRUE(uri17.isMicroForm());
 
     uResource = UResource::microFormat(2);
     auto uri18 = UUri(UAuthority::local(), UEntity::microFormat(2, 1), uResource);
-    assertFalse(uri18.isResolved());
-    assertFalse(uri18.isLongForm());
-    assertTrue(uri18.isMicroForm());
+    EXPECT_FALSE(uri18.isResolved());
+    EXPECT_FALSE(uri18.isLongForm());
+    EXPECT_TRUE(uri18.isMicroForm());
 }
 
-Ensure(UUri, all_tests) {
-    testToString();
-    testLocalUri();
-    testRemoteUri();
-    testRpcResponseUri();
-    testRemoteUriWithoutMessage();
-    testUriWithEmptyAuthority();
-    testUriWithEmptyEntity();
-    testUriWithEmptyResource();
-    testEmptyUri();
-    testResolvedUri();
-}
-
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
-    TestSuite* suite = create_test_suite();
-
-    add_test_with_context(suite, UUri, all_tests);
-
-    return run_test_suite(suite, create_text_reporter());
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

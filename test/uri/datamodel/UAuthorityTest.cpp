@@ -18,292 +18,259 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+#include <gtest/gtest.h>
 #include <string>
-#include <cgreen/cgreen.h>
 #include "UAuthority.h"
 
-using namespace cgreen;
+
 using namespace uprotocol::uri;
 
-#define assertTrue(a) assert_true(a)
-#define assertEquals(a, b) assert_true(b == a)
-#define assertFalse(a) assert_false(a)
-
-Describe(UAuthority);
-
-BeforeEach(UAuthority) {
-    // Dummy
-}
-
-AfterEach(UAuthority) {
-    // Dummy
-}
-
 // Make sure the toString works.
-static void testToString() {
+TEST(UAuthorityTest, ToString)
+{
     UAuthority longRemote = UAuthority::longRemote("VCU", "my_VIN");
     std::string expected = "UAuthority{device='vcu', domain='my_vin', address=null, markedRemote=true, markedResolved=false}";
-    assertEquals(expected, longRemote.toString());
+    EXPECT_EQ(expected, longRemote.toString());
 
     std::string address = "127.0.0.1";
     UAuthority microRemote = UAuthority::microRemote(address);
     expected = "UAuthority{device='null', domain='null', address=127.0.0.1, markedRemote=true, markedResolved=false}";
-    assertEquals(expected, microRemote.toString());
+    EXPECT_EQ(expected, microRemote.toString());
 
     UAuthority resolvedRemote = UAuthority::resolvedRemote("VCU", "MY_VIN", address);
     expected = "UAuthority{device='vcu', domain='my_vin', address=127.0.0.1, markedRemote=true, markedResolved=true}";
-    assertEquals(expected, resolvedRemote.toString());
+    EXPECT_EQ(expected, resolvedRemote.toString());
 
     UAuthority local = UAuthority::local();
     expected = "UAuthority{device='null', domain='null', address=null, markedRemote=false, markedResolved=true}";
-    assertEquals(expected, local.toString());
+    EXPECT_EQ(expected, local.toString());
 
     UAuthority empty = UAuthority::empty();
     expected = "UAuthority{device='null', domain='null', address=null, markedRemote=false, markedResolved=true}";
-    assertEquals(expected, empty.toString());
+    EXPECT_EQ(expected, empty.toString());
 }
 
 // Make sure the toString works with case sensitivity.
-static void testToStringCaseSensitivity() {
+TEST(UAuthorityTest, ToStringCaseSensitivity)
+{
     UAuthority uAuthority = UAuthority::longRemote("vcU", "my_VIN");
     std::string expected = "UAuthority{device='vcu', domain='my_vin', address=null, markedRemote=true, markedResolved=false}";
-    assertEquals(expected, uAuthority.toString());
+    EXPECT_EQ(expected, uAuthority.toString());
 }
 
 // Test create a empty uAuthority.
-static void testEmptyUAuthority() {
+TEST(UAuthorityTest, EmptyUAuthority) {
     UAuthority uAuthority = UAuthority::empty();
-    assertTrue(uAuthority.getDevice().empty());
-    assertTrue(uAuthority.getDomain().empty());
-    assertTrue(uAuthority.getAddress().empty());
-    assertTrue(uAuthority.isLocal());
-    assertFalse(uAuthority.isRemote());
-    assertFalse(uAuthority.isMarkedRemote());
-    assertTrue(uAuthority.isResolved());
-    assertTrue(uAuthority.isEmpty());
-    assertTrue(uAuthority.isMicroForm());
-    assertTrue(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_TRUE(uAuthority.getDomain().empty());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_TRUE(uAuthority.isLocal());
+    EXPECT_FALSE(uAuthority.isRemote());
+    EXPECT_FALSE(uAuthority.isMarkedRemote());
+    EXPECT_TRUE(uAuthority.isResolved());
+    EXPECT_TRUE(uAuthority.isEmpty());
+    EXPECT_TRUE(uAuthority.isMicroForm());
+    EXPECT_TRUE(uAuthority.isLongForm());
 }
 
 // Test create a local uAuthority.
-static void testLocalUAuthority() {
+TEST(UAuthorityTest, LocalUAuthority) {
     UAuthority uAuthority = UAuthority::local();
-    assertTrue(uAuthority.getDevice().empty());
-    assertTrue(uAuthority.getDomain().empty());
-    assertTrue(uAuthority.getAddress().empty());
-    assertTrue(uAuthority.isLocal());
-    assertFalse(uAuthority.isRemote());
-    assertFalse(uAuthority.isMarkedRemote());
-    assertTrue(uAuthority.isResolved());
-    assertTrue(uAuthority.isEmpty());
-    assertTrue(uAuthority.isMicroForm());
-    assertTrue(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_TRUE(uAuthority.getDomain().empty());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_TRUE(uAuthority.isLocal());
+    EXPECT_FALSE(uAuthority.isRemote());
+    EXPECT_FALSE(uAuthority.isMarkedRemote());
+    EXPECT_TRUE(uAuthority.isResolved());
+    EXPECT_TRUE(uAuthority.isEmpty());
+    EXPECT_TRUE(uAuthority.isMicroForm());
+    EXPECT_TRUE(uAuthority.isLongForm());
 }
 
 // Test create a remote uAuthority that supports long UUris.
-static void testLongRemoteUAuthority() {
+TEST(UAuthorityTest, LongRemoteUAuthority) {
     std::string device = "vcu";
     std::string domain = "myvin";
     UAuthority uAuthority = UAuthority::longRemote(device, domain);
-    assertEquals(device, uAuthority.getDevice());
-    assertEquals(domain, uAuthority.getDomain());
-    assertTrue(uAuthority.getAddress().empty());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertFalse(uAuthority.isMicroForm());
-    assertTrue(uAuthority.isLongForm());
+    EXPECT_EQ(device, uAuthority.getDevice());
+    EXPECT_EQ(domain, uAuthority.getDomain());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_FALSE(uAuthority.isMicroForm());
+    EXPECT_TRUE(uAuthority.isLongForm());
 }
 
 // Test create a remote uAuthority that supports long UUris null device.
-static void testLongRemoteEmptyDevice() {
+TEST(UAuthorityTest, LongRemoteEmptyDevice) {
     std::string domain = "myvin";
     UAuthority uAuthority = UAuthority::longRemote("", domain);
-    assertTrue(uAuthority.getDevice().empty());
-    assertEquals(domain, uAuthority.getDomain());
-    assertTrue(uAuthority.getAddress().empty());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertFalse(uAuthority.isMicroForm());
-    assertFalse(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_EQ(domain, uAuthority.getDomain());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_FALSE(uAuthority.isMicroForm());
+    EXPECT_FALSE(uAuthority.isLongForm());
 }
 
 // Test create a remote uAuthority that supports long UUris missing device.
-static void testLongUriBlankDevice() {
+TEST(UAuthorityTest, LongUriBlankDevice) {
     std::string device = " ";
     std::string domain = "myvin";
     UAuthority uAuthority = UAuthority::longRemote(device, domain);
-    assertTrue(uAuthority.getDevice().empty());
-    assertEquals(domain, uAuthority.getDomain());
-    assertTrue(uAuthority.getAddress().empty());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertFalse(uAuthority.isMicroForm());
-    assertFalse(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_EQ(domain, uAuthority.getDomain());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_FALSE(uAuthority.isMicroForm());
+    EXPECT_FALSE(uAuthority.isLongForm());
 }
 
 // Test create a remote uAuthority that supports long UUris null domain.
-static void testLongUriEmptyDomain() {
+TEST(UAuthorityTest, LongUriEmptyDomain) {
     std::string device = "vcu";
     UAuthority uAuthority = UAuthority::longRemote(device, "");
-    assertEquals(device, uAuthority.getDevice());
-    assertTrue(uAuthority.getDomain().empty());
-    assertTrue(uAuthority.getAddress().empty());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertFalse(uAuthority.isMicroForm());
-    assertTrue(uAuthority.isLongForm());
+    EXPECT_EQ(device, uAuthority.getDevice());
+    EXPECT_TRUE(uAuthority.getDomain().empty());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_FALSE(uAuthority.isMicroForm());
+    EXPECT_TRUE(uAuthority.isLongForm());
 }
 
 // Test create a remote uAuthority that supports micro UUris.
-static void testMicroUriUAuthority() {
+TEST(UAuthorityTest, MicroUriUAuthority) {
     std::string address = "127.0.0.1";
     UAuthority uAuthority = UAuthority::microRemote(address);
-    assertTrue(uAuthority.getDevice().empty());
-    assertTrue(uAuthority.getDomain().empty());
-    assertEquals(address, uAuthority.getAddress());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertTrue(uAuthority.isMicroForm());
-    assertFalse(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_TRUE(uAuthority.getDomain().empty());
+    EXPECT_EQ(address, uAuthority.getAddress());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_TRUE(uAuthority.isMicroForm());
+    EXPECT_FALSE(uAuthority.isLongForm());
 }
-
 // Test create a remote uAuthority that supports micro UUris with null address.
-static void testMicroUriEmptyAddress() {
+TEST(UAuthorityTest, MicroUriEmptyAddress) {
     UAuthority uAuthority = UAuthority::microRemote("");
-    assertTrue(uAuthority.getDevice().empty());
-    assertTrue(uAuthority.getDomain().empty());
-    assertTrue(uAuthority.getAddress().empty());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertTrue(uAuthority.isEmpty());
-    assertFalse(uAuthority.isMicroForm());
-    assertFalse(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_TRUE(uAuthority.getDomain().empty());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_TRUE(uAuthority.isEmpty());
+    EXPECT_FALSE(uAuthority.isMicroForm());
+    EXPECT_FALSE(uAuthority.isLongForm());
 }
 
 // Test create a remote resolved uAuthority that supports both long and micro UUris.
-static void testResolvedRemoteUAuthority() {
+TEST(UAuthorityTest, ResolvedRemoteUAuthority) {
     std::string device = "vcu";
     std::string domain = "myvin";
     std::string address = "127.0.0.1";
     UAuthority uAuthority = UAuthority::resolvedRemote(device, domain, address);
-    assertEquals(device, uAuthority.getDevice());
-    assertEquals(domain, uAuthority.getDomain());
-    assertEquals(address, uAuthority.getAddress());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertTrue(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertTrue(uAuthority.isMicroForm());
-    assertTrue(uAuthority.isLongForm());
+    EXPECT_EQ(device, uAuthority.getDevice());
+    EXPECT_EQ(domain, uAuthority.getDomain());
+    EXPECT_EQ(address, uAuthority.getAddress());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_TRUE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_TRUE(uAuthority.isMicroForm());
+    EXPECT_TRUE(uAuthority.isLongForm());
 }
 
 // Test create a remote resolved uAuthority that supports both long and micro UUris with null device.
-static void testResolvedRemoteUAuthorityEmptyDevice() {
+TEST(UAuthorityTest, ResolvedRemoteUAuthorityEmptyDevice) {
     std::string domain = "myvin";
     std::string address = "127.0.0.1";
     UAuthority uAuthority = UAuthority::resolvedRemote("", domain, address);
-    assertTrue(uAuthority.getDevice().empty());
-    assertEquals(domain, uAuthority.getDomain());
-    assertEquals(address, uAuthority.getAddress());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertTrue(uAuthority.isMicroForm());
-    assertFalse(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_EQ(domain, uAuthority.getDomain());
+    EXPECT_EQ(address, uAuthority.getAddress());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_TRUE(uAuthority.isMicroForm());
+    EXPECT_FALSE(uAuthority.isLongForm());
 }
 
 // Test create a remote resolved uAuthority that supports both long and micro UUris with blank device.
-static void testResolvedRemoteUAuthorityBlankDevice() {
+TEST(UAuthorityTest, ResolvedRemoteUAuthorityBlankDevice) {
     std::string device = "  ";
     std::string domain = "myvin";
     std::string address = "127.0.0.1";
     UAuthority uAuthority = UAuthority::resolvedRemote(device, domain, address);
-    assertTrue(uAuthority.getDevice().empty());
-    assertEquals(domain, uAuthority.getDomain());
-    assertEquals(address, uAuthority.getAddress());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertTrue(uAuthority.isMicroForm());
-    assertFalse(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_EQ(domain, uAuthority.getDomain());
+    EXPECT_EQ(address, uAuthority.getAddress());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_TRUE(uAuthority.isMicroForm());
+    EXPECT_FALSE(uAuthority.isLongForm());
 }
 
 // Test create a remote resolved uAuthority that supports both long and micro UUris with missing address.
-static void testResolvedRemoteUAuthorityEmptyAddress() {
+TEST(UAuthorityTest, ResolvedRemoteUAuthorityEmptyAddress) {
     std::string device = "vcu";
     std::string domain = "myvin";
     UAuthority uAuthority = UAuthority::resolvedRemote(device, domain, "");
-    assertEquals(device, uAuthority.getDevice());
-    assertEquals(domain, uAuthority.getDomain());
-    assertTrue(uAuthority.getAddress().empty());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertFalse(uAuthority.isEmpty());
-    assertFalse(uAuthority.isMicroForm());
-    assertTrue(uAuthority.isLongForm());
+    EXPECT_EQ(device, uAuthority.getDevice());
+    EXPECT_EQ(domain, uAuthority.getDomain());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_FALSE(uAuthority.isEmpty());
+    EXPECT_FALSE(uAuthority.isMicroForm());
+    EXPECT_TRUE(uAuthority.isLongForm());
 }
 
 // Test create a remote resolved uAuthority that supports both long and micro UUris with missing data.
-static void testResolvedRemoteUAuthorityEmptyData() {
+TEST(UAuthorityTest, ResolvedRemoteUAuthorityEmptyData) {
     UAuthority uAuthority = UAuthority::resolvedRemote("", "", "");
-    assertTrue(uAuthority.getDevice().empty());
-    assertTrue(uAuthority.getDomain().empty());
-    assertTrue(uAuthority.getAddress().empty());
-    assertFalse(uAuthority.isLocal());
-    assertTrue(uAuthority.isRemote());
-    assertTrue(uAuthority.isMarkedRemote());
-    assertFalse(uAuthority.isResolved());
-    assertTrue(uAuthority.isEmpty());
-    assertFalse(uAuthority.isMicroForm());
-    assertFalse(uAuthority.isLongForm());
+    EXPECT_TRUE(uAuthority.getDevice().empty());
+    EXPECT_TRUE(uAuthority.getDomain().empty());
+    EXPECT_TRUE(uAuthority.getAddress().empty());
+    EXPECT_FALSE(uAuthority.isLocal());
+    EXPECT_TRUE(uAuthority.isRemote());
+    EXPECT_TRUE(uAuthority.isMarkedRemote());
+    EXPECT_FALSE(uAuthority.isResolved());
+    EXPECT_TRUE(uAuthority.isEmpty());
+    EXPECT_FALSE(uAuthority.isMicroForm());
+    EXPECT_FALSE(uAuthority.isLongForm());
 }
 
-Ensure(UAuthority, all_tests) {
-    testToString();
-    testToStringCaseSensitivity();
-    testEmptyUAuthority();
-    testLocalUAuthority();
-    testLongRemoteUAuthority();
-    testLongRemoteEmptyDevice();
-    testLongUriBlankDevice();
-    testLongUriEmptyDomain();
-    testMicroUriUAuthority();
-    testMicroUriEmptyAddress();
-    testResolvedRemoteUAuthority();
-    testResolvedRemoteUAuthorityEmptyDevice();
-    testResolvedRemoteUAuthorityBlankDevice();
-    testResolvedRemoteUAuthorityEmptyAddress();
-    testResolvedRemoteUAuthorityEmptyData();
-}
-
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
-    TestSuite* suite = create_test_suite();
-
-    add_test_with_context(suite, UAuthority, all_tests);
-
-    return run_test_suite(suite, create_text_reporter());
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
