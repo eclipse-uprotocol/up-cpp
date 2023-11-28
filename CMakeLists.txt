@@ -47,7 +47,7 @@ set(protobuf_MODULE_COMPATIBLE TRUE)
 set(PROTOS ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto/cloudevents.proto)
 set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
 set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/uprotocol/proto)
-add_subdirectory(${CMAKE_SOURCE_DIR}/uprotocol/proto)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
 
 # add generated protobuf and directory.
 include_directories(${PROTO_BINARY_DIR})
@@ -59,6 +59,7 @@ include_directories(${UUID_INCLUDE_DIRS})
 
 include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/datamodel)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/factory)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/serialize)
@@ -70,6 +71,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/validator)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto)
 include_directories(${CGREEN_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api/src/main/proto)
 
 file(GLOB PROTO_CPP 				 "${PROTO_BINARY_DIR}/*.cc")
 file(GLOB PROTO_HPP 				 "${PROTO_BINARY_DIR}/*.h")
@@ -82,6 +84,7 @@ file(GLOB SRC_HDR_UUID 				 "uprotocol/uuid/*.h")
 file(GLOB SRC_HDR_TOOLS 			 "uprotocol/uuid/tools/*.h")
 file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
 
+message("MICHAEL ${SRC_PROTO_CORE_API}")
 set(uprotocol_src 
 	src/base64/base64.cpp
 	src/uuid/Uuidv8Factory.cpp
