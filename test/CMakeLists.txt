@@ -50,14 +50,6 @@ add_executable(base64_test
 target_link_libraries(base64_test gtest gtest_main uprotocolsdk)
 add_test("t-06-base64-test" base64_test)	
 
-add_executable(ce_factory_test 	${CGREEN_INCLUDE_DIR} ${TEST_PROTO_SRCS} ${TEST_PROTO_HDRS}
-		${TESTS_PATH}/factory/cloud_event_factory_test.cpp)
-
-add_dependencies(ce_factory_test uprotocol-core-api)
-
-target_link_libraries(ce_factory_test ${OPENSSL_LIBRARIES} ${CGREEN_LIBRARY} uprotocolsdk)
-
-
 add_test("t-07-ce-factory-test" base64_test)
 add_executable(service_type_test ${TESTS_PATH}/model/serviceType_test.cpp)
 target_link_libraries(service_type_test ${CGREEN_LIBRARY} uprotocolsdk)
