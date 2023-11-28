@@ -47,7 +47,7 @@ set(protobuf_MODULE_COMPATIBLE TRUE)
 set(PROTOS ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto/cloudevents.proto)
 set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
 set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/uprotocol/proto)
-add_subdirectory(${CMAKE_SOURCE_DIR}/uprotocol/proto)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
 
 # add generated protobuf and directory.
 include_directories(${PROTO_BINARY_DIR})
