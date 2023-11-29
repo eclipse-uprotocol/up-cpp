@@ -1,12 +1,4 @@
 set(TESTS_PATH ../test)
-
- #Add gtest  files
-    #set(gtest_libs gtest_main)
-#    find_library(gtest_main libgtest_main)
- #   add_library(gtest_main SHARED IMPORTED)
-  #  set_property(TARGET gtest_main PROPERTY IMPORTED_LOCATION ${gtest_main})
-   # message("${this_lib}/CMakeLists.txt : Linking google test libraries...")
-
 set(GTEST_LIB gtest)
 ## setting the compiler
 include_directories(../proto)
