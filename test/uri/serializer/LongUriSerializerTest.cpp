@@ -25,6 +25,7 @@
 #include "UAuthority.h"
 #include "UEntity.h"
 #include "UResource.h"
+#include "IpAddress.h"
 
 using namespace uprotocol::uri;
 
@@ -33,16 +34,16 @@ TEST(LongUriSerializerTest, UsingTheSerializers) {
     auto uURi = UUri(UAuthority::local(),
                     UEntity::longFormat("body.access"),
                     UResource::forRpcRequest("door"));
-    auto uri = LongUriSerializer::getInstance().serialize(uURi);
+    auto uri = LongUriSerializer::serialize(uURi);
     EXPECT_EQ("/body.access//rpc.door", uri);
-    auto uUri2 = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri2 = LongUriSerializer::deserialize(uri);
     EXPECT_EQ(uURi, uUri2);
 }
 
 // Test parse uProtocol uri when is empty string.
 TEST(LongUriSerializerTest, ParseProtocolUriWhenIsEmptyString) {
     std::string uri;
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.isEmpty());
     EXPECT_FALSE(uUri.isResolved());
     EXPECT_TRUE(uUri.isLongForm());
@@ -51,19 +52,19 @@ TEST(LongUriSerializerTest, ParseProtocolUriWhenIsEmptyString) {
 // Test parse uProtocol uri with schema and slash.
 TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAndSlash) {
     std::string uri = "/";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_TRUE(uUri.isEmpty());
 
-    auto uri2 = LongUriSerializer::getInstance().serialize(UUri::empty());
+    auto uri2 = LongUriSerializer::serialize(UUri::empty());
     EXPECT_TRUE(uri2.empty());
 }
 
 // Test parse uProtocol uri with schema and double slash.
 TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAndDoubleSlash) {
     std::string uri = "//";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_FALSE(uUri.getUAuthority().isLocal());
     EXPECT_TRUE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_TRUE(uUri.isEmpty());
@@ -72,7 +73,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAndDoubleSlash) {
 // Test parse uProtocol uri with schema and 3 slash and something.
 TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAnd3SlashAndSomething) {
     std::string uri = "///body.access";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_FALSE(uUri.getUAuthority().isLocal());
     EXPECT_TRUE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -83,7 +84,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAnd3SlashAndSomething) {
 // Test parse uProtocol uri with schema and 4 slash and something.
 TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAnd4SlashAndSomething) {
     std::string uri = "////body.access";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_FALSE(uUri.getUAuthority().isLocal());
     EXPECT_TRUE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_TRUE(uUri.getUEntity().getName().empty());
@@ -94,7 +95,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAnd4SlashAndSomething) {
 // Test parse uProtocol uri with schema and 5 slash and something.
 TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAnd5SlashAndSomething) {
     std::string uri = "/////body.access";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_FALSE(uUri.getUAuthority().isLocal());
     EXPECT_TRUE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_TRUE(uUri.getUEntity().isEmpty());
@@ -107,7 +108,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAnd5SlashAndSomething) {
 // Test parse uProtocol uri with schema and 6 slash and something.
 TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAnd6SlashAndSomething) {
     std::string uri = "//////body.access";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_FALSE(uUri.getUAuthority().isLocal());
     EXPECT_TRUE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_TRUE(uUri.isEmpty());
@@ -116,7 +117,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithSchemaAnd6SlashAndSomething) {
 // Test parse uProtocol uri with local service no version.
 TEST(LongUriSerializerTest, ParseProtocolUriWithLocalServiceNoVersion) {
     std::string uri = "/body.access/";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -127,7 +128,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithLocalServiceNoVersion) {
 // Test parse uProtocol uri with local service with version.
 TEST(LongUriSerializerTest, ParseProtocolUriWithLocalServiceWithVersion) {
     std::string uri = "/body.access/1";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -139,7 +140,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithLocalServiceWithVersion) {
 // Test parse uProtocol uri with local service no version with resource name only.
 TEST(LongUriSerializerTest, ParseProtocolUriWithLocalServiceNoVersionWithResourceNameOnly) {
     std::string uri = "/body.access//door";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -153,7 +154,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithLocalServiceNoVersionWithResourc
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithLocalServiceWithVersionWithResourceNameOnly) {
     std::string uri = "/body.access/1/door";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -168,7 +169,7 @@ ParseProtocolUriWithLocalServiceWithVersionWithResourceNameOnly) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithLocalServiceNoVersionWithResourceWithInstance) {
     std::string uri = "/body.access//door.front_left";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -183,7 +184,7 @@ ParseProtocolUriWithLocalServiceNoVersionWithResourceWithInstance) {
 TEST(LongUriSerializerTest,
 Parse_protocol_uri_with_local_service_with_version_with_resource_with_message) {
     std::string uri = "/body.access/1/door.front_left";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -199,7 +200,7 @@ Parse_protocol_uri_with_local_service_with_version_with_resource_with_message) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithLocalServiceNoVersionWithResourceWithinStanceAndMessage) {
     std::string uri = "/body.access//door.front_left#Door";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -215,7 +216,7 @@ ParseProtocolUriWithLocalServiceNoVersionWithResourceWithinStanceAndMessage) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithLocalServiceWithVersionWithResourceWithInstanceAndMessage) {
     std::string uri = "/body.access/1/door.front_left#Door";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("body.access", uUri.getUEntity().getName());
@@ -231,7 +232,7 @@ ParseProtocolUriWithLocalServiceWithVersionWithResourceWithInstanceAndMessage) {
 // Test parse uProtocol RPC uri with local service no version.
 TEST(LongUriSerializerTest, ParseProtocolRpcUriWithLocalServiceNoVersion) {
     std::string uri = "/petapp//rpc.response";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("petapp", uUri.getUEntity().getName());
@@ -245,7 +246,7 @@ TEST(LongUriSerializerTest, ParseProtocolRpcUriWithLocalServiceNoVersion) {
 // Test parse uProtocol RPC uri with local service with version.
 TEST(LongUriSerializerTest, ParseProtocolRpcUriWithLocalServiceWithVersion) {
     std::string uri = "/petapp/1/rpc.response";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isLocal());
     EXPECT_FALSE(uUri.getUAuthority().isMarkedRemote());
     EXPECT_EQ("petapp", uUri.getUEntity().getName());
@@ -261,7 +262,7 @@ TEST(LongUriSerializerTest, ParseProtocolRpcUriWithLocalServiceWithVersion) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithRemoteServiceOnlyDeviceNoDomain) {
     std::string uri = "//VCU";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
     EXPECT_TRUE(uUri.getUAuthority().getDomain().empty());
     EXPECT_TRUE(uUri.getUEntity().isEmpty());
@@ -272,7 +273,7 @@ ParseProtocolUriWithRemoteServiceOnlyDeviceNoDomain) {
 TEST(LongUriSerializerTest,
 Parse_protocol_uri_with_remote_service_only_device_and_domain) {
     std::string uri = "//VCU.MY_CAR_VIN";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -285,7 +286,7 @@ Parse_protocol_uri_with_remote_service_only_device_and_domain) {
 // Test parse uProtocol uri with microRemote service no version.
 TEST(LongUriSerializerTest, ParseProtocolUriWithRemoteServiceNoVersion) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -299,7 +300,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithRemoteServiceNoVersion) {
 // Test parse uProtocol uri with microRemote service with version.
 TEST(LongUriSerializerTest, ParseProtocolUriWithRemoteServiceWithVersion) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/1";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -315,7 +316,7 @@ TEST(LongUriSerializerTest, ParseProtocolUriWithRemoteServiceWithVersion) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithRemoteServiceNoVersionWithResourceNameOnly) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access//door";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -332,7 +333,7 @@ ParseProtocolUriWithRemoteServiceNoVersionWithResourceNameOnly) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithRemoteServiceWithVersionWithResourceNameOnly) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -350,7 +351,7 @@ ParseProtocolUriWithRemoteServiceWithVersionWithResourceNameOnly) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithRemoteServiceNoVersionWithResourceAndInstanceNoMessage) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access//door.front_left";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -368,7 +369,7 @@ ParseProtocolUriWithRemoteServiceNoVersionWithResourceAndInstanceNoMessage) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithRemoteServiceWithVersionWithResourceAndInstanceNoMessage) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door.front_left";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -387,7 +388,7 @@ ParseProtocolUriWithRemoteServiceWithVersionWithResourceAndInstanceNoMessage) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithRemoteServiceNoVersionWithResourceAndInstanceAndMessage) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access//door.front_left#Door";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -406,7 +407,7 @@ ParseProtocolUriWithRemoteServiceNoVersionWithResourceAndInstanceAndMessage) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithRemoteServiceWithVersionWithResourceAndInstanceAndMessage) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door.front_left#Door";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -427,7 +428,7 @@ ParseProtocolUriWithRemoteServiceWithVersionWithResourceAndInstanceAndMessage) {
 TEST(LongUriSerializerTest,
 ParseProtocolUriWithRemoteServiceWithVersionWithResourceWithMessageDeviceNoDomain) {
     std::string uri = "//VCU/body.access/1/door.front_left";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("vcu", uUri.getUAuthority().getDevice());
@@ -445,7 +446,7 @@ ParseProtocolUriWithRemoteServiceWithVersionWithResourceWithMessageDeviceNoDomai
 TEST(LongUriSerializerTest,
 ParseProtocolRpcUriWithRemoteServiceNoVersion) {
     std::string uri = "//bo.azure/petapp//rpc.response";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("bo", uUri.getUAuthority().getDevice());
@@ -463,7 +464,7 @@ ParseProtocolRpcUriWithRemoteServiceNoVersion) {
 TEST(LongUriSerializerTest,
 ParseProtocolRpcUriWithRemoteServiceWithVersion){
     std::string uri = "//bo.azure/petapp/1/rpc.response";
-    auto uUri = LongUriSerializer::getInstance().deserialize(uri);
+    auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
     EXPECT_FALSE(uUri.getUAuthority().getDevice().empty());
     EXPECT_EQ("bo", uUri.getUAuthority().getDevice());
@@ -481,7 +482,7 @@ ParseProtocolRpcUriWithRemoteServiceWithVersion){
 // Test Create a uProtocol URI from an empty URI Object.
 TEST(LongUriSerializerTest, BuildProtocolUriFromUriWhenUriIsEmpty) {
     auto uUri = UUri::empty();
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("", uProtocolUri);
 }
 
@@ -489,7 +490,7 @@ TEST(LongUriSerializerTest, BuildProtocolUriFromUriWhenUriIsEmpty) {
 TEST(LongUriSerializerTest, BuildProtocolUriFromUriWhenUriHasEmptyUse) {
     auto use = UEntity::empty();
     auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/", uProtocolUri);
 }
 
@@ -498,7 +499,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceNoVersion) {
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::local(), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/body.access/", uProtocolUri);
 }
 
@@ -507,7 +508,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceAndVersion) {
     auto use = UEntity::longFormat("body.access", 1);
     auto uUri = UUri(UAuthority::local(), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/body.access/1", uProtocolUri);
 }
 
@@ -517,7 +518,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceNoVersionWithResource) {
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/body.access//door", uProtocolUri);
 }
 
@@ -527,7 +528,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceAndVersionWithResource) {
     auto use = UEntity::longFormat("body.access", 1);
     auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/body.access/1/door", uProtocolUri);
 }
 
@@ -537,7 +538,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceNoVersionWithResourceWithInstanceNoMessage) {
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door", "front_left", ""));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/body.access//door.front_left", uProtocolUri);
 }
 
@@ -547,7 +548,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceAndVersionWithResourceWithInstanceNoMessage) {
     auto use = UEntity::longFormat("body.access", 1);
     auto uUri = UUri( UAuthority::local(), use, UResource::longFormat("door", "front_left", ""));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/body.access/1/door.front_left", uProtocolUri);
 }
 
@@ -557,7 +558,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceNoVersionWithResourceWithInstanceWithMessage) {
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door", "front_left", "Door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/body.access//door.front_left#Door", uProtocolUri);
 }
 
@@ -567,7 +568,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceAndVersionWithResourceWithInstanceWithMessage) {
     auto use = UEntity::longFormat("body.access", 1);
     auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door", "front_left", "Door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("/body.access/1/door.front_left#Door", uProtocolUri);
 }
 
@@ -576,7 +577,7 @@ TEST(LongUriSerializerTest,
 Build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version) {
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access/", uProtocolUri);
 }
 
@@ -586,7 +587,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasRemoteAuthorityNoDeviceWithDomainWithServiceNoVersion) {
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::longRemote("", "MY_CAR_VIN"), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//my_car_vin/body.access/", uProtocolUri);
 }
 
@@ -596,7 +597,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceAndVersion) {
     auto use = UEntity::longFormat("body.access", 1);
     auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access/1", uProtocolUri);
 }
 
@@ -606,7 +607,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceAndVersionWithResource) {
     auto use = UEntity::longFormat("body.access", 1);
     auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access/1/door", uProtocolUri);
 }
 
@@ -616,7 +617,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceNoVersionWithResource) {
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access//door", uProtocolUri);
 }
 
@@ -627,7 +628,7 @@ BuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceAndVersionWithResourceWit
     auto use = UEntity::longFormat("body.access", 1);
     auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use,
                      UResource::longFormat("door", "front_left", ""));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access/1/door.front_left", uProtocolUri);
 }
 
@@ -638,7 +639,7 @@ BuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceNoVersionWithResourceWith
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use,
                     UResource::longFormat("door", "front_left", ""));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access//door.front_left", uProtocolUri);
 }
 
@@ -648,7 +649,7 @@ TEST(LongUriSerializerTest,
 BuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceAndVersionWithResourceWithInstanceAndMessage) {
     auto use = UEntity::longFormat("body.access", 1);
     auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::longFormat("door", "front_left", "Door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access/1/door.front_left#Door", uProtocolUri);
 }
 
@@ -659,7 +660,7 @@ BuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceNoVersionWithResourceWith
     auto use = UEntity::longFormat("body.access");
     auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use,
                       UResource::longFormat("door", "front_left", "Door"));
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access//door.front_left#Door", uProtocolUri);
 }
 
@@ -668,7 +669,7 @@ BuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceNoVersionWithResourceWith
 TEST(LongUriSerializerTest, BuildProtocolUriForSourcePartOfRpcRequestWhereSourceIsLocal) {
     UAuthority uAuthority = UAuthority::local();
     auto use = UEntity::longFormat("petapp", 1);
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(UUri::rpcResponse(uAuthority, use));
+    std::string uProtocolUri = LongUriSerializer::serialize(UUri::rpcResponse(uAuthority, use));
     EXPECT_EQ("/petapp/1/rpc.response", uProtocolUri);
 }
 
@@ -677,7 +678,7 @@ TEST(LongUriSerializerTest, BuildProtocolUriForSourcePartOfRpcRequestWhereSource
 TEST(LongUriSerializerTest, BuildProtocolUriForSourcePartOfRpcRequestWhereSourceIsRemote) {
     UAuthority uAuthority = UAuthority::longRemote("bo", "azure");
     auto use = UEntity::longFormat("petapp");
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(UUri::rpcResponse(uAuthority, use));
+    std::string uProtocolUri = LongUriSerializer::serialize(UUri::rpcResponse(uAuthority, use));
     EXPECT_EQ("//bo.azure/petapp//rpc.response", uProtocolUri);
 }
 
@@ -687,7 +688,7 @@ TEST(LongUriSerializerTest, BuildProtocolUriFromPartsWhenTheyAreNull) {
     UEntity uSoftwareEntity;
     UResource uResource;
     auto uUri = UUri(uAuthority, uSoftwareEntity, uResource);
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("", uProtocolUri);
 }
 
@@ -699,7 +700,7 @@ BuildProtocolUriFromUriPartsWhenUriHasRemoteAuthorityServiceAndVersionWithResour
     auto use = UEntity::longFormat("body.access", 1);
     UResource uResource = UResource::longFormat("door");
     auto uUri = UUri(uAuthority, use, uResource);
-    std::string uProtocolUri = LongUriSerializer::getInstance().serialize(uUri);
+    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
     EXPECT_EQ("//vcu.my_car_vin/body.access/1/door", uProtocolUri);
 }
 
