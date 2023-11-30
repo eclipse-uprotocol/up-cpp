@@ -56,14 +56,11 @@ void IpAddress::toBytes() {
  */
 void IpAddress::toString() {
     if (!ipBytes_.empty()) {
-        
-        ipString_.reserve(INET6_ADDRSTRLEN + 1);
-
-        auto inetType = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
-
-        if (inet_ntop(inetType, &ipBytes_[0], ipString_.data(), INET6_ADDRSTRLEN) == nullptr) {
-            spdlog::error("inet_ntop failed");
-        }
+	    auto inetType = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
+	    if (std::string ipString(INET6_ADDRSTRLEN, '\0');
+	        inet_ntop(inetType, &ipBytes_[0], ipString.data(), INET6_ADDRSTRLEN) != nullptr) {
+    		ipString_ = ipString.data();
+	    }
     } else {
         spdlog::error("ipBytes is empty");
     }

@@ -198,6 +198,7 @@ UEntity LongUriSerializer::parseUEntity(std::string_view entity, std::string_vie
         entityVersion = std::optional<uint8_t>(std::strtol(version.data(), &endptr, 10));
         if (*endptr != '\0') {
             spdlog::error("Invalid conversion for version");
+            entityVersion = std::nullopt;	     
         }
     }
    
