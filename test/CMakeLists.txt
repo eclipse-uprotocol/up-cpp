@@ -46,7 +46,7 @@ target_link_libraries(uuid_test ${GTEST_LIB} uprotocolsdk)
 add_test("t-04-uuid-test" uuid_test)
 
 add_executable(base64_test ${TESTS_PATH}/tools/base64_test.cpp)
-target_link_libraries(base64_test ${OPENSSL_LIBRARIES} ${CGREEN_LIBRARY} uprotocolsdk)
+target_link_libraries(base64_test ${OPENSSL_LIBRARIES} ${GTEST_LIB} gtest_main uprotocolsdk)
 add_test("t-05-base64-test" base64_test)
 
 add_test("t-06-ce-factory-test" base64_test)
@@ -90,24 +90,24 @@ add_test("t-13-MicroUriSerializerTest"  MicroUriSerializerTest)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(uattributes_test
 	${TESTS_PATH}/utransport/uattributes_test.cpp)
-target_link_libraries(uattributes_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+target_link_libraries(uattributes_test ${CGREEN_LIBRARY} uprotocolsdk ${GTEST_LIB}  gtest_main)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(umessagetypes_test
 	${TESTS_PATH}/utransport/umessagetypes_test.cpp)
-target_link_libraries(umessagetypes_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+target_link_libraries(umessagetypes_test ${CGREEN_LIBRARY} uprotocolsdk ${GTEST_LIB}  gtest_main)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(upayload_test
 	${TESTS_PATH}/utransport/upayload_test.cpp)
-target_link_libraries(upayload_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+target_link_libraries(upayload_test ${CGREEN_LIBRARY} uprotocolsdk ${GTEST_LIB}  gtest_main)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(upriority_test
 	${TESTS_PATH}/utransport/upriority_test.cpp)
-target_link_libraries(upriority_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+target_link_libraries(upriority_test ${CGREEN_LIBRARY} uprotocolsdk ${GTEST_LIB}  gtest_main)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(userializationhint_test
 	${TESTS_PATH}/utransport/userializationhint_test.cpp)
-target_link_libraries(userializationhint_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+target_link_libraries(userializationhint_test ${CGREEN_LIBRARY} uprotocolsdk ${GTEST_LIB}  gtest_main)
