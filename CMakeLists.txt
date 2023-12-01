@@ -67,7 +67,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/tools)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/datamodel)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/serializer)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/validator)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid/factory)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid/serializer)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto)
 include_directories(${CGREEN_INCLUDE_DIR})
 
@@ -78,11 +79,11 @@ file(GLOB SRC_HDR_JSON 	 			 "uprotocol/serialize/*.h")
 file(GLOB SRC_HDR_MODEL  			 "uprotocol/cloudevent/datamodel/*.h")
 file(GLOB SRC_HDR_FACTORY 			 "uprotocol/cloudevent/factory/*.h")
 file(GLOB SRC_HDR_URI 				 "uprotocol/uri/**/*.h")
-file(GLOB SRC_HDR_UUID 				 "uprotocol/uuid/*.h")
+file(GLOB SRC_HDR_UUID 				 "uprotocol/uuid/**/*.h")
 file(GLOB SRC_HDR_TOOLS 			 "uprotocol/uuid/tools/*.h")
 file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
 
-set(uprotocol_src 
+set(uprotocol_src
 	src/base64/base64.cpp
 	src/uuid/Uuidv8Factory.cpp
 	src/uuid/UuidSerializer.cpp
@@ -108,15 +109,15 @@ add_library(uprotocolsdk STATIC $<TARGET_OBJECTS:uprotocollib>)
 
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
-target_link_libraries(uprotocolsdk 
-                      Threads::Threads 
-					  ${Protobuf_LIBRARIES} 
-					  ${RapidJSON_LIBRARIES} 
+target_link_libraries(uprotocolsdk
+                      Threads::Threads
+					  ${Protobuf_LIBRARIES}
+					  ${RapidJSON_LIBRARIES}
 					  ${UUID_LIBRARY}
 					  proto
 					  spdlog::spdlog)
 
-target_link_libraries(uprotocolsdk_shared 
+target_link_libraries(uprotocolsdk_shared
 					  Threads::Threads
 					  ${Protobuf_LIBRARIES}
 					  ${RapidJSON_LIBRARIES}
@@ -149,7 +150,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 			target_compile_options(uprotocolsdk PRIVATE -Wall -Wextra -Werror)
 			target_compile_options(uprotocolsdk_shared PRIVATE -Wall -Wextra -Werror)
 		endif()
-endif()					  
+endif()
 
 include(ExternalProject)
 
@@ -157,7 +158,7 @@ ExternalProject_Add(
 	uprotocol-core-api
 	PREFIX uprotocol-core-api-prefix
 	SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api"
-	BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api" 
+	BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api"
 	INSTALL_COMMAND "" # No install step if not needed
 )
 

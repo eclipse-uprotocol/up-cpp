@@ -2,6 +2,7 @@ set(TESTS_PATH ../test)
 set(GTEST_LIB gtest)
 ## setting the compiler
 include_directories(../proto)
+
 add_executable(json_serializer_test
 		${TESTS_PATH}/json/json_serializer_test.cpp
 		${CGREEN_INCLUDE_DIR}
@@ -39,60 +40,74 @@ add_executable(attribute_tests
 target_link_libraries(attribute_tests ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-03-attribute-test" attribute_tests)
 
-#add_executable(uuid_v8_tests
-#	${TESTS_PATH}/uuid/uuid_v8_test.cpp ${SRC_HDR_UUID})
-
-#target_link_libraries(uuid_v8_tests ${CGREEN_LIBRARY} uprotocolsdk)
-#add_test("t-04-uuid-v8" uuid_v8_tests)
-
-#add_executable(uuid_gen_test
-#	${TESTS_PATH}/uuid/uuid_gen_test.cpp)
-#target_link_libraries(uuid_gen_test ${CGREEN_LIBRARY} uprotocolsdk)
-#add_test("t-05-uuid-gen-test" uuid_gen_test)
-
+add_executable(uuid_test
+	${TESTS_PATH}/uuid/uuid_test.cpp)
+target_link_libraries(uuid_test ${GTEST_LIB} uprotocolsdk)
+add_test("t-04-uuid-test" uuid_test)
 
 add_executable(base64_test ${TESTS_PATH}/tools/base64_test.cpp)
-
 target_link_libraries(base64_test ${OPENSSL_LIBRARIES} ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-05-base64-test" base64_test)
 
-add_test("t-06-base64-test" base64_test)
-
-
-
-add_test("t-07-ce-factory-test" base64_test)
+add_test("t-06-ce-factory-test" base64_test)
 add_executable(service_type_test ${TESTS_PATH}/model/serviceType_test.cpp)
 target_link_libraries(service_type_test ${CGREEN_LIBRARY} uprotocolsdk)
 
-add_test("t-08-service-type-test" service_type_test)
+add_test("t-07-service-type-test" service_type_test)
 
 add_executable(UAuthorityTest
 	${TESTS_PATH}/uri/datamodel/UAuthorityTest.cpp)
 target_link_libraries(UAuthorityTest ${GTEST_LIB} uprotocolsdk)
-add_test("t-09-UAuthorityTest" UAuthorityTest)
+add_test("t-08-UAuthorityTest" UAuthorityTest)
 
 add_executable(UEntityTest
 		${TESTS_PATH}/uri/datamodel/UEntityTest.cpp)
 target_link_libraries(UEntityTest ${GTEST_LIB} uprotocolsdk)
-add_test("t-10-UEntityTest" UEntityTest)
+add_test("t-9-UEntityTest" UEntityTest)
 
 add_executable(UResourceTest
 	${TESTS_PATH}/uri/datamodel/UResourceTest.cpp)
 target_link_libraries(UResourceTest ${GTEST_LIB} uprotocolsdk)
-add_test("t-11-UResourceTest" UResourceTest)
+add_test("t-10-UResourceTest" UResourceTest)
 
 add_executable(UUriTest
 	${TESTS_PATH}/uri/datamodel/UUriTest.cpp)
 target_link_libraries(UUriTest ${GTEST_LIB} uprotocolsdk)
-add_test("t-12-UUriTest" UUriTest)
+add_test("t-11-UUriTest" UUriTest)
 
 add_executable(LongUriSerializerTest
 	${TESTS_PATH}/uri/serializer/LongUriSerializerTest.cpp)
 target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
 target_link_libraries(LongUriSerializerTest ${GTEST_LIB} uprotocolsdk)
-add_test("t-13-LongUriSerializerTest"  LongUriSerializerTest)
+add_test("t-12-LongUriSerializerTest"  LongUriSerializerTest)
 
 add_executable(MicroUriSerializerTest
 	${TESTS_PATH}/uri/serializer/MicroUriSerializerTest.cpp)
 target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
 target_link_libraries(MicroUriSerializerTest ${GTEST_LIB} uprotocolsdk)
-add_test("t-14-MicroUriSerializerTest"  MicroUriSerializerTest)
+add_test("t-13-MicroUriSerializerTest"  MicroUriSerializerTest)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(uattributes_test
+	${TESTS_PATH}/utransport/uattributes_test.cpp)
+target_link_libraries(uattributes_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(umessagetypes_test
+	${TESTS_PATH}/utransport/umessagetypes_test.cpp)
+target_link_libraries(umessagetypes_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(upayload_test
+	${TESTS_PATH}/utransport/upayload_test.cpp)
+target_link_libraries(upayload_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(upriority_test
+	${TESTS_PATH}/utransport/upriority_test.cpp)
+target_link_libraries(upriority_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(userializationhint_test
+	${TESTS_PATH}/utransport/userializationhint_test.cpp)
+target_link_libraries(userializationhint_test ${CGREEN_LIBRARY} uprotocolsdk gtest gtest_main)
