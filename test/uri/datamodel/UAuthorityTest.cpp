@@ -26,8 +26,7 @@
 using namespace uprotocol::uri;
 
 // Make sure the toString works.
-TEST(UAuthorityTest, ToString)
-{
+TEST(UAuthorityTest, ToString) {
     UAuthority longRemote = UAuthority::longRemote("VCU", "my_VIN");
     std::string expected = "UAuthority{device='vcu', domain='my_vin', address=null, markedRemote=true, markedResolved=false}";
     EXPECT_EQ(expected, longRemote.toString());
@@ -51,8 +50,7 @@ TEST(UAuthorityTest, ToString)
 }
 
 // Make sure the toString works with case sensitivity.
-TEST(UAuthorityTest, ToStringCaseSensitivity)
-{
+TEST(UAuthorityTest, ToStringCaseSensitivity) {
     UAuthority uAuthority = UAuthority::longRemote("vcU", "my_VIN");
     std::string expected = "UAuthority{device='vcu', domain='my_vin', address=null, markedRemote=true, markedResolved=false}";
     EXPECT_EQ(expected, uAuthority.toString());
@@ -269,8 +267,7 @@ TEST(UAuthorityTest, ResolvedRemoteUAuthorityEmptyData) {
     EXPECT_FALSE(uAuthority.isLongForm());
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

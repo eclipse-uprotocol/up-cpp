@@ -462,7 +462,7 @@ ParseProtocolRpcUriWithRemoteServiceNoVersion) {
 
 // Test parse uProtocol RPC uri with microRemote service with version.
 TEST(LongUriSerializerTest,
-ParseProtocolRpcUriWithRemoteServiceWithVersion){
+ParseProtocolRpcUriWithRemoteServiceWithVersion) {
     std::string uri = "//bo.azure/petapp/1/rpc.response";
     auto uUri = LongUriSerializer::deserialize(uri);
     EXPECT_TRUE(uUri.getUAuthority().isRemote());
@@ -704,8 +704,7 @@ BuildProtocolUriFromUriPartsWhenUriHasRemoteAuthorityServiceAndVersionWithResour
     EXPECT_EQ("//vcu.my_car_vin/body.access/1/door", uProtocolUri);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

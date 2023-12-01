@@ -25,8 +25,7 @@
 using namespace uprotocol::uri;
 
 // Make sure the toString works.
-TEST(UResourceTest, ToString)
-{
+TEST(UResourceTest, ToString) {
     UResource uResource = UResource::longFormat("door", "front_left", "Door");
     std::string expected("UResource{name='door', instance='front_left', message='Door', id=null, markedResolved=false}");
     EXPECT_EQ(expected, uResource.toString());
@@ -473,8 +472,7 @@ TEST(UResourceTest, RpcResponse) {
     EXPECT_TRUE(uResource.isRPCMethod());
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
