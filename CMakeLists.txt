@@ -1,24 +1,12 @@
 cmake_minimum_required(VERSION 3.18.0)
 file(STRINGS "VERSION" VERSION_STRING)
-project(uprotocol-sdk-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX )
+project(uprotocol-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX)
 
 set(VCPKG $ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 if (EXISTS ${VCPKG})
     message(STATUS "Found VCPKG installation")
     set(CMAKE_TOOLCHAIN_FILE ${VCPKG} CACHE STRING "")
 endif ()
-
-set(CMAKE_BUILD_TYPE_INIT Release)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Export compilation data-base for clang-tidy
-set(CMAKE_VERBOSE_MAKEFILE 0)
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
-endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -36,18 +24,16 @@ endif()
 find_package(RapidJSON CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Protobuf REQUIRED)
-find_package(Threads REQUIRED)
-find_package(UUID REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(CGreen REQUIRED)
 
 # proto generation
 set(protobuf_MODULE_COMPATIBLE TRUE)
 
-set(PROTOS ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto/cloudevents.proto)
-set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
-set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/uprotocol/proto)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
+set(PROTOS ${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/proto/cloudevents.proto)
+set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/proto)
+set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/uprotocol-cpp/proto)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/proto)
 
 # add generated protobuf and directory.
 include_directories(${PROTO_BINARY_DIR})
@@ -55,36 +41,21 @@ include_directories(${PROTO_TEST_BINARY_DIR})
 # add remaining directories.
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${RapidJSON_INCLUDE_DIRS})
-include_directories(${UUID_INCLUDE_DIRS})
-
 include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
-include_directories(.)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/datamodel)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/factory)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/cloudevent/serialize)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/proto)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/tools)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/datamodel)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/serializer)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/validator)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto)
 include_directories(${CGREEN_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api/src/main/proto)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api)
 
 file(GLOB PROTO_CPP 				 "${PROTO_BINARY_DIR}/*.cc")
 file(GLOB PROTO_HPP 				 "${PROTO_BINARY_DIR}/*.h")
-file(GLOB SRC_HDR_BINARY 			 "uprotocol/serialize/*.h")
-file(GLOB SRC_HDR_JSON 	 			 "uprotocol/serialize/*.h")
 file(GLOB SRC_HDR_MODEL  			 "uprotocol/cloudevent/datamodel/*.h")
 file(GLOB SRC_HDR_FACTORY 			 "uprotocol/cloudevent/factory/*.h")
 file(GLOB SRC_HDR_URI 				 "uprotocol/uri/**/*.h")
 file(GLOB SRC_HDR_UUID 				 "uprotocol/uuid/*.h")
 file(GLOB SRC_HDR_TOOLS 			 "uprotocol/uuid/tools/*.h")
-file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
+file(GLOB SRC_PROTO_CORE_API 		"${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
 
-message("MICHAEL ${SRC_PROTO_CORE_API}")
 set(uprotocol_src 
 	src/base64/base64.cpp
 	src/uuid/Uuidv8Factory.cpp
@@ -95,8 +66,6 @@ set(uprotocol_src
 	${PROTO_CPP}
 	${PROTO_HPP}
 	${SRC_HDR_MODEL}
-	${SRC_HDR_BINARY}
-	${SRC_HDR_JSON}
 	${SRC_HDR_FACTORY}
 	${SRC_HDR_URI}
 	${SRC_HDR_UUID}

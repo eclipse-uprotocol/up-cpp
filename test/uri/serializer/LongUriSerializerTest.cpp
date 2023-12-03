@@ -20,11 +20,11 @@
  */
 #include <string>
 #include <cgreen/cgreen.h>
-#include "LongUriSerializer.h"
-#include "UUri.h"
-#include "UAuthority.h"
-#include "UEntity.h"
-#include "UResource.h"
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
+#include <uprotocol-cpp/uri/datamodel/UEntity.h>
+#include <uprotocol-cpp/uri/datamodel/UResource.h>
+#include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
 
 using namespace cgreen;
 using namespace uprotocol::uri;

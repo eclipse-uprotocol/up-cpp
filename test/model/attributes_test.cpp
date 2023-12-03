@@ -18,7 +18,7 @@
  *
  */
 
-#include "attributes.h"
+#include "uprotocol-cpp/cloudevent/datamodel/attributes.h"
 
 #include <cgreen/cgreen.h>
 

@@ -18,7 +18,7 @@
 
 #include <memory>
 
-#include "binary_serializer.h"
+#include "uprotocol-cpp/cloudevent/serialize/binary_serializer.h"
 
 using io::cloudevents::v1::CloudEvent;
 using namespace cgreen;

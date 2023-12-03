@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <uprotocol/transport/datamodel/UMessageType.h>
+#include <uprotocol-cpp/transport/datamodel/UMessageType.h>
 
 using namespace uprotocol::utransport;
 

@@ -20,7 +20,7 @@
  */
 #include <string>
 #include <cgreen/cgreen.h>
-#include "UResource.h"
+#include <uprotocol-cpp/uri/datamodel/UResource.h>
 
 using namespace cgreen;
 using namespace uprotocol::uri;

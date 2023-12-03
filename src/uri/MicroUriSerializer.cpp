@@ -19,12 +19,12 @@
  * under the License.
  */
 
-#include "MicroUriSerializer.h"
-#include "UUri.h"
-#include "UAuthority.h"
-#include "UEntity.h"
-#include "UResource.h"
-#include "IpAddress.h"
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
+#include <uprotocol-cpp/uri/datamodel/UEntity.h>
+#include <uprotocol-cpp/uri/datamodel/UResource.h>
+#include <uprotocol-cpp/uri/serializer/MicroUriSerializer.h>
+#include <uprotocol-cpp/uri/serializer/IpAddress.h>
 
 using uprotocol::uri::IpAddress;
 using AddressType = IpAddress::AddressType;

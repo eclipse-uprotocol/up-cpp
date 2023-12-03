@@ -17,7 +17,7 @@
  *
  */
 
-#include "base64.h"
+#include <uprotocol-cpp/tools/base64.h>
 #include <gtest/gtest.h>
 #include <array>
 

@@ -21,7 +21,7 @@
 #ifndef _MICRO_URI_SERIALIZER_H_
 #define _MICRO_URI_SERIALIZER_H_
 
-#include "UUri.h"
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
 
 namespace uprotocol::uri {
 

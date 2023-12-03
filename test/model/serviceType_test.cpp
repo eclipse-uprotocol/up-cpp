@@ -19,7 +19,7 @@
 
 #include <cgreen/cgreen.h>
 
-#include "service_type.h"
+#include <uprotocol-cpp/cloudevent/datamodel/service_type.h>
 
 using namespace cgreen;
 using cloudevents::format::ServiceType;

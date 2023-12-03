@@ -20,7 +20,7 @@
  */
 #include <string>
 #include <cgreen/cgreen.h>
-#include "UAuthority.h"
+#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
 
 using namespace cgreen;
 using namespace uprotocol::uri;

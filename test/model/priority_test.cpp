@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  */
-#include "priority.h"
+#include <uprotocol-cpp/cloudevent/datamodel/priority.h>
 
 #include <cgreen/cgreen.h>
 

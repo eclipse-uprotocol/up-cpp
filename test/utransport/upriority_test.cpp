@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <uprotocol/transport/datamodel/UPriority.h>
+#include <uprotocol-cpp/transport/datamodel/UPriority.h>
 
 using namespace uprotocol::utransport;
 // Test the UPriority enum values

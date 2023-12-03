@@ -15,8 +15,7 @@
  * limitations under the License.
  *
  */
-
-#include "json_serializer.h"
+#include "uprotocol-cpp/cloudevent/serialize/json_serializer.h"
 
 #include <cgreen/cgreen.h>
 

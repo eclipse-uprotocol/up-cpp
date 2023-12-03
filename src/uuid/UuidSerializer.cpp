@@ -19,7 +19,7 @@
  * under the License.
  */
 
-#include <uprotocol/uuid/serializer/UuidSerializer.h>
+#include <uprotocol-cpp/uuid/serializer/UuidSerializer.h>
 
 namespace uprotocol::uuid {
 

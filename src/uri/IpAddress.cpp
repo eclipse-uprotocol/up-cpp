@@ -23,7 +23,7 @@
 #include <vector>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
-#include "IpAddress.h"
+#include <uprotocol-cpp/uri/serializer/IpAddress.h>
 
 using namespace uprotocol::uri;
 

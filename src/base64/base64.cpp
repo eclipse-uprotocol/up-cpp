@@ -19,7 +19,7 @@
 /* Base64 utility is a way to convert any binary or text data into printable ASCII string format.
  *  Refer :https://en.wikipedia.org/wiki/Base64 */
 
-#include "base64.h"
+#include <uprotocol-cpp/tools/base64.h>
 #include "spdlog/spdlog.h"
 #include <iostream>
 

@@ -22,8 +22,8 @@
 #define _UUID_V8_FACTORY_H_
 
 #include "RandomGen.h"
-#include "uuid.pb.h"
 #include "UuidFactory.h"
+#include <src/main/proto/uuid.pb.h>
 
 namespace uprotocol::uuid {
 /*

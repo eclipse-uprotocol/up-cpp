@@ -18,38 +18,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#ifndef _URI_SERIALIZER_H_
-#define _URI_SERIALIZER_H_
+#ifndef _UUID_FACTORY_H_
+#define _UUID_FACTORY_H_
 
-#include <string>
-#include "UAuthority.h"
-#include "UEntity.h"
-#include "UResource.h"
-#include "UUri.h"
+#include <src/main/proto/uuid.pb.h>
 
-namespace uprotocol::uri {
+namespace uprotocol::uuid {
+using namespace uprotocol::v1;
 
-template <typename T>
-class UriSerializer {
+/**
+ * Classs for creating different UUID factory classes( v6, v8..etc)
+ * C++ does not support static virtual..so make it as class instead of interface
+ */
+class UuidFactory {
 public:
-    virtual ~UriSerializer() = default;
-
     /**
-     * Deserialize from the format to a Uri.
-     * @param uri serialized UUri.
-     * @return Returns a Uri object from the serialized format from the wire.
+     * Creates UUID object that will have 2 64bit long integers represents MSB and LSB
+     * @return UUID Returns UUID object
      */
-    virtual UUri deserialize(const T& uri) = 0;
+    static UUID create() { return UUID(); };
 
-    /**
-     * Serialize from a Uri to a specific serialization format.
-     * @param uri UUri object to be serialized to the format T.
-     * @return Returns the Uri in the transport serialized format.
-     */
-    virtual T serialize(const UUri& uri) = 0;
+    virtual ~UuidFactory() = default;
 
-}; // class UriSerializer
+}; // class UuidFactory
 
-}  // namespace uprotocol::uri
+} // namespace uprotocol::uuid
 
-#endif  // _URI_SERIALIZER_H_
+#endif // _UUID_FACTORY_H_

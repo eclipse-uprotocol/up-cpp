@@ -21,10 +21,10 @@
 #ifndef _LONG_URI_SERIALIZER_H_
 #define _LONG_URI_SERIALIZER_H_
 
-#include "UUri.h"
-#include "UAuthority.h"
-#include "UEntity.h"
-#include "UResource.h"
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
+#include <uprotocol-cpp/uri/datamodel/UEntity.h>
+#include <uprotocol-cpp/uri/datamodel/UResource.h>
 
 namespace uprotocol::uri {
 

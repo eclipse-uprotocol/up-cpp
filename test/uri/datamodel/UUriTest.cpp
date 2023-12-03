@@ -21,7 +21,7 @@
 #include <iostream>
 #include <string>
 #include <cgreen/cgreen.h>
-#include "UUri.h"
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
 
 using namespace cgreen;
 using namespace uprotocol::uri;
