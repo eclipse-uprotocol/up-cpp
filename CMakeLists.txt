@@ -12,6 +12,17 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include (CTest)
+include(ExternalProject)
+
+
+ExternalProject_Add(
+	uprotocol-core-api
+	PREFIX uprotocol-core-api-prefix
+	SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api"
+	BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api" 
+	INSTALL_COMMAND "" # No install step if not needed
+)
+
 enable_testing()
 
 find_package(RapidJSON CONFIG REQUIRED)
@@ -36,10 +47,10 @@ include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
 include_directories(${CGREEN_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api)
 
 file(GLOB 			CLOUD_EVENT_PROTO_CPP 		 "${CLOUD_EVENT_PROTO_BINARY_DIR}/*.cc")
-file(GLOB 			SRC_PROTO_CORE_API 			 "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
+file(GLOB 			SRC_PROTO_CORE_API 			 "${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api/src/main/proto/*.cc")
 file(GLOB_RECURSE 	SRC_FILES 					 "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
  
 set(uprotocol_src 
@@ -58,6 +69,9 @@ set_target_properties(uprotocol-cpp_static PROPERTIES OUTPUT_NAME uprotocol-cpp)
 
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
+add_dependencies(uprotocol-cpp_static uprotocol-core-api)
+add_dependencies(uprotocol-cpp uprotocol-core-api)
+
 target_link_libraries(uprotocol-cpp_static 
 					  ${Protobuf_LIBRARIES} 
 					  ${RapidJSON_LIBRARIES} 
@@ -69,6 +83,10 @@ target_link_libraries(uprotocol-cpp
 					  ${RapidJSON_LIBRARIES}
 					  cloudevent_proto
 					  spdlog::spdlog)
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS uprotocol-cpp DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS uprotocol-cpp_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -97,20 +115,8 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		endif()
 endif()					  
 
-include(ExternalProject)
-
-ExternalProject_Add(
-	uprotocol-core-api
-	PREFIX uprotocol-core-api-prefix
-	SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api"
-	BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api" 
-	INSTALL_COMMAND "" # No install step if not needed
-)
-
 add_dependencies(uprotocol-cpp_static cloudevent_proto)
 add_dependencies(uprotocol-cpp cloudevent_proto)
-add_dependencies(uprotocol-cpp_static uprotocol-core-api)
-add_dependencies(uprotocol-cpp uprotocol-core-api)
 
 add_subdirectory(test)
 
