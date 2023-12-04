@@ -21,7 +21,7 @@
 #include <string>
 #include <optional>
 #include <cgreen/cgreen.h>
-#include "UEntity.h"
+#include <uprotocol-cpp/uri/datamodel/UEntity.h>
 
 using namespace cgreen;
 using namespace uprotocol::uri;

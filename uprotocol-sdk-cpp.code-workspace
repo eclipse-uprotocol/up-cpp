@@ -1,0 +1,31 @@
+{
+	"folders": [
+		{
+			"name": "uprotocol-sdk-cpp",
+			"path": "ultifi/uprotocol-sdk-cpp"
+		},
+		{
+			"name": "manifests",
+			"path": ".repo/manifests"
+		},
+		{
+			"name": "ubox",
+			"path": "ubox"
+		},
+		{
+			"name": "cmake",
+			"path": "ultifi/cmake"
+		},
+		{
+			"name": "ultifi",
+			"path": "ultifi"
+		},
+		{
+			"name": "uspace",
+			"path": "."
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}

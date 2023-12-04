@@ -1,3 +1,10 @@
+# Involve uFw-Ultifi build system; than exit
+if(USE_uFW_BUILD_SYSTEM)
+	message(STATUS "uFW - Ultifi build system involved")
+	include(ultifi.cmake)
+	return()
+endif()
+
 cmake_minimum_required(VERSION 3.18.0)
 file(STRINGS "VERSION" VERSION_STRING)
 project(uprotocol-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX)

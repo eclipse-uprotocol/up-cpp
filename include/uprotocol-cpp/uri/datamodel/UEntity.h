@@ -25,7 +25,7 @@
 #include <cctype>
 #include <optional>
 #include <string>
-#include "UriFormat.h"
+#include <uprotocol-cpp/uri/datamodel/UriFormat.h>
 
 namespace uprotocol::uri {
 
