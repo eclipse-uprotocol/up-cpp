@@ -11,7 +11,6 @@ endif()
 find_package(RapidJSON CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
-find_package(Threads REQUIRED)
 find_package(libuuid REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
@@ -21,8 +20,7 @@ add_subdirectory(include/uprotocol-cpp/proto)
 include(uprotocol-core-api.cmake)
 
 file(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-define_so(uprotocol-cpp Threads::Threads 
-                        protobuf::libprotobuf 
+define_so(uprotocol-cpp protobuf::libprotobuf 
                         RapidJSON::RapidJSON 
                         libuuid::libuuid
                         spdlog::spdlog
