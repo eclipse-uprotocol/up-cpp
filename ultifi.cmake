@@ -20,7 +20,7 @@ add_subdirectory(include/uprotocol-cpp/proto)
 include(uprotocol-core-api.cmake)
 
 file(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-define_so(uprotocol-cpp protobuf::libprotobuf 
+define_both_static_and_shared(uprotocol-cpp protobuf::libprotobuf 
                         RapidJSON::RapidJSON 
                         libuuid::libuuid
                         spdlog::spdlog
@@ -31,4 +31,5 @@ add_library(uprotocol-cpp::uprotocol-cpp ALIAS uprotocol-cpp)
 
 if(BUILD_TESTING)
     add_subdirectory(test)
+    install_3rd_party_so()
 endif()

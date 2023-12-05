@@ -13,3 +13,6 @@ cgreen/1.6.3
 uprotocol-core-api/1.5.2
 
 [options]
+
+[imports]
+lib, *.so* -> ./lib
