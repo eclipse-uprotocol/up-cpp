@@ -3,14 +3,11 @@ cmake
 cmake_find_package_multi
 
 [requires]
-zenoh-c/0.10.0-rc
 rapidjson/cci.20220822
 openssl/3.0.7
 protobuf/3.21.9@cross/cross
 libuuid/1.0.3
 spdlog/1.12.0
-cgreen/1.6.3
 uprotocol-core-api/1.5.2
 
 [options]
-zenoh-c:shared = True

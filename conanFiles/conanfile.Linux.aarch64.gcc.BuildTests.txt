@@ -4,7 +4,6 @@ cmake_find_package_multi
 
 [requires]
 gtest/1.13.0
-zenoh-c/0.10.0-rc
 rapidjson/cci.20220822
 openssl/3.0.7
 protobuf/3.21.9
@@ -14,4 +13,3 @@ cgreen/1.6.3
 uprotocol-core-api/1.5.2
 
 [options]
-zenoh-c:shared = True
