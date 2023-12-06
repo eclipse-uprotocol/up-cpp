@@ -1,8 +1,8 @@
 #ifndef _ULISTENER_H_
 #define _ULISTENER_H_
 
-#include <uri/datamodel/UUri.h>
-#include <transport/datamodel/UAttributes.h>
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/transport/datamodel/UAttributes.h>
 #include "UStatus.h"
 #include "UPayload.h"
 #include "UAttributes.h"

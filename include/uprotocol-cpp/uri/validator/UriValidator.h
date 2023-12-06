@@ -21,7 +21,7 @@
 #ifndef _URI_VALIDATOR_H_
 #define _URI_VALIDATOR_H_
 
-#include "LongUriSerializer.h"
+#include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
 
 namespace uprotocol::uri {
 

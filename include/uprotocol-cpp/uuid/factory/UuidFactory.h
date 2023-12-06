@@ -21,7 +21,7 @@
 #ifndef _UUID_FACTORY_H_
 #define _UUID_FACTORY_H_
 
-#include <src/main/proto/uuid.pb.h>
+#include <uuid.pb.h>
 
 namespace uprotocol::uuid {
 using namespace uprotocol::v1;
