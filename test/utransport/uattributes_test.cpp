@@ -1,7 +1,7 @@
 #include "spdlog/spdlog.h"
-#include <uprotocol/transport/datamodel/UAttributes.h>
-#include <uprotocol/uuid/factory/UuidFactory.h>
-#include <uprotocol/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/transport/datamodel/UAttributes.h>
+#include <uprotocol-cpp/uuid/factory/UuidFactory.h>
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
 #include <gtest/gtest.h>
 
 using namespace uprotocol::utransport;
