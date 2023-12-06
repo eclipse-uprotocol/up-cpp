@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "uuid.pb.h"
+#include "src/main/proto/uuid.pb.h"
 #include "UuidSerializer.h"
 #include "Uuidv8Factory.h"
 

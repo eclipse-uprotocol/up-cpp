@@ -4,7 +4,6 @@
 # * This information is confidential and proprietary to GM Company and may not be used, modified, copied or distributed.
 # */
 cmake_minimum_required(VERSION 3.18)
-project(uprotocol-core-api LANGUAGES CXX)
 
 find_package(protobuf CONFIG REQUIRED)
 # block(SCOPE_FOR VARIABLES)
