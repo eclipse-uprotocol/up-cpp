@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 #include <cstddef>
-#include <uprotocol/transport/datamodel/UListener.h>
-#include <uprotocol/transport/datamodel/UPayload.h>
-#include <uprotocol/transport/datamodel/UAttributes.h>
-#include <uri/datamodel/UUri.h>
+#include <uprotocol-cpp/transport/datamodel/UListener.h>
+#include <uprotocol-cpp/transport/datamodel/UPayload.h>
+#include <uprotocol-cpp/transport/datamodel/UAttributes.h>
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
 
 using namespace uprotocol::utransport;
 using namespace uprotocol::uri;

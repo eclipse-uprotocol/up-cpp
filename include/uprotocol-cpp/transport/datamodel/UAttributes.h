@@ -23,8 +23,8 @@
 #define _UATTRIBUTES_
 
 #include <memory>
-#include <uprotocol/uri/datamodel/UUri.h>
-#include <uprotocol/uuid/factory/UuidFactory.h>
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/uuid/factory/UuidFactory.h>
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"

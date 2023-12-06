@@ -2,9 +2,9 @@
 #define _RPC_CLIENT_H_
 
 #include <future>
-#include <uprotocol/transport/datamodel/UPayload.h>
-#include <uprotocol/transport/datamodel/UAttributes.h>
-#include <uprotocol/transport/datamodel/UStatus.h>
+#include <uprotocol-cpp/transport/datamodel/UPayload.h>
+#include <uprotocol-cpp/transport/datamodel/UAttributes.h>
+#include <uprotocol-cpp/transport/datamodel/UStatus.h>
 
 using namespace uprotocol::utransport;
 using namespace uprotocol::uri;
