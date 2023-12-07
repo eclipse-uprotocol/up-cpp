@@ -10,9 +10,10 @@ protobuf/3.21.9
 libuuid/1.0.3
 spdlog/1.12.0
 cgreen/1.6.3
-uprotocol-core-api/1.5.2
+uprotocol-core-api/1.5.3
 
 [options]
+protobuf:shared = True
 
 [imports]
 lib, *.so* -> ./lib
