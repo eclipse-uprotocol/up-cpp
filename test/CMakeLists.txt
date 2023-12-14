@@ -19,7 +19,6 @@ add_executable(json_serializer_test
 			   ${PROTO_HDR_FILE}
 			   ${PROTO_CPP_FILE})
 
-add_dependencies(json_serializer_test uprotocol-core-api)
 target_link_libraries(json_serializer_test ${CGREEN_LIBRARY} ${RapidJSON_LIBRARIES} uprotocol-cpp)
 
 find_package(Protobuf REQUIRED)
@@ -36,7 +35,6 @@ add_executable(binary_serializer_test
 				${PROTO_CPP_FILE}
 				)
 
-add_dependencies(binary_serializer_test uprotocol-core-api)
 target_link_libraries(binary_serializer_test ${CGREEN_LIBRARY} uprotocol-cpp)
 add_test("t-01-binary-serializer" binary_serializer_test)
 

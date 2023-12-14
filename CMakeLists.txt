@@ -21,14 +21,23 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include (CTest)
 include(ExternalProject)
 
+file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api/*.proto")
 
-ExternalProject_Add(
-	uprotocol-core-api
-	PREFIX uprotocol-core-api-prefix
-	SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api"
-	BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api" 
-	INSTALL_COMMAND "" # No install step if not needed
-)
+set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api/src/main/proto/")
+set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api/src/main/proto")
+
+file(MAKE_DIRECTORY ${PROTOBUF_OUTPUT_DIRECTORY})
+
+foreach(file ${PROTOBUF_DEFINITION_FILES})
+    set(PROTOBUF_ARGUMENTS "-I=${PROTOBUF_INPUT_DIRECTORY}" "--cpp_out=${PROTOBUF_OUTPUT_DIRECTORY}" "${file}")
+
+    execute_process(
+        COMMAND protoc ${PROTOBUF_ARGUMENTS}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        RESULT_VARIABLE PROTOBUF_RESULT
+        OUTPUT_VARIABLE PROTOBUF_OUTPUT_VARIABLE)
+
+endforeach()
 
 enable_testing()
 
@@ -75,9 +84,6 @@ add_library(uprotocol-cpp_static STATIC $<TARGET_OBJECTS:uprotocollib>)
 set_target_properties(uprotocol-cpp_static PROPERTIES OUTPUT_NAME uprotocol-cpp)
 
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
-
-add_dependencies(uprotocol-cpp_static uprotocol-core-api)
-add_dependencies(uprotocol-cpp uprotocol-core-api)
 
 target_link_libraries(uprotocol-cpp_static 
 					  ${Protobuf_LIBRARIES} 
