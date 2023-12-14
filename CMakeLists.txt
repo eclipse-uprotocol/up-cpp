@@ -97,11 +97,6 @@ target_link_libraries(uprotocol-cpp
 					  cloudevent_proto
 					  spdlog::spdlog)
 
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(TARGETS uprotocol-cpp DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS uprotocol-cpp_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
