@@ -4,7 +4,6 @@
 #include <future>
 #include <uprotocol-cpp/transport/datamodel/UPayload.h>
 #include <uprotocol-cpp/transport/datamodel/UAttributes.h>
-#include <uprotocol-cpp/transport/datamodel/UStatus.h>
 
 using namespace uprotocol::utransport;
 using namespace uprotocol::uri;

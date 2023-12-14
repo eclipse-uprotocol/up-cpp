@@ -3,7 +3,7 @@
 
 #include <uprotocol-cpp/uri/datamodel/UUri.h>
 #include <uprotocol-cpp/transport/datamodel/UAttributes.h>
-#include "UStatus.h"
+#include <src/main/proto/ustatus.pb.h>
 #include "UPayload.h"
 #include "UAttributes.h"
 
@@ -20,9 +20,9 @@ namespace uprotocol::utransport
 			* @param attributes Transportation attributes
 			* @return Returns an Ack every time a message is received and processed.
 			*/
-			virtual UStatus onReceive(const UUri &uri, 
-									  const UPayload &payload, 
-									  const UAttributes &attributes) const = 0; 
+			virtual UCode onReceive(const UUri &uri, 
+									const UPayload &payload, 
+									const UAttributes &attributes) const = 0; 
 
 			virtual ~UListener() {} 
 	};
