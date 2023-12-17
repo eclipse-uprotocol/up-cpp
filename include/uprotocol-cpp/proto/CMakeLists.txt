@@ -1,9 +1,3 @@
-# Involve uFw-Ultifi build system; than exit
-if(USE_uFW_BUILD_SYSTEM)
-	include(ultifi.cmake)
-	return()
-endif()
-
 cmake_minimum_required(VERSION 3.18)
 
 INCLUDE(FindProtobuf)

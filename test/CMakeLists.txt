@@ -1,9 +1,3 @@
-# Involve uFw-Ultifi build system; than exit
-if(USE_uFW_BUILD_SYSTEM)
-	include(ultifi.cmake)
-	return()
-endif()
-
 set(TESTS_PATH ../test)
 
 include_directories(../uprotocol/proto)
