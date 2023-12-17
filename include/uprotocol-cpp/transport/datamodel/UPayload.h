@@ -26,10 +26,9 @@
 #include <cstdint>
 #include <cstring>
 
-namespace uprotocol::utransport
-{
-    enum class UPayloadType
-    {
+namespace uprotocol::utransport {
+
+    enum class UPayloadType {
         VALUE = 0, /* data passed by value - will be copied */
         REFERENCE, /* data passed by reference - the user need to ensure that the reference is valid until data is sent*/
         SHARED,    /* data passed by shared pointer */
@@ -39,8 +38,7 @@ namespace uprotocol::utransport
     /**
     * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
     */
-    class UPayload 
-    {
+    class UPayload {
         public:
 
             UPayload(const uint8_t *data, 
