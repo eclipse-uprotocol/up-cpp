@@ -29,7 +29,7 @@
 #include "UAttributes.h"
 
 namespace uprotocol::utransport {
-	
+
 	class UListener {
 		public:
 
@@ -40,7 +40,7 @@ namespace uprotocol::utransport {
 			* @param attributes Transportation attributes
 			* @return Returns an Ack every time a message is received and processed.
 			*/
-			virtual UCode onReceive(const UUri &uri, 
+			virtual UStatus onReceive(const UUri &uri, 
 									const UPayload &payload, 
 									const UAttributes &attributes) const = 0; 
 

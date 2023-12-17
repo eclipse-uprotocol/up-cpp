@@ -36,16 +36,8 @@ using namespace uprotocol::uri;
 namespace uprotocol::utransport {
 
      class UTransport {
-          public:
 
-               /**
-               * API used to authenticate with the underlining transport layer that the uEntity passed
-               * matches the transport specific identity. MUST pass a resolved UUri.
-               * @param uEntity Resolved UEntity
-               * @return Returns OKSTATUS if authenticate was successful, FAILSTATUS if the calling uE 
-               * is not authenticated.
-               */
-               virtual UCode authenticate(const UEntity &uEntity) = 0;
+          public:
                
                /**
                * Transmit UPayload to the topic using the attributes defined in UTransportAttributes.
@@ -55,7 +47,7 @@ namespace uprotocol::utransport {
                * @return Returns OKSTATUS if the payload has been successfully sent (ACK'ed), otherwise it
                * returns FAILSTATUS with the appropriate failure.
                */
-               virtual UCode send(const UUri &uri, 
+               virtual UStatus send(const UUri &uri, 
                                     const UPayload &payload,
                                     const UAttributes &attributes) = 0;
 
@@ -66,7 +58,7 @@ namespace uprotocol::utransport {
                * @return Returns OKSTATUS if the listener is unregistered correctly, otherwise it returns FAILSTATUS
                * with the appropriate failure.
                */      
-               virtual UCode registerListener(const UUri &uri,
+               virtual UStatus registerListener(const UUri &uri,
                                                 const UListener &listner) = 0;
 
                /**
@@ -78,10 +70,10 @@ namespace uprotocol::utransport {
                * with the appropriate failure.
                * 
                */
-               virtual UCode unregisterListener(const UUri &uri, 
+               virtual UStatus unregisterListener(const UUri &uri, 
                                                   const UListener &listner) = 0;
 
-               virtual UCode receive(const UUri &uri, 
+               virtual UStatus receive(const UUri &uri, 
                                        const UPayload &payload, 
                                        const UAttributes &attributes) = 0;
                
