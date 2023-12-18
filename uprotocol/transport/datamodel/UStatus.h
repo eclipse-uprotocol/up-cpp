@@ -3,7 +3,7 @@
 
 namespace uprotocol::utransport {
     
-    enum UStatus 
+    enum class UStatus 
     { 
         OK =                    0,
         CANCELLED =             1,

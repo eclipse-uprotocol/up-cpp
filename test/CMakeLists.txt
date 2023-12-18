@@ -89,6 +89,12 @@ target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
 target_link_libraries(LongUriSerializerTest ${CGREEN_LIBRARY} uprotocolsdk)
 add_test("t-13-LongUriSerializerTest"  LongUriSerializerTest)
 
+add_executable(UriValidatorTest
+		${TESTS_PATH}/uri/validator/UriValidatorTest.cpp)
+target_compile_options(UriValidatorTest PRIVATE -g -O0)
+target_link_libraries(UriValidatorTest ${CGREEN_LIBRARY} uprotocolsdk)
+add_test("t-13-UriValidatorTest"  UriValidatorTest)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(uattributes_test
 	${TESTS_PATH}/utransport/uattributes_test.cpp)

@@ -67,6 +67,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/tools)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/datamodel)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/serializer)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uri/validator)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/transport/datamodel)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/uprotocol/uuid)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto)
 include_directories(${CGREEN_INCLUDE_DIR})
@@ -78,6 +79,7 @@ file(GLOB SRC_HDR_JSON 	 			 "uprotocol/serialize/*.h")
 file(GLOB SRC_HDR_MODEL  			 "uprotocol/cloudevent/datamodel/*.h")
 file(GLOB SRC_HDR_FACTORY 			 "uprotocol/cloudevent/factory/*.h")
 file(GLOB SRC_HDR_URI 				 "uprotocol/uri/**/*.h")
+file(GLOB SRC_HDR_TRANSPORT 		 "uprotocol/transport/**/*.h")
 file(GLOB SRC_HDR_UUID 				 "uprotocol/uuid/*.h")
 file(GLOB SRC_HDR_TOOLS 			 "uprotocol/uuid/tools/*.h")
 file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
@@ -89,6 +91,7 @@ set(uprotocol_src
 	src/uri/IpAddress.cpp
 	src/uri/LongUriSerializer.cpp
 	src/uri/MicroUriSerializer.cpp
+	src/uri/UriValidator.cpp
 	${PROTO_CPP}
 	${PROTO_HPP}
 	${SRC_HDR_MODEL}
@@ -98,7 +101,8 @@ set(uprotocol_src
 	${SRC_HDR_URI}
 	${SRC_HDR_UUID}
 	${SRC_HDR_TOOLS}
-	${SRC_PROTO_CORE_API})
+	${SRC_PROTO_CORE_API}
+	${SRC_HDR_TRANSPORT})
 
 add_library(uprotocollib OBJECT ${uprotocol_src})
 
