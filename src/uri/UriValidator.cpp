@@ -111,7 +111,8 @@ bool UriValidator::isRpcMethod(const UUri& uri) {
         return false;
     }
     return (!uri.getUResource().isEmpty() &&
-     (uri.getUResource().getInstance().empty() && uri.getUResource().getName().find("rpc")) ||
+     (!uri.getUResource().getInstance().empty() &&
+      uri.getUResource().getName().find("rpc")) ||
      uri.getUResource().getId() != 0);
 }
 
