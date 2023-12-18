@@ -164,8 +164,7 @@ struct factory {
           __func__);
       return false;
     }
-
-    if (valid_uri(sinkUri)) {
+    if (UriValidator::valid_uri(sinkUri)) {
       auto* attr = new CloudEvent_CloudEventAttributeValue();
       std::string str = std::string(sinkUri);
       attr->set_ce_string(str);
@@ -220,7 +219,7 @@ struct factory {
       return false;
     }
 
-    if (valid_uri(sinkUri)) {
+    if (UriValidator::valid_uri(sinkUri)) {
       auto* attr = new CloudEvent_CloudEventAttributeValue();
       std::string str = std::string(sinkUri);
       attr->set_ce_string(str);
@@ -269,7 +268,7 @@ struct factory {
       return false;
     }
     if (!sinkUri.empty()) {
-      if (valid_uri(sinkUri)) {
+      if (UriValidator::valid_uri(sinkUri)) {
         auto* attr = new CloudEvent_CloudEventAttributeValue();
         std::string str = std::string(sinkUri);
         attr->set_ce_string(str);
@@ -312,7 +311,7 @@ struct factory {
       return false;
     }
     if (!sinkUri.empty()) {
-      if (valid_uri(sinkUri)) {
+      if (UriValidator::valid_uri(sinkUri)) {
         auto* attr = new CloudEvent_CloudEventAttributeValue();
         std::string str = std::string(sinkUri);
         attr->set_ce_string(str);
@@ -356,7 +355,7 @@ struct factory {
       return false;
     }
 
-    if (valid_uri(sinkUri)) {
+    if (UriValidator::valid_uri(sinkUri)) {
       auto* attr = new CloudEvent_CloudEventAttributeValue();
       std::string str = std::string(sinkUri);
       attr->set_ce_string(str);
@@ -401,7 +400,7 @@ struct factory {
       return false;
     }
 
-    if (valid_uri(sinkUri)) {
+    if (UriValidator::valid_uri(sinkUri)) {
       auto* attr = new CloudEvent_CloudEventAttributeValue();
       std::string str = std::string(sinkUri);
       attr->set_ce_string(str);
@@ -461,7 +460,7 @@ struct factory {
       (*(ce).mutable_attributes())[Serializer::REQ_ID_KEY] = *attr;
     }
 
-    if (unlikely(rpcUri.empty() || !valid_uri(rpcUri))) {
+    if (unlikely(rpcUri.empty() || !UriValidator::valid_uri(rpcUri))) {
       spdlog::error("Sink URI is not a Valid URI, \"%s\"\n", rpcUri.c_str());
       return false;
     } else {
@@ -504,7 +503,7 @@ struct factory {
       (*(ce).mutable_attributes())[Serializer::REQ_ID_KEY] = *attr;
     }
 
-    if (unlikely(rpcUri.empty() || !valid_uri(rpcUri))) {
+    if (unlikely(rpcUri.empty() || !UriValidator::valid_uri(rpcUri))) {
       spdlog::error("Sink URI is not a Valid URI, \"%s\"\n", rpcUri.c_str());
       return false;
     } else {
@@ -571,7 +570,7 @@ events and mandatory or optional in the uProtocol
                                                 google::protobuf::Any* any,
                                                 UAttributes& attributs,
                                                 CE& ce) {
-    if (likely(valid_uri(rpcUri))) {
+    if (likely(UriValidator::valid_uri(rpcUri))) {
       ce.set_source(rpcUri);
     } else {
       spdlog::error("RCP URI is not a Valid URI, \"%s\"\n", rpcUri.c_str());
@@ -627,7 +626,7 @@ events and mandatory or optional in the uProtocol
                                                 std::string* body,
                                                 UAttributes& attributs,
                                                 CE& ce) {
-    if (likely(valid_uri(rpcUri))) {
+    if (likely(UriValidator::valid_uri(rpcUri))) {
       ce.set_source(rpcUri);
     } else {
       spdlog::error("RCP URI is not a Valid URI, \"%s\"\n", rpcUri.c_str());
