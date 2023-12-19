@@ -76,6 +76,10 @@ include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
 include_directories(${CGREEN_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/uri/serializer)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/uri/validator)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/uri/datamodel)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/transport/datamodel)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api)
 
 file(GLOB 			CLOUD_EVENT_PROTO_CPP 		 "${CLOUD_EVENT_PROTO_BINARY_DIR}/*.cc")

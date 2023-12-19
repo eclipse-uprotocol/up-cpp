@@ -63,7 +63,7 @@ static const ::_pb::Message* const file_default_instances[] = {
 const char descriptor_table_protodef_uuid_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\nuuid.proto\022\014uprotocol.v1\" \n\004UUID\022\013\n\003ms"
   "b\030\001 \001(\006\022\013\n\003lsb\030\002 \001(\006B\'\n\030org.eclipse.upro"
-  "tocol.v1B\tUUIRProtoP\001b\006proto3"
+  "tocol.v1B\tUUIDProtoP\001b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_uuid_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_uuid_2eproto = {
