@@ -17,6 +17,10 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ * 
+ * SPDX-FileType: SOURCE
+ * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <optional>
@@ -24,11 +28,11 @@
 #include <string>
 #include <vector>
 #include <spdlog/spdlog.h>
-#include "UUri.h"
-#include "UAuthority.h"
-#include "UEntity.h"
-#include "UResource.h"
-#include "LongUriSerializer.h"
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
+#include <uprotocol-cpp/uri/datamodel/UEntity.h>
+#include <uprotocol-cpp/uri/datamodel/UResource.h>
+#include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
 
 using namespace uprotocol::uri;
 
@@ -190,14 +194,15 @@ UResource LongUriSerializer::parseUAuthority(const std::string& resourceString) 
 UEntity LongUriSerializer::parseUEntity(std::string_view entity, std::string_view version) {
     std::optional<uint8_t> entityVersion = std::nullopt;
         
-    if (true == version.empty()) {
+    if (0 == version.length()) {
         entityVersion = std::nullopt;
     } else {
         char* endptr;
 
         entityVersion = std::optional<uint8_t>(std::strtol(version.data(), &endptr, 10));
         if (*endptr != '\0') {
-            spdlog::error("Invalid conversion for version");
+            spdlog::warn("Invalid conversion for version");
+            entityVersion = std::nullopt;
         }
     }
    
@@ -212,7 +217,7 @@ UEntity LongUriSerializer::parseUEntity(std::string_view entity, std::string_vie
  */
 UUri LongUriSerializer::parseLocalUUri(const std::vector<std::string>& uriParts) {
     std::string entityName;
-    std::string version;
+    std::string version = "";
     UResource uResource = UResource::empty();
     auto numberOfPartsInUri = uriParts.size();
 
@@ -239,7 +244,7 @@ UUri LongUriSerializer::parseLocalUUri(const std::vector<std::string>& uriParts)
 */
 UUri LongUriSerializer::parseRemoteUUri(const std::vector<std::string>& uriParts) {
     std::string entityName;
-    std::string version;
+    std::string version = "";
     auto numberOfPartsInUri = uriParts.size();
 
     if (numberOfPartsInUri < 3) {

@@ -17,9 +17,13 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ * 
+ * SPDX-FileType: SOURCE
+ * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <uprotocol/uuid/serializer/UuidSerializer.h>
+#include <uprotocol-cpp/uuid/serializer/UuidSerializer.h>
 
 namespace uprotocol::uuid {
 

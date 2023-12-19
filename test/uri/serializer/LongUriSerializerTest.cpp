@@ -17,14 +17,18 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ * 
+ * SPDX-FileType: SOURCE
+ * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include <string>
 #include <cgreen/cgreen.h>
-#include "LongUriSerializer.h"
-#include "UUri.h"
-#include "UAuthority.h"
-#include "UEntity.h"
-#include "UResource.h"
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
+#include <uprotocol-cpp/uri/datamodel/UEntity.h>
+#include <uprotocol-cpp/uri/datamodel/UResource.h>
+#include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
 
 using namespace cgreen;
 using namespace uprotocol::uri;

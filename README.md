@@ -51,21 +51,7 @@ In this package we're using the cgreen testing library.
 
 It should appear in /usr/local/lib and in /usr/local/include
 
-#### Microsoft vcpkg installation
-
-Now for C++ depedencies we're using Microsoft vcpkg manager.
-```
-$ cd $HOME
-$ git clone https://github.com/Microsoft/vcpkg.git
-$ .\vcpkg\bootstrap-vcpkg.bat
-$ export PATH=$PATH:~/vcpkg
-$ vcpkg install openssl
-$ vcpkg install rapidjson
-$ vcpkg install protobuf protobuf[zlib]
-$ vcpkg install spdlog
-$ vcpkg install gtest 
-```
-#### installing dependencies without vcpkg
+#### installing dependencies
 ```
 $ sudo apt-get install libgtest-dev
 $ sudo apt-get install openssl-devel
@@ -74,12 +60,12 @@ $ sudo apt-get install rapidjson-devel
 $ install spdlog : https://github.com/gabime/spdlog
 $ install cgreen : https://github.com/cgreen-devs/cgreen/blob/master/INSTALL.md 
 $ install protobuf : git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
-       mkdir build & cd build\
-       cmake ../cmake \
+      mkdir build & cd build\
+      cmake ../cmake \
       -DCMAKE_BUILD_TYPE=Release \
       -Dprotobuf_BUILD_SHARED_LIBS=ON \
       -Dprotobuf_BUILD_TESTS=OFF; \
-      sudo make -j4 install
+      sudo -E make -j4 install
 ```
 #### Setup SDK local repository, build and test
 ```

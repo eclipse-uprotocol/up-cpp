@@ -5,7 +5,8 @@ These are the initial contributors to Eclipse uProtocol C++ SDK
 |===
 | GitHub username | Name
 
-|https://github.com/uzimeirov[uzimeirov] |Uzi Meirov
+|https://github.com/MelamudMichael[MelamudMichael] | Michael Melamud
+|https://github.com/uzimeirov[uzimeirov] | Uzi Meirov
 |https://github.com/adienzel[adienzel] | Adi 
 |https://github.com/giorgiozoppi[giorgiozoppi] | Giorgio Zoppi
 |https://github.com/stevenhartley[stevenhartley] | Steven Hartley

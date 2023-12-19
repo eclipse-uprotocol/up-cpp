@@ -17,13 +17,17 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ * 
+ * SPDX-FileType: SOURCE
+ * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <string>
 #include <vector>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
-#include "IpAddress.h"
+#include <uprotocol-cpp/uri/serializer/IpAddress.h>
 
 using namespace uprotocol::uri;
 
