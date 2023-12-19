@@ -100,7 +100,7 @@ target_link_libraries(LongUriSerializerTest ${CGREEN_LIBRARY} uprotocol-cpp)
 add_test("t-13-LongUriSerializerTest"  LongUriSerializerTest)
 
 add_executable(MicroUriSerializerTest
-	${TESTS_PATH}/uri/MicroUriSerializerTest.cpp)
+	${TESTS_PATH}/uri/serializer/MicroUriSerializerTest.cpp)
 target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
 target_link_libraries(MicroUriSerializerTest ${CGREEN_LIBRARY} uprotocol-cpp)
 add_test("t-14-MicroUriSerializerTest"  MicroUriSerializerTest)
