@@ -17,6 +17,10 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ * 
+ * SPDX-FileType: SOURCE
+ * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "UriValidator.h"
@@ -56,7 +60,7 @@ UStatus UriValidator::validate(const UUri& uri) {
   if (!uri.getUAuthority().isEmpty() && !uri.getUAuthority().isRemote()) {
     return UStatus::INVALID_ARGUMENT;
   }
-  if (uri.getUEntity().getName().empty()) {
+  if (!uri.getUEntity().isEmpty()  && uri.getUEntity().getName().empty()) {
     return UStatus::INVALID_ARGUMENT;
   }
 
@@ -108,9 +112,12 @@ UStatus UriValidator::validateRpcResponse(const UUri& uri) {
 
 bool UriValidator::isRpcMethod(const UUri& uri) {
     return (!uri.isEmpty() && 
+     !uri.getUResource().isEmpty() &&
      uri.getUResource().isRPCMethod() && 
      !uri.getUResource().getInstance().empty() ||
-     (uri.getUResource().getId().has_value()  && uri.getUResource().getId() != 0));
+     (uri.getUResource().getId().has_value() && 
+     uri.getUResource().getId() != 0 && 
+     uri.getUResource().getId() < 1000));
 }
 
 /**
@@ -120,8 +127,7 @@ bool UriValidator::isRpcMethod(const UUri& uri) {
  * @return Returns true if URI is of type RPC response.
  */
 bool UriValidator::isRpcResponse(const UUri& uri) {
-    return (UriValidator::isRpcMethod(uri) && 
-    !uri.getUResource().isEmpty() &&
+    return (UriValidator::isRpcMethod(uri) &&
      uri.getUResource().getInstance().find("reponse") ||
      (uri.getUResource().getId().has_value()  && uri.getUResource().getId() != 0));
 }
