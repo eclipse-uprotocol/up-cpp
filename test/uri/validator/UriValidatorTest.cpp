@@ -330,7 +330,7 @@ static void test_rpc_method_uri_invalid_when_uri_is_remote_no_authority_with_use
     auto uUri = LongUriSerializer::deserialize(uri);
     UStatus status = UriValidator::validateRpcMethod(uUri);
     assertFalse(uUri.isEmpty());
-    assertEquals(status, UStatus::OK);// differ in result    
+    assertEquals(status, UStatus::OK);// differ in result
 }
 
 static void test_rpc_method_uri_invalid_when_uri_is_remote_missing_authority_remotecase() {
@@ -339,10 +339,11 @@ static void test_rpc_method_uri_invalid_when_uri_is_remote_missing_authority_rem
     std::string name("rpc");
     std::string instance("UpdateDoor");
     std::string message("Door");
-    UResource uResource = UResource::longFormat(name, instance, message);
+    uint16_t id = 42;
+    UResource uResource = UResource::resolvedFormat(name, instance, message, id);
     auto uUri = UUri(uAuthority, uEntity, uResource);
     UStatus status = UriValidator::validateRpcMethod(uUri);
-    assertEquals(status, UStatus::OK);// differ in result    
+    assertEquals(status, UStatus::OK); //differ in result
 }
 
 static void test_rpc_method_uri_invalid_when_uri_is_missing_use() {
