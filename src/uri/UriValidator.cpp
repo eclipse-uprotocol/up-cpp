@@ -41,7 +41,7 @@ using namespace uprotocol::utransport;
  * @param uri {@link uri} to validate.
  * @return Returns bool containing a true or a false
  */
-bool UriValidator::valid_uri(const std::string& uri) {
+bool UriValidator::isValidUri(const std::string& uri) {
     auto uri_view = LongUriSerializer::deserialize(uri);
     return !uri_view.isEmpty();   
 }

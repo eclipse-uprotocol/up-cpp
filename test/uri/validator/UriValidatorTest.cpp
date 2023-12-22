@@ -54,7 +54,7 @@ AfterEach(UriValidator) {
 static void testEmptyUri() {
     auto uURi = UUri::empty();
     auto uri = LongUriSerializer::serialize(uURi);
-    bool isEmpty = UriValidator::valid_uri(uri);
+    bool isEmpty = UriValidator::isValidUri(uri);
     assertFalse(isEmpty);
 }
 
@@ -64,7 +64,7 @@ static void testNotEmptyUri() {
     UResource uResource = UResource::microFormat(3);
     auto uUri = UUri(uAuthority, uEntity, uResource);
     auto uri = LongUriSerializer::serialize(uUri);
-    bool isEmpty = UriValidator::valid_uri(uri);
+    bool isEmpty = UriValidator::isValidUri(uri);
     assertFalse(isEmpty);
 }
 
@@ -140,7 +140,7 @@ static void test_validateRpcResponse_with_rpc_type() {
 static void test_validateRpcResponse_with_invalid_rpc_response_type() {
     auto uri = LongUriSerializer::deserialize("/hartley//rpc.wrong");
     UStatus status = UriValidator::validateRpcResponse(uri);
-    assertEquals(status, UStatus::OK); // differ in result
+    assertEquals(status, UStatus::OK); //differ in result
 }
 
 static void test_topic_uri_no_version_when_it_is_valid_remote() {
@@ -200,13 +200,13 @@ static void test_topic_uri_invalid_when_uri_is_remote_no_authority() {
 static void test_topic_uri_invalid_when_uri_is_remote_no_authority_with_use() {
     std::string uri = "///body.access/1/door.front_left#Door";
     UStatus status = UriValidator::validate(LongUriSerializer::deserialize(uri));
-    assertEquals(status, UStatus::OK); // differ in result
+    assertEquals(status, UStatus::OK); //differ in result
 }
 
 static void test_topic_uri_invalid_when_uri_is_missing_use_remote() {
     std::string uri = "//VCU.myvin///door.front_left#Door";
     UStatus status = UriValidator::validate(LongUriSerializer::deserialize(uri));
-    assertEquals(status, UStatus::OK); // differ in result
+    assertEquals(status, UStatus::OK); //differ in result
 }
 
 static void test_topic_uri_invalid_when_uri_is_missing_use_name_remote() {
@@ -334,7 +334,7 @@ static void test_rpc_method_uri_invalid_when_uri_is_remote_no_authority_with_use
     auto uUri = LongUriSerializer::deserialize(uri);
     UStatus status = UriValidator::validateRpcMethod(uUri);
     assertFalse(uUri.isEmpty());
-    assertEquals(status, UStatus::OK);// differ in result
+    assertEquals(status, UStatus::OK);//differ in result
 }
 
 static void test_rpc_method_uri_invalid_when_uri_is_remote_missing_authority_remotecase() {

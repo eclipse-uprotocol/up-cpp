@@ -17,11 +17,12 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
+ * 
  * SPDX-FileType: SOURCE
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
+
 #ifndef _URI_VALIDATOR_H_
 #define _URI_VALIDATOR_H_
 
@@ -43,7 +44,7 @@ namespace uprotocol::uri {
           * @return Returns bool containing a true or a false
           */
 
-          static bool valid_uri(const std::string& uri);
+          static bool isValidUri(const std::string& uri);
 
          /**
           * Validate a {@link UUri} to ensure that it has at least a name for the
