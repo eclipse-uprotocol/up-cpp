@@ -43,13 +43,8 @@ jobs:
         cd build
         cmake ..
         make
-
-    - name: Run Tests (if applicable)
-      run: |
-        cd build
-        ctest
   
-    - name: Capture Coverage Data
+    - name: Run Test Capture
       run: |
         cd build
         ctest --verbose
