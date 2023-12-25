@@ -35,11 +35,11 @@ jobs:
         sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1  libspdlog-dev libcgreen1-dev wget
     - name: Build lastest cmake version
       run: |
-        wget -c https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz
-        tar xfvz cmake-3.20.1.tar.gz 
-        cd cmake-3.20.1/
-        ./bootstrap && make && sudo make install
-
+        sudo apt-get install ca-certificates gpg wget
+        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+        echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
+        sudo apt-get -y update && sudo apt-get -y install
+ 
     - name: Build protobuf
       run: |
         git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
