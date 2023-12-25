@@ -43,7 +43,7 @@ jobs:
  
     - name: Build Protocol Buffer.
       run: |
-        if [ "${{ matrix.compiler }}" == "gcc-11" ]; then  
+        if [ "${{ matrix.compiler }}" == "gcc-11" ]; then 
           git clone --progress https://github.com/protocolbuffers/protobuf
           sudo ldconfig -v
           cd protobuf
