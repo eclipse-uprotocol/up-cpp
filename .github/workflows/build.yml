@@ -46,9 +46,9 @@ jobs:
         git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
         cd protobuf
         git submodule update --init --recursive
-        bazel build :protoc :protobuf
-        sudo cp bazel-bin/protoc /usr/bin
-   
+        cmake . -DCMAKE_CXX_STANDARD=14  -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF;
+        cmake --build . && sudo -E make -j4 install
+        
     - name: Build C++ Application
       run: |
         mkdir -p build && cd build && cmake ../CMakeLists.txt && make 
