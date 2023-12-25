@@ -43,7 +43,7 @@ jobs:
     - name: Build protobuf
       run: |
         git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
-        mkdir -p build & cd build && cmake ../CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF; sudo -E make -j4 install
+        mkdir -p build && cd build && cmake ../CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF; sudo -E make -j4 install
     - name: Build C++ Application
       run: |
         mkdir -p build && cd build && cmake ../CMakeLists.txt && make 
