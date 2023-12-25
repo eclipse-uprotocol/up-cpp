@@ -27,7 +27,7 @@ jobs:
     - name: Setup Compiler and Tools
       run: |
         if [ "${{ matrix.compiler }}" == "clang-15" ]; then
-          sudo apt-get install -y clang-15
+          sudo apt-get install -y clang-15 libclang-15-dev
         elif [ "${{ matrix.compiler }}" == "gcc-11" ]; then
           sudo apt-get install -y g++-11 gcc-11
         fi
