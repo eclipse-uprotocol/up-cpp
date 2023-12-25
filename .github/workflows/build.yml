@@ -33,7 +33,13 @@ jobs:
         fi
         sudo apt-get install -y build-essential libbsd-dev make ninja-build pkg-config clang-format cmake gcc uuid uuid-dev openssl libssl-dev
         sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1 libprotobuf-dev libspdlog-dev libcgreen1-dev
- 
+    - name: Build lastest cmake version
+      run: |
+        wget -c https://github.com/Kitware/CMake/releases/download/v3.20.1/cmake-3.20.1.tar.gz
+        tar xfvz cmake-3.20.1.tar.gz 
+        cd cmake-3.20.1/
+        ./bootstrap && make && sudo make install
+
     - name: Build C++ Application
       run: |
         mkdir build
