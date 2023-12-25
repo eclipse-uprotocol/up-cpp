@@ -1,0 +1,58 @@
+name: C++ Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        compiler: [clang-15, gcc-11]
+
+    env:
+      CC: ${{ matrix.compiler }}
+      CXX: ${{ matrix.compiler }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Setup Compiler
+      run: |
+        if [ "${{ matrix.compiler }}" == "clang-15" ]; then
+          sudo apt-get install -y clang-15
+        elif [ "${{ matrix.compiler }}" == "gcc-11" ]; then
+          sudo apt-get install -y g++-11
+        fi
+        sudo apt-get install -y clang-format
+
+    - name: Clang Format
+      run: |
+        clang-format --version
+        git diff --exit-code || { echo "Code style issues found. Please run clang-format and fix them."; exit 1; }
+
+    - name: C++ Core Guidelines Linter
+      run: |
+        sudo apt-get install -y cppcheck
+        cppcheck --version
+        cppcheck --std=c++11 --enable=warning,style --force --error-exitcode=1 .
+    
+    - name: Build C++ Application
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Run Tests (if applicable)
+      run: |
+        cd build
+        ctest
+
