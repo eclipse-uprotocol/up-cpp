@@ -44,6 +44,7 @@ jobs:
     - name: Build Protocol Buffer.
       run: |
         git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
+        ldconfig -v
         cd protobuf
         git submodule update --init --recursive
         cmake . -DCMAKE_CXX_STANDARD=14  -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF;
