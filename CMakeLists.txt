@@ -62,6 +62,7 @@ find_package(CGreen REQUIRED)
 
 # proto generation
 set(protobuf_MODULE_COMPATIBLE TRUE)
+set (CMAKE_CXX_STANDARD 20)
 
 set(CLOUD_EVENT_PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/uprotocol-cpp/proto)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/proto)
