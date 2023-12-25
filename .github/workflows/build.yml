@@ -43,7 +43,7 @@ jobs:
  
     - name: Build Protocol Buffer.
       run: |
-        git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
+        git clone --progress https://github.com/protocolbuffers/protobuf
         sudo ldconfig -v
         cd protobuf
         git submodule update --init --recursive
