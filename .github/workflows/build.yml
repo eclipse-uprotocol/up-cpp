@@ -42,11 +42,8 @@ jobs:
 
     - name: Build C++ Application
       run: |
-        mkdir build
-        cd build
-        cmake ..
-        make
-  
+        mkdir -p build & cd build && cmake ../cmake -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF; sudo -E make -j4 install
+        
     - name: Run Test Capture
       run: |
         cd build
