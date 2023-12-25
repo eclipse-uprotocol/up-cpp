@@ -40,7 +40,7 @@ jobs:
         echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
         sudo apt-get -y update && sudo apt-get -y install kitware-archive-keyring cmake
  
-    - name: Build protobug
+    - name: Build protobuf
       run: |
         git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
         mkdir -p build & cd build && cmake ../CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF; sudo -E make -j4 install
