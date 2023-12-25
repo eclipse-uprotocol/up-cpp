@@ -32,9 +32,7 @@ jobs:
           sudo apt-get install -y g++-11 gcc-11
         fi
         sudo apt-get install -y build-essential libbsd-dev make ninja-build pkg-config clang-format cmake gcc uuid uuid-dev openssl libssl-dev
-        sudo apt-get install -y libgtest-dev rapidjson-dev
-        git clone https://github.com/cgreen-devs/cgreen.git
-        cd cgreen
+        sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1
         make && sudo make install
  
     
