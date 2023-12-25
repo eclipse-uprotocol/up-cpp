@@ -26,13 +26,14 @@ jobs:
 
     - name: Setup Compiler and Tools
       run: |
+        sudo apt-update -y && apt-get -yinstall g++ git bazel
         if [ "${{ matrix.compiler }}" == "clang-12" ]; then
           sudo apt-get install -y clang-12 libclang-12-dev libclang-cpp12 libclang-cpp12-dev libc++-12-dev
         elif [ "${{ matrix.compiler }}" == "gcc-11" ]; then
           sudo apt-get install -y g++-11 gcc-11
         fi
         sudo apt-get -y update && sudo apt-get install -y build-essential libbsd-dev make ninja-build pkg-config clang-format cmake gcc uuid uuid-dev openssl libssl-dev
-        sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1  libspdlog-dev libcgreen1-dev wget libprotobuf-dev
+        sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1  libspdlog-dev libcgreen1-dev wget
     - name: Build lastest cmake version
       run: |
         sudo apt-get install ca-certificates gpg wget
@@ -40,10 +41,14 @@ jobs:
         echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
         sudo apt-get -y update && sudo apt-get -y install kitware-archive-keyring cmake
  
-    - name: Build protobuf
+    - name: Build Protocol Buffer.
       run: |
         git clone -b v3.21.12 https://github.com/protocolbuffers/protobuf
-        cd protobuf && mkdir -p build && cd build && cmake ../CMakeLists.txt -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF; sudo -E make -j4 install
+        cd protobuf
+        git submodule update --init --recursive
+        bazel build :protoc :protobuf
+        sudo cp bazel-bin/protoc /usr/bin
+   
     - name: Build C++ Application
       run: |
         mkdir -p build && cd build && cmake ../CMakeLists.txt && make 
