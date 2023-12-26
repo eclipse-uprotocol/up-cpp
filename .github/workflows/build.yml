@@ -11,6 +11,13 @@ on:
 jobs:  
   build:
     runs-on: ubuntu-latest
+    
+    #container:
+    #  image: ghcr.io/username/repository/image:tag
+    #  options: --user <user_id>:<group_id>
+    #  credentials:
+    #    username: ${{ github.actor }}
+    #    password: ${{ secrets.GITHUB_TOKEN }}
 
     strategy:
       matrix:
@@ -45,7 +52,7 @@ jobs:
         cd protobuf
         git submodule update --init --recursive
         cmake . -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=14  -DCMAKE_BUILD_TYPE=Debug -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF;
-        cmake --build . && sudo -E make -j4 install && ldconfig -v
+        cmake --build . && sudo -E make -j4 install
         
         
     - name: Build C++ Application
