@@ -44,6 +44,10 @@ jobs:
  
     - name: Build Protocol Buffer.
       run: |
+        git clone https://github.com/abseil/abseil-cpp
+        cd abseil-cpp
+        cmake -DBUILD_TESTING=OFF . && make && make install
+        cd ..
         git clone --progress https://github.com/protocolbuffers/protobuf
         sudo ldconfig -v
         cd protobuf
