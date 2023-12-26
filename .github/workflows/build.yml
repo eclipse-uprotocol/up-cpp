@@ -9,6 +9,7 @@ on:
       - main
 
 jobs:
+  
   build:
     runs-on: ubuntu-latest
 
@@ -34,7 +35,7 @@ jobs:
         fi
         sudo apt-get -y update && sudo apt-get install -y build-essential libbsd-dev make ninja-build pkg-config clang-format cmake gcc uuid uuid-dev openssl libssl-dev
         sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1  libspdlog-dev libcgreen1-dev wget libprotobuf-dev
-    - name: Build lastest cmake version
+    - name: Update Cmake to latest version
       run: |
         sudo apt-get install ca-certificates gpg wget
         wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
@@ -47,13 +48,13 @@ jobs:
         sudo ldconfig -v
         cd protobuf
         git submodule update --init --recursive
-        cmake . -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=20  -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF;
+        cmake . -DABSL_PROPAGATE_CXX_STD=ON -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=20  -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF;
         cmake --build . && sudo -E make -j4 install
         
         
     - name: Build C++ Application
       run: |
-        mkdir -p build && cd build && cmake ../CMakeLists.txt && make 
+        mkdir -p build && cd build && cmake ../CMakeLists.txt --no-warn-unused-cli -B build -S .. -G Ninja && ninja
         
     - name: Run Test Capture
       run: |
