@@ -37,7 +37,7 @@ jobs:
         sudo apt-update -y sudo apt-get -y upgrade && apt-get -y install g++ git libstdc++-11-dev
         sudo apt-get install -y g++-11 gcc-11
         sudo apt-get -y update && sudo apt-get install -y build-essential libbsd-dev make ninja-build pkg-config clang-format cmake gcc uuid uuid-dev openssl libssl-dev
-        sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1  libspdlog-dev libcgreen1-dev wget
+        sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1  libspdlog-dev libcgreen1-dev wget lcov
     - name: Update Cmake to latest version.
       run: |
         sudo apt-get install ca-certificates gpg wget
@@ -56,5 +56,20 @@ jobs:
       run: |
         /usr/bin/cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Debug \
          -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S . -B build -G Ninja
-        cd build && ninja && ninja test
+        cd build && ninja && ninja -v test
+    - name: Generate coverage report
+      run: |
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --list coverage.info
+  
+    - name: Check code coverage
+      run: |
+        cd build
+        COVERAGE_PERCENTAGE=$(lcov --list coverage.info | grep "total" | awk '{ print $4 }' | cut -d "%" -f 1)
+        echo "Code coverage: $COVERAGE_PERCENTAGE%"
+        if (( $COVERAGE_PERCENTAGE < 80 )); then
+          echo "Code coverage is less than 80%. Failing the build."
+          exit 1
+        fi
    
