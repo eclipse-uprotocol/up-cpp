@@ -44,22 +44,22 @@ jobs:
  
     - name: Build Protocol Buffer.
       run: |
-        git clone https://github.com/abseil/abseil-cpp
-        cd abseil-cpp
-        cmake -DBUILD_TESTING=OFF -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=17 .  
-        sudo -E make -j4 install
-        cd ..
+        #git clone https://github.com/abseil/abseil-cpp
+        #cd abseil-cpp
+        #cmake -DBUILD_TESTING=OFF -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=17 .  
+        #sudo -E make -j4 install
+        #cd ..
         git clone --progress https://github.com/protocolbuffers/protobuf
         sudo ldconfig -v
         cd protobuf
         git submodule update --init --recursive
-        cmake . -DABSL_PROPAGATE_CXX_STD=ON -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=14  -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF;
+        cmake . -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=14  -DCMAKE_BUILD_TYPE=Debug -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_BUILD_TESTS=OFF;
         cmake --build . && sudo -E make -j4 install
         
         
     - name: Build C++ Application
       run: |
-        mkdir -p build && cd build && cmake ../CMakeLists.txt --no-warn-unused-cli -B build -S .. -G Ninja && ninja
+        mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug ../CMakeLists.txt --no-warn-unused-cli && make -j4
         
     - name: Run Test Capture
       run: |
