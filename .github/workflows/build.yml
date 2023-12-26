@@ -35,7 +35,7 @@ jobs:
         fi
         sudo apt-get -y update && sudo apt-get install -y build-essential libbsd-dev make ninja-build pkg-config clang-format cmake gcc uuid uuid-dev openssl libssl-dev
         sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1  libspdlog-dev libcgreen1-dev wget libprotobuf-dev
-    - name: Update Cmake to latest version
+    - name: Update Cmake to latest version.
       run: |
         sudo apt-get install ca-certificates gpg wget
         wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
@@ -69,7 +69,7 @@ jobs:
         lcov --remove coverage.info '/usr/*' --output-file coverage.info
         lcov --list coverage.info
   
-    - name: Check Code Coverage Threshold
+    - name: Check Code Coverage Threashold
       run: |
         COVERAGE_THRESHOLD=80
         COVERAGE_PERCENT=$(lcov --summary coverage.info | grep "lines......:" | awk '{print $3}')
