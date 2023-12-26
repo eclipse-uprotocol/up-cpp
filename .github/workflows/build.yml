@@ -14,11 +14,12 @@ jobs:
 
     strategy:
       matrix:
-        compiler: [clang-12, gcc-11]
+        ccompiler: [gcc-11]
+        cppcompiler: [g++-11]
 
     env:
-      CC: ${{ matrix.compiler }}
-      CXX: ${{ matrix.compiler }}
+      CC: ${{ matrix.ccompiler }}
+      CXX: ${{ matrix.cppcompiler }}
 
     steps:
     - name: Checkout Repository
@@ -27,11 +28,7 @@ jobs:
     - name: Setup Compiler and Tools
       run: |
         sudo apt-update -y sudo apt-get -y upgrade && apt-get -y install g++ git libstdc++-11-dev
-        if [ "${{ matrix.compiler }}" == "clang-12" ]; then
-          sudo apt-get install -y clang-12 libclang-12-dev libclang-cpp12 libclang-cpp12-dev libc++-12-dev
-        elif [ "${{ matrix.compiler }}" == "gcc-11" ]; then
-          sudo apt-get install -y g++-11 gcc-11
-        fi
+        sudo apt-get install -y g++-11 gcc-11
         sudo apt-get -y update && sudo apt-get install -y build-essential libbsd-dev make ninja-build pkg-config clang-format cmake gcc uuid uuid-dev openssl libssl-dev
         sudo apt-get install -y libgtest-dev rapidjson-dev cgreen1  libspdlog-dev libcgreen1-dev wget libprotobuf-dev
     - name: Update Cmake to latest version.
@@ -43,11 +40,6 @@ jobs:
  
     - name: Build Protocol Buffer.
       run: |
-        #git clone https://github.com/abseil/abseil-cpp
-        #cd abseil-cpp
-        #cmake -DBUILD_TESTING=OFF -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=17 .  
-        #sudo -E make -j4 install
-        #cd ..
         git clone --progress https://github.com/protocolbuffers/protobuf
         sudo ldconfig -v
         cd protobuf
