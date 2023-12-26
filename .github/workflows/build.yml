@@ -46,7 +46,8 @@ jobs:
       run: |
         git clone https://github.com/abseil/abseil-cpp
         cd abseil-cpp
-        cmake -DBUILD_TESTING=OFF -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=14 . && make && make install
+        cmake -DBUILD_TESTING=OFF -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_STANDARD=17 .  
+        sudo -E make -j4 install
         cd ..
         git clone --progress https://github.com/protocolbuffers/protobuf
         sudo ldconfig -v
