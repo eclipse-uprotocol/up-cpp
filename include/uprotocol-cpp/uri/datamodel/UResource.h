@@ -22,14 +22,15 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _URESOURCE_H_
-#define _URESOURCE_H_
+#ifndef URESOURCE_H_
+#define URESOURCE_H_
 
 #include <algorithm>
 #include <cctype>
 #include <optional>
 #include <string>
 #include "UriFormat.h"
+#include "src/main/proto/uri.pb.h"
 
 namespace uprotocol::uri {
 
@@ -45,7 +46,7 @@ public:
     /**
      * Constructor for building a UResource with empty contents.
      */
-    UResource() { UResource::empty(); }
+    //UResource() { UResource::empty(); }
 
     /**
      * Build a UResource that has all elements resolved and can be serialized in a long UUri or a micro UUri.
@@ -56,12 +57,12 @@ public:
      * @param id The numeric representation of this uResource.
      * @return Returns a UResource that has all the information that is needed to serialize into a long UUri or a micro UUri.
      */
-    static UResource resolvedFormat(const std::string& name,
+    static auto resolvedFormat(const std::string& name,
                                     const std::string& instance,
                                     const std::string& message,
-                                    const std::optional<uint16_t> id) {
+                                    const std::optional<uint16_t> id) -> UResource {
         bool resolved = !isBlank(name) && id.has_value();
-        return UResource{name, instance, message, id, resolved};
+        return UResource(name, instance, message, id, resolved);
     }
 
     /**
@@ -69,8 +70,8 @@ public:
      * @param name The name of the resource as a noun such as door or window, or in the case a method that manipulates the resource, a verb.
      * @return Returns a UResource that can be serialized into a long UUri.
      */
-    static UResource longFormat(const std::string& name) {
-        return UResource{name, "", "", std::nullopt, false};
+    static auto longFormat(const std::string& name) -> UResource {
+        return UResource(name, "", "", std::nullopt, false);
     }
 
     /**
@@ -81,10 +82,10 @@ public:
      *                A message is a data structure type used to define data that is passed in  events and rpc methods.
      * @return Returns a UResource that can be serialised into a long UUri.
      */
-    static UResource longFormat(const std::string& name,
+    static auto longFormat(const std::string& name,
                                 const std::string& instance,
-                                const std::string& message) {
-        return UResource{name, instance, message, std::nullopt, false};
+                                const std::string& message) -> UResource {
+        return UResource(name, instance, message, std::nullopt, false);
     }
 
     /**
@@ -92,8 +93,8 @@ public:
      * @param id The numeric representation of this uResource.
      * @return Returns a UResource that can be serialised into a micro UUri.
      */
-    static UResource microFormat(const std::optional<uint16_t> id) {
-        return UResource{"", "", "", id, false};
+    static auto microFormat(const std::optional<uint16_t> id) -> UResource {
+        return UResource("", "", "", id, false);
     }
 
     /**
@@ -101,8 +102,8 @@ public:
      * @param methodName The RPC method name.
      * @return Returns a UResource used for an RPC request that could be serialised in long format.
      */
-    static UResource forRpcRequest(const std::string& methodName) {
-        return UResource{"rpc", methodName, "", std::nullopt, false};
+    static auto forRpcRequest(const std::string& method_name) -> UResource {
+        return UResource("rpc", method_name, "", std::nullopt, false);
     }
 
     /**
@@ -110,8 +111,8 @@ public:
      * @param methodId The numeric representation method name for the RPC.
      * @return Returns a UResource used for an RPC request that could be serialised in micro format.
      */
-    static UResource forRpcRequest(const std::optional<uint16_t> methodId) {
-        return UResource{"rpc", "", "", methodId, false};
+    static auto forRpcRequest(const std::optional<uint16_t> method_id) -> UResource {
+        return UResource("rpc", "", "", method_id, false);
     }
 
     /**
@@ -120,56 +121,77 @@ public:
      * @param methodId The numeric representation method name for the RPC.
      * @return Returns a UResource used for an RPC request that could be serialised in long and micro format.
      */
-    static UResource forRpcRequest(const std::string& methodName,
-                                   const std::optional<uint16_t> methodId) {
-        bool resolved = !isBlank(methodName) && methodId.has_value();
-        return UResource{"rpc", methodName, "", methodId, resolved};
+    static auto forRpcRequest(const std::string& method_name,
+                                   const std::optional<uint16_t> method_id) -> UResource {
+        bool resolved = !isBlank(method_name) && method_id.has_value();
+        return UResource("rpc", method_name, "", method_id, resolved);
     }
 
     /**
      * Static factory method for creating a response resource that is returned from RPC calls<br>
      * @return Returns a response  resource used for response RPC calls.
      */
-    static UResource forRpcResponse() {
-        static const auto RESPONSE = UResource("rpc", "response", "", 0, true);
-        return RESPONSE;
+    static auto forRpcResponse() -> UResource {
+        static const auto response = UResource("rpc", "response", "", 0, true);
+        return response;
     }
 
     /**
      * @return Returns true if this resource specifies an RPC method call or RPC response.
      */
-    [[nodiscard]] bool isRPCMethod() const {
-        return ((name_ == std::string("rpc") && !getInstance().empty()) ||
-                (name_ == std::string("rpc") && getId().has_value()));
+    [[nodiscard]] auto isRPCMethod() const -> bool {
+        return ((resource_.name() == std::string("rpc") && !getInstance().empty()) ||
+                (resource_.name() == std::string("rpc") && getId().has_value()));
     }
 
     /**
      * Static factory method for creating an empty  resource, to avoid working with null<br>
      * @return Returns an empty  resource that has a blank name and no message instance information.
      */
-    static UResource empty() {
-        static const auto EMPTY = UResource("", "", "", std::nullopt, false);
-        return EMPTY;
+    static auto createEmpty() -> UResource {
+        static const auto empty = UResource("", "", "", std::nullopt, false);
+        return empty;
     }
 
     /**
      * Indicates that this resource is an empty container and has no valuable information in building uProtocol URI.
      * @return Returns true if this resource is an empty container and has no valuable information in building uProtocol URI.
      */
-    [[nodiscard]] bool isEmpty() const override {
-        return (name_.empty() || "rpc" == name_) &&
-                instance_.empty() && message_.empty() && !id_.has_value();
+    [[nodiscard]] auto isEmpty() const -> bool override {
+        auto name = resource_.name();
+        return (name.empty() || "rpc" == name) &&
+                resource_.instance().empty() && resource_.message().empty() && !resource_.has_id();
     }
-
+    
+    /**
+     * return the hash of the resource
+     * @return std::size_t hash
+     */
+    [[nodiscard]] std::size_t getHash() const override {
+        return hash_;
+    }
+    
+    /**
+     * return the uResorce protobuf object of type uprotocol::v1::UResource
+     * @return uprotocol::v1::UResource protobuf class
+     */
+    [[nodiscard]] auto getProtoUresource() const ->  uprotocol::v1::UResource {
+         return resource_;
+    }
     /**
      * @return Returns the name of the resource as a noun such as door or window, or in the case a method that manipulates the resource, a verb.
      */
-    [[nodiscard]] std::string getName() const { return name_; }
+    [[nodiscard]] auto getName() const -> std::string { return resource_.name(); }
 
     /**
      * @return Returns the resource id if it exists.
      */
-    [[nodiscard]] std::optional<uint16_t> getId() const { return id_; }
+    [[nodiscard]] auto getId() const -> std::optional<uint16_t> { 
+        if (resource_.has_id()) {
+            return resource_.id();
+        }
+        return std::nullopt;
+    }
 
     /**
      * An instance of a resource such as front_left
@@ -177,14 +199,14 @@ public:
      * @return Returns the resource instance of the resource if it exists.
      * If the instance does not exist, it is assumed that all the instances of the resource are wanted.
      */
-    [[nodiscard]] std::string getInstance() const { return instance_; }
+    [[nodiscard]] auto getInstance() const -> std::string { return resource_.instance(); }
 
     /**
      * The Message type matches the protobuf service IDL that defines structured data types.
      * A message is a data structure type used to define data that is passed in  events and rpc methods.
      * @return Returns the Message type matches the protobuf service IDL that defines structured data types.
      */
-    [[nodiscard]] std::string getMessage() const { return message_; }
+    [[nodiscard]] auto getMessage() const -> std::string { return resource_.message(); }
 
     /**
      * Return true if this resource contains both ID and names.
@@ -192,49 +214,49 @@ public:
      * type of UResource also requires message to not be null
      * @return  Returns true of this resource contains resolved information
      */
-    [[nodiscard]] bool isResolved() const override { return markedResolved_; }
+    [[nodiscard]] auto isResolved() const -> bool override { return markedResolved_; }
 
     /**
      * Returns true if the uResource contains names so that it can be serialized to long format.
      * @return Returns true if the uResource contains names so that it can be serialized to long format.
      */
-    [[nodiscard]] bool isLongForm() const override {
-        if (name_ == std::string("rpc")) {
+    [[nodiscard]] auto isLongForm() const -> bool override {
+        if (resource_.name() == std::string("rpc")) {
             return !getInstance().empty();
         }
-        return !name_.empty();
+        return !resource_.name().empty();
     }
 
     /**
      * Returns true if the uResource contains the id's which will allow the Uri part to be serialized into micro form.
      * @return Returns true if the uResource can be serialized into micro form.
      */
-    [[nodiscard]] bool isMicroForm() const override { return id_.has_value(); }
+    [[nodiscard]] auto isMicroForm() const -> bool override { return resource_.has_id(); }
 
     /**
      * Compare this UResource to another UResource.
      * @return Returns true if the UResource are equal.
      */
-    bool operator==(const UResource& o) const {
+    auto operator==(const UResource& o) const -> bool {
         if (this == &o) {
             return true;
         }
         return (markedResolved_ == o.markedResolved_) &&
-               (name_ == o.name_) &&
-               (instance_ == o.instance_) &&
-               (message_ == o.message_) &&
-               (id_ == o.id_);
+               (resource_.name() == o.resource_.name()) &&
+               (resource_.instance() == o.resource_.instance()) &&
+               (resource_.message() == o.resource_.message()) &&
+               (resource_.id() == o.resource_.id());
     }
 
     /**
      * Convert this UResource to a string.
      * @return Returns a string representation of this UResource.
      */
-    [[nodiscard]] std::string toString() const {
-        return std::string("UResource{") +  "name='" + name_ + "', " +
-                           "instance='" + (instance_.empty() ? "null" : instance_) + "', " +
-                           "message='" + (message_.empty() ? "null" : message_) + "', " +
-                           "id=" + (id_.has_value() ? std::to_string(id_.value()) : "null") + ", " +
+    [[nodiscard]] auto toString() const -> std::string {
+        return std::string("UResource{") +  "name='" + resource_.name() + "', " +
+                           "instance='" + (resource_.has_instance() ? resource_.instance() : "null") + "', " +
+                           "message='" + (resource_.has_message() ? resource_.message() : "null") + "', " +
+                           "id=" + (resource_.has_id() ? std::to_string(resource_.id()) : "null") + ", " +
                            "markedResolved=" + (markedResolved_ ? "true" : "false") + "}";
     }
 
@@ -246,17 +268,26 @@ private:
      * @param message   The Message type matches the protobuf service IDL message name that defines structured data types.
      *                  A message is a data structure type used to define data that is passed in  events and rpc methods.
      * @param id        The numeric representation of this uResource.
-     * @param markedResolved Indicates that this uResource was populated with intent of having all data.
+     * @param marked_resolved Indicates that this uResource was populated with intent of having all data.
      */
     UResource(const std::string& name,
               const std::string& instance,
               const std::string& message,
               const std::optional<uint16_t> id,
-              const bool markedResolved)
-              : id_(id), markedResolved_(markedResolved) {
-        name_ = isBlank(name) ? "" : name;
-        instance_ = isBlank(instance) ? "" : instance;
-        message_ = isBlank(message) ? "" : message;
+              const bool marked_resolved)
+              : markedResolved_(marked_resolved) {
+        resource_.set_name(isBlank(name) ? "" : name);
+        if (!instance.empty()) {
+            resource_.set_instance(isBlank(instance) ? "" : instance);
+        }
+        if (!message.empty()) {
+            resource_.set_message(isBlank(message) ? "" : message);
+        }
+        if (id.has_value()) {
+            resource_.set_id(id.value());
+        }
+        
+        hash_ = UResourceHash{}(resource_);
     }
 
     /**
@@ -264,33 +295,36 @@ private:
      * @param str   The string to be checked
      * @return bool Returns true if the string is blank.
      */
-    [[nodiscard]] static bool isBlank(std::string_view str) {
+    [[nodiscard]] static auto isBlank(std::string_view str) -> bool {
         return std::all_of(str.begin(), str.end(), [](char ch) { return std::isspace(ch); });
     }
+    
 
-    /**
-     * The name of the resource such as "door".
-     */
-    std::string name_;
-    /**
-     * The instance of the resource such as "front_left".
-     */
-    std::string instance_;
-    /**
-     * The message type of the resource.
-     */
-    std::string message_;
-    /**
-     * The id of the resource.
-     */
-    std::optional<uint16_t> id_;
-    /**
-     * Indicates that this uResource was populated with intent of having all data.
-     */
+    struct UResourceHash {
+        auto operator()(const uprotocol::v1::UResource &uri_resource) const noexcept -> std::size_t {
+            std::size_t local_hash = std::hash < std::string > {}(uri_resource.name());
+            local_hash = uri_resource.has_instance()
+                    ? (std::hash < std::string > {}(uri_resource.instance()) << 1) ^ local_hash 
+                    : local_hash;
+            local_hash = uri_resource.has_message()
+                    ? (std::hash < std::string > {}(uri_resource.message()) << 2) ^ local_hash
+                    : local_hash;
+            local_hash = uri_resource.has_id()
+                    ? (std::hash <uint16_t> {}(static_cast<uint16_t>(uri_resource.id())) << 3) ^ local_hash
+                    : local_hash;
+            return local_hash;
+        }
+    };
+    
+   
     bool markedResolved_;
-
+    uprotocol::v1::UResource resource_;
+    std::size_t  hash_;
+    std::string  uri_resource_string_long_;
+    std::string  uri_resource_string_micro_;
+    
 }; // class UResource
 
 } // namespace uprotocol::uri
 
-#endif // _URESOURCE_H_
+#endif // URESOURCE_H_

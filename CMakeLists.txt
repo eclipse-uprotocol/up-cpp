@@ -20,9 +20,13 @@
 
 cmake_minimum_required(VERSION 3.18.0)
 file(STRINGS "VERSION" VERSION_STRING)
+
+ set(CMAKE_CXX_STANDARD 17)
 project(uprotocol-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX)
 
-set(VCPKG $ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+set(CMAKE_CXX_FLAGS "${CAMKE_CXX_FLAGS} -g -L/usr/local/lib -I../ -pthread -Wall -Wpedantic")
+
+ set(VCPKG $ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 if (EXISTS ${VCPKG})
     message(STATUS "Found VCPKG installation")
     set(CMAKE_TOOLCHAIN_FILE ${VCPKG} CACHE STRING "")

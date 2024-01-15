@@ -207,13 +207,13 @@ static void testResolvedUri() {
     assertFalse(uri3.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
-    auto uri4 = UUri(UAuthority::local(), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
+    auto uri4 = UUri(UAuthority::local(), UEntity::resolvedFormat("body.access", std::nullopt, std::nullopt, 2), uResource);
     assertTrue(uri4.isResolved());
     assertTrue(uri4.isLongForm());
     assertFalse(uri3.isMicroForm());
 
     uResource = UResource::forRpcRequest("ExecuteDoorCommand");
-    auto uri11 = UUri(UAuthority::local(), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
+    auto uri11 = UUri(UAuthority::local(), UEntity::resolvedFormat("body.access", std::nullopt, std::nullopt, 2), uResource);
     assertFalse(uri11.isResolved());
     assertTrue(uri11.isLongForm());
     assertFalse(uri11.isMicroForm());
@@ -237,7 +237,7 @@ static void testResolvedUri() {
     assertFalse(uri7.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
-    auto uri14 = UUri(UAuthority::resolvedRemote("vcu", "vin", ""), UEntity::resolvedFormat("body.access", 1, 2), uResource);
+    auto uri14 = UUri(UAuthority::resolvedRemote("vcu", "vin", ""), UEntity::resolvedFormat("body.access", 1, 0, 2), uResource);
     assertFalse(uri14.isResolved());
     assertTrue(uri14.isLongForm());
     assertFalse(uri14.isMicroForm());
@@ -255,19 +255,19 @@ static void testResolvedUri() {
     assertFalse(uri9.isMicroForm());
 
     uResource = UResource::resolvedFormat("door", "front_left", "Door", 1);
-    auto uri10 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
+    auto uri10 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, std::nullopt, 2), uResource);
     assertTrue(uri10.isResolved());
     assertTrue(uri10.isLongForm());
     assertTrue(uri10.isMicroForm());
 
     uResource = UResource::microFormat(2);
-    auto uri12 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
+    auto uri12 = UUri(UAuthority::resolvedRemote("vcu", "vin", "192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, std::nullopt, 2), uResource);
     assertFalse(uri12.isResolved());
     assertFalse(uri12.isLongForm());
     assertTrue(uri12.isMicroForm());
 
     uResource = UResource::microFormat(2);
-    auto uri19 = UUri(UAuthority::microRemote("192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, 2), uResource);
+    auto uri19 = UUri(UAuthority::microRemote("192.168.1.100"), UEntity::resolvedFormat("body.access", std::nullopt, std::nullopt, 2), uResource);
     assertFalse(uri19.isResolved());
     assertFalse(uri19.isLongForm());
     assertTrue(uri19.isMicroForm());

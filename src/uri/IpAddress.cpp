@@ -23,8 +23,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <string>
-#include <vector>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
 #include <uprotocol-cpp/uri/serializer/IpAddress.h>
@@ -63,9 +61,9 @@ void IpAddress::toString() {
         
         ipString_.reserve(INET6_ADDRSTRLEN + 1);
 
-        auto inetType = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
+        auto inet_type = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
 
-        if (inet_ntop(inetType, &ipBytes_[0], ipString_.data(), INET6_ADDRSTRLEN) == nullptr) {
+        if (inet_ntop(inet_type, ipBytes_.data(), ipString_.data(), INET6_ADDRSTRLEN) == nullptr) {
             spdlog::error("inet_ntop failed");
         }
     } else {

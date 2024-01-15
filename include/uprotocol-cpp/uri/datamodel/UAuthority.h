@@ -22,17 +22,19 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _UAUTHORITY_H_
-#define _UAUTHORITY_H_
+#ifndef UAUTHORITY_H_
+#define UAUTHORITY_H_
 
 #include <algorithm>
 #include <cctype>
 #include <optional>
 #include <string>
 #include <array>
+#include <string_view>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
 #include "UriFormat.h"
+#include "../uprotocol-core-api/src/main/proto/uri.pb.h"
 
 namespace uprotocol::uri {
 
@@ -42,13 +44,21 @@ namespace uprotocol::uri {
  * Device and domain names are used as part of the URI for device and service discovery. Optimized micro versions of the UUri will use the IP Address.<br>
  * Devices will be grouped together into realms of Zone of Authority.<br>
  */
-class UAuthority : public UriFormat {
+class UAuthority : private UriFormat {
 public:
+    
+    UAuthority() = delete;
+    
     /**
-     * Constructor for building a UAuthority with empty contents.
+     * Static factory method for creating an empty uAuthority.<br>
+     * @return UAuthority with no domain, device, or ip address information,
+     * indicating to uProtocol that the uAuthority part in the UUri is relative 
+     * to the sender/receiver deployment environment.
      */
-    UAuthority() { UAuthority::empty(); }
-
+    [[nodiscard]] static auto createEmpty() -> std::optional<UAuthority> {
+        return UAuthority(false);
+    }
+    
     /**
      * Static factory method for creating a local uAuthority.<br>
      * A local uri does not contain an authority and looks like this:
@@ -56,7 +66,9 @@ public:
      * @return Returns a local uAuthority that has no domain, device, or ip address information, indicating to uProtocol
      *      that the uAuthority part in the UUri is relative to the sender/receiver deployment environment.
      */
-    static UAuthority local() { return empty(); }
+    [[nodiscard]] static auto createLocal() -> std::optional<UAuthority> { 
+        return createEmpty(); 
+    }
 
     /**
      * Static factory method for creating a remote authority supporting the long serialization information representation of a UUri.<br>
@@ -68,70 +80,78 @@ public:
      * Vehicle Domain name <b>MUST</b> be that of the vehicle VIN.
      * @return Returns a uAuthority that contains the device and the domain and can only be serialized in long UUri format.
      */
-    static UAuthority longRemote(const std::string& device,
-                                 const std::string& domain) {
-        return UAuthority{device, domain, "", true, false};
+    [[nodiscard]] static auto createLongRemote(const std::string& device,
+                                 const std::string& domain) -> std::optional<UAuthority> {
+        if (isBlank(domain) && isBlank(device)) {
+            spdlog::error("Domain is blank");
+            return std::nullopt;
+        }
+        return UAuthority(device, domain);
     }
-
+    
+    [[nodiscard]] static auto createLongRemote(const std::string& address) -> std::optional<UAuthority> {
+        if (isBlank(address)) {
+            spdlog::error("Domain is blank");
+            return std::nullopt;
+        }
+        return UAuthority(address);
+    }
+    
+    
     /**
      * Static factory method for creating a remote authority supporting the micro serialization information representation of a UUri.<br>
      * Building a UAuthority with this method will create an unresolved uAuthority that can only be serialised in micro UUri format.
      * @param address The ip address of the device a software entity is deployed on.
      * @return Returns a uAuthority that contains only the internet address of the device, and can only be serialized in micro UUri format.
      */
-    static UAuthority microRemote(const std::string& address) {
-        return UAuthority{"", "", address, true, false};
+    [[nodiscard]] static auto createMicroRemote(const std::string& address) -> std::optional<UAuthority> {
+        if (isBlank(address)) {
+            spdlog::error("Address is blank");
+            return std::nullopt;
+        }
+    
+        auto authority = UAuthority(address);
+        if (auto remote = authority.authority_.remote_case(); uprotocol::v1::UAuthority::RemoteCase::kIp == remote) {
+            return authority;
+        }
+        spdlog::error("not leagal address {}", address);
+        return std::nullopt;
     }
-
+    
     /**
-     * Static factory method for creating a remote authority that is completely resolved with name, device and ip address of the device.<br>
-     * Building a UAuthority with this method will enable serialisation in both UUri formats, long UUri format and micro UUri format.
-     * Note that in the case of missing data, this will not fail, but simply create a UAuthority that is not resolved.
-     * @param device The device name for long serialization of UUri.
-     * @param domain The domain name for long serialization of UUri.
-     * @param address the IP address for the device, for micro serialization of UUri.
-     * @return Returns a uAuthority that contains all resolved data and so can be serialized into a long UUri or a micro UUri.
+     * get the pUAthority from the protobuf part
+     * @return const uprotocol::v1::UAuthority& protobuff class
      */
-    static UAuthority resolvedRemote(const std::string& device,
-                                     const std::string& domain,
-                                     const std::string& address) {
-        bool isResolved = !isBlank(device) && !isBlank(address);
-        return UAuthority{device, domain, address, true, isResolved};
-    }
-
-    /**
-     * Static factory method for creating an empty uAuthority, to avoid working with null<br>
-     * Empty uAuthority is still serializable in both long and micro UUri formats, and will be as local to the current deployment environment.
-     * @return Returns an empty authority that has no domain, device, or device ip address information.
-     */
-    static UAuthority empty() {
-        static const auto EMPTY = UAuthority("", "", "", false, true);
-        return EMPTY;
-    }
+    [[nodiscard]] auto getProtobufAuthority() const -> const uprotocol::v1::UAuthority& { return authority_; }  
 
     /**
      * Accessing an optional device of the uAuthority.
      * @return Returns the device a software entity is deployed on, such as the VCU, CCU or cloud provider.
      */
-    [[nodiscard]] std::string getDevice() const { return device_; }
+    [[nodiscard]] auto getDevice() const -> std::string { return device_; }
 
     /**
      * Accessing an optional domain of the uAuthority.
      * @return Returns the domain a software entity is deployed on, such as vehicle or backoffice.
      */
-    [[nodiscard]] std::string getDomain() const { return domain_; }
+    [[nodiscard]] auto getDomain() const -> std::string { return domain_; }
 
     /**
      * Accessing an optional IP address configuration of the uAuthority.
      * @return Returns the device IP address.
      */
-    [[nodiscard]] std::string getAddress() const { return address_; }
+    [[nodiscard]] auto getAddress() const -> std::optional<std::string> {
+        if (auto remote = authority_.remote_case(); uprotocol::v1::UAuthority::RemoteCase::kIp == remote) {
+            return authority_.ip();
+        }
+        return std::nullopt;
+    }
 
     /**
      * Support for determining if this uAuthority is defined for a local deployment.
      * @return returns true if this uAuthority is local, meaning does not contain a device/domain for long UUri or information for micro UUri.
      */
-    [[nodiscard]] bool isLocal() const {
+    [[nodiscard]] auto isLocal() const -> bool {
         return isEmpty() && !isMarkedRemote();
     }
 
@@ -139,7 +159,7 @@ public:
      * Support for determining if this uAuthority defines a deployment that is defined as remote.
      * @return Returns true if this uAuthority is remote, meaning it contains information for serialising a long UUri or a micro UUri.
      */
-    [[nodiscard]] bool isRemote() const {
+    [[nodiscard]] auto isRemote() const -> bool {
         return isMarkedRemote();
     }
 
@@ -147,20 +167,20 @@ public:
      * Support for determining if this uAuthority was configured to be remote.
      * @return Returns true if this uAuthority is explicitly configured remote deployment.
      */
-    [[nodiscard]] bool isMarkedRemote() const { return markedRemote_; }
+    [[nodiscard]] auto isMarkedRemote() const -> bool { return markedRemote_; }
 
     /**
      * Indicates that this UAuthority has already been resolved.
      * A resolved UAuthority means that it has all the information needed to be serialised in the long format or the micro format of a UUri.
      * @return Returns true if this UAuthority is resolved with all the information needed to be serialised in the long format or the micro format of a UUri.
      */
-    [[nodiscard]] bool isResolved() const override { return markedResolved_; }
+    [[nodiscard]] auto isResolved() const -> bool override { return false; }
 
     /**
      * Determine if the UAuthority can be used to serialize a UUri in long format.
      * @return Returns true if the UAuthority can be used to serialize a UUri in long format.
      */
-    [[nodiscard]] bool isLongForm() const override {
+    [[nodiscard]] auto isLongForm() const -> bool override {
         return isLocal() || !getDevice().empty();
     }
 
@@ -168,96 +188,201 @@ public:
      * Determine if the UAuthority can be used to serialize a UUri in micro format.
      * @return Returns true if the uAuthority can be serialized a UUri in micro format.
      */
-    [[nodiscard]] bool isMicroForm() const override {
-        return isLocal() || !getAddress().empty();
+    [[nodiscard]] auto isMicroForm() const -> bool override {
+        auto addr = getAddress();
+        return isLocal() || (addr.has_value() && !(addr.value().empty()));
     }
 
     /**
      * Indicates that the UAuthority is an empty container.
      * @return Returns true if this UAuthority is empty.
      */
-    [[nodiscard]] bool isEmpty() const override {
-        return getDevice().empty() && getDomain().empty() && getAddress().empty();
+    [[nodiscard]] auto isEmpty() const -> bool override {
+        switch (authority_.remote_case()) {
+            case uprotocol::v1::UAuthority::RemoteCase::kIp:
+                return authority_.ip().empty();
+                break;
+            case uprotocol::v1::UAuthority::RemoteCase::kName:
+                return authority_.name().empty();
+            case uprotocol::v1::UAuthority::RemoteCase::kId:
+                return authority_.id().empty();
+            default:
+                return true;
+        }
     }
-
+    
+    /**
+     * return the hash of the resource
+     * @return std::size_t hash
+     */
+    [[nodiscard]] auto getHash() const -> std::size_t override {
+        return hash_;
+    }
+    
     /**
      * Equality operator for comparing two UAuthorities.
      * @param o The UAuthority to compare with.
      * @return Returns true if the UAuthorities are equal.
      */
-    [[nodiscard]] bool operator==(const UAuthority& o) const {
+    [[nodiscard]] auto operator==(const UAuthority& o) const -> bool {
         if (this == &o) {
             return true;
         }
-        return (markedRemote_ == o.markedRemote_) &&
-               (markedResolved_ == o.markedResolved_) &&
-               (device_ == o.device_) &&
-               (domain_ == o.domain_) &&
-               (address_ == o.address_);
+        if (authority_.remote_case() != o.authority_.remote_case()) {
+            return false;
+        }
+        if (markedRemote_ != o.markedRemote_) {
+            return false;
+        }
+        if (authority_.remote_case() == uprotocol::v1::UAuthority::RemoteCase::kIp) {
+            return (authority_.ip() == o.authority_.ip());
+        } else if (authority_.remote_case() == uprotocol::v1::UAuthority::RemoteCase::kName) {
+            return (authority_.name() == o.authority_.name());
+        } else if (authority_.remote_case() == uprotocol::v1::UAuthority::RemoteCase::kId) {
+            return (authority_.id() == o.authority_.id());
+        } else if (authority_.remote_case() == uprotocol::v1::UAuthority::RemoteCase::REMOTE_NOT_SET) {
+            return (markedRemote_ == o.markedRemote_);
+        } else {
+            return false;
+        }
     }
 
     /**
      * Utility method to convert the UAuthority to a string.
      * @return Returns a string representation of the UAuthority.
      */
-    [[nodiscard]] std::string toString() const {
+    [[nodiscard]] auto toString() const -> std::string {
+        std::string address;
+        switch (authority_.remote_case()) {
+            case uprotocol::v1::UAuthority::RemoteCase::kIp:
+                address = authority_.ip();
+                break;
+            case uprotocol::v1::UAuthority::RemoteCase::kName:
+            case uprotocol::v1::UAuthority::RemoteCase::kId:
+            case uprotocol::v1::UAuthority::RemoteCase::REMOTE_NOT_SET:
+                //address = "";
+                break;
+        }
+        
+        
         return std::string("UAuthority{") +
                            "device='" + (device_.empty() ? "null" : device_) + "', " +
                            "domain='" + (domain_.empty() ? "null" : domain_) + "', " +
-                           "address=" + (address_.empty() ? "null" : address_) + ", " +
-                           "markedRemote=" + (markedRemote_ ? "true" : "false") + ", " +
-                           "markedResolved=" + (markedResolved_ ? "true" : "false") + "}";
+                           "address=" + (address.empty() ? "null" : address) + ", " +
+                           "markedRemote=" + (markedRemote_ ? "true" : "false") + "}";
     }
 
  private:
     /**
-     * Constructor for building a UAuthority.
-     * @param device        The device a software entity is deployed on, such as the VCU, CCU or cloud provider.
-     * @param domain        The domain a software entity is deployed on, such as vehicle or Cloud (PaaS).
-     * @param address       The device IP address of the device.
-     * @param markedRemote  Indicates if this UAuthority was implicitly marked as remote.
-     * @param markedResolved Indicates that this uAuthority has all the information needed to be serialised
-     *                          in the long format or the micro format of a UUri.
+     * 
+     * @param marked_remote 
+     */
+    explicit UAuthority(bool marked_remote) : markedRemote_(marked_remote) {
+        hash_ = UAuthorityHash{}(authority_);
+    }
+    
+    /**
+     * create a UAuthority from a UProtocol UAuthority with long form
+     * @param device 
+     * @param domain 
      */
     UAuthority(const std::string& device,
-               const std::string& domain,
-               const std::string& address,
-               const bool markedRemote,
-               const bool markedResolved)
-               : markedRemote_(markedRemote), markedResolved_(markedResolved) {
+               const std::string& domain) {
+        auto has_device = false;
+        auto has_domain = false;
         if (!device.empty()) {
             auto current = isBlank(device) ? "" : device;
             std::transform(current.begin(), current.end(), current.begin(),
                            [](unsigned char c) { return std::tolower(c); });
             this->device_ = std::move(current);
+            has_device = true;
         }
         if (!domain.empty()) {
             auto current = isBlank(domain) ? "" : domain;
             std::transform(current.begin(), current.end(), current.begin(),
                            [](unsigned char c) { return std::tolower(c); });
             this->domain_ = std::move(current);
+            has_domain = true;
         }
-        address_ = isBlank(address) ? "" : address;
-        // To have a unified format for ipv6 addressing.
-        if (std::array<uint8_t, sizeof(struct in6_addr)> ipv6{0}; inet_pton(AF_INET6, address.c_str(), &ipv6) == 1) {
-            std::string ipv6str(INET6_ADDRSTRLEN, '\0');
-            if (inet_ntop(AF_INET6, &ipv6, ipv6str.data(), INET6_ADDRSTRLEN) != nullptr) {
-                address_ = ipv6str.data();
-            } else {
-                address_ = "";
+        std::string m_authority = (device_.empty() ? "" : device_) + (domain_.empty() ? "" : "." + domain_);
+        authority_.set_name(m_authority);
+        markedRemote_ = has_device || has_domain;
+        hash_ = UAuthorityHash{}(authority_);
+    }
+    
+    explicit UAuthority(const std::string& address) {
+        std::string m_address = isBlank(address) ? "" : address;
+    
+//        std::string ip_char;
+//        ip_char.reserve(INET6_ADDRSTRLEN + 1);
+        char ip_char[INET6_ADDRSTRLEN + 1];
+        memset(ip_char, 0, INET6_ADDRSTRLEN + 1);
+        if (in6_addr ipv6{0}; inet_pton(AF_INET6, m_address.c_str(), &ipv6) == 1) {
+             if (inet_ntop(AF_INET6,
+                          &ipv6,
+                          ip_char,
+                          INET6_ADDRSTRLEN) != nullptr) {
+                 authority_.set_ip(ip_char);
+            }
+        } else if (struct in_addr ipv4{0};
+                inet_pton(AF_INET, m_address.c_str(), &ipv4) == 1) {
+            if (inet_ntop(AF_INET,
+                          &ipv4,
+                          ip_char,
+                          INET_ADDRSTRLEN) != nullptr) {
+                authority_.set_ip(ip_char);
             }
         }
+        markedRemote_ = true;
+        hash_ = UAuthorityHash{}(authority_);
     }
-
+        
     /**
      * Utility method to verify if the string is blank.
      * @param str   The string to be checked
      * @return bool Returns true if the string is blank.
      */
-    [[nodiscard]] static bool isBlank(std::string_view str) {
+    [[nodiscard]] static auto isBlank(std::string_view str) -> bool {
         return std::all_of(str.begin(), str.end(), [](char ch) { return std::isspace(ch); });
     }
-
+    
+    /**
+     * utility method to get the full string representation of ipv6 address.
+     * the format is 8 groups of 2 bytes in hex separated by colons. 
+     * and it uses full representation of 0000 and not the compressed form.
+     * @param addr 
+     * @return 
+     */
+    [[nodiscard]] static auto ipv62fullstring(const struct in6_addr *addr) -> std::string {
+        char str[INET6_ADDRSTRLEN];
+        sprintf(str, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
+                static_cast<int>(addr->s6_addr[0]), static_cast<int>(addr->s6_addr[1]),
+                static_cast<int>(addr->s6_addr[2]), static_cast<int>(addr->s6_addr[3]),
+                static_cast<int>(addr->s6_addr[4]), static_cast<int>(addr->s6_addr[5]),
+                static_cast<int>(addr->s6_addr[6]), static_cast<int>(addr->s6_addr[7]),
+                static_cast<int>(addr->s6_addr[8]), static_cast<int>(addr->s6_addr[9]),
+                static_cast<int>(addr->s6_addr[10]), static_cast<int>(addr->s6_addr[11]),
+                static_cast<int>(addr->s6_addr[12]), static_cast<int>(addr->s6_addr[13]),
+                static_cast<int>(addr->s6_addr[14]), static_cast<int>(addr->s6_addr[15]));
+        return str;
+    }
+    
+    struct UAuthorityHash {
+        auto operator()(const uprotocol::v1::UAuthority &uri_authority) const noexcept -> std::size_t {
+            switch (uri_authority.remote_case()) {
+                case uprotocol::v1::UAuthority::RemoteCase::kIp:
+                    return std::hash<std::string>{}(uri_authority.ip());
+                case uprotocol::v1::UAuthority::RemoteCase::kName:
+                    return std::hash<std::string>{}(uri_authority.name());
+                default:
+                    return 0; //static_cast<std::size_t>(0);
+            }
+        }
+    };
+    
+    
+    uprotocol::v1::UAuthority authority_;
+    
     /**
      * A device is a logical independent representation of a service bus in different execution environments.<br>
      * Devices will be grouped together into realms of Zone of Authority.
@@ -272,7 +397,7 @@ public:
     /**
      * The device IP address. Represents the micro version of a UAuthority.
      */
-    std::string address_;
+//    std::string address_;
         /**
      * An UAuthority starting with // is a remote configuration of a URI, and we mark the uAuthority implicitly as remote.
      * This is never exposed externally and is used internally to indicate remote or local deployments.
@@ -282,10 +407,15 @@ public:
      * Indicates that this UAuthority has already been resolved.
      * A resolved UAuthority means that it has all the information needed to be serialised in the long format or the micro format of a UUri.
      */
-    bool markedResolved_;
+    //bool markedResolved_;
+    
+    
+    
+    std::size_t  hash_;
+
 
 }; // class UAuthority
 
 } // namespace uprotocol::uri
 
-#endif // _UAUTHORITY_H_
+#endif // UAUTHORITY_H_

@@ -22,13 +22,20 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _LONG_URI_SERIALIZER_H_
-#define _LONG_URI_SERIALIZER_H_
+#ifndef LONG_URI_SERIALIZER_H_
+#define LONG_URI_SERIALIZER_H_
 
-#include <uprotocol-cpp/uri/datamodel/UUri.h>
-#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
-#include <uprotocol-cpp/uri/datamodel/UEntity.h>
-#include <uprotocol-cpp/uri/datamodel/UResource.h>
+//#include <uprotocol-cpp/uri/datamodel/UUri.h>
+//#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
+//#include <uprotocol-cpp/uri/datamodel/UEntity.h>
+//#include <uprotocol-cpp/uri/datamodel/UResource.h>
+#include <uprotocol-cpp/uri/builder/BuildUResource.h>
+#include <uprotocol-cpp/uri/builder/BuildEntity.h>
+#include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
+#include <uprotocol-cpp/uri/builder/BuildUUri.h>
+#include "../tools/Utils.h"
+#include "../uprotocol-core-api/src/main/proto/uri.pb.h"
+#include <string_view>
 
 namespace uprotocol::uri {
 
@@ -44,14 +51,14 @@ public:
      * @return Returns the String format of the supplied UUri that can be used as a sink or a source
      * in a uProtocol publish communication.
      */
-    static std::string serialize(const UUri& uUri);
+    static auto serialize(const v1::UUri& u_uri) -> std::string;
 
     /**
      * Deserialize a String into a UUri object.
      * @param uProtocolUri A long format uProtocol URI.
      * @return Returns an UUri data object.
      */
-    static UUri deserialize(std::string const& uProtocolUri);
+    static auto deserialize(std::string const& u_protocol_uri) -> v1::UUri;
 
 private:
     LongUriSerializer() = default;
@@ -88,7 +95,7 @@ private:
      * @param s String to be trimmed.
      * @return Returns the trimmed string.
      */
-    static inline std::string ltrim_copy(std::string s) {
+    static inline auto ltrim_copy(std::string s) -> std::string {
         ltrim(s);
         return s;
     }
@@ -98,7 +105,7 @@ private:
      * @param s String to be trimmed.
      * @return Returns the trimmed string.
      */
-    static inline std::string rtrim_copy(std::string s) {
+    static inline auto rtrim_copy(std::string s) -> std::string {
         rtrim(s);
         return s;
     }
@@ -108,7 +115,7 @@ private:
      * @param s String to be trimmed.
      * @return Returns the trimmed string.
      */
-    static inline std::string trim_copy(std::string s) {
+    static inline auto trim_copy(std::string s) -> std::string {
         trim(s);
         return s;
     }
@@ -120,29 +127,29 @@ private:
      * @param delimiter Delimiter to split the string.
      * @return Returns a vector of strings.
      */
-    static std::vector<std::string> split(std::string str,
-                                          const std::string_view& delimiter);
+    static auto split(std::string str,
+                      const std::string_view& delimiter) -> std::vector<std::string>;
 
     /**
      * Create the resource part of the Uri from a resource object.
      * @param uResource  Resource representing a resource or an RPC method.
      * @return Returns the String representation of the  Resource in the uProtocol URI.
      */
-    static std::string buildResourcePartOfUri(const UResource& uResource);
+    static auto buildResourcePartOfUri(const v1::UResource& u_resource) -> std::string;
 
     /**
      * Create the service part of the uProtocol URI from an  software entity object.
      * @param use  Software Entity representing a service or an application.
      * @return Returns the String representation of the  Software Entity in the uProtocol URI.
      */
-    static std::string buildSoftwareEntityPartOfUri(const UEntity& use);
+    static auto buildSoftwareEntityPartOfUri(const v1::UEntity& use) -> std::string;
 
     /**
      * Create authority part of the URI from the given UAuthority object.
      * @param uAuthority UAuthority object of the UUri.
      * @return Returns the string representation of Authority.
      */
-    static std::string buildAuthorityPartOfUri(const UAuthority& uAuthority);
+    static auto buildAuthorityPartOfUri(const v1::UAuthority& u_authority) -> std::string;
 
     /**
      * Static factory method for creating a UResource using a string that contains
@@ -150,7 +157,7 @@ private:
      * @param resourceString String that contains the UResource information.
      * @return Returns a UResource object.
      */
-    static UResource parseUAuthority(const std::string& resourceString);
+    static auto parseUResource(const std::string& resource_string) -> v1::UResource;
 
     /**
      * Static factory method for creating a UEntity using a string that contains
@@ -159,7 +166,7 @@ private:
      * @param version String that contains the UEntity version.
      * @return Returns a UEntity object.
      */
-    static UEntity parseUEntity(std::string_view entity, std::string_view version);
+    static auto parseUEntity(const std::string &entity, const std::string &version) -> v1::UEntity;
 
     /**
      * Static factory method for creating a UUri using a vector of strings that contains
@@ -167,7 +174,7 @@ private:
      * @param uriParts Vector of strings that contains the Local UUri information.
      * @return Returns a UUri object.
      */
-    static UUri parseLocalUUri(const std::vector<std::string>& uriParts);
+    static auto parseLocalUUri(const std::vector<std::string>& uri_parts) -> v1::UUri;
 
     /**
      * Static factory method for creating a UUri using a vector of strings that contains
@@ -175,10 +182,10 @@ private:
      * @param uriParts Vector of strings that contains the Remote UUri information.
      * @return Returns a UUri object.
     */
-    static UUri parseRemoteUUri(const std::vector<std::string>& uriParts);
+    static auto parseRemoteUUri(const std::vector<std::string>& uri_parts) -> v1::UUri;
 
 }; // class LongUriSerializer
 
 } // namespace uprotocol::uri
 
-#endif // _LONG_URI_SERIALIZER_H_
+#endif // LONG_URI_SERIALIZER_H_

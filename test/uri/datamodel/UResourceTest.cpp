@@ -45,24 +45,24 @@ AfterEach(UResource) {
 
 // Make sure the toString works.
 static void testToString() {
-    UResource uResource = UResource::longFormat("door", "front_left", "Door");
+    auto u_resource = UResource::longFormat("door", "front_left", "Door");
     std::string expected("UResource{name='door', instance='front_left', message='Door', id=null, markedResolved=false}");
-    assertEquals(expected, uResource.toString());
-    assertFalse(uResource.isEmpty());
+    assertEquals(expected, u_resource.toString());
+    assertFalse(u_resource.isEmpty());
 }
 
 // Test creating a empty Resource.
 static void testEmptyResource() {
-    UResource uResource = UResource::empty();
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::createEmpty();
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a complete up Resource in long format.
@@ -70,164 +70,164 @@ static void testLongFormat() {
     std::string name("door");
     std::string instance("front_left");
     std::string message("Door");
-    UResource uResource = UResource::longFormat(name, instance, message);
-    assertEquals(name, uResource.getName());
-    assertEquals(instance, uResource.getInstance());
-    assertEquals(message, uResource.getMessage());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat(name, instance, message);
+    assertEquals(name, u_resource.getName());
+    assertEquals(instance, u_resource.getInstance());
+    assertEquals(message, u_resource.getMessage());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in long format with no name.
 static void testLongFormatWithoutName() {
     std::string instance("front_left");
     std::string message("Door");
-    UResource uResource = UResource::longFormat("", instance, message);
-    assertTrue(uResource.getName().empty());
-    assertEquals(instance, uResource.getInstance());
-    assertEquals(message, uResource.getMessage());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat("", instance, message);
+    assertTrue(u_resource.getName().empty());
+    assertEquals(instance, u_resource.getInstance());
+    assertEquals(message, u_resource.getMessage());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in long format with no instance.
 static void testLongFormatWithoutInstance() {
     std::string name("door");
     std::string message("Door");
-    UResource uResource = UResource::longFormat(name, "", message);
-    assertEquals(name, uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertEquals(message, uResource.getMessage());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat(name, "", message);
+    assertEquals(name, u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertEquals(message, u_resource.getMessage());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in long format with no message.
 static void testLongFormatWithoutMessage() {
     std::string name("door");
     std::string instance("front_left");
-    UResource uResource = UResource::longFormat(name, instance, "");
-    assertEquals(name, uResource.getName());
-    assertEquals(instance, uResource.getInstance());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat(name, instance, "");
+    assertEquals(name, u_resource.getName());
+    assertEquals(instance, u_resource.getInstance());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in long format with empty inputs.
 static void testLongFormatEmpty() {
-    UResource uResource = UResource::longFormat("", "", "");
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat("", "", "");
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in long format with empty values.
 static void testLongFormatWithBlankValues() {
-    UResource uResource = UResource::longFormat(" ", " ", " ");
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat(" ", " ", " ");
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in long format with name.
 static void testLongFormatWithName() {
     std::string name("door");
-    UResource uResource = UResource::longFormat(name);
-    assertEquals(name, uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat(name);
+    assertEquals(name, u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in long format with name empty.
 static void testLongFormatWithNameEmpty() {
-    UResource uResource = UResource::longFormat("");
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat("");
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in long format with name blank.
 static void testLongFormatWithNameBlank() {
-    UResource uResource = UResource::longFormat("  ");
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::longFormat("  ");
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource in micro format.
 static void testMicroFormat() {
     uint16_t id = 42;
-    UResource uResource = UResource::microFormat(id);
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertEquals(id, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::microFormat(id);
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertEquals(id, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a Resource to be used in micro formatted UUri id is null.
 static void testMicroFormatWithoutId() {
-    UResource uResource = UResource::microFormat(std::nullopt);
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::microFormat(std::nullopt);
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a fully resolved Resource to be used in long and micro formatted UUri.
@@ -236,16 +236,16 @@ static void testResolvedFormat() {
     std::string instance("front_left");
     std::string message("Door");
     uint16_t id = 42;
-    UResource uResource = UResource::resolvedFormat(name, instance, message, id);
-    assertEquals(name, uResource.getName());
-    assertEquals(instance, uResource.getInstance());
-    assertEquals(message, uResource.getMessage());
-    assertEquals(id, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertTrue(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::resolvedFormat(name, instance, message, id);
+    assertEquals(name, u_resource.getName());
+    assertEquals(instance, u_resource.getInstance());
+    assertEquals(message, u_resource.getMessage());
+    assertEquals(id, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertTrue(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a fully resolved Resource with empty name.
@@ -253,16 +253,16 @@ static void testResolvedFormatEmptyName() {
     std::string instance("front_left");
     std::string message("Door");
     uint16_t id = 42;
-    UResource uResource = UResource::resolvedFormat("  ", instance, message, id);
-    assertTrue(uResource.getName().empty());
-    assertEquals(instance, uResource.getInstance());
-    assertEquals(message, uResource.getMessage());
-    assertEquals(id, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::resolvedFormat("  ", instance, message, id);
+    assertTrue(u_resource.getName().empty());
+    assertEquals(instance, u_resource.getInstance());
+    assertEquals(message, u_resource.getMessage());
+    assertEquals(id, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a fully resolved Resource with empty instance.
@@ -270,16 +270,16 @@ static void testResolvedFormatEmptyInstance() {
     std::string name("door");
     std::string message("Door");
     uint16_t id = 42;
-    UResource uResource = UResource::resolvedFormat(name, "  ", message, id);
-    assertEquals(name, uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertEquals(message, uResource.getMessage());
-    assertEquals(id, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertTrue(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::resolvedFormat(name, "  ", message, id);
+    assertEquals(name, u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertEquals(message, u_resource.getMessage());
+    assertEquals(id, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertTrue(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a fully resolved Resource with empty message.
@@ -287,16 +287,16 @@ static void testResolvedFormatEmptyMessage() {
     std::string name("door");
     std::string instance("front_left");
     uint16_t id = 42;
-    UResource uResource = UResource::resolvedFormat(name, instance, "  ", id);
-    assertEquals(name, uResource.getName());
-    assertEquals(instance, uResource.getInstance());
-    assertTrue(uResource.getMessage().empty());
-    assertEquals(id, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertTrue(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::resolvedFormat(name, instance, "  ", id);
+    assertEquals(name, u_resource.getName());
+    assertEquals(instance, u_resource.getInstance());
+    assertTrue(u_resource.getMessage().empty());
+    assertEquals(id, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertTrue(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a fully resolved Resource with empty id.
@@ -304,191 +304,191 @@ static void testResolvedFormatEmptyId() {
     std::string name("door");
     std::string instance("front_left");
     std::string message("Door");
-    UResource uResource = UResource::resolvedFormat(name, instance, message, std::nullopt);
-    assertEquals(name, uResource.getName());
-    assertEquals(instance, uResource.getInstance());
-    assertEquals(message, uResource.getMessage());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::resolvedFormat(name, instance, message, std::nullopt);
+    assertEquals(name, u_resource.getName());
+    assertEquals(instance, u_resource.getInstance());
+    assertEquals(message, u_resource.getMessage());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating a fully resolved Resource with empty values.
 static void testResolvedFormatEmptyValues() {
-    UResource uResource = UResource::resolvedFormat(" ", " ", " ", std::nullopt);
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::resolvedFormat(" ", " ", " ", std::nullopt);
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating invalid uResource with only the message.
 static void testResolvedFormatWithOnlyMessage() {
     std::string message("Door");
-    UResource uResource = UResource::resolvedFormat("", "", message, std::nullopt);
-    assertTrue(uResource.getName().empty());
-    assertTrue(uResource.getInstance().empty());
-    assertEquals(message, uResource.getMessage());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::resolvedFormat("", "", message, std::nullopt);
+    assertTrue(u_resource.getName().empty());
+    assertTrue(u_resource.getInstance().empty());
+    assertEquals(message, u_resource.getMessage());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating rpc request for long formatted UUri.
 static void testRpcRequestLongFormat() {
-    std::string methodName = "ExecuteDoorCommand";
-    UResource uResource = UResource::forRpcRequest(methodName);
-    assertEquals("rpc", uResource.getName());
-    assertEquals(methodName, uResource.getInstance());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertTrue(uResource.isRPCMethod());
+    std::string method_name = "ExecuteDoorCommand";
+    auto u_resource = UResource::forRpcRequest(method_name);
+    assertEquals("rpc", u_resource.getName());
+    assertEquals(method_name, u_resource.getInstance());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertTrue(u_resource.isRPCMethod());
 }
 
 // Test creating rpc request for long formatted UUri with empty method name.
 static void testRpcRequestLongFormatEmptyMethodName() {
-    UResource uResource = UResource::forRpcRequest("");
-    assertEquals("rpc", uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::forRpcRequest("");
+    assertEquals("rpc", u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating rpc request for long formatted UUri with blank method name.
 static void testRpcRequestLongFormatBlankMethodName() {
-    UResource uResource = UResource::forRpcRequest("  ");
-    assertEquals("rpc", uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::forRpcRequest("  ");
+    assertEquals("rpc", u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating rpc request for micro formatted UUri.
 static void testRpcRequestMicroFormat() {
     uint16_t id = 42;
-    UResource uResource = UResource::forRpcRequest(id);
-    assertEquals("rpc", uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertEquals(id, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertTrue(uResource.isRPCMethod());
+    auto u_resource = UResource::forRpcRequest(id);
+    assertEquals("rpc", u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertEquals(id, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertTrue(u_resource.isRPCMethod());
 }
 
 // Test creating rpc request for micro formatted UUri without id.
 static void testRpcRequestMicroFormatWithoutId() {
-    UResource uResource = UResource::forRpcRequest(std::nullopt);
-    assertEquals("rpc", uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::forRpcRequest(std::nullopt);
+    assertEquals("rpc", u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri.
 static void testRpcRequestLongAndMicroFormat() {
-    std::string methodName = "ExecuteDoorCommand";
+    std::string method_name = "ExecuteDoorCommand";
     uint16_t id = 42;
-    UResource uResource = UResource::forRpcRequest(methodName, id);
-    assertEquals("rpc", uResource.getName());
-    assertEquals(methodName, uResource.getInstance());
-    assertTrue(uResource.getMessage().empty());
-    assertEquals(id, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertTrue(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertTrue(uResource.isRPCMethod());
+    auto u_resource = UResource::forRpcRequest(method_name, id);
+    assertEquals("rpc", u_resource.getName());
+    assertEquals(method_name, u_resource.getInstance());
+    assertTrue(u_resource.getMessage().empty());
+    assertEquals(id, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertTrue(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertTrue(u_resource.isRPCMethod());
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri without id.
 static void testRpcRequestLongAndMicroFormatWithoutId() {
-    std::string methodName = "ExecuteDoorCommand";
-    UResource uResource = UResource::forRpcRequest(methodName, std::nullopt);
-    assertEquals("rpc", uResource.getName());
-    assertEquals(methodName, uResource.getInstance());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertTrue(uResource.isRPCMethod());
+    std::string method_name = "ExecuteDoorCommand";
+    auto u_resource = UResource::forRpcRequest(method_name, std::nullopt);
+    assertEquals("rpc", u_resource.getName());
+    assertEquals(method_name, u_resource.getInstance());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertTrue(u_resource.isRPCMethod());
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri without method name.
 static void testRpcRequestLongAndMicroFormatWithoutMethodName() {
     uint16_t id = 42;
-    UResource uResource = UResource::forRpcRequest(" ", id);
-    assertEquals("rpc", uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertEquals(id, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertTrue(uResource.isRPCMethod());
+    auto u_resource = UResource::forRpcRequest(" ", id);
+    assertEquals("rpc", u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertEquals(id, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertTrue(u_resource.isRPCMethod());
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri missing values.
 static void testRpcRequestLongAndMicroFormatWithoutValues() {
-    UResource uResource = UResource::forRpcRequest("", std::nullopt);
-    assertEquals("rpc", uResource.getName());
-    assertTrue(uResource.getInstance().empty());
-    assertTrue(uResource.getMessage().empty());
-    assertFalse(uResource.getId().has_value());
-    assertTrue(uResource.isEmpty());
-    assertFalse(uResource.isResolved());
-    assertFalse(uResource.isLongForm());
-    assertFalse(uResource.isMicroForm());
-    assertFalse(uResource.isRPCMethod());
+    auto u_resource = UResource::forRpcRequest("", std::nullopt);
+    assertEquals("rpc", u_resource.getName());
+    assertTrue(u_resource.getInstance().empty());
+    assertTrue(u_resource.getMessage().empty());
+    assertFalse(u_resource.getId().has_value());
+    assertTrue(u_resource.isEmpty());
+    assertFalse(u_resource.isResolved());
+    assertFalse(u_resource.isLongForm());
+    assertFalse(u_resource.isMicroForm());
+    assertFalse(u_resource.isRPCMethod());
 }
 
 // Test creating rpc response.
 static void testRpcResponse() {
-    UResource uResource = UResource::forRpcResponse();
-    assertEquals("rpc", uResource.getName());
-    assertEquals("response", uResource.getInstance());
-    assertTrue(uResource.getMessage().empty());
-    assertEquals(0, uResource.getId().value());
-    assertFalse(uResource.isEmpty());
-    assertTrue(uResource.isResolved());
-    assertTrue(uResource.isLongForm());
-    assertTrue(uResource.isMicroForm());
-    assertTrue(uResource.isRPCMethod());
+    auto u_resource = UResource::forRpcResponse();
+    assertEquals("rpc", u_resource.getName());
+    assertEquals("response", u_resource.getInstance());
+    assertTrue(u_resource.getMessage().empty());
+    assertEquals(0, u_resource.getId().value());
+    assertFalse(u_resource.isEmpty());
+    assertTrue(u_resource.isResolved());
+    assertTrue(u_resource.isLongForm());
+    assertTrue(u_resource.isMicroForm());
+    assertTrue(u_resource.isRPCMethod());
 }
 
 Ensure(UResource, all_tests) {

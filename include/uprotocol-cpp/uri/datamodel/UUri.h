@@ -22,8 +22,8 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _UURI_H_
-#define _UURI_H_
+#ifndef UURI_H_
+#define UURI_H_
 
 #include <string>
 #include <utility>
@@ -31,6 +31,7 @@
 #include "UAuthority.h"
 #include "UEntity.h"
 #include "UResource.h"
+#include "../uprotocol-core-api/src/main/proto/uri.pb.h"
 
 namespace uprotocol::uri {
 
@@ -52,58 +53,71 @@ public:
      * @param uEntity The uEntity in the role of a service or in the role of an application is the software and version.
      * @param uResource The uResource is something that is manipulated by a service such as a Door.
      */
-    UUri(const UAuthority& uAuthority,
-         const UEntity& uEntity,
-         const UResource& uResource)
-         : uAuthority_(uAuthority), uEntity_(uEntity), uResource_(uResource) {}
-
-    /**
-     * Create a URI for a resource. This will match all the specific instances of the resource,
-     *      for example all the instances of the vehicle doors.
-     * @param uAuthority The  Authority represents the deployment location of a specific  Software Entity.
-     * @param uEntity The USE in the role of a service or in the role of an application.
-     * @param uResource The resource is something that is manipulated by a service such as a Door.
-     */
-    UUri(const UAuthority& uAuthority,
-         const UEntity& uEntity,
-         const std::string& uResource)
-         : UUri(uAuthority, uEntity, UResource::longFormat(uResource)) {}
-
+    static auto createUUri(const UAuthority& u_authority,
+                           const UEntity& u_entity,
+                           const UResource& u_resource) -> UUri {
+        return UUri(u_authority, u_entity, u_resource);
+    }
+    
+    
+    static auto createLocalUUri(const UEntity& u_entity,
+                                const std::string& u_resource) -> UUri {
+        return UUri::createUUri(UAuthority::createEmpty().value(), u_entity, UResource::longFormat(u_resource));
+    }
+    
+    static auto createLocalUUri(const UAuthority& u_authority,
+                                const UEntity& u_entity,
+                                UResource& u_resource) -> UUri {
+        return UUri::createUUri(u_authority, u_entity, u_resource);
+    }
+    
+    
+    
     /**
      * Create an RPC Response UUri passing the Authority and Entity information.
      * @param uAuthority The uAuthority represents the deployment location of a specific Software Entity.
      * @param uEntity The SW entity information.
      * @return Returns a UUri of a constructed RPC Response.
      */
-    static UUri rpcResponse(UAuthority const& UAuthority,
-                            UEntity const& UEntity) {
-        return UUri(UAuthority, UEntity, UResource::forRpcResponse());
+    static auto rpcResponse(UAuthority const& u_authority,
+                            UEntity const& u_entity) -> UUri {
+        return UUri(u_authority, u_entity, UResource::forRpcResponse());
     }
 
     /**
      * Static factory method for creating an empty  uri, to avoid working with null<br>
      * @return Returns an empty uri to avoid working with null.
      */
-    static UUri empty() {
-        static const auto EMPTY = UUri(UAuthority::empty(), UEntity::empty(), UResource::empty());
-        return EMPTY;
+    static auto createEmpty() -> UUri {
+        static const auto empty = UUri(UAuthority::createEmpty().value(), 
+                                       UEntity::empty(), 
+                                       UResource::createEmpty());
+        return empty;
     }
 
     /**
      * Indicates that this  URI is an empty container and has no valuable information in building uProtocol sinks or sources.
      * @return Returns true if this  URI is an empty container and has no valuable information in building uProtocol sinks or sources.
      */
-    [[nodiscard]] bool isEmpty() const override {
+    [[nodiscard]] auto isEmpty() const -> bool override {
         return uAuthority_.isEmpty() && uEntity_.isEmpty() && uResource_.isEmpty();
     }
-
+    
+    /**
+     * return the hash of the resource
+     * @return std::size_t hash
+     */
+    [[nodiscard]] auto getHash() const -> std::size_t override {
+        return hash_;
+    }
+    
     /**
      * Returns true if URI contains both names and numeric representations of the names inside its belly.
      * Meaning that this UUri can be serialized to long or micro formats.
      * @return Returns true if URI contains both names and numeric representations of the names inside its belly.
      *      Meaning that this UUri can buree serialized to long or micro formats.
      */
-    [[nodiscard]] bool isResolved() const override {
+    [[nodiscard]] auto isResolved() const -> bool override {
         return uAuthority_.isResolved() && uEntity_.isResolved() && uResource_.isResolved();
     }
 
@@ -111,7 +125,7 @@ public:
      * Determines if this UUri can be serialized into a long form UUri.
      * @return Returns true if this UUri can be serialized into a long form UUri.
      */
-    [[nodiscard]] bool isLongForm() const override {
+    [[nodiscard]] auto isLongForm() const -> bool override {
         return uAuthority_.isLongForm() &&
                (uEntity_.isLongForm() || uEntity_.isEmpty()) &&
                (uResource_.isLongForm() || uResource_.isEmpty());
@@ -121,31 +135,31 @@ public:
      * Determines if this UUri can be serialized into a micro form UUri.
      * @return Returns true if this UUri can be serialized into a micro form UUri.
      */
-    [[nodiscard]] bool isMicroForm() const override {
+    [[nodiscard]] auto isMicroForm() const -> bool override {
         return uAuthority_.isMicroForm() && uEntity_.isMicroForm() && uResource_.isMicroForm();
     }
 
     /**
      * @return Returns the Authority represents the deployment location of a specific Software Entity.
      */
-    [[nodiscard]] UAuthority getUAuthority() const { return uAuthority_; }
+    [[nodiscard]] auto getUAuthority() const -> UAuthority { return uAuthority_; }
 
     /**
      * @return Returns the USE in the role of a service or in the role of an application.
      */
-    [[nodiscard]] UEntity getUEntity() const { return uEntity_; }
+    [[nodiscard]] auto getUEntity() const -> UEntity { return uEntity_; }
 
     /**
      * @return Returns the  resource, something that is manipulated by a service such as a Door.
      */
-    [[nodiscard]] UResource getUResource() const { return uResource_; }
+    [[nodiscard]] auto getUResource() const -> UResource { return uResource_; }
 
     /**
      * Compares this UUri to the specified object.
      * @param o The object to compare this UUri against.
      * @return Returns true if and only if the specified object is a UUri whose components are equal to the components of this UUri.
      */
-    bool operator==(const UUri& o) const {
+    auto operator==(const UUri& o) const -> bool {
         if (this == &o) {
             return true;
         }
@@ -158,7 +172,7 @@ public:
      * Converts this UUri to a String.
      * @return Returns a string representation of this UUri.
      */
-    [[nodiscard]] std::string toString() const {
+    [[nodiscard]] auto toString() const -> std::string {
         return std::string("UriPart{") +
                            "uAuthority=" + uAuthority_.toString() +
                            ", uEntity=" + uEntity_.toString() +
@@ -166,6 +180,28 @@ public:
     }
 
 private:
+    // private constructor
+    UUri(const UAuthority& u_authority,
+         const UEntity& u_entity,
+         const UResource& u_resource)
+            : uAuthority_(u_authority), uEntity_(u_entity), uResource_(u_resource) {
+        if (!u_authority.isEmpty()) {
+            uUri_.mutable_authority()->CopyFrom(u_authority.getProtobufAuthority());
+        }
+        if (!u_entity.isEmpty()) {
+            uUri_.mutable_entity()->CopyFrom(u_entity.getProtobufEntity());
+        }
+        if (!u_resource.isEmpty()) {
+            uUri_.mutable_resource()->CopyFrom(u_resource.getProtoUresource());
+        }
+        //todo hash
+    }
+    
+    /**
+     * The underlying protobuf uri.
+     */
+    uprotocol::v1::UUri uUri_;
+    
     /**
      * UAuthority represents the deployment location of a specific Software Entity.
      */
@@ -179,8 +215,10 @@ private:
      */
     const UResource uResource_;
 
+    std::size_t hash_ = 0;
+    
 }; // class UUri
 
 }  // namespace uprotocol::uri
 
-#endif  // _UURI_H_
+#endif  // UURI_H_
