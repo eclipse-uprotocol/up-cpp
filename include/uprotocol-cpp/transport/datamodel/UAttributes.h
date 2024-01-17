@@ -32,7 +32,7 @@
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"
-#include "src/main/proto/uuid.pb.h"
+#include "uprotocol/uuid.pb.h"
 
 using namespace uprotocol::uri;
 using namespace uprotocol::v1;

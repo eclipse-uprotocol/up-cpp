@@ -28,7 +28,7 @@
 
 #include <uprotocol-cpp/uri/datamodel/UUri.h>
 #include <uprotocol-cpp/transport/datamodel/UAttributes.h>
-#include <src/main/proto/ustatus.pb.h>
+#include <uprotocol/ustatus.pb.h>
 #include "UPayload.h"
 #include "UAttributes.h"
 

@@ -46,7 +46,7 @@
 #include "spec_version.h"
 #include "UriValidator.h"
 
-#include "src/main/proto/uuid.pb.h"
+#include "uprotocol/uuid.pb.h"
 #include <uprotocol-cpp/uuid/serializer/UuidSerializer.h>
 #include <uprotocol-cpp/uuid/factory/Uuidv8Factory.h>
 
