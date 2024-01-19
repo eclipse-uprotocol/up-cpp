@@ -32,34 +32,59 @@ using AddressType = IpAddress::AddressType;
 using namespace uprotocol::uri;
 
 /**
+ * Static factory method for creating a remote authority supporting the micro serialization information representation of a UUri.<br>
+ * Building a UAuthority with this method will create an unresolved uAuthority that can only be serialised in micro UUri format.
+ * @param address The ip address of the device a software entity is deployed on.
+ * @return Returns a uAuthority that contains only the internet address of the device, and can only be serialized in micro UUri format.
+ */
+[[nodiscard]] static auto createMicroRemote(const std::string& address) -> uprotocol::v1::UAuthority {
+    if (isBlank(address)) {
+        spdlog::error("Address is blank");
+        return uprotocol::uri::BuildUAuthority().build();
+    }
+    
+    auto authority = uprotocol::uri::BuildUAuthority().setIp(address).build();
+    if (auto remote = authority.remote_case(); uprotocol::v1::UAuthority::RemoteCase::kIp == remote) {
+        return authority;
+    }
+    spdlog::error("not leagal address {}", address);
+    return uprotocol::uri::BuildUAuthority().build();
+}
+
+/**
  * Serialize a UUri into a vector<uint8_t> following the Micro-URI specifications.
  * @param uUri The UUri data object.
  * @return Returns a vector<uint8_t> representing the serialized UUri.
  */
 auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vector<uint8_t> {
-    if (isEmpty(u_uri) || !u_uri.isMicroForm()) {
+    if (isEmpty(u_uri) || !isMicroForm(u_uri)) {
         return std::vector<uint8_t>();
     }
    
 
     std::vector<uint8_t> uri;
-    auto address = u_uri.getUAuthority().getAddress();
-    auto entity_id = u_uri.getUEntity().getId().value_or(0);
-    auto entity_version = u_uri.getUEntity().getVersion().value_or(0);
-    auto resource_id = u_uri.getUResource().getId().value_or(0);
+    std::string address;
+    if (u_uri.authority().has_ip()) {
+        address = u_uri.authority().ip();
+    }
+    auto entity_id = u_uri.entity().id();
+    decltype(u_uri.entity().version_major()) version = 0;
+    if (u_uri.entity().has_version_major()) {
+        version = u_uri.entity().version_major();
+    }
+    auto resource_id = u_uri.resource().id();
 
     // UP_VERSION
-    uri.push_back(UP_VERSION);
+    uri.push_back(UpVersion);
     
-    AddressType address_type;
-    if (!address.has_value()) {
-        address_type = AddressType::Invalid;
-    } else {
-        uprotocol::uri::IpAddress ip_address(address.value());
+    AddressType address_type = AddressType::Invalid;
+    if (!address.empty()) {
+        uprotocol::uri::IpAddress ip_address(address);
         if (address_type = ip_address.getType(); address_type == AddressType::Invalid) {
             return std::vector<uint8_t>();
-        } 
-    }
+        }
+    } 
+    
     uri.push_back(static_cast<uint8_t>(address_type));
 
     // URESOURCE_ID
@@ -71,22 +96,50 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
     uri.push_back(static_cast<uint8_t>(entity_id & 0xFF)); // 8 lsb bits
     
     // UENTITY_VERSION
-    uri.push_back(entity_version);
+    auto version_string = std::to_string(version);
+    uri.push_back(version_string.empty() ? 0 : static_cast<unsigned char>(std::stoi(version_string)));
     
     // UNUSED
     uri.push_back(0);
     
     // UAUTORITY_ADDRESS
-    if (!address.has_value()) {
+    if (address.empty()) {
         return uri;
     }
     
-    // if it is not local, then it is a remote address with IP
-    uprotocol::uri::IpAddress ip_address(address.value());
+    // not local, then it is a remote address with IP
+    uprotocol::uri::IpAddress ip_address(address);
     std::vector<uint8_t> ip = ip_address.getBytes();
     uri.insert(uri.end(), ip.begin(), ip.end());
 
     return uri;
+}
+
+
+auto printIp(std::vector<uint8_t> ip) {
+    std::string s;
+    if (ip.empty()) {
+        spdlog::info("Serialized IP is empty");
+        return;
+    }
+    for (decltype(ip.size()) i = 0; i < ip.size(); i++) {
+        s += std::to_string(ip[i]) + " ";
+    }
+    spdlog::info("Serialized IP: {}", s);
+}
+ 
+auto MicroUriSerializer::getAddressType(uint8_t type) -> std::optional<AddressType> {
+//    auto address_type = AddressType::Invalid;
+    switch (static_cast<AddressType>(type)) {
+        case AddressType::IpV4:
+        case AddressType::IpV6:
+        case AddressType::Local:
+        case AddressType::Invalid:
+            return static_cast<AddressType>(type);
+        default:
+            spdlog::error("micro uri address type is not supported");
+            return std::nullopt;
+    }
 }
 
 /**
@@ -94,54 +147,71 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
  * @param microUri A vector<uint8_t> uProtocol micro URI.
  * @return Returns an UUri data object from the serialized format of a microUri.
  */
-auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> std::optional<uprotocol::v1::UUri> {
-    if (micro_uri.empty() || micro_uri.size() < LOCAL_MICRO_URI_LENGTH) {
-        return UUri::createEmpty();
+auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> uprotocol::v1::UUri {
+    if (micro_uri.empty() || micro_uri.size() < LocalMicroUriLength) {
+        return BuildUUri().build();
     }
-
-    if (micro_uri[0] != UP_VERSION) {
-    return UUri::createEmpty();
+    
+    switch (micro_uri.size()) {
+        case LocalMicroUriLength:
+        case IpV4MicroUriLength:
+        case IpV6MicroUriLength:
+            break;
+        default: {
+            spdlog::error("micro uri length : {} is not supported", micro_uri.size());
+            return BuildUUri().build();
+        }
+    }
+ 
+    if (micro_uri[0] != UpVersion) {
+        spdlog::error("micro uri version is not Valid : {}", micro_uri[0]);
+        return BuildUUri().build();
     }
 
     // IPADDRESS_TYPE
-    auto address_type = static_cast<AddressType>(micro_uri[1]);
+    auto address_type = getAddressType(micro_uri[1]);
+    if (!address_type) {
+        return BuildUUri().build();
+    }
 
     // UAUTORITY_ADDRESS
-     auto position = IPADDRESS_START_POSITION;
-    std::vector<uint8_t> ip(micro_uri.begin() + IPADDRESS_START_POSITION, micro_uri.end());
-    IpAddress ip_address(ip, address_type);
+    std::vector<uint8_t> ip(micro_uri.begin() + IpaddressStartPosition, micro_uri.end());
+    if (ip.empty()) {
+        spdlog::error("micro uri address is empty");
+    }
     
-    auto get_u_authority = [&]()  {
-        if (address_type == AddressType::Local) {
-            return UAuthority::createLocal();
-        } else if (address_type == AddressType::IpV4) {
-            return UAuthority::createMicroRemote(ip_address.getString());
-        } else if (address_type == AddressType::IpV6) {
-            return UAuthority::createMicroRemote(ip_address.getString());
-        } else {
-            return UAuthority::createEmpty();
+    auto get_u_authority = [](const std::vector<uint8_t> &ip1, AddressType type)  {
+        switch (type) {
+            case AddressType::IpV4:
+            case AddressType::IpV6: {
+                IpAddress ip_address(ip1, type);
+                return createMicroRemote(ip_address.getString());
+            }
+            //case AddressType::Local:
+            default:
+                return BuildUAuthority().build();
         }
     };
     
-    auto u_authority = get_u_authority();
+    auto u_authority = get_u_authority(ip, address_type.value());
 
     // UENTITY_ID
-    auto entity_id = (static_cast<uint16_t>(micro_uri[position]) << 8) | micro_uri[position + 1];
+    auto entity_id = (static_cast<uint16_t>(micro_uri[EntityIdStartPosition]) << 8) | micro_uri[EntityIdStartPosition + 1];
 
     // UE_VERSION
-    uint8_t version = micro_uri[position + 2];
-    std::optional<uint8_t> entity_version = (version == 0) ? std::nullopt : std::optional<int8_t>(version);
-
+    uint8_t major_version = micro_uri[UeVersionPosition];
     // URESOURCE_ID
-    auto resource_id = (static_cast<uint16_t>(micro_uri[2]) << 8) | (micro_uri[3]);
+    auto resource_id = (static_cast<uint16_t>(micro_uri[ResourceIdPosition]) << 8) | (micro_uri[ResourceIdPosition + 1]);
     
-    if (!u_authority.has_value()) {
-        return UUri::createUUri(UAuthority::createEmpty().value(),
-                                UEntity::microFormat(entity_id, entity_version), 
-                                UResource::microFormat(resource_id));
-    }
-
-    return UUri::createUUri(u_authority.value(),
-                            UEntity::microFormat(entity_id, entity_version), 
-                            UResource::microFormat(resource_id));
+    return BuildUUri().setAutority(u_authority).
+                       setEntity(BuildUEntity().
+                                 setId(entity_id).
+                                 setMajorVersion(major_version).
+                                 build()).
+                       setResource(BuildUResource().
+                                   setID(resource_id).
+                                   build()).
+                       build();
 }
+
+

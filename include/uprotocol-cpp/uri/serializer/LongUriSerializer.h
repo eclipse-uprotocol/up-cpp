@@ -25,15 +25,10 @@
 #ifndef LONG_URI_SERIALIZER_H_
 #define LONG_URI_SERIALIZER_H_
 
-//#include <uprotocol-cpp/uri/datamodel/UUri.h>
-//#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
-//#include <uprotocol-cpp/uri/datamodel/UEntity.h>
-//#include <uprotocol-cpp/uri/datamodel/UResource.h>
 #include <uprotocol-cpp/uri/builder/BuildUResource.h>
 #include <uprotocol-cpp/uri/builder/BuildEntity.h>
 #include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
 #include <uprotocol-cpp/uri/builder/BuildUUri.h>
-#include "../tools/Utils.h"
 #include "../uprotocol-core-api/src/main/proto/uri.pb.h"
 #include <string_view>
 

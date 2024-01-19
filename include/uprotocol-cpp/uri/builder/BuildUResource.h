@@ -46,31 +46,67 @@ namespace uprotocol::uri {
 
     public:
         BuildUResource() { resource_.Clear();}
+        
         auto setName(const std::string &name) -> BuildUResource & {
-            resource_.set_name(name);
+            if (isBlank(name)) {
+                spdlog::error("UResource name cannot be empty");
+            } else {
+                resource_.set_name(name);
+            }
             return *this;
         }
+        
         auto setInstance(const std::string &instance) -> BuildUResource & {
-            resource_.set_instance(instance);
+            if (isBlank(instance)) {
+                spdlog::error("UResource instance cannot be empty");
+            } else {
+                resource_.set_instance(instance);
+            }
             return *this;
         }
         auto setMessage(const std::string &message) -> BuildUResource & {
-            resource_.set_message(message);
+            if (isBlank(message)) {
+                spdlog::error("UResource message cannot be empty");
+            } else {
+                resource_.set_message(message);
+            }
             return *this;
         }
         auto setID(const uint32_t &id) -> BuildUResource & {
-            resource_.set_id(id);
+            if (0 == id) {
+                spdlog::error("UResource id cannot be 0");
+            } else {
+                resource_.set_id(id);
+            }
             return *this;
         }
     
         auto setRpcRequest(const std::string &method) -> BuildUResource & {
-            resource_.set_name("rpc");
-            resource_.set_instance(method);
+            if (isBlank(method)) {
+                spdlog::error("UResource method cannot be empty");
+            } else {
+                resource_.set_name("rpc");
+                resource_.set_instance(method);
+            }
+            return *this;
+        }
+        auto setRpcRequest(const std::string &method, uint32_t id) -> BuildUResource & {
+            if (isBlank(method) || 0 == id) {
+                spdlog::error("UResource method cannot be empty");
+            } else {
+                setName("rpc");
+                setInstance(method);
+                setID(id);
+            }
             return *this;
         }
         auto setRpcRequest(const uint32_t id) -> BuildUResource & {
-            resource_.set_name("rpc");
-            resource_.set_id(id);
+            if (0 == id) {
+                spdlog::error("UResource id cannot be 0");
+            } else {
+                setName("rpc");
+                setID(id);
+            }
             return *this;
         }
         auto setRpcResponse() -> BuildUResource & {
@@ -84,5 +120,9 @@ namespace uprotocol::uri {
             return resource_;
         }
     };
+    
+    [[nodiscard]] [[maybe_unused]] auto static isRPCMethod(const uprotocol::v1::UResource &resource) -> bool {
+        return resource.name() == "rpc";
+    }
 }  // namespace uprotocol::uri
 #endif //UPROTOCOL_CPP_BUILDURESOURCE_H

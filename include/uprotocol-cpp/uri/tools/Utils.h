@@ -28,6 +28,7 @@
 
 #ifndef UPROTOCOL_CPP_UTILS_H
 #define UPROTOCOL_CPP_UTILS_H
+
 #include <algorithm>
 #include <cctype>
 #include <optional>
@@ -36,38 +37,40 @@
 #include <string_view>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
+
 #include "../uprotocol-core-api/src/main/proto/uri.pb.h"
+namespace uprotocol::uri {
 
 /**
  *  
  * @param str 
  * @return 
  */
-[[nodiscard]] static auto isBlank(std::string_view str) -> bool {
-    return std::all_of(str.begin(), str.end(), [](char ch) { return std::isspace(ch); });
-}
+    [[nodiscard]] [[maybe_unused]] static auto isBlank(std::string_view str) -> bool {
+        return std::all_of(str.begin(), str.end(), [](char ch) { return std::isspace(ch); });
+    }
 
 /**
  * 
  * @param entity 
  * @return 
  */
-[[nodiscard]] static auto isEmpty(uprotocol::v1::UEntity const &entity) -> bool {
-    return entity.name().empty() && !entity.has_version_major() && !entity.has_id();
-}
+    [[nodiscard]] [[maybe_unused]] static auto isEmpty(uprotocol::v1::UEntity const &entity) -> bool {
+        return entity.name().empty() && !entity.has_version_major() && !entity.has_id();
+    }
 
 /**
  * 
  * @param resource 
  * @return 
  */
-[[nodiscard]] static auto isEmpty(uprotocol::v1::UResource const &resource) -> bool {
-    auto const& name = resource.name();
-    return (name.empty() || "rpc" == name) &&
-           resource.instance().empty() && 
-           resource.message().empty() && 
-           !resource.has_id();
-}
+    [[nodiscard]] [[maybe_unused]] static auto isEmpty(uprotocol::v1::UResource const &resource) -> bool {
+        auto const &name = resource.name();
+        return (name.empty() || "rpc" == name) &&
+                (!resource.has_instance() || resource.instance().empty()) &&
+                (!resource.has_message() || resource.message().empty()) &&
+                (!resource.has_id() || resource.id() == 0);
+    }
 
 
 /**
@@ -75,96 +78,125 @@
  * @param authority 
  * @return 
  */
-[[nodiscard]] static auto isEmpty(uprotocol::v1::UAuthority const &authority) -> bool {
-    switch (authority.remote_case()) {
-        case uprotocol::v1::UAuthority::RemoteCase::kIp:
-            return authority.ip().empty();
-         case uprotocol::v1::UAuthority::RemoteCase::kName:
-            return authority.name().empty();
-        case uprotocol::v1::UAuthority::RemoteCase::kId:
-            return authority.id().empty();
-        default:
-            return true;
+    [[nodiscard]] [[maybe_unused]] static auto isEmpty(uprotocol::v1::UAuthority const &authority) -> bool {
+        switch (authority.remote_case()) {
+            case uprotocol::v1::UAuthority::RemoteCase::kIp:
+                return authority.ip().empty();
+            case uprotocol::v1::UAuthority::RemoteCase::kName:
+                return authority.name().empty();
+            case uprotocol::v1::UAuthority::RemoteCase::kId:
+                return authority.id().empty();
+            default:
+                return true;
+        }
     }
-}
-
-[[nodiscard]] static auto isEmpty(uprotocol::v1::UUri const &uri) -> bool {
-    return isEmpty(uri.authority()) && isEmpty(uri.resource()) && isEmpty(uri.entity());
-}
-
-
-[[nodiscard]] [[maybe_unused]] auto static isResolved([[maybe_unused]] uprotocol::v1::UUri const &uri) -> bool {
-    return false;
-}
-
-[[nodiscard]] [[maybe_unused]] auto static isResolved([[maybe_unused]] uprotocol::v1::UAuthority const &authority) -> bool {
-    return false;
-}
-
-[[nodiscard]] [[maybe_unused]] auto static isResolved(uprotocol::v1::UEntity const &entity) -> bool {
-    return !isBlank(entity.name()) && entity.has_id() && 0 != entity.id();
-}
-
-[[nodiscard]] [[maybe_unused]] auto static isResolved(uprotocol::v1::UResource const &resource) -> bool {
-    return !isBlank(resource.name()) && resource.has_id() && 0 != resource.id();
-}
-
-[[nodiscard]] [[maybe_unused]] auto static operator==(const uprotocol::v1::UAuthority& s, const uprotocol::v1::UAuthority& o)  -> bool {
-    if (s.remote_case() != o.remote_case()) {
+    
+    [[nodiscard]] [[maybe_unused]] static auto isEmpty(uprotocol::v1::UUri const &uri) -> bool {
+        return isEmpty(uri.authority()) && isEmpty(uri.resource()) && isEmpty(uri.entity());
+    }
+    
+    
+    [[nodiscard]] [[maybe_unused]] auto static isResolved([[maybe_unused]] uprotocol::v1::UUri const &uri) -> bool {
         return false;
     }
-    switch (s.remote_case()) {
-        case uprotocol::v1::UAuthority::RemoteCase::kIp:
-            return s.ip() == o.ip();
-        case uprotocol::v1::UAuthority::RemoteCase::kName:
-            return s.name() == o.name();
-        case uprotocol::v1::UAuthority::RemoteCase::kId:
-            return s.id() == o.id();
-        default:
-            return true;
+    
+    [[nodiscard]] [[maybe_unused]] auto static
+    isResolved([[maybe_unused]] uprotocol::v1::UAuthority const &authority) -> bool {
+        return false;
     }
-}
-
-[[nodiscard]] [[maybe_unused]] auto static operator==(const uprotocol::v1::UEntity& s, const uprotocol::v1::UEntity& o)  -> bool {
-    return s.name() == o.name() && // same name
-            (s.has_version_major() && o.has_version_major() ? // if exists must be same major
-                    s.version_major() == o.version_major() : true) && // if not exists, ok
-            (s.has_version_minor() && o.has_version_minor() ? s.version_minor() == o.version_minor() : true);
-}
-
-[[nodiscard]] [[maybe_unused]] auto static operator==(const uprotocol::v1::UResource& s, const uprotocol::v1::UResource& o)  -> bool {
-    return s.name() == o.name() && // same name
-            (s.has_instance() && o.has_instance() ? s.instance() == o.instance() : true) && // if exists must be same instance
-            (s.has_message() && o.has_message() ? s.message() == o.message() : true); // if exists must be same message
-}
-
-
-[[nodiscard]] [[maybe_unused]] auto static operator==(const uprotocol::v1::UUri& s, const uprotocol::v1::UUri& o)  -> bool {
-    return (s.has_authority() && o.has_authority() && (s.authority() == o.authority()) &&
-            s.has_entity() && o.has_entity() && (s.entity() == o.entity()) &&
-            s.has_resource() && o.has_resource() && (s.resource() == o.resource()));
-}
-
-[[nodiscard]] [[maybe_unused]] static auto isLongForm(const uprotocol::v1::UAuthority& authority) -> bool  {
-    return isEmpty(authority) || (authority.has_ip() && authority.ip().empty()) || (authority.has_name() && !authority.name().empty()) || !authority.has_id();
-}
-
-[[nodiscard]] [[maybe_unused]] static auto isLongForm(const uprotocol::v1::UEntity& entity) -> bool  {
-    return !isBlank(entity.name()) || (entity.has_version_major() && entity.version_major() > 0);
-}
-
-[[nodiscard]] [[maybe_unused]] static auto isLongForm(const uprotocol::v1::UResource& resource) -> bool  {
-    return (resource.name() == std::string("rpc") && !resource.instance().empty()) || !isBlank(resource.name());
-}
-
-[[nodiscard]] [[maybe_unused]] static auto isLongForm(const uprotocol::v1::UUri& uri) -> bool  {
-    return isLongForm(uri.authority()) &&
-           (isLongForm(uri.entity()) || isEmpty(uri.entity())) &&
-           (isLongForm(uri.resource()) || isEmpty(uri.resource()));
-}
-
-
-
-
+    
+    [[nodiscard]] [[maybe_unused]] auto static isResolved(uprotocol::v1::UEntity const &entity) -> bool {
+        return !isBlank(entity.name()) && entity.has_id() && 0 != entity.id();
+    }
+    
+    [[nodiscard]] [[maybe_unused]] auto static isResolved(uprotocol::v1::UResource const &resource) -> bool {
+        if (!isBlank(resource.name())) {
+            if ("rpc" == resource.name()) {
+                return !isBlank(resource.instance()) && resource.has_id() && 0 != resource.id();
+            } else {
+                return resource.has_id() && 0 != resource.id();
+            }
+        }
+        return false; 
+        //!isBlank(resource.name()) && ("rpc" == resource.name() ? !isBlank(resource.instance()) : true) && resource.has_id() && 0 != resource.id();
+    }
+    
+    [[nodiscard]] [[maybe_unused]] auto static isLocal(uprotocol::v1::UAuthority const &authority) -> bool {
+        return uprotocol::v1::UAuthority::RemoteCase::REMOTE_NOT_SET == authority.remote_case();
+    }
+    [[nodiscard]] [[maybe_unused]] auto static isRemote(uprotocol::v1::UAuthority const &authority) -> bool {
+        return uprotocol::v1::UAuthority::RemoteCase::REMOTE_NOT_SET != authority.remote_case();
+    }
+    
+    
+    [[nodiscard]] [[maybe_unused]] auto static
+    operator==(const uprotocol::v1::UAuthority &s, const uprotocol::v1::UAuthority &o) -> bool {
+        if (s.remote_case() != o.remote_case()) {
+            return false;
+        }
+        switch (s.remote_case()) {
+            case uprotocol::v1::UAuthority::RemoteCase::kIp:
+                return s.ip() == o.ip();
+            case uprotocol::v1::UAuthority::RemoteCase::kName:
+                return s.name() == o.name();
+            case uprotocol::v1::UAuthority::RemoteCase::kId:
+                return s.id() == o.id();
+            default:
+                return true;
+        }
+    }
+    
+    [[nodiscard]] [[maybe_unused]] auto static
+    operator==(const uprotocol::v1::UEntity &s, const uprotocol::v1::UEntity &o) -> bool {
+        return s.name() == o.name() && // same name
+               (s.has_version_major() && o.has_version_major() ? // if exists must be same major
+                s.version_major() == o.version_major() : true) && // if not exists, ok
+               (s.has_version_minor() && o.has_version_minor() ? s.version_minor() == o.version_minor() : true);
+    }
+    
+    [[nodiscard]] [[maybe_unused]] auto static
+    operator==(const uprotocol::v1::UResource &s, const uprotocol::v1::UResource &o) -> bool {
+        return s.name() == o.name() && // same name
+               (s.has_instance() && o.has_instance() ? s.instance() == o.instance() : true) &&
+               // if exists must be same instance
+               (s.has_message() && o.has_message() ? s.message() == o.message()
+                                                   : true); // if exists must be same message
+    }
+    
+    
+    [[nodiscard]] [[maybe_unused]] auto static
+    operator==(const uprotocol::v1::UUri &s, const uprotocol::v1::UUri &o) -> bool {
+        return (s.authority() == o.authority() &&
+                s.entity() == o.entity() &&
+                s.resource() == o.resource());
+    }
+    
+    [[nodiscard]] [[maybe_unused]] static auto isLongForm(const uprotocol::v1::UAuthority &authority) -> bool {
+//        return isEmpty(authority) || (authority.has_ip() && authority.ip().empty()) ||
+//               (authority.has_name() && !authority.name().empty()) || !authority.has_id();
+        return isEmpty(authority) || (authority.has_name() && !authority.name().empty()); // || !authority.has_id();
+    }
+    
+    [[nodiscard]] [[maybe_unused]] static auto isLongForm(const uprotocol::v1::UEntity &entity) -> bool {
+        return !isBlank(entity.name()); //|| (entity.has_version_major() && entity.version_major() > 0);
+    }
+    
+    [[nodiscard]] [[maybe_unused]] static auto isLongForm(const uprotocol::v1::UResource &resource) -> bool {
+        if (resource.name() == std::string("rpc") && !resource.instance().empty()) {
+            return true;
+        } else {
+            return !resource.name().empty()  && resource.name() != std::string("rpc");
+        }
+     }
+    
+    [[nodiscard]] [[maybe_unused]] static auto isLongForm(const uprotocol::v1::UUri &uri) -> bool {
+        return isLongForm(uri.authority()) &&
+               (isLongForm(uri.entity()) || isEmpty(uri.entity())) &&
+               (isLongForm(uri.resource()) || isEmpty(uri.resource()));
+    }
+    
+    
+    
+};
 
 #endif //UPROTOCOL_CPP_UTILS_H

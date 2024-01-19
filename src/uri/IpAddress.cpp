@@ -33,17 +33,16 @@ using namespace uprotocol::uri;
  * Updates the byte format of IP address and type, from the string format.
  */
 void IpAddress::toBytes() {
-    std::array<uint8_t, IpAddress::IPV6_ADDRESS_BYTES> bytes = {0};
+    std::array<uint8_t, IpAddress::IpV6AddressBytes> bytes = {0};
     auto length = 0;
-
     if (ipString_.empty()) {
         type_ = AddressType::Local;
-    } else if (1 == inet_pton(AF_INET, ipString_.data(), &bytes)) {
+    } else if (1 == inet_pton(AF_INET, ipString_.c_str(), &bytes)) {
         type_ = AddressType::IpV4;
-        length = IpAddress::IPV4_ADDRESS_BYTES;
-    } else if (1 == inet_pton(AF_INET6, ipString_.data(), &bytes)) {
+        length = IpAddress::IpV4AddressBytes;
+    } else if (1 == inet_pton(AF_INET6, ipString_.c_str(), &bytes)) {
         type_ = AddressType::IpV6;
-        length = IpAddress::IPV6_ADDRESS_BYTES;
+        length = IpAddress::IpV6AddressBytes;
     } else {
         type_ = AddressType::Invalid;
     }
@@ -58,13 +57,16 @@ void IpAddress::toBytes() {
  */
 void IpAddress::toString() {
     if (!ipBytes_.empty()) {
+         
+        char ip_char[INET6_ADDRSTRLEN + 1];
         
-        ipString_.reserve(INET6_ADDRSTRLEN + 1);
-
         auto inet_type = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
 
-        if (inet_ntop(inet_type, ipBytes_.data(), ipString_.data(), INET6_ADDRSTRLEN) == nullptr) {
+        if (inet_ntop(inet_type, ipBytes_.data(), ip_char, INET6_ADDRSTRLEN) == nullptr) {
             spdlog::error("inet_ntop failed");
+        }
+        else {
+            ipString_ = ip_char;
         }
     } else {
         spdlog::error("ipBytes is empty");

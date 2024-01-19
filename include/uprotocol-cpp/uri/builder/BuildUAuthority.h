@@ -51,7 +51,15 @@ namespace uprotocol::uri {
                 spdlog::error("UAutority already has a remote set. Ignoring setName()");
                 return *this;
             }
-            authority_.set_name(name);
+            if (isBlank(name)) {
+                spdlog::error("UAutority name is blank. Ignoring setName()");
+                return *this;
+            } else {
+                auto tmp  = name;
+                std::transform(tmp.begin(), tmp.end(), tmp.begin(),
+                               [](unsigned char c) { return std::tolower(c); });
+                authority_.set_name(std::move(tmp));
+            }
             return *this;
         }
 
@@ -65,13 +73,13 @@ namespace uprotocol::uri {
                 return *this;
             }
             if (isBlank(device)) {
-                authority_.set_name(domain);
+                setName(domain);
                 return *this;
             } else if (isBlank(domain)) {
-                authority_.set_name(device);
+                setName(device);
                 return *this;
             }
-            authority_.set_name(device + "." + domain);
+            setName(device + "." + domain);
             return *this;
         }
     
@@ -91,10 +99,16 @@ namespace uprotocol::uri {
                               INET6_ADDRSTRLEN) != nullptr) {
                     authority_.set_ip(ip_char);
                 }
-            } else if (struct in_addr ipv4{};
-                    (inet_pton(AF_INET, m_address.c_str(), &ipv4) == 1) &&
-                    (inet_ntop(AF_INET, &ipv4, ip_char, INET_ADDRSTRLEN) != nullptr)) {
+            } else if (struct in_addr ipv4{}; (inet_pton(AF_INET, m_address.c_str(), &ipv4) == 1)) {
+                if (inet_ntop(AF_INET, &ipv4, ip_char, INET_ADDRSTRLEN) != nullptr) {
                     authority_.set_ip(ip_char);
+                } else {
+                    spdlog::error<std::string_view>("UAutority address is not a valid IP address. Ignoring setIp()");
+                    return *this;
+                }
+    
+            } else {
+                spdlog::error<std::string_view>("UAutority address is not a valid IP address. Ignoring setIp()");
             }
             
             return *this;

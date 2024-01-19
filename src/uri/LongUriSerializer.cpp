@@ -31,7 +31,6 @@
 #include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
 #include <uprotocol-cpp/uri/builder/BuildEntity.h>
 #include <uprotocol-cpp/uri/builder/BuildUResource.h>
-#include "uprotocol-cpp/uri/tools/Utils.h"
 #include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
 
 //using namespace uprotocol::uri;
@@ -67,7 +66,6 @@ auto uprotocol::uri::LongUriSerializer::serialize(const v1::UUri& u_uri) -> std:
  * @return Returns an UUri data object.
  */
 auto uprotocol::uri::LongUriSerializer::deserialize(std::string const& u_protocol_uri) -> v1::UUri {
-    std::cout << std::endl << __func__ << " : " << __LINE__ << " " << u_protocol_uri << std::endl;
     if (u_protocol_uri.empty()) {
         return BuildUUri().build();
     }
@@ -84,19 +82,17 @@ auto uprotocol::uri::LongUriSerializer::deserialize(std::string const& u_protoco
 
     constexpr auto MinimumParts = 2;
 
-//    std::cout << "uri_parts : " << uri_parts.size() << std::endl;
-//    for (uint64_t i = 0; i < uri_parts.size(); i++) {
-//        std::cout << "uri_parts[" << i << "] : " << uri_parts[i] << std::endl;
-//    }
     decltype(uri_parts.size()) j = 0;
     for (decltype(uri_parts.size()) i = 0; i < uri_parts.size(); i++) {
         if (uri_parts[i].empty()) {
             ++j;
-            if (j == (i - 1) && 4 == j) {
-                return BuildUUri().build();
-            }
+        } else {
+            break;
         }
     }
+     if (j > 3) {
+         return BuildUUri().build();
+     }
     if (uri_parts.size() < MinimumParts) {
         return BuildUUri().build();
     } else if (is_local) {
@@ -229,7 +225,7 @@ auto uprotocol::uri::LongUriSerializer::parseUResource(const std::string& resour
  * @return Returns a UEntity object.
  */
 auto uprotocol::uri::LongUriSerializer::parseUEntity(const std::string &entity, const std::string &version) -> v1::UEntity {
-    if (0 == version.length() || 0 == entity.length()) {
+    if (0 == entity.length()) {
         return BuildUEntity().build();
     }
     
@@ -288,20 +284,29 @@ auto uprotocol::uri::LongUriSerializer::parseRemoteUUri(const std::vector<std::s
     if (number_of_parts_in_uri < 3) {
         return BuildUUri().build();
     }
-    auto authority_parts = split(uri_parts[2], ".");
+    uint64_t i = 0;
+    for (; i < number_of_parts_in_uri; i++) {
+        if (!uri_parts[i].empty()) {
+            break;
+        }
+    }
+    if (number_of_parts_in_uri <= i) {
+        return BuildUUri().build();
+    }
+    auto authority_parts = split(uri_parts[i], ".");
     std::string device = authority_parts[0];
     std::string domain;
     if (authority_parts.size() > 1) {
         domain = authority_parts[1];
     }
     auto u_authority = BuildUAuthority().setName(device, domain).build();
-    if (!isEmpty(u_authority)) {
+    if (isEmpty(u_authority)) {
         return BuildUUri().build();
     }
     
     if (uri_parts.size() > 3) {
         std::string version;
-        entity_name = uri_parts[3];
+        entity_name = uri_parts[++i];
         if (number_of_parts_in_uri > 4) {
             version = uri_parts[4];
         }

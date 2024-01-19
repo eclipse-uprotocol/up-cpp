@@ -46,20 +46,32 @@ namespace uprotocol::uri {
     
     public:
         BuildUEntity() { entity_.Clear();}
+        
         auto setName(const std::string &name) -> BuildUEntity & {
-            entity_.set_name(name);
+            if (isBlank(name)) {
+                spdlog::error("UEntity name cannot be empty or blanks");
+            } else {
+                entity_.set_name(name);
+            }
             return *this;
         }
         auto setId(const uint32_t &id) -> BuildUEntity & {
+            if (0 == id || entity_.has_id()) {
+                return *this;
+            }
             entity_.set_id(id);
             return *this;
         }
+        
         auto setVersion(const std::string &version) -> BuildUEntity & {
             if (version.empty()) {
                 return *this;
             }
             if (auto res = version.find('.'); res == std::string::npos) {
                 auto ver = std::stoi(version);
+                if (ver <= 0) {
+                    return *this;
+                }
                 entity_.set_version_major(ver);
             } else {
                 auto ver = std::stoi(version.substr(0, res));
@@ -67,6 +79,16 @@ namespace uprotocol::uri {
                 ver = std::stoi(version.substr(res + 1));
                 entity_.set_version_minor(ver);
             }
+            return *this;
+        }
+        
+        auto setMajorVersion(const uint32_t &majorVersion) -> BuildUEntity & {
+            entity_.set_version_major(majorVersion);
+            return *this;
+        }
+        
+        auto setMinorVersion(const uint32_t &minorVersion) -> BuildUEntity & {
+            entity_.set_version_minor(minorVersion);
             return *this;
         }
         

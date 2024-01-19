@@ -78,22 +78,22 @@ target_link_libraries(service_type_test ${CGREEN_LIBRARY} uprotocol-cpp)
 add_test("t-08-service-type-test" service_type_test)
 
 add_executable(UAuthorityTest
-	${TESTS_PATH}/uri/datamodel/UAuthorityTest.cpp)
+	${TESTS_PATH}/uri/builder/UAuthorityTest.cpp)
 target_link_libraries(UAuthorityTest ${CGREEN_LIBRARY} uprotocol-cpp)
 add_test("t-09-UAuthorityTest" UAuthorityTest)
 
 add_executable(UEntityTest
-		${TESTS_PATH}/uri/datamodel/UEntityTest.cpp)
+		${TESTS_PATH}/uri/builder/UEntityTest.cpp)
 target_link_libraries(UEntityTest ${CGREEN_LIBRARY} uprotocol-cpp)
 add_test("t-10-UEntityTest" UEntityTest)
 
 add_executable(UResourceTest
-	${TESTS_PATH}/uri/datamodel/UResourceTest.cpp)
+	${TESTS_PATH}/uri/builder/UResourceTest.cpp)
 target_link_libraries(UResourceTest ${CGREEN_LIBRARY} uprotocol-cpp)
 add_test("t-11-UResourceTest" UResourceTest)
 
 add_executable(UUriTest
-	${TESTS_PATH}/uri/datamodel/UUriTest.cpp)
+	${TESTS_PATH}/uri/builder/UUriTest.cpp)
 target_link_libraries(UUriTest ${CGREEN_LIBRARY} uprotocol-cpp)
 add_test("t-12-UUriTest" UUriTest)
 

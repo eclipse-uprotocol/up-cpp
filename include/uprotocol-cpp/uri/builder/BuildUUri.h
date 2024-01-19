@@ -84,6 +84,12 @@ namespace uprotocol::uri {
             return uri_;
         }
     };
+    
+    [[nodiscard]] [[maybe_unused]] auto static isRPCMethod(const uprotocol::v1::UUri &uri) -> bool {
+        return uri.resource().name() == "rpc";
+    }
+    
+    
 }  // namespace uprotocol::uri
 
 #endif //UPROTOCOL_CPP_BUILDUURI_H

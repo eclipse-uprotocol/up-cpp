@@ -22,9 +22,10 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _IP_ADDRESS_H_
-#define _IP_ADDRESS_H_
+#ifndef IP_ADDRESS_H_
+#define IP_ADDRESS_H_
 
+#include <iostream> 
 namespace uprotocol::uri {
 
 /**
@@ -53,33 +54,37 @@ public:
     /**
      * Constructor with IP address in byte format.
      */
-    IpAddress(std::vector<uint8_t> const& ipBytes, AddressType type) : type_(type), ipBytes_(ipBytes)  {
+    IpAddress(std::vector<uint8_t> const& ipBytes, AddressType type) : type_(type) , ipBytes_(ipBytes) {
+//        for (unsigned char ipByte : ipBytes) {
+//            ipBytes_.push_back(ipByte);
+//        }
         toString();
+
     }
 
     /**
      * Get the type of IP address.
      */
-    AddressType getType() const { return type_; }
+    auto getType() const { return type_; }
 
     /**
      * Get the string format of IP address.
      */
-    std::string getString() const { return ipString_; }
+    auto getString() const { return ipString_; }
 
     /**
      * Get the byte format of IP address.
      */
-    std::vector<uint8_t> getBytes() const { return ipBytes_; }
+    auto getBytes() const { return ipBytes_; }  
 
     /**
      * Number of bytes in IPv4 address.
      */
-    static constexpr uint8_t IPV4_ADDRESS_BYTES = 4;
+    static constexpr uint8_t IpV4AddressBytes = 4;
     /**
      * Number of bytes in IPv6 address.
      */
-    static constexpr uint8_t IPV6_ADDRESS_BYTES = 16;
+    static constexpr uint8_t IpV6AddressBytes = 16;
 
 private:
     /**
@@ -103,10 +108,10 @@ private:
     /**
      * IP address in string format.
      */
-    std::string ipString_ = "";
+    std::string ipString_;
 
 }; // class IpAddress
 
 } // namespace uprotocol::uri
 
-#endif // _IP_ADDRESS_H_
+#endif // IP_ADDRESS_H_

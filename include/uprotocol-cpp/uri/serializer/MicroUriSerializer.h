@@ -29,7 +29,9 @@
 #include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
 #include <uprotocol-cpp/uri/builder/BuildEntity.h>
 #include <uprotocol-cpp/uri/builder/BuildUResource.h>
-#include "uprotocol-cpp/uri/tools/Utils.h"
+#include "uprotocol-cpp/uri/serializer/IpAddress.h"
+
+using AddressType = uprotocol::uri::IpAddress::AddressType;
 
 namespace uprotocol::uri {
 
@@ -51,36 +53,70 @@ public:
      * @param microUri A vector<uint8_t> uProtocol micro URI.
      * @return Returns an UUri data object from the serialized format of a microUri.
      */
-    static auto deserialize(std::vector<uint8_t> const& micro_uri) -> std::optional<uprotocol::v1::UUri>;
+    static auto deserialize(std::vector<uint8_t> const& micro_uri) -> uprotocol::v1::UUri;
 
 private:
     /**
      * Default MicroUriSerializer constructor.
      */
     MicroUriSerializer() = default;
-
-    /**
-     * The length of a local micro URI.
-     */
-    static constexpr uint32_t LOCAL_MICRO_URI_LENGTH = 8;
+    
+    static auto getAddressType(uint8_t type) -> std::optional<AddressType>;
+        
+        /**
+         * The length of a local micro URI.
+         */
+    static constexpr uint32_t LocalMicroUriLength = 8;
     /**
      * The length of a IPv4 micro URI.
      */
-    static constexpr uint32_t IPV4_MICRO_URI_LENGTH = 12;
+    static constexpr uint32_t IpV4MicroUriLength = 12;
     /**
      * The length of a IPv6 micro URI.
      */
-    static constexpr uint32_t IPV6_MICRO_URI_LENGTH = 24;
+    static constexpr uint32_t IpV6MicroUriLength = 24;
     /**
      * Starting position of the IP address in the micro URI.
      */
-    static constexpr uint8_t IPADDRESS_START_POSITION = LOCAL_MICRO_URI_LENGTH;
+    static constexpr uint8_t IpaddressStartPosition = LocalMicroUriLength;
+    /**
+     * Starting position of the entity id in the micro URI.
+     */
+    static constexpr uint8_t ResourceIdPosition = 2;
+    /**
+     * Entity id position in the micro URI.
+     */
+    static constexpr uint8_t EntityIdStartPosition = 4;
+    /**
+     * UE version position in the micro URI.
+     */
+    static constexpr uint8_t UeVersionPosition = EntityIdStartPosition + 2;
     /**
      * The version of the UProtocol.
      */
-    static constexpr uint8_t UP_VERSION = 0x01;
+    static constexpr uint8_t UpVersion = 0x01;
 
 }; // class MicroUriSerializer
+    
+    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UResource &resource) -> bool {
+        return resource.has_id() && resource.id() > 0;
+    }
+    
+    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UEntity &entity) -> bool {
+        return entity.has_id() && entity.id() > 0;
+    }
+    
+    
+    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UAuthority &authority) -> bool {
+        return isEmpty(authority) || (authority.has_ip() && !authority.ip().empty());
+    }
+    
+    
+    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UUri &uri) -> bool {
+        return isMicroForm(uri.authority()) &&
+               isMicroForm(uri.entity()) &&
+               isMicroForm(uri.resource());
+    }
 
 } // namespace uprotocol::uri
 
