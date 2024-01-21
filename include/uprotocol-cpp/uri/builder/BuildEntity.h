@@ -69,7 +69,7 @@ namespace uprotocol::uri {
             }
             if (auto res = version.find('.'); res == std::string::npos) {
                 auto ver = std::stoi(version);
-                if (ver <= 0) {
+                if (ver < 0) {
                     return *this;
                 }
                 entity_.set_version_major(ver);

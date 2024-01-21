@@ -99,18 +99,19 @@ namespace uprotocol::uri {
                               INET6_ADDRSTRLEN) != nullptr) {
                     authority_.set_ip(ip_char);
                 }
-            } else if (struct in_addr ipv4{}; (inet_pton(AF_INET, m_address.c_str(), &ipv4) == 1)) {
-                if (inet_ntop(AF_INET, &ipv4, ip_char, INET_ADDRSTRLEN) != nullptr) {
+            } else if (struct in_addr ipv4{}; inet_pton(AF_INET, m_address.c_str(), &ipv4) == 1) {
+                if (inet_ntop(AF_INET,
+                              &ipv4, 
+                              ip_char, 
+                              INET_ADDRSTRLEN) != nullptr) {
                     authority_.set_ip(ip_char);
                 } else {
-                    spdlog::error<std::string_view>("UAutority address is not a valid IP address. Ignoring setIp()");
+                    spdlog::error<std::string_view>("UAutority address is not a valid IPV4 address. Ignoring setIp()");
                     return *this;
                 }
-    
             } else {
                 spdlog::error<std::string_view>("UAutority address is not a valid IP address. Ignoring setIp()");
             }
-            
             return *this;
         }
         

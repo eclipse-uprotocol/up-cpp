@@ -110,9 +110,9 @@ namespace uprotocol::uri {
             return *this;
         }
         auto setRpcResponse() -> BuildUResource & {
-            resource_.set_name("rpc");
-            resource_.set_instance("response");
-            resource_.set_id(0);
+            setName("rpc");
+            setInstance("response");
+            setID(0);
             return *this;
         }
         
