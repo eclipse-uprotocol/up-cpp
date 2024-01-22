@@ -332,6 +332,41 @@ static void testDeserializeWithValidIpv6Uri() {
     assertEquals(u_uri.authority().ip(), ipv6);
 }
 
+// Test deserialize with valid id micro uri.
+static void testDeserializeWithValidIdUri() {
+    std::vector<uint8_t> header = {0x1, 0x3, 0x0, 0x5};
+    std::vector<uint8_t> footer = {0x0, 0x2, 0x1, 0x0};
+    std::vector<uint8_t> id = {0x05, 0x8, 0x11, 0x90, 0x28, 0x01};
+    
+    std::vector<uint8_t> uri;
+    uri.reserve(header.size() + footer.size() + id.size());
+    uri.insert(uri.end(), header.begin(), header.end());
+    uri.insert(uri.end(), footer.begin(), footer.end());
+    uri.insert(uri.end(), id.begin(), id.end());
+    
+    auto u_uri = MicroUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertTrue(isMicroForm(u_uri));
+    assertFalse(isResolved(u_uri));
+    assertFalse(isLongForm(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    assertTrue(u_uri.authority().has_id());
+    std::vector<uint8_t> id_bytes;
+    id_bytes.push_back(u_uri.authority().id().size());
+    for (auto id : u_uri.authority().id()) {
+        id_bytes.push_back(id);
+    }
+    assertEquals(id_bytes, id);
+    assertFalse(u_uri.authority().has_ip());
+    assertFalse(u_uri.authority().has_name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertEquals(u_uri.entity().version_major(), 1);
+    assertTrue(u_uri.entity().has_id());
+    assertEquals(u_uri.entity().id(), 2);
+    assertTrue(u_uri.resource().has_id());
+    assertEquals(u_uri.resource().id(), 5);
+}
+
 // Test deserialize with invalid version.
 static void testDeserializeWithInvalidVersion() {
     std::vector<uint8_t> uri = {0x9, 0x0, 0x0, 0x5, 0x0, 0x2, 0x1, 0x0};
@@ -356,6 +391,24 @@ static void testDeserializeWithWrongSizeForLocalMicroUri() {
 // Test deserialize with wrong size for IPv4 micro URI.
 static void testDeserializeWithWrongSizeForIpv4MicroUri() {
     std::vector<uint8_t> uri = {0x1, 0x1, 0x0, 0x5, 192, 168, 1, 100, 0x0, 0x2, 0x1, 0x0, 0x0};
+    auto u_uri = MicroUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri));
+}
+// Test deserialize with valid id micro uri.
+static void testDeserializeWithWrongSizeIDMicroURI() {
+    std::vector<uint8_t> header = {0x1, 0x3, 0x0, 0x5};
+    std::vector<uint8_t> footer = {0x0, 0x2, 0x1, 0x0};
+    std::vector<uint8_t> id;
+    for (int i = 0; i < 258; i++) {
+        id.push_back(0x05);
+    }
+    
+    std::vector<uint8_t> uri;
+    
+    uri.reserve(header.size() + footer.size() + id.size());
+    uri.insert(uri.end(), header.begin(), header.end());
+    uri.insert(uri.end(), footer.begin(), footer.end());
+    uri.insert(uri.end(), id.begin(), id.end());
     auto u_uri = MicroUriSerializer::deserialize(uri);
     assertTrue(isEmpty(u_uri));
 }
@@ -389,11 +442,13 @@ Ensure(MicroUriSerializer, all_tests) {
     testDeserializeWithValidLocalUri();
     testDeserializeWithValidIpv4Uri();
     testDeserializeWithValidIpv6Uri();
+    testDeserializeWithValidIdUri();
     testDeserializeWithInvalidVersion();
     testDeserializeWithInvalidType();
     testDeserializeWithWrongSizeForLocalMicroUri();
     testDeserializeWithWrongSizeForIpv4MicroUri();
     testDeserializeWithWrongSizeForIpv6MicroUri();
+    testDeserializeWithWrongSizeIDMicroURI();
 }
 
 

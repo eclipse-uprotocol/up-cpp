@@ -53,7 +53,7 @@ public:
      * @param microUri A vector<uint8_t> uProtocol micro URI.
      * @return Returns an UUri data object from the serialized format of a microUri.
      */
-    static auto deserialize(std::vector<uint8_t> const& micro_uri) -> uprotocol::v1::UUri;
+    static auto deserialize(std::vector<uint8_t> const& addr) -> uprotocol::v1::UUri;
 
 private:
     /**
@@ -91,6 +91,7 @@ private:
      * UE version position in the micro URI.
      */
     static constexpr uint8_t UeVersionPosition = EntityIdStartPosition + 2;
+    static constexpr uint8_t UAutorityIdMaxLength = 255;
     /**
      * The version of the UProtocol.
      */
@@ -108,7 +109,7 @@ private:
     
     
     [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UAuthority &authority) -> bool {
-        return isEmpty(authority) || (authority.has_ip() && !authority.ip().empty());
+        return isEmpty(authority) || (authority.has_ip() && !authority.ip().empty())  || (authority.has_id() && !authority.id().empty());
     }
     
     

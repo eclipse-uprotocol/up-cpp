@@ -41,6 +41,7 @@ public:
         Local=0,
         IpV4,
         IpV6,
+        Id,
         Invalid
     };
 
