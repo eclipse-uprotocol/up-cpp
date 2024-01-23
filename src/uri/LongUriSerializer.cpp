@@ -82,8 +82,8 @@ auto uprotocol::uri::LongUriSerializer::deserialize(std::string const& u_protoco
     constexpr auto MinimumParts = 2;
 
     decltype(uri_parts.size()) j = 0;
-    for (decltype(uri_parts.size()) i = 0; i < uri_parts.size(); i++) {
-        if (uri_parts[i].empty()) {
+    for (const auto & uri_part : uri_parts) {
+        if (uri_part.empty()) {
             ++j;
         } else {
             break;

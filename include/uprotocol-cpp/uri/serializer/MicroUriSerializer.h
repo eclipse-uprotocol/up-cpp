@@ -46,14 +46,14 @@ public:
      * @param uUri The UUri data object.
      * @return Returns a vector<uint8_t> representing the serialized UUri.
      */
-    static auto serialize(const uprotocol::v1::UUri& u_uri) -> std::vector<uint8_t>;
+    [[nodiscard]] static auto serialize(const uprotocol::v1::UUri& u_uri) -> std::vector<uint8_t>;
 
     /**
      * Deserialize a vector<uint8_t> into a UUri object.
      * @param microUri A vector<uint8_t> uProtocol micro URI.
      * @return Returns an UUri data object from the serialized format of a microUri.
      */
-    static auto deserialize(std::vector<uint8_t> const& addr) -> uprotocol::v1::UUri;
+    [[nodiscard]] static auto deserialize(std::vector<uint8_t> const& addr) -> uprotocol::v1::UUri;
 
 private:
     /**
@@ -61,7 +61,13 @@ private:
      */
     MicroUriSerializer() = default;
     
-    static auto getAddressType(uint8_t type) -> std::optional<AddressType>;
+    [[nodiscard]] static auto getAddressType(uint8_t type) -> std::optional<AddressType>;
+    
+    [[nodiscard]] static auto checkMicroUriSize(std::size_t size, AddressType address_type) -> bool;
+    
+    [[nodiscard]] static auto getUauthority(const std::vector<uint8_t> &addr, AddressType type) -> uprotocol::v1::UAuthority;
+    
+    [[maybe_unused]] static auto printIp(std::vector<uint8_t> ip);
         
         /**
          * The length of a local micro URI.

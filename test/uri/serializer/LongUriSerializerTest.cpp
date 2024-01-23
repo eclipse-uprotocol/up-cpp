@@ -336,7 +336,6 @@ TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceNoVersionWithResour
 }
 
 // Test parse uProtocol uri with microRemote service with version with resource name only.
-//static void testParseProtocolUriWithRemoteServiceWithVersionWithResourceName_only() {
 TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceWithVersionWithResourceNameOnly) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door";
     auto u_uri = LongUriSerializer::deserialize(uri);

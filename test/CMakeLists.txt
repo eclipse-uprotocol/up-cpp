@@ -79,34 +79,34 @@ add_test("t-08-service-type-test" service_type_test)
 
 add_executable(UAuthorityTest
 	${TESTS_PATH}/uri/builder/UAuthorityTest.cpp)
-target_link_libraries(UAuthorityTest ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+target_link_libraries(UAuthorityTest uprotocol-cpp gtest gtest_main)
 add_test("t-09-UAuthorityTest" UAuthorityTest)
 
 add_executable(UEntityTest
 		${TESTS_PATH}/uri/builder/UEntityTest.cpp)
-target_link_libraries(UEntityTest ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+target_link_libraries(UEntityTest uprotocol-cpp gtest gtest_main)
 add_test("t-10-UEntityTest" UEntityTest)
 
 add_executable(UResourceTest
 	${TESTS_PATH}/uri/builder/UResourceTest.cpp)
-target_link_libraries(UResourceTest ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+target_link_libraries(UResourceTest uprotocol-cpp gtest gtest_main)
 add_test("t-11-UResourceTest" UResourceTest)
 
 add_executable(UUriTest
 	${TESTS_PATH}/uri/builder/UUriTest.cpp)
-target_link_libraries(UUriTest ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+target_link_libraries(UUriTest uprotocol-cpp gtest gtest_main)
 add_test("t-12-UUriTest" UUriTest)
 
 add_executable(LongUriSerializerTest
 		${TESTS_PATH}/uri/serializer/LongUriSerializerTest.cpp)
 target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
-target_link_libraries(LongUriSerializerTest ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+target_link_libraries(LongUriSerializerTest uprotocol-cpp gtest gtest_main)
 add_test("t-13-LongUriSerializerTest"  LongUriSerializerTest)
 
 add_executable(MicroUriSerializerTest
 	${TESTS_PATH}/uri/serializer/MicroUriSerializerTest.cpp)
 target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
-target_link_libraries(MicroUriSerializerTest ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+target_link_libraries(MicroUriSerializerTest uprotocol-cpp gtest gtest_main)
 add_test("t-14-MicroUriSerializerTest"  MicroUriSerializerTest)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
