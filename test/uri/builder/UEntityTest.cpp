@@ -26,30 +26,18 @@
  
  */
 #include <string>
-#include <optional>
-#include <cgreen/cgreen.h>
+#include <gtest/gtest.h>
 #include "uprotocol-cpp/uri/builder/BuildEntity.h"
 #include "uprotocol-cpp/uri/serializer/MicroUriSerializer.h"
 
-using namespace cgreen;
 using namespace uprotocol::uri;
 
-#define assertTrue(a) assert_true(a)
-#define assertEquals(a, b) assert_true((b) == (a))
-#define assertFalse(a) assert_false(a)
-
-Describe(UEntity);
-
-BeforeEach(UEntity) {
-    // Dummy
-}
-
-AfterEach(UEntity) {
-    // Dummy
-}
+#define assertTrue(a) EXPECT_TRUE(a)
+#define assertEquals(a, b) EXPECT_EQ((b), (a))
+#define assertFalse(a) assertTrue(!(a))
 
 // Make sure the toString works.
-static void testToString() {
+TEST(UEntity, testToString) {
     auto u_entity = BuildUEntity().setName("body.access").setMajorVersion(1).build();
     assertFalse(isEmpty(u_entity));
     assertEquals("body.access", u_entity.name());
@@ -83,7 +71,7 @@ static void testToString() {
 }
 
 // Test creating an empty USE using the empty static method.
-static void testEmptyEntity() {
+TEST(UEntity, testEmptyEntity) {
     auto u_entity = BuildUEntity().build();
     assertTrue(isEmpty(u_entity));
     assertTrue(u_entity.name().empty());
@@ -94,7 +82,7 @@ static void testEmptyEntity() {
 
 
 // Test creating a software entity for use in long format UUri with name that is blank.
-static void testLongFormatWithBlankName() {
+TEST(UEntity, testLongFormatWithBlankName) {
     auto u_entity = BuildUEntity().setName("  ").build();
     assertTrue(isEmpty(u_entity));
     assertFalse(u_entity.has_version_minor());
@@ -106,7 +94,7 @@ static void testLongFormatWithBlankName() {
 
 
 // Test creating a software entity for use in long format UUri with name and version.
-static void testLongFormatWithNameAndVersion() {
+TEST(UEntity, testLongFormatWithNameAndVersion) {
     auto u_entity = BuildUEntity().setName("body.access").setMajorVersion(1).build();
     assertEquals("body.access", u_entity.name());
     assertTrue(u_entity.has_version_major());
@@ -119,7 +107,7 @@ static void testLongFormatWithNameAndVersion() {
 
 
 // Test creating a software entity for use in micro format UUri with id.
-static void testMicroFormatWithId() {
+TEST(UEntity, testMicroFormatWithId) {
     uint16_t id = 42;
     auto u_entity = BuildUEntity().setId(id).build();
     assertTrue(u_entity.name().empty());
@@ -135,10 +123,10 @@ static void testMicroFormatWithId() {
 
 
 // Test creating a software entity for use in micro format UUri with id and version.
-static void testMicroFormatWithIdAndVersion() {
+TEST(UEntity, testMicroFormatWithIdAndVersion) {
     uint16_t id = 42;
     uint16_t version = 1;
-    auto u_entity = BuildUEntity().setId(id).setMajorVersion(version).build();;
+    auto u_entity = BuildUEntity().setId(id).setMajorVersion(version).build();
     assertTrue(u_entity.name().empty());
     assertTrue(u_entity.has_version_major());
     assertEquals(version, u_entity.version_major());
@@ -152,9 +140,9 @@ static void testMicroFormatWithIdAndVersion() {
 
 
 // Test creating a software entity for use in micro format UUri with null id and version.
-static void testMicroFormatWithVersionAndNoId() {
+TEST(UEntity, testMicroFormatWithVersionAndNoId) {
     uint8_t version = 1;
-    auto u_entity = BuildUEntity().setMajorVersion(version).build();;
+    auto u_entity = BuildUEntity().setMajorVersion(version).build();
     assertTrue(u_entity.name().empty());
     assertTrue(u_entity.has_version_major());
     assertTrue(u_entity.version_major() == version);
@@ -167,7 +155,7 @@ static void testMicroFormatWithVersionAndNoId() {
 }
 
 // Test creating a resolved software entity for use in long format and micro format UUri.
-static void testResolvedFormat() {
+TEST(UEntity, testResolvedFormat) {
     uint16_t id = 42;
     uint8_t version = 1;
     auto u_entity = BuildUEntity().setName("body.access").setMajorVersion(version).setId(id).build();
@@ -182,24 +170,7 @@ static void testResolvedFormat() {
     assertTrue(isMicroForm(u_entity));
 }
 
-
-
-
-Ensure(UEntity, all_tests) {
-    testToString();
-    testEmptyEntity();
-    testLongFormatWithBlankName();
-    testLongFormatWithNameAndVersion();
-    testMicroFormatWithId();
-    testMicroFormatWithIdAndVersion();
-    testMicroFormatWithVersionAndNoId();
-    testResolvedFormat();
-}
-
 auto main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) -> int {
-    TestSuite* suite = create_test_suite();
-
-    add_test_with_context(suite, UEntity, all_tests);
-
-    return run_test_suite(suite, create_text_reporter());
+    ::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
+    return RUN_ALL_TESTS();
 }

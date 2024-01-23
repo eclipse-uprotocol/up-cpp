@@ -26,8 +26,7 @@
  
  */
 #include <string>
-#include <cgreen/cgreen.h>
-
+#include <gtest/gtest.h>
 #include "uprotocol-cpp/uri/builder/BuildUUri.h"
 #include "uprotocol-cpp/uri/builder/BuildEntity.h"
 #include "uprotocol-cpp/uri/builder/BuildUResource.h"
@@ -35,32 +34,21 @@
 #include "uprotocol-cpp/uri/serializer/LongUriSerializer.h"
 #include "uprotocol-cpp/uri/serializer/MicroUriSerializer.h"
 
-using namespace cgreen;
 using namespace uprotocol::uri;
 
-#define assertTrue(a) assert_true(a)
-#define assertEquals(a, b) assert_true((b) == (a))
-#define assertFalse(a) assert_false(a)
-
-Describe(UUri);
-
-BeforeEach(UUri) {
-    // Dummy
-}
-
-AfterEach(UUri) {
-    // Dummy
-}
+#define assertTrue(a) EXPECT_TRUE((a))
+#define assertEquals(a, b) EXPECT_EQ((b), (a))
+#define assertFalse(a) assertTrue(!(a))
 
 // Make sure the toString works.
-static void testToString() {
+TEST(UUri, testToString) {
     auto u_authority_local = BuildUAuthority().build();
-    assert_true(isEmpty(u_authority_local));
+    assertTrue(isEmpty(u_authority_local));
     auto u_authority_remote = BuildUAuthority().setName("VCU", "MY_VIN").build();
-    assert_false(isEmpty(u_authority_remote));
+    assertFalse(isEmpty(u_authority_remote));
     assertTrue(u_authority_remote.has_name());
     assertFalse(u_authority_remote.name().empty());
-    assertEquals("vcu.my_vin", u_authority_remote.name());
+    assertTrue("vcu.my_vin" == u_authority_remote.name());
     assertFalse(u_authority_remote.has_ip());
     assertFalse(u_authority_remote.has_id());
     
@@ -94,17 +82,17 @@ static void testToString() {
     assertFalse(isEmpty(uri1));
 
     std::string u_protocol_uri = LongUriSerializer::serialize(uri_local);
-    assertEquals("/body.access/1/door.front_left", u_protocol_uri);
+    assertTrue("/body.access/1/door.front_left" == u_protocol_uri);
     auto uri_remote = BuildUUri().setAutority(u_authority_remote).
             setEntity(u_entity).
             setResource(u_resource).
             build();
     u_protocol_uri = LongUriSerializer::serialize(uri_local);
-    assertEquals("/body.access/1/door.front_left", u_protocol_uri);
- }
+    assertTrue("/body.access/1/door.front_left" == u_protocol_uri);
+}
 
 // Test creating full local uri.
-static void testLocalUri() {
+TEST(UUri, testLocalUri) {
     auto uri = BuildUUri().setAutority(BuildUAuthority().build()).
             setEntity(BuildUEntity().setName("body.access").build()).
             setResource(BuildUResource().setName("door").setInstance("front_left").build()).build();
@@ -116,7 +104,7 @@ static void testLocalUri() {
 }
 
 // Test creating full remote uri.
-static void testRemoteUri() {
+TEST(UUri, testRemoteUri) {
     auto u_authority = BuildUAuthority().setName("VCU", "MY_VIN").build();
     auto aa = BuildUAuthority().setName("VCU", "MY_VIN").build();
     assertFalse(isEmpty(u_authority));
@@ -131,15 +119,15 @@ static void testRemoteUri() {
 }
 
 // Test creating rpc response uri.
-static void testRpcResponseUri() {
+TEST(UUri, testRpcResponseUri) {
     auto u_authority = BuildUAuthority().setName("VCU", "MY_VIN").build();
-    assert_true(u_authority.has_name());
+    assertTrue(u_authority.has_name());
     auto u_entity = BuildUEntity().setName("body.access").setMajorVersion(1).build();
     auto uri = BuildUUri().setAutority(u_authority).
                     setEntity(u_entity).setResource(BuildUResource().
                     setRpcResponse().build()).build();
-    assertEquals(u_authority, uri.authority());
-    assertEquals(u_entity, uri.entity());
+    assertTrue(u_authority == uri.authority());
+    assertTrue(u_entity == uri.entity());
     assertTrue(uri.resource().name() == "rpc");
     assertFalse(isEmpty(uri));
     assertFalse(isEmpty(uri.authority()));
@@ -150,22 +138,22 @@ static void testRpcResponseUri() {
 }
 
 // Test creating full uri with resource but no message using the constructor.
-static void testRemoteUriWithoutMessage() {
+TEST(UUri, testRemoteUriWithoutMessage) {
     auto u_authority = BuildUAuthority().setName("VCU", "MY_VIN").build();
-    assert_false(isEmpty(u_authority));
+    assertFalse(isEmpty(u_authority));
     auto u_entity = BuildUEntity().setName("body.access").setMajorVersion(1).build();
     auto u_resource = BuildUResource().setName("door").build();
     auto uri = BuildUUri().setAutority(u_authority).setEntity(u_entity).setResource(BuildUResource().setName("door").build()).build();
-    assertEquals(u_authority, uri.authority());
-    assertEquals(u_entity, uri.entity());
-    assertEquals(u_resource, uri.resource());
+    assertTrue(u_authority == uri.authority());
+    assertTrue(u_entity ==uri.entity());
+    assertTrue(u_resource == uri.resource());
     assertFalse(isEmpty(uri));
     assertTrue(isLongForm(uri));
     assertFalse(isMicroForm(uri));
 }
 
 // Test creating a uri with empty authority.
-static void testUriWithEmptyAuthority() {
+TEST(UUri, testUriWithEmptyAuthority) {
     auto u_entity = BuildUEntity().setName("body.access").setMajorVersion(1).build();
     auto u_resource = BuildUResource().setName("door").setInstance("front_left").build();
     
@@ -177,12 +165,12 @@ static void testUriWithEmptyAuthority() {
 }
 
 // Test creating a uri with empty software entity.
-static void testUriWithEmptyEntity() {
+TEST(UUri, testUriWithEmptyEntity) {
     auto u_authority = BuildUAuthority().setName("VCU", "MY_VIN").build();
     assertFalse(isEmpty(u_authority));
     auto u_resource = BuildUResource().setName("door").setInstance("front_left").setMessage("").build();
     auto  uri = BuildUUri().setAutority(u_authority).setEntity(BuildUEntity().build()).setResource(u_resource).build();
-    assertEquals(BuildUEntity().build(), uri.entity());
+    assertTrue(BuildUEntity().build() == uri.entity());
     assertFalse(isEmpty(uri));
     assertTrue(isLongForm(uri));
     assertFalse(isMicroForm(uri));
@@ -190,19 +178,19 @@ static void testUriWithEmptyEntity() {
 
 
 // Test creating a uri with empty resource.
-static void testUriWithEmptyResource() {
+TEST(UUri, testUriWithEmptyResource) {
     auto u_authority = BuildUAuthority().setName("VCU", "MY_VIN").build();
     auto u_entity = BuildUEntity().setName("body.access").setMajorVersion(1).build();
     auto u_resource = BuildUResource().build();
     auto uri = BuildUUri().setAutority(u_authority).setEntity(u_entity).setResource(u_resource).build();
-    assertEquals(BuildUResource().build(), uri.resource());
+    assertTrue(BuildUResource().build() == uri.resource());
     assertFalse(isEmpty(uri));
     assertTrue(isLongForm(uri));
     assertFalse(isMicroForm(uri));
 }
 
-// Test creating an empty uri using the empty static method.
-static void testEmptyUri() {
+// Test creating an empty uri using the empty method.
+TEST(UUri, testEmptyUri) {
     auto uri = BuildUUri().build();
     assertTrue(isEmpty(uri.authority()));
     assertTrue(isEmpty(uri.entity()));
@@ -217,14 +205,14 @@ static void testEmptyUri() {
     assertTrue(isEmpty(uri2));
     assertTrue(isLongForm(uri2));
     assertFalse(isMicroForm(uri2));
-    assertEquals(uri.authority(), uri2.authority());
-    assertEquals(uri.entity(), uri2.entity());
-    assertEquals(uri.resource(), uri2.resource());
-    assertEquals(uri, uri2);
+    assertTrue(uri.authority() == uri2.authority());
+    assertTrue(uri.entity() == uri2.entity());
+    assertTrue(uri.resource() == uri2.resource());
+    assertTrue(uri == uri2);
 }
 
 // Test isResolved and isLongForm for valid URIs.
-static void testResolvedUri() {
+TEST(UUri, testResolvedUri) {
     auto uri = BuildUUri().build();
     assertTrue(isLongForm(uri));
     assertFalse(isMicroForm(uri));
@@ -360,23 +348,7 @@ static void testResolvedUri() {
     assertTrue(isMicroForm(uri18));
 }
 
-Ensure(UUri, all_tests) {
-    testToString();
-    testLocalUri();
-    testRemoteUri();
-    testRpcResponseUri();
-    testRemoteUriWithoutMessage();
-    testUriWithEmptyAuthority();
-    testUriWithEmptyEntity();
-    testUriWithEmptyResource();
-    testEmptyUri();
-    testResolvedUri();
-}
-
 auto main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) -> int {
-    TestSuite* suite = create_test_suite();
-
-    add_test_with_context(suite, UUri, all_tests);
-
-    return run_test_suite(suite, create_text_reporter());
+    ::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
+    return RUN_ALL_TESTS();
 }

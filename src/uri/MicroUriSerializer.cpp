@@ -184,7 +184,6 @@ auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> u
         return BuildUUri().build();
     }
     
-    
     switch (micro_uri.size()) {
         case LocalMicroUriLength:
         case IpV4MicroUriLength:
@@ -200,13 +199,12 @@ auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> u
             return BuildUUri().build();
         }
     }
- 
+    
     if (micro_uri[0] != UpVersion) {
         spdlog::error("micro uri version is not Valid : {}", micro_uri[0]);
         return BuildUUri().build();
     }
-
-
+    
     // UAUTORITY_ADDRESS
     std::vector<uint8_t> ip(micro_uri.begin() + IpaddressStartPosition, micro_uri.end());
     if (ip.empty()) {

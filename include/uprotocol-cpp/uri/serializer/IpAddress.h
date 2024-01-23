@@ -56,9 +56,6 @@ public:
      * Constructor with IP address in byte format.
      */
     IpAddress(std::vector<uint8_t> const& ipBytes, AddressType type) : type_(type) , ipBytes_(ipBytes) {
-//        for (unsigned char ipByte : ipBytes) {
-//            ipBytes_.push_back(ipByte);
-//        }
         toString();
 
     }
@@ -71,7 +68,7 @@ public:
     /**
      * Get the string format of IP address.
      */
-    auto getString() const { return ipString_; }
+    auto getString() const -> std::string { return ipString_; }
 
     /**
      * Get the byte format of IP address.

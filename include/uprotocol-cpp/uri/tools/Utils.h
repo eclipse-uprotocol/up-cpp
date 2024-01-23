@@ -37,8 +37,8 @@
 #include <string_view>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
+#include <src/main/proto/uri.pb.h>
 
-#include "../uprotocol-core-api/src/main/proto/uri.pb.h"
 namespace uprotocol::uri {
 
 /**
@@ -197,6 +197,6 @@ namespace uprotocol::uri {
     
     
     
-};
+}  // namespace uprotocol::uri;
 
 #endif //UPROTOCOL_CPP_UTILS_H

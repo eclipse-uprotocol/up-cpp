@@ -26,36 +26,25 @@
  
  */
 #include <string>
-#include <cgreen/cgreen.h>
+#include <gtest/gtest.h>
 #include "uprotocol-cpp/uri/builder/BuildUResource.h"
 #include "uprotocol-cpp/uri/serializer/MicroUriSerializer.h"
 
 
-using namespace cgreen;
 using namespace uprotocol::uri;
 
-#define assertTrue(a) assert_true(a)
-#define assertEquals(a, b) assert_true((b) ==(a))
-#define assertFalse(a) assert_false(a)
-
-Describe(UResource);
-
-BeforeEach(UResource) {
-    // Dummy
-}
-
-AfterEach(UResource) {
-    // Dummy
-}
+#define assertTrue(a) EXPECT_TRUE(a)
+#define assertEquals(a, b) EXPECT_EQ((b), (a))
+#define assertFalse(a) assertTrue(!(a))
 
 // Make sure the toString works.
-static void testToString() {
+TEST(UResource, testToString) {
     auto u_resource = BuildUResource().setName("door").setInstance("front_left").setMessage("Door").build();
     assertFalse(isEmpty(u_resource));
 }
 
 // Test creating a empty Resource.
-static void testEmptyResource() {
+TEST(UResource, testEmptyResource) {
     auto u_resource = BuildUResource().build();
     assertTrue(isEmpty(u_resource));
     assertFalse(u_resource.has_instance());
@@ -65,7 +54,7 @@ static void testEmptyResource() {
 }
 
 // Test creating a complete up Resource in long format.
-static void testLongFormat() {
+TEST(UResource, testLongFormat) {
     std::string name("door");
     std::string instance("front_left");
     std::string message("Door");
@@ -82,7 +71,7 @@ static void testLongFormat() {
 }
 
 // Test creating a Resource in long format with no name.
-static void testLongFormatWithoutName() {
+TEST(UResource, testLongFormatWithoutName) {
     std::string instance("front_left");
     std::string message("Door");
     std::string name;
@@ -102,7 +91,7 @@ static void testLongFormatWithoutName() {
 }
 
 // Test creating a Resource in long format with no instance.
-static void testLongFormatWithoutInstance() {
+TEST(UResource, testLongFormatWithoutInstance) {
     std::string name("door");
     std::string message("Door");
     std::string instance;
@@ -119,7 +108,7 @@ static void testLongFormatWithoutInstance() {
 }
 
 // Test creating a Resource in long format with no message.
-static void testLongFormatWithoutMessage() {
+TEST(UResource, testLongFormatWithoutMessage) {
     std::string name("door");
     std::string instance("front_left");
     std::string message;
@@ -137,7 +126,7 @@ static void testLongFormatWithoutMessage() {
 }
 
 // Test creating a Resource in long format with empty inputs.
-static void testLongFormatEmpty() {
+TEST(UResource, testLongFormatEmpty) {
     std::string name;
     std::string instance;
     std::string message;
@@ -146,7 +135,7 @@ static void testLongFormatEmpty() {
 }
 
 // Test creating a Resource in long format with empty values.
-static void testLongFormatWithBlankValues() {
+TEST(UResource, testLongFormatWithBlankValues) {
     std::string name(" ");
     std::string instance(" ");
     std::string message(" ");
@@ -155,7 +144,7 @@ static void testLongFormatWithBlankValues() {
 }
 
 // Test creating a Resource in long format with name.
-static void testLongFormatWithName() {
+TEST(UResource, testLongFormatWithName) {
     std::string name("door");
     auto u_resource = BuildUResource().setName(name).build();
     assertFalse(isEmpty(u_resource));
@@ -170,19 +159,19 @@ static void testLongFormatWithName() {
 }
 
 // Test creating a Resource in long format with name empty.
-static void testLongFormatWithNameEmpty() {
+TEST(UResource, testLongFormatWithNameEmpty) {
     auto u_resource = BuildUResource().setName("").build();
     assertTrue(isEmpty(u_resource));
 }
 
 // Test creating a Resource in long format with name blank.
-static void testLongFormatWithNameBlank() {
+TEST(UResource, testLongFormatWithNameBlank) {
     auto u_resource = BuildUResource().setName("  ").build();
     assertTrue(isEmpty(u_resource));
 }
 
 // Test creating a Resource in micro format.
-static void testMicroFormat() {
+TEST(UResource, testMicroFormat) {
     uint16_t id = 42;
     auto u_resource = BuildUResource().setID(id).build();
     assertTrue(u_resource.name().empty());
@@ -201,7 +190,7 @@ static void testMicroFormat() {
 
 
 // Test creating a fully resolved Resource to be used in long and micro formatted UUri.
-static void testResolvedFormat() {
+TEST(UResource, testResolvedFormat) {
     std::string name("door");
     std::string instance("front_left");
     std::string message("Door");
@@ -219,7 +208,7 @@ static void testResolvedFormat() {
 }
 
 // Test creating a fully resolved Resource with empty name.
-static void testResolvedFormatEmptyName() {
+TEST(UResource, testResolvedFormatEmptyName) {
     std::string name("  ");
     std::string instance("front_left");
     std::string message("Door");
@@ -237,7 +226,7 @@ static void testResolvedFormatEmptyName() {
 }
 
 // Test creating a fully resolved Resource with empty instance.
-static void testResolvedFormatEmptyInstance() {
+TEST(UResource, testResolvedFormatEmptyInstance) {
     std::string name("door");
     std::string instance("  ");
     std::string message("Door");
@@ -255,7 +244,7 @@ static void testResolvedFormatEmptyInstance() {
 }
 
 // Test creating a fully resolved Resource with empty message.
-static void testResolvedFormatEmptyMessage() {
+TEST(UResource, testResolvedFormatEmptyMessage) {
     std::string name("door");
     std::string instance("front_left");
     std::string message("  ");
@@ -273,7 +262,7 @@ static void testResolvedFormatEmptyMessage() {
 }
 
 // Test creating a fully resolved Resource with empty id.
-static void testResolvedFormatEmptyId() {
+TEST(UResource, testResolvedFormatEmptyId) {
     std::string name("door");
     std::string instance("front_left");
     std::string message("Door");
@@ -291,7 +280,7 @@ static void testResolvedFormatEmptyId() {
 }
 
 // Test creating a fully resolved Resource with empty values.
-static void testResolvedFormatEmptyValues() {
+TEST(UResource, testResolvedFormatEmptyValues) {
     std::string name(" ");
     std::string instance(" ");
     std::string message(" ");
@@ -302,7 +291,7 @@ static void testResolvedFormatEmptyValues() {
 }
 
 // Test creating invalid uResource with only the message.
-static void testResolvedFormatWithOnlyMessage() {
+TEST(UResource, testResolvedFormatWithOnlyMessage) {
     std::string message("Door");
     std::string name;
     std::string instance;
@@ -320,7 +309,7 @@ static void testResolvedFormatWithOnlyMessage() {
 }
 
 // Test creating rpc request for long formatted UUri.
-static void testRpcRequestLongFormat() {
+TEST(UResource, testRpcRequestLongFormat) {
     std::string method_name = "ExecuteDoorCommand";
     auto u_resource = BuildUResource().setRpcRequest(method_name).build();
     assertEquals("rpc", u_resource.name());
@@ -335,7 +324,7 @@ static void testRpcRequestLongFormat() {
 }
 
 // Test creating rpc request for long formatted UUri with empty method name.
-static void testRpcRequestLongFormatEmptyMethodName() {
+TEST(UResource, testRpcRequestLongFormatEmptyMethodName) {
     std::string method_name;
     auto u_resource = BuildUResource().setRpcRequest(method_name).build();
     assertTrue(u_resource.name().empty());
@@ -350,7 +339,7 @@ static void testRpcRequestLongFormatEmptyMethodName() {
 }
 
 // Test creating rpc request for long formatted UUri with blank method name.
-static void testRpcRequestLongFormatBlankMethodName() {
+TEST(UResource, testRpcRequestLongFormatBlankMethodName) {
     std::string method_name = " ";
     auto u_resource = BuildUResource().setRpcRequest(method_name).build();
     assertTrue(u_resource.name().empty());
@@ -365,7 +354,7 @@ static void testRpcRequestLongFormatBlankMethodName() {
 }
 
 // Test creating rpc request for micro formatted UUri.
-static void testRpcRequestMicroFormat() {
+TEST(UResource, testRpcRequestMicroFormat) {
     uint16_t id = 42;
     auto u_resource = BuildUResource().setRpcRequest(id).build();
     
@@ -381,7 +370,7 @@ static void testRpcRequestMicroFormat() {
 }
 
 // Test creating rpc request for micro formatted UUri without id.
-static void testRpcRequestMicroFormatWithoutId() {
+TEST(UResource, testRpcRequestMicroFormatWithoutId) {
     uint16_t id = 0;
     auto u_resource = BuildUResource().setRpcRequest(id).build();
     assertTrue("rpc" != u_resource.name());
@@ -396,7 +385,7 @@ static void testRpcRequestMicroFormatWithoutId() {
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri.
-static void testRpcRequestLongAndMicroFormat() {
+TEST(UResource, testRpcRequestLongAndMicroFormat) {
     std::string method_name = "ExecuteDoorCommand";
     uint16_t id = 42;
     auto u_resource = BuildUResource().setRpcRequest(method_name, id).build();
@@ -412,7 +401,7 @@ static void testRpcRequestLongAndMicroFormat() {
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri without id.
-static void testRpcRequestLongAndMicroFormatWithoutId() {
+TEST(UResource, testRpcRequestLongAndMicroFormatWithoutId) {
     std::string method_name = "ExecuteDoorCommand";
     uint16_t id = 0;
     auto u_resource = BuildUResource().setRpcRequest(method_name, id).build();
@@ -429,7 +418,7 @@ static void testRpcRequestLongAndMicroFormatWithoutId() {
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri without method name.
-static void testRpcRequestLongAndMicroFormatWithoutMethodName() {
+TEST(UResource, testRpcRequestLongAndMicroFormatWithoutMethodName) {
     std::string method_name;
     uint16_t id = 42;
     auto u_resource = BuildUResource().setRpcRequest(method_name, id).build();
@@ -448,7 +437,7 @@ static void testRpcRequestLongAndMicroFormatWithoutMethodName() {
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri missing values.
-static void testRpcRequestLongAndMicroFormatWithoutValues() {
+TEST(UResource, testRpcRequestLongAndMicroFormatWithoutValues) {
     std::string method_name;
     uint16_t id = 0;
     auto u_resource = BuildUResource().setRpcRequest(method_name, id).build();
@@ -456,7 +445,7 @@ static void testRpcRequestLongAndMicroFormatWithoutValues() {
 }
 
 // Test creating rpc response.
-static void testRpcResponse() {
+TEST(UResource, testRpcResponse) {
     auto u_resource = BuildUResource().setRpcResponse().build();
     assertEquals("rpc", u_resource.name());
     assertEquals("response", u_resource.instance());
@@ -469,42 +458,8 @@ static void testRpcResponse() {
     assertTrue(isRPCMethod(u_resource));
 }
 
-Ensure(UResource, all_tests) {
-    testToString();
-    testEmptyResource();
-    testLongFormat();
-    testLongFormatWithoutName();
-    testLongFormatWithoutInstance();
-    testLongFormatWithoutMessage();
-    testLongFormatEmpty();
-    testLongFormatWithBlankValues();
-    testLongFormatWithName();
-    testLongFormatWithNameEmpty();
-    testLongFormatWithNameBlank();
-    testMicroFormat();
-    testResolvedFormat();
-    testResolvedFormatEmptyName();
-    testResolvedFormatEmptyInstance();
-    testResolvedFormatEmptyMessage();
-    testResolvedFormatEmptyId();
-    testResolvedFormatEmptyValues();
-    testResolvedFormatWithOnlyMessage();
-    testRpcRequestLongFormat();
-    testRpcRequestLongFormatEmptyMethodName();
-    testRpcRequestLongFormatBlankMethodName();
-    testRpcRequestMicroFormat();
-    testRpcRequestMicroFormatWithoutId();
-    testRpcRequestLongAndMicroFormat();
-    testRpcRequestLongAndMicroFormatWithoutId();
-    testRpcRequestLongAndMicroFormatWithoutMethodName();
-    testRpcRequestLongAndMicroFormatWithoutValues();
-    testRpcResponse();
-}
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
-    TestSuite* suite = create_test_suite();
-
-    add_test_with_context(suite, UResource, all_tests);
-
-    return run_test_suite(suite, create_text_reporter());
+auto main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) -> int {
+    ::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
+    return RUN_ALL_TESTS();
 }

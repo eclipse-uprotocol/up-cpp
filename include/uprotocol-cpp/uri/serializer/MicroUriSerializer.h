@@ -109,7 +109,7 @@ private:
     
     
     [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UAuthority &authority) -> bool {
-        return isEmpty(authority) || (authority.has_ip() && !authority.ip().empty())  || (authority.has_id() && !authority.id().empty());
+        return isEmpty(authority) || (authority.has_ip() && !authority.ip().empty()) || (authority.has_id() && !authority.id().empty());
     }
     
     

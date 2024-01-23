@@ -31,9 +31,8 @@
 #include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
 #include <uprotocol-cpp/uri/builder/BuildEntity.h>
 #include <uprotocol-cpp/uri/builder/BuildUResource.h>
+#include <uprotocol-cpp/uri/tools/Utils.h>
 #include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
-
-//using namespace uprotocol::uri;
 
 /**
  * Support for serializing UUri objects into their String format.

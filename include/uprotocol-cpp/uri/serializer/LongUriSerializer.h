@@ -29,7 +29,8 @@
 #include <uprotocol-cpp/uri/builder/BuildEntity.h>
 #include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
 #include <uprotocol-cpp/uri/builder/BuildUUri.h>
-#include "../uprotocol-core-api/src/main/proto/uri.pb.h"
+#include <uprotocol-cpp/uri/tools/Utils.h>
+#include <src/main/proto/uri.pb.h>
 #include <string_view>
 
 namespace uprotocol::uri {

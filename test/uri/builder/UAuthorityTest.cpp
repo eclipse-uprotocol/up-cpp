@@ -26,50 +26,38 @@
  
  */
 #include <string>
-//#include <iostream>
-#include <cgreen/cgreen.h>
+#include <gtest/gtest.h>
 #include "uprotocol-cpp/uri/builder/BuildUAuthority.h"
 #include "uprotocol-cpp/uri/serializer/MicroUriSerializer.h"
 
 
-using namespace cgreen;
 using namespace uprotocol::uri;
 
-#define assertTrue(a) assert_true(a)
-#define assertEquals(a, b) assert_true((b) == (a))
-#define assertFalse(a) assert_false(a)
-
-Describe(UAuthority);
-
-BeforeEach(UAuthority) {
-    // Dummy
-}
-
-AfterEach(UAuthority) {
-    // Dummy
-}
+#define assertTrue(a) EXPECT_TRUE(a)
+#define assertEquals(a, b) EXPECT_EQ((b), (a))
+#define assertFalse(a) assertTrue(!(a))
 
 // Make sure the toString works.
-static void testToString() {
+TEST(UAUTHRITY, testToString) {
+
     auto long_remote = BuildUAuthority().setName("VCU", "my_VIN").build();
     assertTrue(long_remote.remote_case() != uprotocol::v1::UAuthority::REMOTE_NOT_SET);
     assertFalse(long_remote.name().empty());
     assertEquals("vcu.my_vin", long_remote.name());
-
     std::string address = "127.0.0.1";
     auto micro_remote = BuildUAuthority().setIp(address).build();
     assertTrue(micro_remote.has_ip());
-
+    
     auto local = BuildUAuthority().build();
     assertTrue(isEmpty(local));
     assertTrue(local.remote_case() == uprotocol::v1::UAuthority::REMOTE_NOT_SET);
-
+    
     auto empty = BuildUAuthority().build();
     assertTrue(isEmpty(local));
 }
 
 // Make sure the toString works with case sensitivity.
-static void testToStringCaseSensitivity() {
+TEST(UAUTHRITY, testToStringCaseSensitivity) {
     auto u_authority = BuildUAuthority().setName("VCU", "my_VIN").build();
     assertFalse(isEmpty(u_authority));
     assertTrue(u_authority.has_name());
@@ -77,7 +65,7 @@ static void testToStringCaseSensitivity() {
 }
 
 // Test create a empty uAuthority.
-static void testEmptyUAuthority() {
+TEST(UAUTHRITY, testEmptyUAuthority) {
     auto u_authority = BuildUAuthority().build();
     assertFalse(u_authority.has_ip());
     assertFalse(u_authority.has_name());
@@ -91,7 +79,7 @@ static void testEmptyUAuthority() {
 }
 
 // Test create a local uAuthority.
-static void testLocalUAuthority() {
+TEST(UAUTHRITY, testLocalUAuthority) {
     auto u_authority = BuildUAuthority().build();
     assertFalse(u_authority.has_ip());
     assertTrue(isLocal(u_authority));
@@ -103,7 +91,7 @@ static void testLocalUAuthority() {
 }
 
 // Test create a remote uAuthority that supports long UUris.
-static void testLongRemoteUAuthority() {
+TEST(UAUTHRITY, testLongRemoteUAuthority) {
     std::string device = "vcu";
     std::string domain = "myvin";
     auto u_authority = BuildUAuthority().setName(device, domain).build();
@@ -120,7 +108,7 @@ static void testLongRemoteUAuthority() {
 }
 
 // Test create a remote uAuthority that supports long UUris null device.
-static void testLongRemoteEmptyDevice() {
+TEST(UAUTHRITY, testLongRemoteEmptyDevice) {
     std::string domain = "myvin";
     std::string device;
     auto u_authority = BuildUAuthority().setName(device, domain).build();
@@ -138,7 +126,7 @@ static void testLongRemoteEmptyDevice() {
 }
 
 // Test create a remote uAuthority that supports long UUris missing device.
-static void testLongUriBlankDevice() {
+TEST(UAUTHRITY, testLongUriBlankDevice) {
     std::string device = " ";
     std::string domain = "myvin";
     auto u_authority  = BuildUAuthority().setName(device, domain).build();
@@ -154,7 +142,7 @@ static void testLongUriBlankDevice() {
 }
 
 // Test create a remote uAuthority that supports long UUris null domain.
-static void testLongUriEmptyDomain() {
+TEST(UAUTHRITY, testLongUriEmptyDomain) {
     std::string device = "vcu";
     std::string domain;
     auto u_authority = BuildUAuthority().setName(device, domain).build();
@@ -170,7 +158,7 @@ static void testLongUriEmptyDomain() {
 }
 
 // Test create a remote uAuthority that supports micro UUris.
-static void testMicroUriUAuthority() {
+TEST(UAUTHRITY, testMicroUriUAuthority) {
     std::string address = "127.0.0.1";
     auto u_authority = BuildUAuthority().setIp(address).build();
     assertFalse(u_authority.has_name());
@@ -186,31 +174,14 @@ static void testMicroUriUAuthority() {
 
 // Test create a remote uAuthority that supports micro UUris with null address.
 //since local micro UURI is not containing address, so this test case is not valid.
-static void testMicroUriEmptyAddress() {
+TEST(UAUTHRITY, testMicroUriEmptyAddress) {
     auto u_authority1 = BuildUAuthority().setName("").build();
     assertTrue(u_authority1.remote_case() == uprotocol::v1::UAuthority::REMOTE_NOT_SET);
     assertTrue(isEmpty(u_authority1));
 }
 
-
-
-Ensure(UAuthority, all_tests) {
-    testToString();
-    testToStringCaseSensitivity();
-    testEmptyUAuthority();
-    testLocalUAuthority();
-    testLongRemoteUAuthority();
-    testLongRemoteEmptyDevice();
-    testLongUriBlankDevice();
-    testLongUriEmptyDomain();
-    testMicroUriUAuthority();
-    testMicroUriEmptyAddress();
-}
-
 auto main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) -> int {
-    TestSuite* suite = create_test_suite();
+    ::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
+    return RUN_ALL_TESTS();
 
-    add_test_with_context(suite, UAuthority, all_tests);
-
-    return run_test_suite(suite, create_text_reporter());
 }
