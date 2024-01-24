@@ -44,11 +44,7 @@ using namespace uprotocol::uri;
     }
     
     auto authority = uprotocol::uri::BuildUAuthority().setIp(address).build();
-    if (auto remote = authority.remote_case(); uprotocol::v1::UAuthority::RemoteCase::kIp == remote) {
-        return authority;
-    }
-    spdlog::error("not leagal address {}", address);
-    return uprotocol::uri::BuildUAuthority().build();
+    return authority;
 }
 
 [[nodiscard]] static auto createMicroRemoteWithId(const std::vector<uint8_t> &id_vec) -> uprotocol::v1::UAuthority {
@@ -59,11 +55,7 @@ using namespace uprotocol::uri;
     }
     
     auto authority = uprotocol::uri::BuildUAuthority().setId(id).build();
-    if (auto remote = authority.remote_case(); uprotocol::v1::UAuthority::RemoteCase::kId == remote) {
-        return authority;
-    }
-    spdlog::error("not leagal id {}", id);
-    return uprotocol::uri::BuildUAuthority().build();
+    return authority;
 }
 
 /**

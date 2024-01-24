@@ -38,7 +38,7 @@
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
 #include "../tools/Utils.h"
-#include <src/main/proto/uri.pb.h>
+#include <../up-core-api/uprotocol/uri.pb.h>
 
 namespace uprotocol::uri {
     class BuildUAuthority {
@@ -47,7 +47,7 @@ namespace uprotocol::uri {
         BuildUAuthority() { authority_.Clear(); }
     
         auto setName(const std::string &name) -> BuildUAuthority & {
-            if (authority_.remote_case() != uprotocol::v1::UAuthority::REMOTE_NOT_SET) {
+            if (authority_.has_name() && !authority_.name().empty()) {
                 spdlog::error("UAutority already has a remote set. Ignoring setName()");
                 return *this;
             }
@@ -64,8 +64,8 @@ namespace uprotocol::uri {
         }
 
         auto setName(const std::string &device, const std::string &domain) -> BuildUAuthority & {
-            if (authority_.remote_case() != uprotocol::v1::UAuthority::REMOTE_NOT_SET) {
-                spdlog::error("UAutority already has a remote set. Ignoring setName()");
+            if (authority_.has_name() && !authority_.name().empty()) {
+                spdlog::error("UAutority already has a name {} set. Ignoring setName()", authority_.name());
                 return *this;
             }
             if (isBlank(device) && isBlank(domain)) {
@@ -84,8 +84,8 @@ namespace uprotocol::uri {
         }
     
         auto setIp(const std::string &address) -> BuildUAuthority & {
-            if (authority_.remote_case() != uprotocol::v1::UAuthority::REMOTE_NOT_SET) {
-                spdlog::error<std::string_view>("UAutority already has a remote set. Ignoring setIp()");
+            if (authority_.has_ip() && !authority_.ip().empty()) {
+                spdlog::error("UAutority already has ip set {}. Ignoring setIp()", authority_.ip());
                 return *this;
             }
             std::string m_address = isBlank(address) ? "" : address;
@@ -116,8 +116,8 @@ namespace uprotocol::uri {
         }
         
         auto setId(const std::string &id) -> BuildUAuthority & {
-            if (authority_.remote_case() != uprotocol::v1::UAuthority::REMOTE_NOT_SET) {
-                spdlog::error("UAutority already has a remote set. Ignoring setId()");
+            if (authority_.has_id() && !authority_.id().empty()) {
+                spdlog::error("UAutority already has a id set {}. Ignoring setId()", authority_.id());
                 return *this;
             }
             authority_.set_id(id.c_str());

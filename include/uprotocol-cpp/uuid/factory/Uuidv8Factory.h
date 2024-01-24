@@ -27,7 +27,7 @@
 
 #include "RandomGen.h"
 #include "UuidFactory.h"
-#include <src/main/proto/uuid.pb.h>
+#include <../up-core-api/uprotocol/uuid.pb.h>
 
 namespace uprotocol::uuid {
 /*

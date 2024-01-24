@@ -37,7 +37,7 @@
 #include <string_view>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
-#include <src/main/proto/uri.pb.h>
+#include "../up-core-api/uprotocol/uri.pb.h"
 
 namespace uprotocol::uri {
 
@@ -79,16 +79,9 @@ namespace uprotocol::uri {
  * @return 
  */
     [[nodiscard]] [[maybe_unused]] static auto isEmpty(uprotocol::v1::UAuthority const &authority) -> bool {
-        switch (authority.remote_case()) {
-            case uprotocol::v1::UAuthority::RemoteCase::kIp:
-                return authority.ip().empty();
-            case uprotocol::v1::UAuthority::RemoteCase::kName:
-                return authority.name().empty();
-            case uprotocol::v1::UAuthority::RemoteCase::kId:
-                return authority.id().empty();
-            default:
-                return true;
-        }
+        return !((authority.has_name() && !authority.name().empty()) ||
+            (authority.has_id() && !authority.id().empty()) ||
+            (authority.has_ip() && !authority.ip().empty()));
     }
     
     [[nodiscard]] [[maybe_unused]] static auto isEmpty(uprotocol::v1::UUri const &uri) -> bool {
@@ -122,28 +115,19 @@ namespace uprotocol::uri {
     }
     
     [[nodiscard]] [[maybe_unused]] auto static isLocal(uprotocol::v1::UAuthority const &authority) -> bool {
-        return uprotocol::v1::UAuthority::RemoteCase::REMOTE_NOT_SET == authority.remote_case();
+        return isEmpty(authority);
     }
+    
     [[nodiscard]] [[maybe_unused]] auto static isRemote(uprotocol::v1::UAuthority const &authority) -> bool {
-        return uprotocol::v1::UAuthority::RemoteCase::REMOTE_NOT_SET != authority.remote_case();
+        return !isEmpty(authority);
     }
     
     
     [[nodiscard]] [[maybe_unused]] auto static
     operator==(const uprotocol::v1::UAuthority &s, const uprotocol::v1::UAuthority &o) -> bool {
-        if (s.remote_case() != o.remote_case()) {
-            return false;
-        }
-        switch (s.remote_case()) {
-            case uprotocol::v1::UAuthority::RemoteCase::kIp:
-                return s.ip() == o.ip();
-            case uprotocol::v1::UAuthority::RemoteCase::kName:
-                return s.name() == o.name();
-            case uprotocol::v1::UAuthority::RemoteCase::kId:
-                return s.id() == o.id();
-            default:
-                return true;
-        }
+        return (s.has_name() && o.has_name() ? s.name() == o.name() : true) &&
+               (s.has_id() && o.has_id() ? s.id() == o.id() : true) &&
+               (s.has_ip() && o.has_ip() ? s.ip() == o.ip() : true);
     }
     
     [[nodiscard]] [[maybe_unused]] auto static

@@ -41,7 +41,7 @@ using namespace uprotocol::uri;
 TEST(UAUTHRITY, testToString) {
 
     auto long_remote = BuildUAuthority().setName("VCU", "my_VIN").build();
-    assertTrue(long_remote.remote_case() != uprotocol::v1::UAuthority::REMOTE_NOT_SET);
+    assertTrue(long_remote.has_name());
     assertFalse(long_remote.name().empty());
     assertEquals("vcu.my_vin", long_remote.name());
     std::string address = "127.0.0.1";
@@ -50,7 +50,9 @@ TEST(UAUTHRITY, testToString) {
     
     auto local = BuildUAuthority().build();
     assertTrue(isEmpty(local));
-    assertTrue(local.remote_case() == uprotocol::v1::UAuthority::REMOTE_NOT_SET);
+    assertFalse(local.has_name());
+    assertFalse(local.has_ip());
+    assertFalse(local.has_id());
     
     auto empty = BuildUAuthority().build();
     assertTrue(isEmpty(local));
@@ -176,7 +178,7 @@ TEST(UAUTHRITY, testMicroUriUAuthority) {
 //since local micro UURI is not containing address, so this test case is not valid.
 TEST(UAUTHRITY, testMicroUriEmptyAddress) {
     auto u_authority1 = BuildUAuthority().setName("").build();
-    assertTrue(u_authority1.remote_case() == uprotocol::v1::UAuthority::REMOTE_NOT_SET);
+    assertFalse(u_authority1.has_name());
     assertTrue(isEmpty(u_authority1));
 }
 

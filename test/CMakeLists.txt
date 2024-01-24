@@ -25,7 +25,7 @@ set(TESTS_PATH ../test)
 
 include_directories(../uprotocol/proto)
 
-file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
+file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol/*.cc")
 
 
 add_executable(json_serializer_test
