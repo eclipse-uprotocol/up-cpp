@@ -36,51 +36,61 @@
 
 /**
  * Support for serializing UUri objects into their String format.
- * @param uUri UUri object to be serialized to the String format.
+ * @param uri UUri object to be serialized to the String format.
  * @return Returns the String format of the supplied UUri that can be used as a sink or a source
  * in a uProtocol publish communication.
  */ 
-auto uprotocol::uri::LongUriSerializer::serialize(const v1::UUri& u_uri) -> std::string {
-    if (isEmpty(u_uri)) {
+auto uprotocol::uri::LongUriSerializer::serialize(const v1::UUri& uri) -> std::string {
+    if (isEmpty(uri)) {
         return "";
     }
 
-    std::string uri;
-    uri.append(buildAuthorityPartOfUri(u_uri.authority()));
-    if (uri.length() >= 2 || uri.empty()) {
-        uri.append("/");
+    std::string uri_string;
+    uri_string.append(buildAuthorityPartOfUri(uri.authority()));
+    if (uri_string.length() >= 2 || uri_string.empty()) {
+        uri_string.append("/");
     }
-    if (isEmpty(u_uri.entity())) {
-        return uri;
+    if (isEmpty(uri.entity())) {
+        return uri_string;
     }
-    uri.append(buildSoftwareEntityPartOfUri(u_uri.entity()));
-    uri.append(buildResourcePartOfUri(u_uri.resource()));
+    uri_string.append(buildSoftwareEntityPartOfUri(uri.entity()));
+    uri_string.append(buildResourcePartOfUri(uri.resource()));
 
-    return uri;
+    return uri_string;
 }
 
 /**
  * Deserialize a String into a UUri object.
- * @param uProtocolUri A long format uProtocol URI.
+ * @param protocol_uri A long format uProtocol URI.
  * @return Returns an UUri data object.
  */
-auto uprotocol::uri::LongUriSerializer::deserialize(std::string const& u_protocol_uri) -> v1::UUri {
-    if (u_protocol_uri.empty()) {
+auto uprotocol::uri::LongUriSerializer::deserialize(std::string const& protocol_uri) -> v1::UUri {
+    if (protocol_uri.empty()) {
         return BuildUUri().build();
     }
 
-    auto uri = u_protocol_uri;
+    auto uri = protocol_uri;
     std::replace(uri.begin(), uri.end(), '\\', '/');
     
-    auto pos = uri.find("//");
-    auto is_local = pos != 0;  // local if does not start with "//"
-    if (!is_local) { // we find that is remote since "//" is found
-        is_local = uri.find("///", pos) == 0;  // local if starts with "///");
-    }
-    const auto uri_parts = split(uri, "/");
+     const auto uri_parts = split(uri, "/");
 
     constexpr auto MinimumParts = 2;
+    
+    if (auto j = getFirstNotEmpty(uri_parts); j > 3) {
+        return BuildUUri().build();
+    }
+    
+    //bool is_local = getLocality(uri);
+    if (uri_parts.size() < MinimumParts) {
+        return BuildUUri().build();
+    } else if (getLocality(uri)) {
+        return parseLocalUUri(uri_parts);
+    } else {
+        return parseRemoteUUri(uri_parts);
+    }
+}
 
+auto uprotocol::uri::LongUriSerializer::getFirstNotEmpty(const std::vector<std::string> &uri_parts) -> uint64_t {
     decltype(uri_parts.size()) j = 0;
     for (const auto & uri_part : uri_parts) {
         if (uri_part.empty()) {
@@ -89,16 +99,16 @@ auto uprotocol::uri::LongUriSerializer::deserialize(std::string const& u_protoco
             break;
         }
     }
-     if (j > 3) {
-         return BuildUUri().build();
-     }
-    if (uri_parts.size() < MinimumParts) {
-        return BuildUUri().build();
-    } else if (is_local) {
-        return parseLocalUUri(uri_parts);
-    } else {
-        return parseRemoteUUri(uri_parts);
+    return j;
+}
+
+auto inline uprotocol::uri::LongUriSerializer::getLocality(const std::string_view &uri) -> bool {
+    auto pos = uri.find("//");
+    auto is_local = pos != 0;  // local if does not start with "//"
+    if (!is_local) { // we find that is remote since "//" is found
+        is_local = uri.find("///", pos) == 0;  // local if starts with "///");
     }
+    return is_local;
 }
 
 /**
@@ -129,18 +139,18 @@ auto uprotocol::uri::LongUriSerializer::split(std::string str,
  * @param uResource  Resource representing a resource or an RPC method.
  * @return Returns the String representation of the  Resource in the uProtocol URI.
  */
-auto uprotocol::uri::LongUriSerializer::buildResourcePartOfUri(const v1::UResource& u_resource) -> std::string {
-    if (isEmpty(u_resource)) {
+auto uprotocol::uri::LongUriSerializer::buildResourcePartOfUri(const v1::UResource& resource) -> std::string {
+    if (isEmpty(resource)) {
         return "";
     }
 
     std::string sb("/");
-    sb.append(u_resource.name());
-    if (u_resource.has_instance() && !u_resource.instance().empty()) {
-        sb.append(".").append(u_resource.instance());
+    sb.append(resource.name());
+    if (resource.has_instance() && !resource.instance().empty()) {
+        sb.append(".").append(resource.instance());
     }
-    if (u_resource.has_message() && !u_resource.message().empty()) {
-        sb.append("#").append(u_resource.message());
+    if (resource.has_message() && !resource.message().empty()) {
+        sb.append("#").append(resource.message());
     }
 
     return sb;
@@ -292,14 +302,8 @@ auto uprotocol::uri::LongUriSerializer::parseRemoteUUri(const std::vector<std::s
     if (number_of_parts_in_uri <= i) {
         return BuildUUri().build();
     }
-    auto authority_parts = split(uri_parts[i], ".");
-    std::string device = authority_parts[0];
-    std::string domain;
-    if (authority_parts.size() > 1) {
-        domain = authority_parts[1];
-    }
-    auto u_authority = BuildUAuthority().setName(device, domain).build();
-    if (isEmpty(u_authority)) {
+    auto authority = BuildUAuthority().setName(uri_parts[i]).build();
+    if (isEmpty(authority)) {
         return BuildUUri().build();
     }
     
@@ -309,11 +313,11 @@ auto uprotocol::uri::LongUriSerializer::parseRemoteUUri(const std::vector<std::s
         if (number_of_parts_in_uri > 4) {
             version = uri_parts[4];
         }
-        auto u_entity = parseUEntity(entity_name, version);
-        auto u_resource = number_of_parts_in_uri > 5 ? parseUResource(uri_parts[5]) : BuildUResource().build();
+        auto entity = parseUEntity(entity_name, version);
+        auto resource = number_of_parts_in_uri > 5 ? parseUResource(uri_parts[5]) : BuildUResource().build();
     
-        return BuildUUri().setAutority(u_authority).setEntity(u_entity).setResource(u_resource).build();
+        return BuildUUri().setAutority(authority).setEntity(entity).setResource(resource).build();
     } else {
-        return BuildUUri().setAutority(u_authority).setEntity(BuildUEntity().build()).setResource(BuildUResource().build()).build();
+        return BuildUUri().setAutority(authority).setEntity(BuildUEntity().build()).setResource(BuildUResource().build()).build();
     }
 }
