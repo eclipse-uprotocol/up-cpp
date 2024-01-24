@@ -182,7 +182,7 @@ private:
     
     [[nodiscard]] static auto inline getLocality(const std::string_view &uri) -> bool;
     
-    [[nodiscard]] static auto getFirstNotEmpty(const std::vector<std::string> &uri_parts) -> uint64_t ;
+    [[nodiscard]] static auto inline getFirstNotEmpty(const std::vector<std::string> &uri_parts) -> uint64_t ;
 }; // class LongUriSerializer
 
 } // namespace uprotocol::uri
