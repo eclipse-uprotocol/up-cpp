@@ -38,8 +38,8 @@ include(ExternalProject)
 
 file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/*.proto")
 
-set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api/uprotocol/")
-set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api/uprotocol/")
+set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/")
+set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../up-core-api/uprotocol/")
 
 file(MAKE_DIRECTORY ${PROTOBUF_OUTPUT_DIRECTORY})
 
@@ -79,10 +79,10 @@ include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
 include_directories(${CGREEN_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/up-core-api)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../up-core-api)
 
 file(GLOB 			CLOUD_EVENT_PROTO_CPP 		 "${CLOUD_EVENT_PROTO_BINARY_DIR}/*.cc")
-file(GLOB 			SRC_PROTO_CORE_API 			 "${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api/uprotocol/*.cc")
+file(GLOB 			SRC_PROTO_CORE_API 			 "${CMAKE_CURRENT_BINARY_DIR}/../up-core-api/uprotocol/*.cc")
 file(GLOB_RECURSE 	SRC_FILES 					 "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
  
 set(uprotocol_src 
