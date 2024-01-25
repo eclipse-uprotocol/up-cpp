@@ -20,6 +20,8 @@
 
 cmake_minimum_required(VERSION 3.18.0)
 file(STRINGS "VERSION" VERSION_STRING)
+
+ set(CMAKE_CXX_STANDARD 17)
 project(uprotocol-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX)
 
 set(VCPKG $ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake)
@@ -34,7 +36,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include (CTest)
 include(ExternalProject)
 
-file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api/*.proto")
+file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/*.proto")
 
 set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../uprotocol-core-api/uprotocol/")
 set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api/uprotocol/")
@@ -69,6 +71,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/proto)
 # add generated protobuf and directory.
 include_directories(${CLOUD_EVENT_PROTO_BINARY_DIR})
 include_directories(${PROTO_TEST_BINARY_DIR})
+include_directories(${PROTOBUF_OUTPUT_DIRECTORY}) 
 # add remaining directories.
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${RapidJSON_INCLUDE_DIRS})
@@ -76,7 +79,7 @@ include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
 include_directories(${CGREEN_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/up-core-api)
 
 file(GLOB 			CLOUD_EVENT_PROTO_CPP 		 "${CLOUD_EVENT_PROTO_BINARY_DIR}/*.cc")
 file(GLOB 			SRC_PROTO_CORE_API 			 "${CMAKE_CURRENT_BINARY_DIR}/../uprotocol-core-api/uprotocol/*.cc")

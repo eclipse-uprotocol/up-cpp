@@ -22,8 +22,8 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _URI_FORMAT_H_
-#define _URI_FORMAT_H_
+#ifndef URI_FORMAT_H_
+#define URI_FORMAT_H_
 
 namespace uprotocol::uri {
 
@@ -60,8 +60,14 @@ public:
      */
     virtual bool isMicroForm() const = 0;
 
+    /**
+     * Reterns the hash of the implemented class
+     * @return std::size_t hash
+     */
+    virtual std::size_t getHash() const = 0;
+    
 }; // class UriFormat
 
 } // namespace uprotocol::uri
 
-#endif // _URI_FORMAT_H_
+#endif // URI_FORMAT_H_

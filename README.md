@@ -69,6 +69,7 @@ $ install protobuf : git clone --progress -b v3.21.12 https://github.com/protoco
 ```
 #### Setup SDK local repository, build and test
 ```
+$ git clone https://github.com/eclipse-uprotocol/up-core-api.git
 $ git clone https://github.com/eclipse-uprotocol/uprotocol-sdk-cpp.git
 $ cd uprotocol-sdk-cpp
 $ code .

@@ -25,7 +25,7 @@ set(TESTS_PATH ../test)
 
 include_directories(../uprotocol/proto)
 
-file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
+file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol/*.cc")
 
 #add_executable(json_serializer_test
 #			   ${TESTS_PATH}/json/json_serializer_test.cpp
@@ -77,35 +77,35 @@ add_test("t-06-base64-test" base64_test)
 #add_test("t-08-service-type-test" service_type_test)
 
 add_executable(UAuthorityTest
-	${TESTS_PATH}/uri/datamodel/UAuthorityTest.cpp)
-target_link_libraries(UAuthorityTest ${CGREEN_LIBRARY} uprotocol-cpp)
+	${TESTS_PATH}/uri/builder/UAuthorityTest.cpp)
+target_link_libraries(UAuthorityTest uprotocol-cpp gtest gtest_main)
 add_test("t-09-UAuthorityTest" UAuthorityTest)
 
 add_executable(UEntityTest
-		${TESTS_PATH}/uri/datamodel/UEntityTest.cpp)
-target_link_libraries(UEntityTest ${CGREEN_LIBRARY} uprotocol-cpp)
+		${TESTS_PATH}/uri/builder/UEntityTest.cpp)
+target_link_libraries(UEntityTest uprotocol-cpp gtest gtest_main)
 add_test("t-10-UEntityTest" UEntityTest)
 
 add_executable(UResourceTest
-	${TESTS_PATH}/uri/datamodel/UResourceTest.cpp)
-target_link_libraries(UResourceTest ${CGREEN_LIBRARY} uprotocol-cpp)
+	${TESTS_PATH}/uri/builder/UResourceTest.cpp)
+target_link_libraries(UResourceTest uprotocol-cpp gtest gtest_main)
 add_test("t-11-UResourceTest" UResourceTest)
 
 add_executable(UUriTest
-	${TESTS_PATH}/uri/datamodel/UUriTest.cpp)
-target_link_libraries(UUriTest ${CGREEN_LIBRARY} uprotocol-cpp)
+	${TESTS_PATH}/uri/builder/UUriTest.cpp)
+target_link_libraries(UUriTest uprotocol-cpp gtest gtest_main)
 add_test("t-12-UUriTest" UUriTest)
 
 add_executable(LongUriSerializerTest
 		${TESTS_PATH}/uri/serializer/LongUriSerializerTest.cpp)
 target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
-target_link_libraries(LongUriSerializerTest ${CGREEN_LIBRARY} uprotocol-cpp)
+target_link_libraries(LongUriSerializerTest uprotocol-cpp gtest gtest_main)
 add_test("t-13-LongUriSerializerTest"  LongUriSerializerTest)
 
 add_executable(MicroUriSerializerTest
 	${TESTS_PATH}/uri/serializer/MicroUriSerializerTest.cpp)
 target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
-target_link_libraries(MicroUriSerializerTest ${CGREEN_LIBRARY} uprotocol-cpp)
+target_link_libraries(MicroUriSerializerTest uprotocol-cpp gtest gtest_main)
 add_test("t-14-MicroUriSerializerTest"  MicroUriSerializerTest)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
