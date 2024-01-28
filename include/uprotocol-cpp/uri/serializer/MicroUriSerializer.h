@@ -60,13 +60,31 @@ private:
      * Default MicroUriSerializer constructor.
      */
     MicroUriSerializer() = default;
-    
+    /**
+     * find the address type enum 
+     * @param type 
+     * @return std::optional<AddressType> std::nullopt if not found and AddressType if foundddr
+     */
     [[nodiscard]] static auto getAddressType(uint8_t type) -> std::optional<AddressType>;
-    
+    /**
+     * Check that the micro URI size fit the definitions
+     * @param size 
+     * @param address_type 
+     * @return 
+     */
     [[nodiscard]] static auto checkMicroUriSize(std::size_t size, AddressType address_type) -> bool;
-    
+    /**
+     * Get UAthority from the address and type
+     * @param addr 
+     * @param type 
+     * @return uprotocol::v1::UAuthority if address is not valid UAuthority return empty
+     */
     [[nodiscard]] static auto getUauthority(const std::vector<uint8_t> &addr, AddressType type) -> uprotocol::v1::UAuthority;
-    
+    /**
+     * Debug function to print the ip address
+     * @param ip 
+     * @return 
+     */
     [[maybe_unused]] static auto printIp(std::vector<uint8_t> ip);
         
         /**
@@ -97,6 +115,9 @@ private:
      * UE version position in the micro URI.
      */
     static constexpr uint8_t UeVersionPosition = EntityIdStartPosition + 2;
+    /**
+     * the max size of id string in the micro URI. 
+     */
     static constexpr uint8_t UAutorityIdMaxLength = 255;
     /**
      * The version of the UProtocol.
@@ -104,21 +125,39 @@ private:
     static constexpr uint8_t UpVersion = 0x01;
 
 }; // class MicroUriSerializer
-    
+    // utility functions
+    /**
+     * Check if uprotocol::v1::UResourc is micro form
+     * @param resource 
+     * @return 
+     */
     [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UResource &resource) -> bool {
         return resource.has_id() && resource.id() > 0;
     }
     
+    /**
+      * Check if uprotocol::v1::UEntity is micro form
+      * @param resource 
+      * @return 
+      */
     [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UEntity &entity) -> bool {
         return entity.has_id() && entity.id() > 0;
     }
     
-    
+    /**
+     * Check if uprotocol::v1::UAuthority is micro form
+     * @param resource 
+     * @return 
+     */
     [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UAuthority &authority) -> bool {
         return isEmpty(authority) || (authority.has_ip() && !authority.ip().empty()) || (authority.has_id() && !authority.id().empty());
     }
     
-    
+    /**
+     * Check if uprotocol::v1::UUri is micro form
+     * @param resource 
+     * @return 
+     */
     [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UUri &uri) -> bool {
         return isMicroForm(uri.authority()) &&
                isMicroForm(uri.entity()) &&

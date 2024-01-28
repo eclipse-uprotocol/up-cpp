@@ -20,7 +20,7 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  
  
@@ -46,6 +46,12 @@ namespace uprotocol::uri {
     public:
         BuildUAuthority() { authority_.Clear(); }
     
+        /**
+         * set name of the authority. if name is empty or blank, an error will be logged and the name will not be set
+         * if name is already set, it will not be changed
+         * @param name
+         * @return
+         */
         auto setName(const std::string &name) -> BuildUAuthority & {
             if (authority_.has_name() && !authority_.name().empty()) {
                 spdlog::error("UAutority already has a remote set. Ignoring setName()");
@@ -63,6 +69,13 @@ namespace uprotocol::uri {
             return *this;
         }
 
+        /**
+         * set authority name using device and domain. if both device and domain are blank, an error will be logged and the name will not be set
+         * if name is already set, it will not be changed
+         * @param device std::string
+         * @param domain std::string
+         * @return 
+         */
         auto setName(const std::string &device, const std::string &domain) -> BuildUAuthority & {
             if (authority_.has_name() && !authority_.name().empty()) {
                 spdlog::error("UAutority already has a name {} set. Ignoring setName()", authority_.name());
@@ -83,6 +96,12 @@ namespace uprotocol::uri {
             return *this;
         }
     
+        /**
+         * set authority IP address. if address is empty or blank, an error will be logged and the address will not be set
+         * wrong IP address format will be ignored
+         * @param address std::string
+         * @return 
+         */
         auto setIp(const std::string &address) -> BuildUAuthority & {
             if (authority_.has_ip() && !authority_.ip().empty()) {
                 spdlog::error("UAutority already has ip set {}. Ignoring setIp()", authority_.ip());
