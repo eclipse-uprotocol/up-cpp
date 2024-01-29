@@ -142,5 +142,5 @@ endif()
 add_dependencies(uprotocol-cpp_static cloudevent_proto)
 add_dependencies(uprotocol-cpp cloudevent_proto)
 
-#add_subdirectory(test)
+add_subdirectory(test)
 
