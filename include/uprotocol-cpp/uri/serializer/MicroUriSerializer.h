@@ -86,8 +86,16 @@ private:
      * @return 
      */
     [[maybe_unused]] static auto printIp(std::vector<uint8_t> ip);
-        
-        /**
+    
+    /**
+     * Add the ip address to the micro URI
+     * @param u_uri vector of uint8_t representing the micro URI
+     * @param uri uprotocol::v1::UUri
+     * @param address String of the ip address or the ID
+     */
+    [[maybe_unused]] static auto addIpOrId(const uprotocol::v1::UUri &u_uri, std::vector<uint8_t> &uri, std::string &address) -> void;
+    
+    /**
          * The length of a local micro URI.
          */
     static constexpr uint32_t LocalMicroUriLength = 8;
@@ -123,7 +131,7 @@ private:
      * The version of the UProtocol.
      */
     static constexpr uint8_t UpVersion = 0x01;
-
+    
 }; // class MicroUriSerializer
     // utility functions
     /**

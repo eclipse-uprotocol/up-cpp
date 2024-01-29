@@ -125,8 +125,20 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
     }
     
     // not local, then it is a remote address with IP
+    addIpOrId(u_uri, uri, address);
+    
+    return uri;
+}
+
+/**
+ * build the authority address part of the micro uri
+ * @param u_uri 
+ * @param uri 
+ * @param address 
+ */
+auto MicroUriSerializer::addIpOrId(const uprotocol::v1::UUri &u_uri, std::vector<uint8_t> &uri, std::string &address) -> void {
     if (u_uri.authority().has_ip()) {
-        uprotocol::uri::IpAddress ip_address(address);
+        IpAddress ip_address(address);
         std::vector<uint8_t> ip = ip_address.getBytes();
         uri.insert(uri.end(), ip.begin(), ip.end());
     } else if (u_uri.authority().has_id()) {
@@ -134,8 +146,6 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
         uri.push_back(static_cast<uint8_t>(address.size()));
         uri.insert(uri.end(), id.begin(), id.end());
     }
-
-    return uri;
 }
 
 
