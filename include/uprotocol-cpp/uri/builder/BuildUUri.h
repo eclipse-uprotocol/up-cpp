@@ -20,7 +20,7 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  
  
@@ -46,6 +46,11 @@ namespace uprotocol::uri {
     public:
         BuildUUri() { uri_.Clear(); }
         
+        /**
+         * Set the Autority part of the URI
+         * @param authority 
+         * @return 
+         */
         auto setAutority(uprotocol::v1::UAuthority const &authority) -> BuildUUri & {
             if (uri_.has_authority()) {
                 spdlog::error("UUri already has a authority set. Ignoring setAuthority()");
@@ -57,7 +62,11 @@ namespace uprotocol::uri {
             }
             return *this;
         }
-        
+        /**
+         * Set the Entity part of the URI
+         * @param entity 
+         * @return 
+         */
         auto setEntity(uprotocol::v1::UEntity const &entity) -> BuildUUri & {
             if (uri_.has_entity()) {
                 spdlog::error("UUri already has a entity set. Ignoring setEntity()");
@@ -68,7 +77,11 @@ namespace uprotocol::uri {
             }
             return *this;
         }
-        
+        /**
+         * Set the Resource part of the URI
+         * @param resource 
+         * @return 
+         */
         auto setResource(uprotocol::v1::UResource const &resource) -> BuildUUri & {
             if (uri_.has_resource()) {
                 spdlog::error("UUri already has a resource set. Ignoring setResource()");
@@ -79,12 +92,19 @@ namespace uprotocol::uri {
             }
             return *this;
         }
-        
+        /**
+         * return the UUri protobuf object
+         * @return 
+         */
         auto build() const -> v1::UUri {
             return uri_;
         }
     };
-    
+    /**
+     * Check if UUri is RpcMethod
+     * @param uri 
+     * @return 
+     */
     [[nodiscard]] [[maybe_unused]] auto static isRPCMethod(const uprotocol::v1::UUri &uri) -> bool {
         return uri.resource().name() == "rpc";
     }

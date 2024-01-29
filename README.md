@@ -69,7 +69,7 @@ $ install protobuf : git clone --progress -b v3.21.12 https://github.com/protoco
 ```
 #### Setup SDK local repository, build and test
 ```
-$ git clone https://github.com/eclipse-uprotocol/up-core-api.git
+$ git clone --branch uprotocol-core-api-1.5.5 https://github.com/eclipse-uprotocol/up-core-api.git
 $ git clone https://github.com/eclipse-uprotocol/uprotocol-sdk-cpp.git
 $ cd uprotocol-sdk-cpp
 $ code .
@@ -82,8 +82,9 @@ https://code.visualstudio.com/docs/cpp/CMake-linux
 
 If the CMake Tools plugin is not configured to auto generate, then manually run cmake and build using the following commands.
 ```
-$ /usr/bin/cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S . -B build -G Ninja
+$ mkdir build
 $ cd build
+$ /usr/bin/cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S .. -B build -G Ninja
 $ ninja
 $ ninja test
 ```

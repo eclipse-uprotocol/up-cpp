@@ -80,16 +80,22 @@ auto uprotocol::uri::LongUriSerializer::deserialize(std::string const& protocol_
         return BuildUUri().build();
     }
     
-    //bool is_local = getLocality(uri);
+    //bool is_local = isLocality(uri);
     if (uri_parts.size() < MinimumParts) {
         return BuildUUri().build();
-    } else if (getLocality(uri)) {
+    } else if (isLocality(uri)) {
         return parseLocalUUri(uri_parts);
     } else {
         return parseRemoteUUri(uri_parts);
     }
 }
 
+/**
+ * Check the number of empty strings in the Vector from the start to find the first non-empty string.
+ * THis is used to determine if the URI is local or remote.
+ * @param uri_parts 
+ * @return 
+ */
 auto uprotocol::uri::LongUriSerializer::getFirstNotEmpty(const std::vector<std::string> &uri_parts) -> uint64_t {
     decltype(uri_parts.size()) j = 0;
     for (const auto & uri_part : uri_parts) {
@@ -102,7 +108,12 @@ auto uprotocol::uri::LongUriSerializer::getFirstNotEmpty(const std::vector<std::
     return j;
 }
 
-auto inline uprotocol::uri::LongUriSerializer::getLocality(const std::string_view &uri) -> bool {
+/**
+ * Find if the URI string is local or remote
+ * @param uri 
+ * @return 
+ */
+auto inline uprotocol::uri::LongUriSerializer::isLocality(const std::string_view &uri) -> bool {
     auto pos = uri.find("//");
     auto is_local = pos != 0;  // local if does not start with "//"
     if (!is_local) { // we find that is remote since "//" is found
@@ -197,7 +208,7 @@ auto uprotocol::uri::LongUriSerializer::buildAuthorityPartOfUri(const v1::UAutho
 }
 
 /**
- * Static factory method for creating a UResource using a string that contains
+ * Static method for creating a UResource using a string that contains
  * name + instance + message.
  * @param resourceString String that contains the UResource information.
  * @return Returns a UResource object.
@@ -227,7 +238,7 @@ auto uprotocol::uri::LongUriSerializer::parseUResource(const std::string& resour
 }
 
 /**
- * Static factory method for creating a UEntity using a string that contains
+ * Static method for creating a UEntity using a string that contains
  * name and version.
  * @param entity String that contains the UEntity name.
  * @param version String that contains the UEntity version.
@@ -242,7 +253,7 @@ auto uprotocol::uri::LongUriSerializer::parseUEntity(const std::string &entity, 
 }
 
 /**
- * Static factory method for creating a UUri using a vector of strings that contains
+ * Static method for creating a UUri using a vector of strings that contains
  * the Local UUri information.
  * @param uriParts Vector of strings that contains the Local UUri information.
  * @return Returns a UUri object.
@@ -281,7 +292,7 @@ auto uprotocol::uri::LongUriSerializer::parseLocalUUri(const std::vector<std::st
 }
 
 /**
- * Static factory method for creating a UUri using a vector of strings that contains
+ * Static method for creating a UUri using a vector of strings that contains
  * the Remote UUri information.
  * @param uriParts Vector of strings that contains the Remote UUri information.
  * @return Returns a UUri object.
@@ -309,7 +320,8 @@ auto uprotocol::uri::LongUriSerializer::parseRemoteUUri(const std::vector<std::s
     
     if (uri_parts.size() > 3) {
         std::string version;
-        entity_name = uri_parts[++i];
+        ++i;
+        entity_name = uri_parts[i];
         if (number_of_parts_in_uri > 4) {
             version = uri_parts[4];
         }

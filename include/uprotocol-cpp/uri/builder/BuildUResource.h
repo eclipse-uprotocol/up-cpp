@@ -20,7 +20,7 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  
  
@@ -46,7 +46,12 @@ namespace uprotocol::uri {
 
     public:
         BuildUResource() { resource_.Clear();}
-        
+        /**
+         * set name of the resource. if name is empty or blank, an error will be logged and the name will not be set
+         * if name is already set, it will not be changed
+         * @param name
+         * @return
+         */
         auto setName(const std::string &name) -> BuildUResource & {
             if (isBlank(name)) {
                 spdlog::error("UResource name cannot be empty");
@@ -55,7 +60,12 @@ namespace uprotocol::uri {
             }
             return *this;
         }
-        
+        /**
+         * set instance of the resource. if instance is empty or blank, an error will be logged and the instance will not be set
+         * if instance is already set, it will not be changed   
+         * @param instance 
+         * @return 
+         */
         auto setInstance(const std::string &instance) -> BuildUResource & {
             if (isBlank(instance)) {
                 spdlog::error("UResource instance cannot be empty");
@@ -64,6 +74,12 @@ namespace uprotocol::uri {
             }
             return *this;
         }
+        /**
+         * set message of the resource. if message is empty or blank, an error will be logged and the message will not be set
+         * if message is already set, it will not be changed
+         * @param message
+         * @return
+         */
         auto setMessage(const std::string &message) -> BuildUResource & {
             if (isBlank(message)) {
                 spdlog::error("UResource message cannot be empty");
@@ -72,6 +88,12 @@ namespace uprotocol::uri {
             }
             return *this;
         }
+        /**
+         * set id of the resource. if id is 0, an error will be logged and the id will not be set
+         * if id is already set, it will not be changed
+         * @param id
+         * @return
+         */
         auto setID(const uint32_t &id) -> BuildUResource & {
             if (0 == id) {
                 spdlog::error("UResource id cannot be 0");
@@ -80,7 +102,12 @@ namespace uprotocol::uri {
             }
             return *this;
         }
-    
+        /**
+         * set id of the resource. if id is 0, an error will be logged and the id will not be set
+         * if id is already set, it will not be changed
+         * @param id
+         * @return
+         */
         auto setRpcRequest(const std::string &method) -> BuildUResource & {
             if (isBlank(method)) {
                 spdlog::error("UResource method cannot be empty");
@@ -90,6 +117,12 @@ namespace uprotocol::uri {
             }
             return *this;
         }
+        /**
+         * set Rpc request with both method and id. a wrapper method on setName, setId and set instance
+         * @param method 
+         * @param id 
+         * @return 
+         */
         auto setRpcRequest(const std::string &method, uint32_t id) -> BuildUResource & {
             if (isBlank(method) || 0 == id) {
                 spdlog::error("UResource method cannot be empty");
@@ -100,6 +133,12 @@ namespace uprotocol::uri {
             }
             return *this;
         }
+        /**
+         * set Rpc request with id. a wrapper method on setName, setId
+         * @param method 
+         * @param id 
+         * @return 
+         */
         auto setRpcRequest(const uint32_t id) -> BuildUResource & {
             if (0 == id) {
                 spdlog::error("UResource id cannot be 0");
@@ -109,13 +148,20 @@ namespace uprotocol::uri {
             }
             return *this;
         }
+        /**
+         * set RPC response 
+         * @return 
+         */
         auto setRpcResponse() -> BuildUResource & {
             setName("rpc");
             setInstance("response");
             setID(0);
             return *this;
         }
-        
+        /**
+         * 
+         * @return uprotocol::v1::UResource
+         */
         auto build() const -> uprotocol::v1::UResource {
             return resource_;
         }

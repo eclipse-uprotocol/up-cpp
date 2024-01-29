@@ -32,7 +32,7 @@ using AddressType = IpAddress::AddressType;
 using namespace uprotocol::uri;
 
 /**
- * Static factory method for creating a remote authority supporting the micro serialization information representation of a UUri.<br>
+ * Static method for creating a remote authority supporting the micro serialization information representation of a UUri.<br>
  * Building a UAuthority with this method will create an unresolved uAuthority that can only be serialised in micro UUri format.
  * @param address The ip address of the device a software entity is deployed on.
  * @return Returns a uAuthority that contains only the internet address of the device, and can only be serialized in micro UUri format.
@@ -47,6 +47,12 @@ using namespace uprotocol::uri;
     return authority;
 }
 
+/**
+ * Static method for creating a remote authority supporting the micro serialization information representation of a UUri.<br>
+ * using ID
+ * @param id_vec 
+ * @return 
+ */
 [[nodiscard]] static auto createMicroRemoteWithId(const std::vector<uint8_t> &id_vec) -> uprotocol::v1::UAuthority {
     auto id = std::string(id_vec.begin() + 1, id_vec.end());
     if (isBlank(id)) {
@@ -68,7 +74,6 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
         return std::vector<uint8_t>();
     }
    
-
     std::vector<uint8_t> uri;
     std::string address;
     if (u_uri.authority().has_ip()) {
@@ -120,8 +125,20 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
     }
     
     // not local, then it is a remote address with IP
+    addIpOrId(u_uri, uri, address);
+    
+    return uri;
+}
+
+/**
+ * build the authority address part of the micro uri
+ * @param u_uri 
+ * @param uri 
+ * @param address 
+ */
+auto MicroUriSerializer::addIpOrId(const uprotocol::v1::UUri &u_uri, std::vector<uint8_t> &uri, std::string &address) -> void {
     if (u_uri.authority().has_ip()) {
-        uprotocol::uri::IpAddress ip_address(address);
+        IpAddress ip_address(address);
         std::vector<uint8_t> ip = ip_address.getBytes();
         uri.insert(uri.end(), ip.begin(), ip.end());
     } else if (u_uri.authority().has_id()) {
@@ -129,8 +146,6 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
         uri.push_back(static_cast<uint8_t>(address.size()));
         uri.insert(uri.end(), id.begin(), id.end());
     }
-
-    return uri;
 }
 
 
@@ -176,6 +191,11 @@ auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> u
                        build();
 }
 
+/**
+ * debug function to print IP address
+ * @param ip 
+ * @return 
+ */
 [[maybe_unused]] auto MicroUriSerializer::printIp(std::vector<uint8_t> ip) {
     std::string s;
     if (ip.empty()) {
@@ -188,6 +208,11 @@ auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> u
     spdlog::info("Serialized IP: {}", s);
 }
 
+/**
+ * get AddressType from uint8_t
+ * @param type as it represented in micrUri format
+ * @return std::optional<AddressType>
+ */
 auto MicroUriSerializer::getAddressType(uint8_t type) -> std::optional<AddressType> {
     switch (static_cast<AddressType>(type)) {
         case AddressType::IpV4:
@@ -202,6 +227,12 @@ auto MicroUriSerializer::getAddressType(uint8_t type) -> std::optional<AddressTy
     }
 }
 
+/**
+ * check if microUri size is valid
+ * @param size
+ * @param address_type
+ * @return 
+ */
 auto MicroUriSerializer::checkMicroUriSize(std::size_t size, AddressType address_type) -> bool {
     switch (size) {
         case LocalMicroUriLength:
@@ -221,6 +252,12 @@ auto MicroUriSerializer::checkMicroUriSize(std::size_t size, AddressType address
     
 };
 
+/**
+ * get UAuthority from IP address or ID
+ * @param addr vector that containes either IP address or ID
+ * @param type AddressType type of the passed address
+ * @return uprotocol::v1::UAuthority. If the address is empty or illegal, then it returns an empty UAuthority.
+ */
 auto MicroUriSerializer::getUauthority(const std::vector<uint8_t> &addr, AddressType type) -> uprotocol::v1::UAuthority {
     switch (type) {
         case AddressType::IpV4:

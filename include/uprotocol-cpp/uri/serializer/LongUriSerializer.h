@@ -179,9 +179,17 @@ private:
      * @return Returns a UUri object.
     */
     [[nodiscard]] static auto parseRemoteUUri(const std::vector<std::string>& uri_parts) -> v1::UUri;
-    
-    [[nodiscard]] static auto inline getLocality(const std::string_view &uri) -> bool;
-    
+    /**
+     * Verify if the given URI string is local
+     * @param uri 
+     * @return 
+     */
+    [[nodiscard]] static auto inline isLocality(const std::string_view &uri) -> bool;
+    /**
+     * find the first not empty value in the vector and return location
+     * @param uri_parts 
+     * @return 
+     */
     [[nodiscard]] static auto inline getFirstNotEmpty(const std::vector<std::string> &uri_parts) -> uint64_t ;
 }; // class LongUriSerializer
 
