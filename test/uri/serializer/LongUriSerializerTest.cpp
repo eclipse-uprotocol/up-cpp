@@ -23,772 +23,722 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include <string>
-#include <cgreen/cgreen.h>
-#include <uprotocol-cpp/uri/datamodel/UUri.h>
-#include <uprotocol-cpp/uri/datamodel/UAuthority.h>
-#include <uprotocol-cpp/uri/datamodel/UEntity.h>
-#include <uprotocol-cpp/uri/datamodel/UResource.h>
+#include <gtest/gtest.h>
 #include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
 
-using namespace cgreen;
+#include <uprotocol-cpp/uri/builder/BuildUResource.h>
+#include <uprotocol-cpp/uri/builder/BuildEntity.h>
+#include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
+#include <uprotocol-cpp/uri/builder/BuildUUri.h>
+
 using namespace uprotocol::uri;
 
-#define assertTrue(a) assert_true(a)
-#define assertEquals(a, b) assert_true(b == a)
-#define assertFalse(a) assert_false(a)
-
-Describe(LongUriSerializer);
-
-BeforeEach(LongUriSerializer) {
-    // Dummy
-}
-
-AfterEach(LongUriSerializer) {
-    // Dummy
-}
+#define assertTrue(a) EXPECT_TRUE((a))
+#define assertFalse(a) assertTrue(!(a))
 
 // Test using the serializers.
-static void test_using_the_serializers() {
-    auto uURi = UUri(UAuthority::local(),
-                    UEntity::longFormat("body.access"),
-                    UResource::forRpcRequest("door"));
-    auto uri = LongUriSerializer::serialize(uURi);
-    assertEquals("/body.access//rpc.door", uri);
-    auto uUri2 = LongUriSerializer::deserialize(uri);
-    assertEquals(uURi, uUri2);
+TEST(LongUriSerializer, testUsingTheSerializers) {
+    auto u_uri = BuildUUri().
+                    setAutority(BuildUAuthority().build()).
+                    setEntity(BuildUEntity().setName("body.access").build()).
+                    setResource(BuildUResource().setRpcRequest("door").build()).build();
+    auto uri = LongUriSerializer::serialize(u_uri);
+    assertTrue("/body.access//rpc.door" == uri);
+    auto u_uri2 = LongUriSerializer::deserialize(uri);
+    assertTrue(u_uri.authority() == u_uri2.authority());
+    assertTrue(u_uri.entity() == u_uri2.entity());
+    assertTrue(u_uri.entity().name() == u_uri2.entity().name());
+    assertTrue(u_uri.resource() == u_uri2.resource());
+    auto uri1 = LongUriSerializer::serialize(u_uri2);
+    assertTrue("/body.access//rpc.door" == uri1);
+    
+    assertTrue(u_uri == u_uri2);
 }
 
 // Test parse uProtocol uri when is empty string.
-static void test_parse_protocol_uri_when_is_empty_string() {
+TEST(LongUriSerializer, testParseProtocolUriWhenIsEmptyString) {
     std::string uri;
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.isEmpty());
-    assertFalse(uUri.isResolved());
-    assertTrue(uUri.isLongForm());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri));
+    assertTrue(isLongForm(u_uri));
 }
 
 // Test parse uProtocol uri with schema and slash.
-static void test_parse_protocol_uri_with_schema_and_slash() {
+TEST(LongUriSerializer, testParseProtocolUriWithSchemaAndSlash) {
     std::string uri = "/";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertTrue(uUri.isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri.authority()));
 
-    auto uri2 = LongUriSerializer::serialize(UUri::empty());
+    auto uri2 = LongUriSerializer::serialize(BuildUUri().build());
     assertTrue(uri2.empty());
 }
 
 // Test parse uProtocol uri with schema and double slash.
-static void test_parse_protocol_uri_with_schema_and_double_slash() {
+TEST(LongUriSerializer, testParseProtocolUriWithSchemaAndDoubleSlash) {
     std::string uri = "//";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertFalse(uUri.getUAuthority().isLocal());
-    assertTrue(uUri.getUAuthority().isMarkedRemote());
-    assertTrue(uUri.isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri.authority()));
 }
 
 // Test parse uProtocol uri with schema and 3 slash and something.
-static void test_parse_protocol_uri_with_schema_and_3_slash_and_something() {
+TEST(LongUriSerializer, testParseProtocolUriWithSchemaAnd3SlashAndSomething) {
     std::string uri = "///body.access";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertFalse(uUri.getUAuthority().isLocal());
-    assertTrue(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertFalse(uUri.getUEntity().getVersion().has_value());
-    assertTrue(uUri.getUResource().isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri.authority()));
+    assertTrue(u_uri.entity().name() == "body.access");
+    assertFalse(u_uri.entity().has_version_minor());
+    assertTrue(isEmpty(u_uri.resource()));
 }
 
 // Test parse uProtocol uri with schema and 4 slash and something.
-static void test_parse_protocol_uri_with_schema_and_4_slash_and_something() {
+TEST(LongUriSerializer, testParseProtocolUriWithSchemaAnd4SlashAndSomething) {
     std::string uri = "////body.access";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertFalse(uUri.getUAuthority().isLocal());
-    assertTrue(uUri.getUAuthority().isMarkedRemote());
-    assertTrue(uUri.getUEntity().getName().empty());
-    assertFalse(uUri.getUEntity().getVersion().has_value());
-    assertTrue(uUri.getUResource().isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri));
 }
 
 // Test parse uProtocol uri with schema and 5 slash and something.
-static void test_parse_protocol_uri_with_schema_and_5_slash_and_something() {
+TEST(LongUriSerializer, testParseProtocolUriWithSchemaAnd5SlashAndSomething) {
     std::string uri = "/////body.access";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertFalse(uUri.getUAuthority().isLocal());
-    assertTrue(uUri.getUAuthority().isMarkedRemote());
-    assertTrue(uUri.getUEntity().isEmpty());
-    assertEquals("body", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("access", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri));
 }
 
 // Test parse uProtocol uri with schema and 6 slash and something.
-static void test_parse_protocol_uri_with_schema_and_6_slash_and_something() {
+TEST(LongUriSerializer, testParseProtocolUriWithSchemaAnd6SlashAndSomething) {
     std::string uri = "//////body.access";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertFalse(uUri.getUAuthority().isLocal());
-    assertTrue(uUri.getUAuthority().isMarkedRemote());
-    assertTrue(uUri.isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri));
 }
 
 // Test parse uProtocol uri with local service no version.
-static void test_parse_protocol_uri_with_local_service_no_version() {
+TEST(LongUriSerializer, testParseProtocolUriWithLocalServiceNoVersion) {
     std::string uri = "/body.access/";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertTrue(uUri.getUResource().isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertTrue(isEmpty(u_uri.authority()));
+    assertFalse(u_uri.entity().has_version_minor());
+    assertTrue(u_uri.entity().name() == "body.access");
+    assertFalse(u_uri.entity().has_version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertTrue(isEmpty(u_uri.resource()));
 }
 
 // Test parse uProtocol uri with local service with version.
-static void test_parse_protocol_uri_with_local_service_with_version() {
+TEST(LongUriSerializer, testParseProtocolUriWithLocalServiceWithVersion) {
     std::string uri = "/body.access/1";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertTrue(uUri.getUResource().isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertTrue(isEmpty(u_uri.authority()));
+    assertFalse(u_uri.entity().has_version_minor());
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertTrue(isEmpty(u_uri.resource()));
 }
 
 // Test parse uProtocol uri with local service no version with resource name only.
-static void
-test_parse_protocol_uri_with_local_service_no_version_with_resource_name_only() {
+TEST(LongUriSerializer, testParseProtocolUriWithLocalServiceNoVersionWithResourceNameOnly) {
     std::string uri = "/body.access//door";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertTrue(uUri.getUResource().getInstance().empty());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(u_uri.entity().has_version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertTrue("body.access" == u_uri.entity().name());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertFalse(u_uri.resource().has_instance());
+    assertFalse(u_uri.resource().has_message());
 }
 
 // Test parse uProtocol uri with local service with version with resource name only.
-static void
-test_parse_protocol_uri_with_local_service_with_version_with_resource_name_only() {
+TEST(LongUriSerializer, testParseProtocolUriWithLocalServiceWithVersionWithResourceNameOnly) {
     std::string uri = "/body.access/1/door";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertTrue(uUri.getUResource().getInstance().empty());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertTrue(isEmpty(u_uri.authority()));
+    assertFalse(isEmpty(u_uri.entity()));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertFalse(isEmpty(u_uri.resource()));    
+    assertTrue("door" == u_uri.resource().name());
+    assertFalse(u_uri.resource().has_instance());
+    assertFalse(u_uri.resource().has_message());
 }
 
 // Test parse uProtocol uri with local service no version with resource and instance only.
-static void
-test_parse_protocol_uri_with_local_service_no_version_with_resource_with_instance() {
-    std::string uri = "/body.access//door.front_left";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertFalse(uUri.getUEntity().getVersion().has_value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+TEST(LongUriSerializer, testParseProtocolUriWithLocalServiceNoVersionWithResourceWithInstance) {
+    std::string uri = "/body.access//door.frontLeft";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(u_uri.entity().has_version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertTrue(u_uri.resource().has_instance());
+    assertTrue("frontLeft" ==u_uri.resource().instance());
+    assertFalse(u_uri.resource().has_message());
 }
 
 // Test parse uProtocol uri with local service with version with resource and instance only.
-static void
-test_parse_protocol_uri_with_local_service_with_version_with_resource_with_message() {
-    std::string uri = "/body.access/1/door.front_left";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+TEST(LongUriSerializer, testParseProtocolUriWithLocalServiceWithVersionWithResourceWithMessage) {
+    std::string uri = "/body.access/1/door.frontLeft";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertTrue(isEmpty(u_uri.authority()));
+    assertFalse(isEmpty(u_uri.entity()));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertTrue(u_uri.resource().has_instance());   
+    assertFalse(u_uri.resource().instance().empty());
+    assertTrue("frontLeft" == u_uri.resource().instance());
+    assertTrue(u_uri.resource().message().empty());
 }
 
 // Test parse uProtocol uri with local service no version with resource with instance and message.
-static void
-test_parse_protocol_uri_with_local_service_no_version_with_resource_with_instance_and_message() {
-    std::string uri = "/body.access//door.front_left#Door";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertFalse(uUri.getUResource().getMessage().empty());
-    assertEquals("Door", uUri.getUResource().getMessage());
+TEST(LongUriSerializer, testParseProtocolUriWithLocalServiceNoVersionWithResourceWithInstanceAndMessage) {
+    std::string uri = "/body.access//door.frontLeft#Door";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(u_uri.entity().has_version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertTrue(u_uri.resource().has_instance());
+    assertFalse(u_uri.resource().instance().empty());
+    assertTrue("frontLeft" == u_uri.resource().instance());
+    assertTrue(u_uri.resource().has_message());
+    assertFalse(u_uri.resource().message().empty());
+    assertTrue("Door" == u_uri.resource().message());
 }
 
 // Test parse uProtocol uri with local service with version with resource with instance and message.
-static void
-test_parse_protocol_uri_with_local_service_with_version_with_resource_with_instance_and_message() {
-    std::string uri = "/body.access/1/door.front_left#Door";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertFalse(uUri.getUResource().getMessage().empty());
-    assertEquals("Door", uUri.getUResource().getMessage());
+TEST(LongUriSerializer, testParseProtocolUriWithLocalServiceWithVersionWithResourceWithInstanceAndMessage) {
+    std::string uri = "/body.access/1/door.frontLeft#Door";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertTrue(isEmpty(u_uri.authority()));
+    assertFalse(isEmpty(u_uri.entity()));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 == u_uri.entity().version_major());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertTrue(u_uri.resource().has_instance());
+    assertFalse(u_uri.resource().instance().empty());
+    assertTrue("frontLeft" == u_uri.resource().instance());
+    assertFalse(u_uri.resource().message().empty());
+    assertTrue("Door" == u_uri.resource().message());
 }
 
 // Test parse uProtocol RPC uri with local service no version.
-static void test_parse_protocol_rpc_uri_with_local_service_no_version() {
+TEST(LongUriSerializer, testParseProtocolRpcUriWithLocalServiceNoVersion) {
     std::string uri = "/petapp//rpc.response";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("petapp", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertEquals("rpc", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("response", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(u_uri.entity().has_version_major());
+    assertTrue("petapp" == u_uri.entity().name());
 }
 
 // Test parse uProtocol RPC uri with local service with version.
-static void test_parse_protocol_rpc_uri_with_local_service_with_version() {
+TEST(LongUriSerializer, testParseProtocolRpcUriWithLocalServiceWithVersion) {
     std::string uri = "/petapp/1/rpc.response";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isLocal());
-    assertFalse(uUri.getUAuthority().isMarkedRemote());
-    assertEquals("petapp", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("rpc", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("response", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertTrue(isEmpty(u_uri.authority()));
+    assertFalse(isEmpty(u_uri.entity()));
+    assertTrue("petapp" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertTrue("rpc" == u_uri.resource().name());
+    assertFalse(u_uri.resource().instance().empty());
+    assertTrue("response" == u_uri.resource().instance());
+    assertTrue(u_uri.resource().message().empty());
 }
 
 // Test parse uProtocol uri with microRemote service only device no domain.
-static void
-test_parse_protocol_uri_with_remote_service_only_device_no_domain() {
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceOnlyDeviceNoDomain) {
     std::string uri = "//VCU";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertTrue(uUri.getUAuthority().getDomain().empty());
-    assertTrue(uUri.getUEntity().isEmpty());
-    assertTrue(uUri.getUResource().isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    assertTrue("vcu" == u_uri.authority().name());
+    auto pos = u_uri.authority().name().find('.');
+    assertTrue(pos == std::string::npos);
 }
 
 // Test parse uProtocol uri with microRemote service only device and domain.
-static void
-test_parse_protocol_uri_with_remote_service_only_device_and_domain() {
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceOnlyDeviceAndDomain) {
     std::string uri = "//VCU.MY_CAR_VIN";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertTrue(uUri.getUEntity().isEmpty());
-    assertTrue(uUri.getUResource().isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    auto name = u_uri.authority().name();
+    assertFalse(name.empty());
+    assertTrue("vcu.my_car_vin" == u_uri.authority().name());
+    auto pos = name.find('.');
+    assertTrue(pos != std::string::npos);
+    assertTrue("vcu" == name.substr(0, pos));
+    assertTrue("my_car_vin" == name.substr(pos + 1));
+    assertTrue(isEmpty(u_uri.entity()));
+    assertTrue(isEmpty(u_uri.resource()));
 }
 
 // Test parse uProtocol uri with microRemote service no version.
-static void test_parse_protocol_uri_with_remote_service_no_version() {
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceNoVersion) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertTrue(uUri.getUResource().isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    auto name = u_uri.authority().name();
+    assertFalse(name.empty());
+    assertTrue("vcu.my_car_vin" == u_uri.authority().name());
+    auto pos = name.find('.');
+    assertTrue(pos != std::string::npos);
+    assertTrue("vcu" == name.substr(0, pos));
+    assertTrue("my_car_vin" == name.substr(pos + 1));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertFalse(u_uri.entity().has_version_major());
+    assertTrue(isEmpty(u_uri.resource()));
 }
 
 // Test parse uProtocol uri with microRemote service with version.
-static void test_parse_protocol_uri_with_remote_service_with_version() {
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceWithVersion) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/1";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertTrue(uUri.getUResource().isEmpty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    auto name = u_uri.authority().name();
+    assertFalse(name.empty());
+    assertTrue("vcu.my_car_vin" == u_uri.authority().name());
+    auto pos = name.find('.');
+    assertTrue(pos != std::string::npos);
+    assertTrue("vcu" == name.substr(0, pos));
+    assertTrue("my_car_vin" == name.substr(pos + 1));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertTrue(isEmpty(u_uri.resource()));
 }
 
 // Test parse uProtocol uri with microRemote service no version with resource name only.
-static void
-test_parse_protocol_uri_with_remote_service_no_version_with_resource_name_only() {
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceNoVersionWithResourceNameOnly) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access//door";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertTrue(uUri.getUResource().getInstance().empty());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(u_uri.entity().has_version_major());
 }
 
 // Test parse uProtocol uri with microRemote service with version with resource name only.
-static void
-test_parse_protocol_uri_with_remote_service_with_version_with_resource_name_only() {
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceWithVersionWithResourceNameOnly) {
     std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertTrue(uUri.getUResource().getInstance().empty());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    auto name = u_uri.authority().name();
+    assertFalse(name.empty());
+    assertTrue("vcu.my_car_vin" == u_uri.authority().name());
+    auto pos = name.find('.');
+    assertTrue(pos != std::string::npos);
+    assertTrue("vcu" == name.substr(0, pos));
+    assertTrue("my_car_vin" == name.substr(pos + 1));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertFalse(u_uri.resource().has_instance());
+    assertFalse(u_uri.resource().has_message());
 }
 
 // Test parse uProtocol uri with microRemote service no version with resource and instance no message.
-static void
-test_parse_protocol_uri_with_remote_service_no_version_with_resource_and_instance_no_message() {
-    std::string uri = "//VCU.MY_CAR_VIN/body.access//door.front_left";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceNoVersionWithResourceAndInstanceNoMessage) {
+    std::string uri = "//VCU.MY_CAR_VIN/body.access//door.frontLeft";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(u_uri.entity().has_version_major());
 }
 
 // Test parse uProtocol uri with microRemote service with version with resource and instance no message.
-static void
-test_parse_protocol_uri_with_remote_service_with_version_with_resource_and_instance_no_message() {
-    std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door.front_left";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceWithVersionWithResourceAndInstanceNoMessage) {
+    std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door.frontLeft";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    auto name = u_uri.authority().name();
+    assertFalse(name.empty());
+    assertTrue("vcu.my_car_vin" == u_uri.authority().name());
+    auto pos = name.find('.');
+    assertTrue(pos != std::string::npos);
+    assertTrue("vcu" == name.substr(0, pos));
+    assertTrue("my_car_vin" == name.substr(pos + 1));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 == u_uri.entity().version_major());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertTrue(u_uri.resource().has_instance());
+    assertTrue("frontLeft" == u_uri.resource().instance());
+    assertFalse(u_uri.resource().has_message());
 }
 
-// Test parse uProtocol uri with microRemote service no version with resource and instance and message.
-static void
-test_parse_protocol_uri_with_remote_service_no_version_with_resource_and_instance_and_message() {
-    std::string uri = "//VCU.MY_CAR_VIN/body.access//door.front_left#Door";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertFalse(uUri.getUResource().getMessage().empty());
-    assertEquals("Door", uUri.getUResource().getMessage());
+// Test parse uProtocol uri with microRemote service no version with resource and instance and message. 
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceNoVersionWithResourceAndInstanceAndMessage) {
+    std::string uri = "//VCU.MY_CAR_VIN/body.access//door.frontLeft#Door";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(u_uri.entity().has_version_major());
+    assertTrue(u_uri.resource().has_message());
+    assertTrue("Door" == u_uri.resource().message());
 }
 
 // Test parse uProtocol uri with microRemote service with version with resource and instance and message.
-static void
-test_parse_protocol_uri_with_remote_service_with_version_with_resource_and_instance_and_message() {
-    std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door.front_left#Door";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("my_car_vin", uUri.getUAuthority().getDomain());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertFalse(uUri.getUResource().getMessage().empty());
-    assertEquals("Door", uUri.getUResource().getMessage());
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceWithVersionWithResourceAndInstanceAndMessage) {
+    std::string uri = "//VCU.MY_CAR_VIN/body.access/1/door.frontLeft#Door";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    auto name = u_uri.authority().name();
+    assertFalse(name.empty());
+    assertTrue("vcu.my_car_vin" == u_uri.authority().name());
+    auto pos = name.find('.');
+    assertTrue(pos != std::string::npos);
+    assertTrue("vcu" == name.substr(0, pos));
+    assertTrue("my_car_vin" == name.substr(pos + 1));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertTrue(u_uri.resource().has_instance());
+    assertTrue("frontLeft" == u_uri.resource().instance());
+    assertTrue(u_uri.resource().has_message());
+    assertFalse(u_uri.resource().message().empty());
+    assertTrue("Door" == u_uri.resource().message());
 }
 
 // Test parse uProtocol uri with microRemote service with version with resource with
 // message when there is only device, no domain.
-static void
-test_parse_protocol_uri_with_remote_service_with_version_with_resource_with_message_device_no_domain() {
-    std::string uri = "//VCU/body.access/1/door.front_left";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("vcu", uUri.getUAuthority().getDevice());
-    assertTrue(uUri.getUAuthority().getDomain().empty());
-    assertEquals("body.access", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("door", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("front_left", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+TEST(LongUriSerializer, testParseProtocolUriWithRemoteServiceWithVersionWithResourceWithMessageDeviceNoDomain) {
+    std::string uri = "//VCU/body.access/1/door.frontLeft";
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    auto name = u_uri.authority().name();
+    assertFalse(name.empty());
+    assertTrue("vcu" == u_uri.authority().name());
+    auto pos = name.find('.');
+    assertTrue(pos == std::string::npos);
+    assertFalse(isEmpty(u_uri.entity()));
+    assertTrue("body.access" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 == u_uri.entity().version_major());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("door" == u_uri.resource().name());
+    assertTrue(u_uri.resource().has_instance());
+    assertTrue("frontLeft" == u_uri.resource().instance());
+    assertFalse(u_uri.resource().has_message());
 }
 
 // Test parse uProtocol RPC uri with microRemote service no version.
-static void test_parse_protocol_rpc_uri_with_remote_service_no_version() {
+TEST(LongUriSerializer, testParseProtocolRpcUriWithRemoteServiceNoVersion) {
     std::string uri = "//bo.azure/petapp//rpc.response";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("bo", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("azure", uUri.getUAuthority().getDomain());
-    assertEquals("petapp", uUri.getUEntity().getName());
-    assertTrue(!uUri.getUEntity().getVersion().has_value());
-    assertEquals("rpc", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("response", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(u_uri.entity().has_version_major());
+    assertTrue(u_uri.resource().has_instance());
+    assertTrue(isRPCMethod(u_uri));
+    assertTrue(isRPCMethod(u_uri.resource()));
 }
 
 // Test parse uProtocol RPC uri with microRemote service with version.
-static void test_parse_protocol_rpc_uri_with_remote_service_with_version() {
+TEST(LongUriSerializer, testParseProtocolRpcUriWithRemoteServiceWithVersion) {
     std::string uri = "//bo.azure/petapp/1/rpc.response";
-    auto uUri = LongUriSerializer::deserialize(uri);
-    assertTrue(uUri.getUAuthority().isRemote());
-    assertFalse(uUri.getUAuthority().getDevice().empty());
-    assertEquals("bo", uUri.getUAuthority().getDevice());
-    assertFalse(uUri.getUAuthority().getDomain().empty());
-    assertEquals("azure", uUri.getUAuthority().getDomain());
-    assertEquals("petapp", uUri.getUEntity().getName());
-    assertTrue(uUri.getUEntity().getVersion().has_value());
-    assertEquals(1, uUri.getUEntity().getVersion().value());
-    assertEquals("rpc", uUri.getUResource().getName());
-    assertFalse(uUri.getUResource().getInstance().empty());
-    assertEquals("response", uUri.getUResource().getInstance());
-    assertTrue(uUri.getUResource().getMessage().empty());
+    auto u_uri = LongUriSerializer::deserialize(uri);
+    assertFalse(isEmpty(u_uri));
+    assertFalse(isEmpty(u_uri.authority()));
+    auto name = u_uri.authority().name();
+    assertFalse(name.empty());
+    assertTrue("bo.azure" == u_uri.authority().name());
+    auto pos = name.find('.');
+    assertTrue(pos != std::string::npos);
+    assertTrue("bo" == name.substr(0, pos));
+    assertTrue("azure" == name.substr(pos + 1));
+    assertFalse(isEmpty(u_uri.entity()));
+    assertTrue("petapp" == u_uri.entity().name());
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertFalse(isEmpty(u_uri.resource()));
+    assertTrue("rpc" == u_uri.resource().name());
+    assertTrue(u_uri.resource().has_instance());
+    assertTrue("response" == u_uri.resource().instance());
+    assertFalse(u_uri.resource().has_message());
 }
 
 // Test Create a uProtocol URI from an empty URI Object.
-static void test_build_protocol_uri_from_uri_when_uri_isEmpty() {
-    auto uUri = UUri::empty();
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriIsEmpty) {
+    auto u_uri = BuildUUri().build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(u_protocol_uri.empty());
 }
 
 // Test Create a uProtocol URI from an URI object with an empty UEntity.
-static void test_build_protocol_uri_from_uri_when_uri_has_empty_use() {
-    auto use = UEntity::empty();
-    auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasEmptyUse) {
+    auto use = BuildUEntity().build();
+    auto u_uri = BuildUUri().setEntity(use).setResource(BuildUResource().setName("door").build()).build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue("/" == u_protocol_uri);
 }
 
 // Test Create a uProtocol URI from an URI Object with a local authority with service no version.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_no_version() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::local(), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/body.access/", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceNoVersion) {
+    auto use = BuildUEntity().setName("body.access").build();
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).setEntity(use).setResource(BuildUResource().build()).build();
+    assertFalse(isEmpty(u_uri));
+    assertTrue(isEmpty(u_uri.authority()));
+    assertFalse(isEmpty(u_uri.entity()));
+    assertFalse(u_uri.entity().has_version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertTrue(isEmpty(u_uri.resource()));
+    
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertFalse(u_protocol_uri.empty());
+    assertTrue("/body.access/" == u_protocol_uri);
 }
 
 // Test Create a uProtocol URI from an URI Object with a local authority with service and version.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_and_version() {
-    auto use = UEntity::longFormat("body.access", 1);
-    auto uUri = UUri(UAuthority::local(), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/body.access/1", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceAndVersion) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+                                   setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+                                   setResource(BuildUResource().build()).
+                                   build();
+    assertFalse(isEmpty(u_uri));
+    assertTrue(isEmpty(u_uri.authority()));
+    assertFalse(isEmpty(u_uri.entity()));
+    assertTrue(u_uri.entity().has_version_major());
+    assertTrue(1 ==u_uri.entity().version_major());
+    assertFalse(u_uri.entity().has_version_minor());
+    assertTrue(isEmpty(u_uri.resource()));
+    
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertFalse(u_protocol_uri.empty());
+    assertTrue("/body.access/1" == u_protocol_uri);
 }
 
 // Test Create a uProtocol URI from an URI Object with a local authority
 // with service no version with resource.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_no_version_with_resource() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/body.access//door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceNoVersionWithResource) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+                                  setEntity(BuildUEntity().setName("body.access").build()).
+                                  setResource(BuildUResource().setName("door").build()).
+                                  build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue("/body.access//door" == u_protocol_uri);
 }
 
 // Test Create a uProtocol URI from an URI Object with a local authority
 // with service and version with resource.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_and_version_with_resource() {
-    auto use = UEntity::longFormat("body.access", 1);
-    auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/body.access/1/door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceAndVersionWithResource) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+            setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+            setResource(BuildUResource().setName("door").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue("/body.access/1/door" == u_protocol_uri);
 }
 
 // Test Create a uProtocol URI from an URI Object with a local authority
 // with service no version with resource with instance no message.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_no_version_with_resource_with_instance_no_message() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door", "front_left", ""));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/body.access//door.front_left", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceNoVersionWithResourceWithInstanceNoMessage) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+            setEntity(BuildUEntity().setName("body.access").build()).
+            setResource(BuildUResource().setName("door").setInstance("frontLeft").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue("/body.access//door.frontLeft" == u_protocol_uri);
 }
 
 // Test Create a uProtocol URI from an URI Object with a local authority
 // with service and version with resource with instance no message.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_and_version_with_resource_with_instance_no_message() {
-    auto use = UEntity::longFormat("body.access", 1);
-    auto uUri = UUri( UAuthority::local(), use, UResource::longFormat("door", "front_left", ""));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/body.access/1/door.front_left", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceAndVersionWithResourceWithInstanceNoMessage) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+            setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+            setResource(BuildUResource().setName("door").setInstance("frontLeft").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue("/body.access/1/door.frontLeft" == u_protocol_uri);
 }
 
 // Test Create a uProtocol URI from an URI Object with a local authority
 // with service no version with resource with instance and message.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_no_version_with_resource_with_instance_with_message() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door", "front_left", "Door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/body.access//door.front_left#Door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceNoVersionWithResourceWithInstanceWithMessage) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+            setEntity(BuildUEntity().setName("body.access").build()).
+            setResource(BuildUResource().setName("door").setInstance("frontLeft").setMessage("Door").build()).
+            build();
+    assertTrue(LongUriSerializer::serialize(u_uri) == "/body.access//door.frontLeft#Door");
 }
 
 // Test Create a uProtocol URI from an URI Object with a local authority
 // with service and version with resource with instance and message.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_and_version_with_resource_with_instance_with_message() {
-    auto use = UEntity::longFormat("body.access", 1);
-    auto uUri = UUri(UAuthority::local(), use, UResource::longFormat("door", "front_left", "Door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("/body.access/1/door.front_left#Door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasLocalAuthorityServiceAndVersionWithResourceWithInstanceWithMessage) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+            setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+            setResource(BuildUResource().setName("door").setInstance("frontLeft").setMessage("Door").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(LongUriSerializer::serialize(u_uri) == "/body.access/1/door.frontLeft#Door");
+    assertTrue(u_protocol_uri == "/body.access/1/door.frontLeft#Door");
 }
 
 // Test Create a uProtocol URI from an URI Object with a microRemote authority with service no version.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access/", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceNoVersion) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").build()).
+            setResource(BuildUResource().build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(u_protocol_uri == "//vcu.my_car_vin/body.access/");
 }
 
 // Test Create a uProtocol URI from an URI Object with a microRemote authority no
 // device with domain with service no version.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_no_device_with_domain_with_service_no_version() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::longRemote("", "MY_CAR_VIN"), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//my_car_vin/body.access/", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityNoDeviceWithDomainWithServiceNoVersion) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").build()).
+            setResource(BuildUResource().build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(u_protocol_uri == "//my_car_vin/body.access/");
 }
 
 // Test Create a uProtocol URI from an URI Object with a microRemote authority
 // with service and version.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_and_version() {
-    auto use = UEntity::longFormat("body.access", 1);
-    auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::empty());
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access/1", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceAndVersion) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+            setResource(BuildUResource().build()).
+            build();
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//vcu.my_car_vin/body.access/1");
 }
 
 // Test Create a uProtocol URI from an URI Object with a microRemote authority
 // with service and version with resource.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_and_version_with_resource() {
-    auto use = UEntity::longFormat("body.access", 1);
-    auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access/1/door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceAndVersionWithResource) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+            setResource(BuildUResource().setName("door").build()).
+            build();
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//vcu.my_car_vin/body.access/1/door");
 }
 
 // Test Create a uProtocol URI from an URI Object with a microRemote authority
 // with service no version with resource.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version_with_resource() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::longFormat("door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access//door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceNoVersionWithResource) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").build()).
+            setResource(BuildUResource().setName("door").build()).
+            build();
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//vcu.my_car_vin/body.access//door");
 }
 
 // Test Create a uProtocol URI from an URI Object with a microRemote authority
 // with service and version with resource with instance no message.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_and_version_with_resource_with_instance_no_message() {
-    auto use = UEntity::longFormat("body.access", 1);
-    auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use,
-                     UResource::longFormat("door", "front_left", ""));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access/1/door.front_left", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceAndVersionWithResourceWithInstanceNoMessage) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+            setResource(BuildUResource().setName("door").setInstance("frontLeft").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//vcu.my_car_vin/body.access/1/door.frontLeft");
 }
 
 // Test Create a uProtocol URI from an URI Object with a microRemote authority
 // with service no version with resource with instance no message.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version_with_resource_with_instance_no_message() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use,
-                    UResource::longFormat("door", "front_left", ""));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access//door.front_left", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceNoVersionWithResourceWithInstanceNoMessage) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").build()).
+            setResource(BuildUResource().setName("door").setInstance("frontLeft").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//vcu.my_car_vin/body.access//door.frontLeft");
 }
 
 // Test Create a uProtocol URI from an URI Object with a microRemote authority
 // with service and version with resource with instance and message.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_and_version_with_resource_with_instance_and_message() {
-    auto use = UEntity::longFormat("body.access", 1);
-    auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use, UResource::longFormat("door", "front_left", "Door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access/1/door.front_left#Door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceAndVersionWithResourceWithInstanceAndMessage) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+            setResource(BuildUResource().setName("door").setInstance("frontLeft").setMessage("Door").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//vcu.my_car_vin/body.access/1/door.frontLeft#Door");
 }
 
 // Test Create a uProtocol URI from an URI Object with a longRemote authority
 // with service no version with resource with instance and message.
-static void
-test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version_with_resource_with_instance_and_message() {
-    auto use = UEntity::longFormat("body.access");
-    auto uUri = UUri(UAuthority::longRemote("VCU", "MY_CAR_VIN"), use,
-                      UResource::longFormat("door", "front_left", "Door"));
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access//door.front_left#Door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriWhenUriHasRemoteAuthorityServiceNoVersionWithResourceWithInstanceAndMessage) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").build()).
+            setResource(BuildUResource().setName("door").setInstance("frontLeft").setMessage("Door").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//vcu.my_car_vin/body.access//door.frontLeft#Door");
 }
 
 // Test Create a uProtocol URI for the source part of an RPC request, where the
 // source is local.
-static void
-test_build_protocol_uri_for_source_part_of_rpc_request_where_source_is_local() {
-    UAuthority uAuthority = UAuthority::local();
-    auto use = UEntity::longFormat("petapp", 1);
-    std::string uProtocolUri = LongUriSerializer::serialize(UUri::rpcResponse(uAuthority, use));
-    assertEquals("/petapp/1/rpc.response", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriForSourcePartOfRpcRequestWhereSourceIsLocal) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+            setEntity(BuildUEntity().setName("petapp").setMajorVersion(1).build()).
+            setResource(BuildUResource().setRpcResponse().build()).
+            build();
+    assertTrue(isEmpty(u_uri.authority()));
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(LongUriSerializer::serialize(u_uri) == "/petapp/1/rpc.response");
 }
 
 // Test Create a uProtocol URI for the source part of an RPC request, where the
 // source is microRemote.
-static void
-test_build_protocol_uri_for_source_part_of_rpc_request_where_source_is_remote() {
-    UAuthority uAuthority = UAuthority::longRemote("bo", "azure");
-    auto use = UEntity::longFormat("petapp");
-    std::string uProtocolUri = LongUriSerializer::serialize(UUri::rpcResponse(uAuthority, use));
-    assertEquals("//bo.azure/petapp//rpc.response", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriForSourcePartOfRpcRequestWhereSourceIsRemote) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("bo", "azure").build()).
+            setEntity(BuildUEntity().setName("petapp").build()).
+            setResource(BuildUResource().setRpcResponse().build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//bo.azure/petapp//rpc.response");
 }
 
 // Test Create a uProtocol URI from parts that are null.
-static void test_build_protocol_uri_from_parts_when_they_are_null() {
-    UAuthority uAuthority;
-    UEntity uSoftwareEntity;
-    UResource uResource;
-    auto uUri = UUri(uAuthority, uSoftwareEntity, uResource);
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromPartsWhenTheyAreNull) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().build()).
+            setEntity(BuildUEntity().build()).
+            setResource(BuildUResource().build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(u_protocol_uri.empty());
 }
 
 // Test Create a uProtocol URI from the parts of URI Object with a microRemote
 // authority with service and version with resource.
-static void
-test_build_protocol_uri_from_uri_parts_when_uri_has_remote_authority_service_and_version_with_resource() {
-    UAuthority uAuthority = UAuthority::longRemote("VCU", "MY_CAR_VIN");
-    auto use = UEntity::longFormat("body.access", 1);
-    UResource uResource = UResource::longFormat("door");
-    auto uUri = UUri(uAuthority, use, uResource);
-    std::string uProtocolUri = LongUriSerializer::serialize(uUri);
-    assertEquals("//vcu.my_car_vin/body.access/1/door", uProtocolUri);
+TEST(LongUriSerializer, testBuildProtocolUriFromUriPartsWhenUriHasRemoteAuthorityServiceAndVersionWithResource) {
+    auto u_uri = BuildUUri().setAutority(BuildUAuthority().setName("VCU", "MY_CAR_VIN").build()).
+            setEntity(BuildUEntity().setName("body.access").setMajorVersion(1).build()).
+            setResource(BuildUResource().setName("door").build()).
+            build();
+    auto u_protocol_uri = LongUriSerializer::serialize(u_uri);
+    assertTrue(LongUriSerializer::serialize(u_uri) == "//vcu.my_car_vin/body.access/1/door");
 }
 
-Ensure(LongUriSerializer, all_tests) {
-    test_using_the_serializers();
 
-    test_parse_protocol_uri_when_is_empty_string();
-    test_parse_protocol_uri_with_schema_and_slash();
-    test_parse_protocol_uri_with_schema_and_double_slash();
-    test_parse_protocol_uri_with_schema_and_3_slash_and_something();
-    test_parse_protocol_uri_with_schema_and_4_slash_and_something();
-    test_parse_protocol_uri_with_schema_and_5_slash_and_something();
-    test_parse_protocol_uri_with_schema_and_6_slash_and_something();
-
-    test_parse_protocol_uri_with_local_service_no_version();
-    test_parse_protocol_uri_with_local_service_with_version();
-    test_parse_protocol_uri_with_local_service_no_version_with_resource_name_only();
-    test_parse_protocol_uri_with_local_service_with_version_with_resource_name_only();
-    test_parse_protocol_uri_with_local_service_no_version_with_resource_with_instance();
-    test_parse_protocol_uri_with_local_service_with_version_with_resource_with_message();
-    test_parse_protocol_uri_with_local_service_no_version_with_resource_with_instance_and_message();
-    test_parse_protocol_uri_with_local_service_with_version_with_resource_with_instance_and_message();
-
-    test_parse_protocol_rpc_uri_with_local_service_no_version();
-    test_parse_protocol_rpc_uri_with_local_service_with_version();
-
-    test_parse_protocol_uri_with_remote_service_only_device_no_domain();
-    test_parse_protocol_uri_with_remote_service_only_device_and_domain();
-
-    test_parse_protocol_uri_with_remote_service_no_version();
-    test_parse_protocol_uri_with_remote_service_with_version();
-    test_parse_protocol_uri_with_remote_service_no_version_with_resource_name_only();
-    test_parse_protocol_uri_with_remote_service_with_version_with_resource_name_only();
-    test_parse_protocol_uri_with_remote_service_no_version_with_resource_and_instance_no_message();
-    test_parse_protocol_uri_with_remote_service_with_version_with_resource_and_instance_no_message();
-    test_parse_protocol_uri_with_remote_service_no_version_with_resource_and_instance_and_message();
-    test_parse_protocol_uri_with_remote_service_with_version_with_resource_and_instance_and_message();
-    test_parse_protocol_uri_with_remote_service_with_version_with_resource_with_message_device_no_domain();
-    test_parse_protocol_rpc_uri_with_remote_service_no_version();
-    test_parse_protocol_rpc_uri_with_remote_service_with_version();
-    test_build_protocol_uri_from_uri_when_uri_isEmpty();
-    test_build_protocol_uri_from_uri_when_uri_has_empty_use();
-    test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_no_version();
-    test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_and_version();
-    test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_no_version_with_resource();
-    test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_and_version_with_resource();
-    test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_no_version_with_resource_with_instance_no_message();
-    test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_and_version_with_resource_with_instance_no_message();
-    test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_no_version_with_resource_with_instance_with_message();
-    test_build_protocol_uri_from_uri_when_uri_has_local_authority_service_and_version_with_resource_with_instance_with_message();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_no_device_with_domain_with_service_no_version();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_and_version();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_and_version_with_resource();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version_with_resource();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_and_version_with_resource_with_instance_no_message();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version_with_resource_with_instance_no_message();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_and_version_with_resource_with_instance_and_message();
-    test_build_protocol_uri_from_uri_when_uri_has_remote_authority_service_no_version_with_resource_with_instance_and_message();
-    test_build_protocol_uri_for_source_part_of_rpc_request_where_source_is_local();
-    test_build_protocol_uri_for_source_part_of_rpc_request_where_source_is_remote();
-    test_build_protocol_uri_from_parts_when_they_are_null();
-    test_build_protocol_uri_from_uri_parts_when_uri_has_remote_authority_service_and_version_with_resource();
-}
-
-int main(int argc, const char** argv) {
-    TestSuite* suite = create_test_suite();
-
-    add_test_with_context(suite, LongUriSerializer, all_tests);
-
-    return run_test_suite(suite, create_text_reporter());
+auto main(int argc, const char** argv) -> int {
+    ::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
+    return RUN_ALL_TESTS();
 }

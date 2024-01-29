@@ -22,16 +22,17 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _URI_VALIDATOR_H_
-#define _URI_VALIDATOR_H_
+#ifndef URI_VALIDATOR_H_
+#define URI_VALIDATOR_H_
 
 #include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
+#include <uprotocol-cpp/uri/tools/Utils.h>
 
 namespace uprotocol::uri {
 
 bool valid_uri(const std::string& uri) {
     auto uri_view = LongUriSerializer::deserialize(uri);
-    return !uri_view.isEmpty();
+    return !isEmpty(uri_view);
 }
 
 }  // namespace uprotocol::uri

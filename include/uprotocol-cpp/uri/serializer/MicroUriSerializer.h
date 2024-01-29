@@ -22,10 +22,16 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _MICRO_URI_SERIALIZER_H_
-#define _MICRO_URI_SERIALIZER_H_
+#ifndef MICRO_URI_SERIALIZER_H_
+#define MICRO_URI_SERIALIZER_H_
 
-#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <uprotocol-cpp/uri/builder/BuildUUri.h>
+#include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
+#include <uprotocol-cpp/uri/builder/BuildEntity.h>
+#include <uprotocol-cpp/uri/builder/BuildUResource.h>
+#include "uprotocol-cpp/uri/serializer/IpAddress.h"
+
+using AddressType = uprotocol::uri::IpAddress::AddressType;
 
 namespace uprotocol::uri {
 
@@ -40,44 +46,132 @@ public:
      * @param uUri The UUri data object.
      * @return Returns a vector<uint8_t> representing the serialized UUri.
      */
-    static std::vector<uint8_t> serialize(const UUri& uUri);
+    [[nodiscard]] static auto serialize(const uprotocol::v1::UUri& u_uri) -> std::vector<uint8_t>;
 
     /**
      * Deserialize a vector<uint8_t> into a UUri object.
      * @param microUri A vector<uint8_t> uProtocol micro URI.
      * @return Returns an UUri data object from the serialized format of a microUri.
      */
-    static UUri deserialize(std::vector<uint8_t> const& microUri);
+    [[nodiscard]] static auto deserialize(std::vector<uint8_t> const& addr) -> uprotocol::v1::UUri;
 
 private:
     /**
      * Default MicroUriSerializer constructor.
      */
     MicroUriSerializer() = default;
-
     /**
-     * The length of a local micro URI.
+     * find the address type enum 
+     * @param type 
+     * @return std::optional<AddressType> std::nullopt if not found and AddressType if foundddr
      */
-    static constexpr uint32_t LOCAL_MICRO_URI_LENGTH = 8;
+    [[nodiscard]] static auto getAddressType(uint8_t type) -> std::optional<AddressType>;
+    /**
+     * Check that the micro URI size fit the definitions
+     * @param size 
+     * @param address_type 
+     * @return 
+     */
+    [[nodiscard]] static auto checkMicroUriSize(std::size_t size, AddressType address_type) -> bool;
+    /**
+     * Get UAthority from the address and type
+     * @param addr 
+     * @param type 
+     * @return uprotocol::v1::UAuthority if address is not valid UAuthority return empty
+     */
+    [[nodiscard]] static auto getUauthority(const std::vector<uint8_t> &addr, AddressType type) -> uprotocol::v1::UAuthority;
+    /**
+     * Debug function to print the ip address
+     * @param ip 
+     * @return 
+     */
+    [[maybe_unused]] static auto printIp(std::vector<uint8_t> ip);
+    
+    /**
+     * Add the ip address to the micro URI
+     * @param u_uri vector of uint8_t representing the micro URI
+     * @param uri uprotocol::v1::UUri
+     * @param address String of the ip address or the ID
+     */
+    [[maybe_unused]] static auto addIpOrId(const uprotocol::v1::UUri &u_uri, std::vector<uint8_t> &uri, std::string &address) -> void;
+    
+    /**
+         * The length of a local micro URI.
+         */
+    static constexpr uint32_t LocalMicroUriLength = 8;
     /**
      * The length of a IPv4 micro URI.
      */
-    static constexpr uint32_t IPV4_MICRO_URI_LENGTH = 12;
+    static constexpr uint32_t IpV4MicroUriLength = 12;
     /**
      * The length of a IPv6 micro URI.
      */
-    static constexpr uint32_t IPV6_MICRO_URI_LENGTH = 24;
+    static constexpr uint32_t IpV6MicroUriLength = 24;
     /**
      * Starting position of the IP address in the micro URI.
      */
-    static constexpr uint8_t IPADDRESS_START_POSITION = 4;
+    static constexpr uint8_t IpaddressStartPosition = LocalMicroUriLength;
+    /**
+     * Starting position of the entity id in the micro URI.
+     */
+    static constexpr uint8_t ResourceIdPosition = 2;
+    /**
+     * Entity id position in the micro URI.
+     */
+    static constexpr uint8_t EntityIdStartPosition = 4;
+    /**
+     * UE version position in the micro URI.
+     */
+    static constexpr uint8_t UeVersionPosition = EntityIdStartPosition + 2;
+    /**
+     * the max size of id string in the micro URI. 
+     */
+    static constexpr uint8_t UAutorityIdMaxLength = 255;
     /**
      * The version of the UProtocol.
      */
-    static constexpr uint8_t UP_VERSION = 0x01;
-
+    static constexpr uint8_t UpVersion = 0x01;
+    
 }; // class MicroUriSerializer
+    // utility functions
+    /**
+     * Check if uprotocol::v1::UResourc is micro form
+     * @param resource 
+     * @return 
+     */
+    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UResource &resource) -> bool {
+        return resource.has_id() && resource.id() > 0;
+    }
+    
+    /**
+      * Check if uprotocol::v1::UEntity is micro form
+      * @param resource 
+      * @return 
+      */
+    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UEntity &entity) -> bool {
+        return entity.has_id() && entity.id() > 0;
+    }
+    
+    /**
+     * Check if uprotocol::v1::UAuthority is micro form
+     * @param resource 
+     * @return 
+     */
+    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UAuthority &authority) -> bool {
+        return isEmpty(authority) || (authority.has_ip() && !authority.ip().empty()) || (authority.has_id() && !authority.id().empty());
+    }
+    
+    /**
+     * Check if uprotocol::v1::UUri is micro form
+     * @param resource 
+     * @return 
+     */
+    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UUri &uri) -> bool {
+        return isMicroForm(uri.authority()) &&
+               isMicroForm(uri.entity()) &&
+               isMicroForm(uri.resource());
+    }
 
 } // namespace uprotocol::uri
 
-#endif // _MICRO_URI_SERIALIZER_H_
+#endif // MICRO_URI_SERIALIZER_H_

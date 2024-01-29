@@ -27,14 +27,13 @@
 #define _UATTRIBUTES_
 
 #include <memory>
-#include <uprotocol-cpp/uri/datamodel/UUri.h>
 #include <uprotocol-cpp/uuid/factory/UuidFactory.h>
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"
-#include "src/main/proto/uuid.pb.h"
+#include "uprotocol/uuid.pb.h"
+#include "uprotocol/uri.pb.h"
 
-using namespace uprotocol::uri;
 using namespace uprotocol::v1;
 
 namespace uprotocol::utransport {
@@ -58,7 +57,7 @@ namespace uprotocol::utransport {
                 this->type_ = UMessageType::UNDEFINED;
                 this->priority_ = UPriority::UNDEFINED;
 
-                    //optional
+                //optional
                 this->ttl_ = std::nullopt;             
                 this->token_ = std::nullopt;
                 this->hint_ = std::nullopt;
