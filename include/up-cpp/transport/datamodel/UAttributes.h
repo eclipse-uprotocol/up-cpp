@@ -27,7 +27,7 @@
 #define _UATTRIBUTES_
 
 #include <memory>
-#include <uprotocol-cpp/uuid/factory/UuidFactory.h>
+#include <up-cpp/uuid/factory/UuidFactory.h>
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"

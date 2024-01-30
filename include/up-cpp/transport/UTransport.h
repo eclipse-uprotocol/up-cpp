@@ -28,9 +28,9 @@
 
 #include <stdint.h>
 #include <cstddef>
-#include <uprotocol-cpp/transport/datamodel/UListener.h>
-#include <uprotocol-cpp/transport/datamodel/UPayload.h>
-#include <uprotocol-cpp/transport/datamodel/UAttributes.h>
+#include <up-cpp/transport/datamodel/UListener.h>
+#include <up-cpp/transport/datamodel/UPayload.h>
+#include <up-cpp/transport/datamodel/UAttributes.h>
 #include <uprotocol/uri.pb.h>
 #include <uprotocol/ustatus.pb.h>
 

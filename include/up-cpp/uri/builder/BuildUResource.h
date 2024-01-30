@@ -37,7 +37,7 @@
 #include <string_view>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
-#include <uprotocol-cpp/uri/tools/Utils.h>
+#include <up-cpp/uri/tools/Utils.h>
 #include "uprotocol/uri.pb.h"
 
 namespace uprotocol::uri {

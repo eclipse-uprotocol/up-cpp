@@ -32,8 +32,8 @@
 #include <optional>
 #include <unordered_map>
 
-#include <uprotocol-cpp/cloudevent/datamodel/cloud_event.h>
-#include <uprotocol-cpp/tools/base64.h>
+#include <up-cpp/cloudevent/datamodel/cloud_event.h>
+#include <up-cpp/tools/base64.h>
 #include "cloudevents.pb.h"
 #include "google/protobuf/util/time_util.h"
 #include "rapidjson/document.h"

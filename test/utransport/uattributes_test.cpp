@@ -24,9 +24,9 @@
  */
 
 #include "spdlog/spdlog.h"
-#include <uprotocol-cpp/transport/datamodel/UAttributes.h>
-#include <uprotocol-cpp/uuid/factory/UuidFactory.h>
-#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <up-cpp/transport/datamodel/UAttributes.h>
+#include <up-cpp/uuid/factory/UuidFactory.h>
+#include <up-cpp/uri/datamodel/UUri.h>
 #include <gtest/gtest.h>
 
 using namespace uprotocol::utransport;

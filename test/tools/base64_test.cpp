@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <uprotocol-cpp/tools/base64.h>
+#include <up-cpp/tools/base64.h>
 #include <gtest/gtest.h>
 #include <array>
 

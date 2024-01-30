@@ -25,11 +25,11 @@
 #ifndef MICRO_URI_SERIALIZER_H_
 #define MICRO_URI_SERIALIZER_H_
 
-#include <uprotocol-cpp/uri/builder/BuildUUri.h>
-#include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
-#include <uprotocol-cpp/uri/builder/BuildEntity.h>
-#include <uprotocol-cpp/uri/builder/BuildUResource.h>
-#include "uprotocol-cpp/uri/serializer/IpAddress.h"
+#include <up-cpp/uri/builder/BuildUUri.h>
+#include <up-cpp/uri/builder/BuildUAuthority.h>
+#include <up-cpp/uri/builder/BuildEntity.h>
+#include <up-cpp/uri/builder/BuildUResource.h>
+#include "up-cpp/uri/serializer/IpAddress.h"
 
 using AddressType = uprotocol::uri::IpAddress::AddressType;
 

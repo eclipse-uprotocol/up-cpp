@@ -22,19 +22,37 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef URI_VALIDATOR_H_
-#define URI_VALIDATOR_H_
 
-#include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
-#include <uprotocol-cpp/uri/tools/Utils.h>
+#ifndef _ULISTENER_H_
+#define _ULISTENER_H_
 
-namespace uprotocol::uri {
+#include <up-cpp/transport/datamodel/UAttributes.h>
+#include <uprotocol/ustatus.pb.h>
+#include <uprotocol/uri.pb.h>
+#include "UPayload.h"
+#include "UAttributes.h"
 
-bool valid_uri(const std::string& uri) {
-    auto uri_view = LongUriSerializer::deserialize(uri);
-    return !isEmpty(uri_view);
+using namespace uprotocol::v1;
+
+namespace uprotocol::utransport {
+
+	class UListener {
+		public:
+
+			/**
+			* Method called to handle/process events.
+			* @param topic Topic the underlying source of the message.
+			* @param payload Payload of the message.
+			* @param attributes Transportation attributes
+			* @return Returns an Ack every time a message is received and processed.
+			*/
+			virtual UStatus onReceive(const UUri &uri, 
+									const UPayload &payload, 
+									const UAttributes &attributes) const = 0; 
+
+			virtual ~UListener() {} 
+	};
 }
 
-}  // namespace uprotocol::uri
 
-#endif // _URI_VALIDATOR_H_
+#endif /* _ULISTENER_H_*/

@@ -25,11 +25,11 @@
 #ifndef LONG_URI_SERIALIZER_H_
 #define LONG_URI_SERIALIZER_H_
 
-#include <uprotocol-cpp/uri/builder/BuildUResource.h>
-#include <uprotocol-cpp/uri/builder/BuildEntity.h>
-#include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
-#include <uprotocol-cpp/uri/builder/BuildUUri.h>
-#include <uprotocol-cpp/uri/tools/Utils.h>
+#include <up-cpp/uri/builder/BuildUResource.h>
+#include <up-cpp/uri/builder/BuildEntity.h>
+#include <up-cpp/uri/builder/BuildUAuthority.h>
+#include <up-cpp/uri/builder/BuildUUri.h>
+#include <up-cpp/uri/tools/Utils.h>
 #include <../up-core-api/uprotocol/uri.pb.h>
 #include <string_view>
 
