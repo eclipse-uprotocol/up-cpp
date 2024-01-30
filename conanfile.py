@@ -22,6 +22,9 @@ class up_core_api(ConanFile):
    # requires = "protobuf/3.21.12"  # Specify the version of Protobuf you need
     generators = "CMakeDeps"
 
+    # def config_options(self):
+    #     if self.settings.compiler == "gcc":
+    #         self.settings.compiler.version = "17"
     def requirements(self):
         self.requires("protobuf/3.21.12")
 
@@ -43,6 +46,7 @@ class up_core_api(ConanFile):
 
         # Create an alias for the library
         #self.cpp_info.set_target("up-cpp")
+       # self.cpp_info.cxxflags = ["-std=c++17"]
 
     def package_info(self):
         self.cpp_info.libs = ["up-cpp", "protobuf::protobuf"]

@@ -55,6 +55,7 @@ find_package(OpenSSL REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(CGreen REQUIRED)
+find_package(fmt REQUIRED)
 
 # proto generation
 set(protobuf_MODULE_COMPATIBLE TRUE)
@@ -92,9 +93,8 @@ set(uprotocol_src
 # add_library(up-cpp_static STATIC $<TARGET_OBJECTS:uprotocollib>)
 
 # set_target_properties(up-cpp_static PROPERTIES OUTPUT_NAME up-cpp)
-
+add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
-
 # target_link_libraries(up-cpp_static 
 # 					  ${Protobuf_LIBRARIES} 
 # 					  ${RapidJSON_LIBRARIES} 
