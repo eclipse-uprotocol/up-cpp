@@ -14,18 +14,16 @@ class up_core_api(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [False, False]}
+    default_options = {"shared": True, "fPIC": False}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = "CMakeLists.txt", "include/*" ,"src/*" , "up-core-api/*"
+   # requires = "protobuf/3.21.12"  # Specify the version of Protobuf you need
+    generators = "CMakeDeps"
 
-
- #   def configure(self):
-     #   self.build_folder = "/projects_dev_sdv/uSpace/conan_sandbox/up-cpp"
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def requirements(self):
+        self.requires("protobuf/3.21.12")
 
     def layout(self):
         cmake_layout(self)
@@ -43,5 +41,8 @@ class up_core_api(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        # Create an alias for the library
+        #self.cpp_info.set_target("up-cpp")
+
     def package_info(self):
-        self.cpp_info.libs = ["up-cpp"]
+        self.cpp_info.libs = ["up-cpp", "protobuf::protobuf"]
