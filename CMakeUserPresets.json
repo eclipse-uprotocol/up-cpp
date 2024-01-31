@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/home/xz62px/projects_dev_sdv/uSpace/conan_sandbox/up-cpp/build/Release/generators/CMakePresets.json"
+    ]
+}

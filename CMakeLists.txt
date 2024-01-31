@@ -48,6 +48,12 @@ foreach(file ${PROTOBUF_DEFINITION_FILES})
         OUTPUT_VARIABLE PROTOBUF_OUTPUT_VARIABLE)
 endforeach()
 
+find_package(RapidJSON CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(Protobuf REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(fmt REQUIRED)
+
 # add remaining directories.
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${RapidJSON_INCLUDE_DIRS})
@@ -83,3 +89,4 @@ add_subdirectory(test)
 
 INSTALL(TARGETS up-cpp)
 INSTALL(DIRECTORY include DESTINATION .) 
+INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api DESTINATION include) 
