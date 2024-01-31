@@ -18,11 +18,11 @@
  # under the License.
  
 
-cmake_minimum_required(VERSION 3.18.0)
+cmake_minimum_required(VERSION 3.10.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-project(up-cpp VERSION 0.1.0 LANGUAGES CXX)
+project(up-cpp  LANGUAGES CXX)
 
 if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)

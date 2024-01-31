@@ -31,8 +31,8 @@
 #include "UMessageType.h"
 #include "USerializationHint.h"
 #include "UPriority.h"
-#include "uprotocol/uuid.pb.h"
-#include "uprotocol/uri.pb.h"
+#include "up-core-api/uuid.pb.h"
+#include "up-core-api/uri.pb.h"
 
 using namespace uprotocol::v1;
 

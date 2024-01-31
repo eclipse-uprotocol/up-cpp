@@ -27,8 +27,8 @@
 #define _ULISTENER_H_
 
 #include <up-cpp/transport/datamodel/UAttributes.h>
-#include <uprotocol/ustatus.pb.h>
-#include <uprotocol/uri.pb.h>
+#include <up-core-api/ustatus.pb.h>
+#include <up-core-api/uri.pb.h>
 #include "UPayload.h"
 #include "UAttributes.h"
 
