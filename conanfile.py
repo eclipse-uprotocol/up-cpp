@@ -23,7 +23,6 @@ class up_core_api(ConanFile):
     exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "up-core-api/*", "test/*"
     requires = [
         "spdlog/1.13.0",
-        "openssl/3.2.0",
         "fmt/10.2.1",
         "rapidjson/cci.20230929",
         "gtest/1.14.0"
@@ -54,4 +53,4 @@ class up_core_api(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["up-cpp", "protobuf::protobuf" , "spdlog::spdlog", "openssl::openssl", "fmt::fmt", "gtest::gtest"]
+        self.cpp_info.libs = ["up-cpp", "protobuf::protobuf", "spdlog::spdlog", "fmt::fmt"]
