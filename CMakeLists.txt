@@ -19,54 +19,35 @@
  
 
 cmake_minimum_required(VERSION 3.18.0)
-#file(STRINGS "VERSION" VERSION_STRING)
 
 set(CMAKE_CXX_STANDARD 17)
-project(up-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX)
+
+project(up-cpp VERSION 0.1.0 LANGUAGES CXX)
+
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	conan_basic_setup()
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-include (CTest)
-include(ExternalProject)
-
 file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/*.proto")
 
 set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
-set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol/")
+set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/")
 
 file(MAKE_DIRECTORY ${PROTOBUF_OUTPUT_DIRECTORY})
 
 foreach(file ${PROTOBUF_DEFINITION_FILES})
     set(PROTOBUF_ARGUMENTS "-I=${PROTOBUF_INPUT_DIRECTORY}" "--cpp_out=${PROTOBUF_OUTPUT_DIRECTORY}" "${file}")
-
     execute_process(
         COMMAND protoc ${PROTOBUF_ARGUMENTS}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         RESULT_VARIABLE PROTOBUF_RESULT
         OUTPUT_VARIABLE PROTOBUF_OUTPUT_VARIABLE)
-
 endforeach()
 
-enable_testing()
-
-find_package(RapidJSON CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(Protobuf REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-find_package(CGreen REQUIRED)
-find_package(fmt REQUIRED)
-
-# proto generation
-set(protobuf_MODULE_COMPATIBLE TRUE)
-
-set(CLOUD_EVENT_PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/up-cpp/proto)
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include/up-cpp/proto)
-
-# add generated protobuf and directory.
-include_directories(${CLOUD_EVENT_PROTO_BINARY_DIR})
-include_directories(${PROTO_TEST_BINARY_DIR})
-include_directories(${PROTOBUF_OUTPUT_DIRECTORY}) 
 # add remaining directories.
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${RapidJSON_INCLUDE_DIRS})
@@ -74,46 +55,31 @@ include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
 include_directories(${CGREEN_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/up-core-api)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
-file(GLOB 			CLOUD_EVENT_PROTO_CPP 		 "${CLOUD_EVENT_PROTO_BINARY_DIR}/*.cc")
-file(GLOB 			SRC_PROTO_CORE_API 			 "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol/*.cc")
-file(GLOB_RECURSE 	SRC_FILES 					 "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB 			SRC_PROTO_CORE_API 	"${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/*.cc")
+file(GLOB_RECURSE 	SRC_FILES 			"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
  
-set(uprotocol_src 
+set(UPROTOCOL_SRC 
 	${SRC_FILES}
-	${CLOUD_EVENT_PROTO_CPP}
 	${SRC_PROTO_CORE_API})
 
-#add_library(uprotocollib OBJECT ${uprotocol_src})
-
-# set_property(TARGET uprotocollib PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-# add_library(up-cpp SHARED $<TARGET_OBJECTS:uprotocollib>)
-# add_library(up-cpp_static STATIC $<TARGET_OBJECTS:uprotocollib>)
-
-# set_target_properties(up-cpp_static PROPERTIES OUTPUT_NAME up-cpp)
 add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
-# target_link_libraries(up-cpp_static 
-# 					  ${Protobuf_LIBRARIES} 
-# 					  ${RapidJSON_LIBRARIES} 
-# 					  cloudevent_proto
-# 					  spdlog::spdlog)
 
 add_library(up-cpp SHARED
-			${uprotocol_src}
-			${RapidJSON_LIBRARIES}
-			#  cloudevent_proto
-			${spdlog_LIBRARIES})
+			${UPROTOCOL_SRC})
 
-target_link_libraries(up-cpp PRIVATE protobuf::protobuf)
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	target_link_libraries(up-cpp PRIVATE 
+		       			  ${CONAN_LIBS})
+else()
+	target_link_libraries(up-cpp PRIVATE 
+   					  	  protobuf::protobuf
+						  spdlog::spdlog)
+endif()
 
-#add_dependencies(up-cpp_static cloudevent_proto)
-#add_dependencies(up-cpp cloudevent_proto)
-
-#add_subdirectory(test)
+add_subdirectory(test)
 
 INSTALL(TARGETS up-cpp)
 INSTALL(DIRECTORY include DESTINATION .) 
-INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol DESTINATION .) 

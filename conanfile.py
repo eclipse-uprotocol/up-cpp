@@ -1,4 +1,6 @@
 from conan import ConanFile, tools
+from conans import ConanFile, CMake
+
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 import shutil
 
@@ -18,13 +20,16 @@ class up_core_api(ConanFile):
     default_options = {"shared": True, "fPIC": False}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "include/*" ,"src/*" , "up-core-api/*"
-   # requires = "protobuf/3.21.12"  # Specify the version of Protobuf you need
+    exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "up-core-api/*", "test/*"
+    requires = [
+        "spdlog/1.13.0",
+        "openssl/3.2.0",
+        "fmt/10.2.1",
+        "rapidjson/cci.20230929",
+        "gtest/1.14.0"
+    ]
     generators = "CMakeDeps"
 
-    # def config_options(self):
-    #     if self.settings.compiler == "gcc":
-    #         self.settings.compiler.version = "17"
     def requirements(self):
         self.requires("protobuf/3.21.12")
 
@@ -33,6 +38,10 @@ class up_core_api(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.preprocessor_definitions["CMAKE_CXX_STANDARD"] = "17"
+        tc.preprocessor_definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = "ON"
+        tc.preprocessor_definitions["CMAKE_CXX_FLAGS"] = "-MD -MT"
+         
         tc.generate()
 
     def build(self):
@@ -44,9 +53,5 @@ class up_core_api(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # Create an alias for the library
-        #self.cpp_info.set_target("up-cpp")
-       # self.cpp_info.cxxflags = ["-std=c++17"]
-
     def package_info(self):
-        self.cpp_info.libs = ["up-cpp", "protobuf::protobuf"]
+        self.cpp_info.libs = ["up-cpp", "protobuf::protobuf" , "spdlog::spdlog", "openssl::openssl", "fmt::fmt", "gtest::gtest"]

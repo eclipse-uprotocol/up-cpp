@@ -1,0 +1,12 @@
+[requires]
+protobuf/3.21.12
+spdlog/1.13.0
+openssl/3.2.0
+fmt/10.2.1
+rapidjson/cci.20230929
+gtest/1.14.0
+[generators]
+cmake
+
+[layout]
+cmake_layout

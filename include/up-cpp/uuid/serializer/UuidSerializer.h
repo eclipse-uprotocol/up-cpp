@@ -25,7 +25,7 @@
 #ifndef _UUID_SERIALIZER_H_
 #define _UUID_SERIALIZER_H_
 
-#include <uprotocol/uuid.pb.h>
+#include <up-core-api/uuid.pb.h>
 #include <spdlog/spdlog.h>
 
 namespace uprotocol::uuid {

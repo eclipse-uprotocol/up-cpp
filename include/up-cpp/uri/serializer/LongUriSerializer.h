@@ -30,7 +30,7 @@
 #include <up-cpp/uri/builder/BuildUAuthority.h>
 #include <up-cpp/uri/builder/BuildUUri.h>
 #include <up-cpp/uri/tools/Utils.h>
-#include <uprotocol/uri.pb.h>
+#include <up-core-api/uri.pb.h>
 #include <string_view>
 
 namespace uprotocol::uri {

@@ -38,7 +38,7 @@
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
 #include <up-cpp/uri/tools/Utils.h>
-#include "uprotocol/uri.pb.h"
+#include "up-core-api/uri.pb.h"
 
 namespace uprotocol::uri {
     class BuildUResource {
