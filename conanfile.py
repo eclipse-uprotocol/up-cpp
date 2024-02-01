@@ -31,6 +31,7 @@ class up_core_api(ConanFile):
 
     def requirements(self):
         self.requires("protobuf/3.21.12")
+        self.requires("gtest/1.14.0")
 
     def layout(self):
         cmake_layout(self)
@@ -40,7 +41,7 @@ class up_core_api(ConanFile):
         tc.preprocessor_definitions["CMAKE_CXX_STANDARD"] = "17"
         tc.preprocessor_definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = "ON"
         tc.preprocessor_definitions["CMAKE_CXX_FLAGS"] = "-MD -MT"
-         
+        #tc.preprocessor_definitions["GLIBCXX_USE_CXX11_ABI"] = "1"
         tc.generate()
 
     def build(self):
@@ -53,4 +54,4 @@ class up_core_api(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["up-cpp", "protobuf::protobuf", "spdlog::spdlog", "fmt::fmt"]
+        self.cpp_info.libs = ["up-cpp", "protobuf::protobuf", "spdlog::spdlog", "fmt::fmt", ]

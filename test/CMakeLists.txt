@@ -20,10 +20,30 @@
  # SPDX-FileType: SOURCE
  # SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  # SPDX-License-Identifier: Apache-2.0
- 
+
 set(TESTS_PATH ../test)
 
-include_directories(../uprotocol/proto)
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	conan_basic_setup()
+  set(GTEST_LIBS ${CONAN_LIBS_GTEST})
+else()
+  set(protobuf_MODULE_COMPATIBLE TRUE)
+  find_package(Protobuf REQUIRED)
+  find_package(GTest REQUIRED)
+  find_package(spdlog REQUIRED)
+  find_package(fmt REQUIRED)
+
+  include_directories(${protobuf_INCLUDE_DIR})
+  include_directories(${GTest_INCLUDE_DIRS})
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  include_directories(${spdlog_INCLUDE_DIRS})
+  include_directories(${fmt_INCLUDE_DIRS})
+  set(GTEST_LIBS GTest::gtest GTest::gtest_main)
+endif()
+
+add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
+add_compile_definitions(GLIBCXX_USE_CXX11_ABI=0)
 
 file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol/*.cc")
 
@@ -36,12 +56,6 @@ file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/up
 #			   ${PROTO_CPP_FILE})
 
 #target_link_libraries(json_serializer_test ${CGREEN_LIBRARY} ${RapidJSON_LIBRARIES} up-cpp)
-
-find_package(Protobuf REQUIRED)
-include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-protobuf_generate_cpp(TEST_PROTO_SRCS TEST_PROTO_HDRS ${TESTS_PATH}/factory/test.proto)
 
 #add_executable(binary_serializer_test
 #				${TESTS_PATH}/binary/binary_test.cpp
@@ -65,10 +79,10 @@ protobuf_generate_cpp(TEST_PROTO_SRCS TEST_PROTO_HDRS ${TESTS_PATH}/factory/test
 # target_link_libraries(attribute_tests ${CGREEN_LIBRARY} up-cpp)
 # add_test("t-03-attribute-test" attribute_tests)
 
-add_executable(base64_test 
+add_executable(base64_test
 	${TESTS_PATH}/tools/base64_test.cpp)
-target_link_libraries(base64_test gtest gtest_main up-cpp)
-add_test("t-06-base64-test" base64_test)	
+target_link_libraries(base64_test up-cpp ${GTEST_LIBS})
+add_test("t-06-base64-test" base64_test)
 
 #add_test("t-07-ce-factory-test" base64_test)
 #add_executable(service_type_test ${TESTS_PATH}/model/serviceType_test.cpp)
@@ -78,53 +92,52 @@ add_test("t-06-base64-test" base64_test)
 
 add_executable(UAuthorityTest
 	${TESTS_PATH}/uri/builder/UAuthorityTest.cpp)
-target_link_libraries(UAuthorityTest up-cpp gtest gtest_main)
+target_link_libraries(UAuthorityTest up-cpp ${GTEST_LIBS})
 add_test("t-09-UAuthorityTest" UAuthorityTest)
 
 add_executable(UEntityTest
 		${TESTS_PATH}/uri/builder/UEntityTest.cpp)
-target_link_libraries(UEntityTest up-cpp gtest gtest_main)
+target_link_libraries(UEntityTest up-cpp ${GTEST_LIBS})
 add_test("t-10-UEntityTest" UEntityTest)
 
 add_executable(UResourceTest
 	${TESTS_PATH}/uri/builder/UResourceTest.cpp)
-target_link_libraries(UResourceTest up-cpp gtest gtest_main)
+target_link_libraries(UResourceTest up-cpp ${GTEST_LIBS})
 add_test("t-11-UResourceTest" UResourceTest)
 
 add_executable(UUriTest
 	${TESTS_PATH}/uri/builder/UUriTest.cpp)
-target_link_libraries(UUriTest up-cpp gtest gtest_main)
+target_link_libraries(UUriTest up-cpp ${GTEST_LIBS})
 add_test("t-12-UUriTest" UUriTest)
 
 add_executable(LongUriSerializerTest
 		${TESTS_PATH}/uri/serializer/LongUriSerializerTest.cpp)
 target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
-target_link_libraries(LongUriSerializerTest up-cpp gtest gtest_main)
+target_link_libraries(LongUriSerializerTest up-cpp ${GTEST_LIBS})
 add_test("t-13-LongUriSerializerTest"  LongUriSerializerTest)
 
 add_executable(MicroUriSerializerTest
 	${TESTS_PATH}/uri/serializer/MicroUriSerializerTest.cpp)
 target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
-target_link_libraries(MicroUriSerializerTest up-cpp gtest gtest_main)
+target_link_libraries(MicroUriSerializerTest up-cpp ${GTEST_LIBS})
 add_test("t-14-MicroUriSerializerTest"  MicroUriSerializerTest)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(umessagetypes_test
 	${TESTS_PATH}/utransport/umessagetypes_test.cpp)
-target_link_libraries(umessagetypes_test up-cpp gtest gtest_main)
+target_link_libraries(umessagetypes_test up-cpp ${GTEST_LIBS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(upayload_test
 	${TESTS_PATH}/utransport/upayload_test.cpp)
-target_link_libraries(upayload_test up-cpp gtest gtest_main)
+target_link_libraries(upayload_test up-cpp ${GTEST_LIBS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(upriority_test
 	${TESTS_PATH}/utransport/upriority_test.cpp)
-target_link_libraries(upriority_test  up-cpp gtest gtest_main)
+target_link_libraries(upriority_test up-cpp ${GTEST_LIBS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(userializationhint_test
 	${TESTS_PATH}/utransport/userializationhint_test.cpp)
-target_link_libraries(userializationhint_test up-cpp gtest gtest_main)
-
+target_link_libraries(userializationhint_test up-cpp ${GTEST_LIBS})

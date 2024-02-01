@@ -5,6 +5,7 @@ openssl/3.2.0
 fmt/10.2.1
 rapidjson/cci.20230929
 gtest/1.14.0
+pkgconf/2.1.0
 [generators]
 cmake
 
