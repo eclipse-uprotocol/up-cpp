@@ -73,10 +73,6 @@ add_definitions(-DSPDLOG_FMT_EXTERNAL)
 add_library(up-cpp SHARED
 			      ${UPROTOCOL_SRC})
 
-#temporary workaround - needs to be removed 
-add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
-add_compile_definitions(GLIBCXX_USE_CXX11_ABI=0)
-
 if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   target_link_libraries(up-cpp PRIVATE
 		       			        ${CONAN_LIBS})

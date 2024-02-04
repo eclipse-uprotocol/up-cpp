@@ -42,8 +42,6 @@ else()
   set(GTEST_LIBS GTest::gtest GTest::gtest_main)
 endif()
 
-add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
-add_compile_definitions(GLIBCXX_USE_CXX11_ABI=0)
 
 file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol/*.cc")
 

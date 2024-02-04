@@ -39,10 +39,6 @@ class up_cpp(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.preprocessor_definitions["CMAKE_CXX_STANDARD"] = "17"
-        tc.preprocessor_definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = "ON"
-        tc.preprocessor_definitions["CMAKE_CXX_FLAGS"] = "-MD -MT"
-        #tc.preprocessor_definitions["GLIBCXX_USE_CXX11_ABI"] = "1"
         tc.generate()
 
     def build(self):
