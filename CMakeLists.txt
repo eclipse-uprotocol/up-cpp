@@ -32,10 +32,17 @@ else()
   set(PROTOBUF_PROTOC "protoc")
 endif()
 
-set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
+if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/)
+  set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
+elseif (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/)
+  set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/")
+else()
+  message("Error: could not find up-core-api")
+endif()
+
 set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/")
 
-file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/*.proto")
+file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${PROTOBUF_INPUT_DIRECTORY}/*.proto")
 file(MAKE_DIRECTORY ${PROTOBUF_OUTPUT_DIRECTORY})
 
 foreach(file ${PROTOBUF_DEFINITION_FILES})
@@ -47,19 +54,8 @@ foreach(file ${PROTOBUF_DEFINITION_FILES})
         OUTPUT_VARIABLE PROTOBUF_OUTPUT_VARIABLE)
 endforeach()
 
-#get_cmake_property(_variableNames VARIABLES)
-#list (SORT _variableNames)
-#foreach (_variableName ${_variableNames})
-#    if (_variableName MATCHES "protobuf")
-  #      message(STATUS "${_variableName}=${${_variableName}}")
-  #  endif()
-#endforeach()
-
 # add remaining directories.
 include_directories(${protobuf_INCLUDE_DIR})
-include_directories(${RapidJSON_INCLUDE_DIRS})
-include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
-include_directories(${CGREEN_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -75,8 +71,9 @@ add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
 add_library(up-cpp SHARED
-			${UPROTOCOL_SRC})
+			      ${UPROTOCOL_SRC})
 
+#temporary workaround - needs to be removed 
 add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
 add_compile_definitions(GLIBCXX_USE_CXX11_ABI=0)
 

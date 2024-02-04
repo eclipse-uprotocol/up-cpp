@@ -20,14 +20,18 @@ class up_core_api(ConanFile):
     default_options = {"shared": True, "fPIC": False}
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "up-core-api/*", "test/*"
+    exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "test/*"
     requires = [
         "spdlog/1.13.0",
         "fmt/10.2.1",
         "rapidjson/cci.20230929",
         "gtest/1.14.0"
     ]
+
     generators = "CMakeDeps"
+
+    def source(self):
+        self.run("git clone https://github.com/eclipse-uprotocol/up-core-api.git")
 
     def requirements(self):
         self.requires("protobuf/3.21.12")
