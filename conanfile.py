@@ -54,4 +54,4 @@ class up_core_api(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["up-cpp", "protobuf::protobuf", "spdlog::spdlog", "fmt::fmt", ]
+        self.cpp_info.libs = ["up-cpp"]
