@@ -42,6 +42,13 @@ else()
   set(GTEST_LIBS GTest::gtest GTest::gtest_main)
 endif()
 
+#add_executable(json_serializer_test
+#			   ${TESTS_PATH}/json/json_serializer_test.cpp
+#			   ${CGREEN_INCLUDE_DIR}
+#			   ${SRC_HDR_MODEL}
+#			   ${SRC_HDR_JSON}
+#			   ${PROTO_HDR_FILE}
+#			   ${PROTO_CPP_FILE})
 
 file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol/*.cc")
 
