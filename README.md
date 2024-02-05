@@ -38,10 +38,28 @@ $ sudo apt-get install build-essential \
       libssl-dev
 $ pip3 install conan==1.59
 ```
+
 #### Setup SDK local repository, build and test
 ```
 $ git clone https://github.com/eclipse-uprotocol/up-core-api.git
-$ git clone https://github.com/eclipse-uprotocol/uprotocol-sdk-cpp.git
+$ git clone https://github.com/eclipse-uprotocol/up-cpp.git
+```
+
+#### Building locally 
+```
+$ cd up-cpp
+$ mkdir build
+$ cd build
+$ conan install ../conaninfo
+$ cmake ../
+$ make -j 
+```
+
+#### Creating conan package locally 
+ensure that the conan profile is configured to use ABI 11 (libstdc++11: New ABI.) standards according to https://docs.conan.io/en/1.60/howtos/manage_gcc_abi.html
+```
+$ cd up-cpp
+$ conan create . --build=missing
 ```
 
 ## Show your support
