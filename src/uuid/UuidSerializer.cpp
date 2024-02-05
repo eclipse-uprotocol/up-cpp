@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <uprotocol-cpp/uuid/serializer/UuidSerializer.h>
+#include <up-cpp/uuid/serializer/UuidSerializer.h>
 
 namespace uprotocol::uuid {
 

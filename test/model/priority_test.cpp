@@ -22,7 +22,7 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#include <uprotocol-cpp/cloudevent/datamodel/priority.h>
+#include <up-cpp/cloudevent/datamodel/priority.h>
 
 #include <cgreen/cgreen.h>
 

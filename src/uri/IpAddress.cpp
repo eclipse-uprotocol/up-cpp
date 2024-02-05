@@ -25,7 +25,7 @@
 
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
-#include <uprotocol-cpp/uri/serializer/IpAddress.h>
+#include <up-cpp/uri/serializer/IpAddress.h>
 
 using namespace uprotocol::uri;
 

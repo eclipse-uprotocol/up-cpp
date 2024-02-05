@@ -27,12 +27,12 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <uprotocol-cpp/uri/builder/BuildUUri.h>
-#include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
-#include <uprotocol-cpp/uri/builder/BuildEntity.h>
-#include <uprotocol-cpp/uri/builder/BuildUResource.h>
-#include <uprotocol-cpp/uri/tools/Utils.h>
-#include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
+#include <up-cpp/uri/builder/BuildUUri.h>
+#include <up-cpp/uri/builder/BuildUAuthority.h>
+#include <up-cpp/uri/builder/BuildEntity.h>
+#include <up-cpp/uri/builder/BuildUResource.h>
+#include <up-cpp/uri/tools/Utils.h>
+#include <up-cpp/uri/serializer/LongUriSerializer.h>
 
 /**
  * Support for serializing UUri objects into their String format.

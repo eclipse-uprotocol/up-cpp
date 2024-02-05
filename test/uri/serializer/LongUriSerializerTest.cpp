@@ -24,12 +24,12 @@
  */
 #include <string>
 #include <gtest/gtest.h>
-#include <uprotocol-cpp/uri/serializer/LongUriSerializer.h>
+#include <up-cpp/uri/serializer/LongUriSerializer.h>
 
-#include <uprotocol-cpp/uri/builder/BuildUResource.h>
-#include <uprotocol-cpp/uri/builder/BuildEntity.h>
-#include <uprotocol-cpp/uri/builder/BuildUAuthority.h>
-#include <uprotocol-cpp/uri/builder/BuildUUri.h>
+#include <up-cpp/uri/builder/BuildUResource.h>
+#include <up-cpp/uri/builder/BuildEntity.h>
+#include <up-cpp/uri/builder/BuildUAuthority.h>
+#include <up-cpp/uri/builder/BuildUUri.h>
 
 using namespace uprotocol::uri;
 

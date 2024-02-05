@@ -24,8 +24,8 @@
  */
 
 
-#include <uprotocol-cpp/uri/serializer/MicroUriSerializer.h>
-#include <uprotocol-cpp/uri/serializer/IpAddress.h>
+#include <up-cpp/uri/serializer/MicroUriSerializer.h>
+#include <up-cpp/uri/serializer/IpAddress.h>
 
 using uprotocol::uri::IpAddress;
 using AddressType = IpAddress::AddressType;

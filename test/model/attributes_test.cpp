@@ -23,10 +23,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "uprotocol-cpp/cloudevent/datamodel/attributes.h"
-
+#include "up-cpp/cloudevent/datamodel/attributes.h"
 #include <cgreen/cgreen.h>
-
 #include <iostream>
 
 using namespace cgreen;

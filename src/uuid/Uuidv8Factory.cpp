@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <uprotocol-cpp/uuid/factory/Uuidv8Factory.h>
+#include <up-cpp/uuid/factory/Uuidv8Factory.h>
 
 namespace uprotocol::uuid {
 

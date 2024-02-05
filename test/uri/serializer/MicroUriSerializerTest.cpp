@@ -24,10 +24,10 @@
  */
 #include <string>
 #include <gtest/gtest.h>
-#include <uprotocol-cpp/uri/serializer/MicroUriSerializer.h>
-#include <uprotocol-cpp/uri/builder/BuildUUri.h>
-#include <uprotocol-cpp/uri/serializer/IpAddress.h>
-#include <uprotocol-cpp/uri/tools/Utils.h>
+#include <up-cpp/uri/serializer/MicroUriSerializer.h>
+#include <up-cpp/uri/builder/BuildUUri.h>
+#include <up-cpp/uri/serializer/IpAddress.h>
+#include <up-cpp/uri/tools/Utils.h>
 
 using namespace uprotocol::uri;
 

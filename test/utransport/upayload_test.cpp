@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include <gtest/gtest.h>
-#include <uprotocol-cpp/transport/datamodel/UPayload.h>
+#include <up-cpp/transport/datamodel/UPayload.h>
 
 using namespace uprotocol::utransport;
 

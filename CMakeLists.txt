@@ -16,131 +16,75 @@
  # KIND, either express or implied.  See the License for the
  # specific language governing permissions and limitations
  # under the License.
- 
 
-cmake_minimum_required(VERSION 3.18.0)
-file(STRINGS "VERSION" VERSION_STRING)
+cmake_minimum_required(VERSION 3.10.0)
+set(CMAKE_CXX_STANDARD 17)
+project(up-cpp  LANGUAGES CXX)
 
- set(CMAKE_CXX_STANDARD 17)
-project(uprotocol-cpp VERSION "${VERSION_STRING}" LANGUAGES CXX)
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	conan_basic_setup()
+  set(PROTOBUF_PROTOC "${CONAN_BIN_DIRS_PROTOBUF}/protoc")
+else()
+  find_package(Protobuf REQUIRED)
+  find_package(spdlog REQUIRED)
+  find_package(fmt REQUIRED)
+  set(PROTOBUF_PROTOC "protoc")
+endif()
 
-set(VCPKG $ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-if (EXISTS ${VCPKG})
-    message(STATUS "Found VCPKG installation")
-    set(CMAKE_TOOLCHAIN_FILE ${VCPKG} CACHE STRING "")
-endif ()
+if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/)
+  set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
+elseif (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/)
+  set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/")
+else()
+  message("Error: could not find up-core-api")
+endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/")
 
-include (CTest)
-include(ExternalProject)
-
-file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/*.proto")
-
-set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/")
-set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../up-core-api/uprotocol/")
-
+file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${PROTOBUF_INPUT_DIRECTORY}/*.proto")
 file(MAKE_DIRECTORY ${PROTOBUF_OUTPUT_DIRECTORY})
 
 foreach(file ${PROTOBUF_DEFINITION_FILES})
     set(PROTOBUF_ARGUMENTS "-I=${PROTOBUF_INPUT_DIRECTORY}" "--cpp_out=${PROTOBUF_OUTPUT_DIRECTORY}" "${file}")
-
     execute_process(
-        COMMAND protoc ${PROTOBUF_ARGUMENTS}
+        COMMAND ${PROTOBUF_PROTOC} ${PROTOBUF_ARGUMENTS}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         RESULT_VARIABLE PROTOBUF_RESULT
         OUTPUT_VARIABLE PROTOBUF_OUTPUT_VARIABLE)
-
 endforeach()
 
-enable_testing()
-
-find_package(RapidJSON CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(Protobuf REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-find_package(CGreen REQUIRED)
-
-# proto generation
-set(protobuf_MODULE_COMPATIBLE TRUE)
-
-set(CLOUD_EVENT_PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/include/uprotocol-cpp/proto)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include/uprotocol-cpp/proto)
-
-# add generated protobuf and directory.
-include_directories(${CLOUD_EVENT_PROTO_BINARY_DIR})
-include_directories(${PROTO_TEST_BINARY_DIR})
-include_directories(${PROTOBUF_OUTPUT_DIRECTORY}) 
 # add remaining directories.
-include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${RapidJSON_INCLUDE_DIRS})
-include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
-include_directories(${CGREEN_INCLUDE_DIR})
+include_directories(${protobuf_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../up-core-api)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api)
 
-file(GLOB 			CLOUD_EVENT_PROTO_CPP 		 "${CLOUD_EVENT_PROTO_BINARY_DIR}/*.cc")
-file(GLOB 			SRC_PROTO_CORE_API 			 "${CMAKE_CURRENT_BINARY_DIR}/../up-core-api/uprotocol/*.cc")
-file(GLOB_RECURSE 	SRC_FILES 					 "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
- 
-set(uprotocol_src 
+file(GLOB_RECURSE 	SRC_PROTO_CORE_API 	"${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/*.cc")
+file(GLOB_RECURSE 	SRC_FILES 		"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+
+set(UPROTOCOL_SRC
 	${SRC_FILES}
-	${CLOUD_EVENT_PROTO_CPP}
 	${SRC_PROTO_CORE_API})
 
-add_library(uprotocollib OBJECT ${uprotocol_src})
-
-set_property(TARGET uprotocollib PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-add_library(uprotocol-cpp SHARED $<TARGET_OBJECTS:uprotocollib>)
-add_library(uprotocol-cpp_static STATIC $<TARGET_OBJECTS:uprotocollib>)
-
-set_target_properties(uprotocol-cpp_static PROPERTIES OUTPUT_NAME uprotocol-cpp)
-
+add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
-target_link_libraries(uprotocol-cpp_static 
-					  ${Protobuf_LIBRARIES} 
-					  ${RapidJSON_LIBRARIES} 
-					  cloudevent_proto
-					  spdlog::spdlog)
+add_library(up-cpp SHARED
+			      ${UPROTOCOL_SRC})
 
-target_link_libraries(uprotocol-cpp 
-					  ${Protobuf_LIBRARIES}
-					  ${RapidJSON_LIBRARIES}
-					  cloudevent_proto
-					  spdlog::spdlog)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov -coverage")
-	endif()
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  target_link_libraries(up-cpp PRIVATE
+		       			        ${CONAN_LIBS})
+else()
+	target_link_libraries(up-cpp PRIVATE
+   					  	        protobuf::protobuf
+						            spdlog::spdlog)
 endif()
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		target_compile_options(uprotocol-cpp_static PRIVATE -Wall -Wextra -Werror -stdlib=libc++ -fsanitize=address -fprofile-arcs -ftest-coverage -fno-omit-frame-pointer -v)
-		target_compile_options(uprotocol-cpp PRIVATE -Wall -Wextra -Werror -stdlib=libc++ -fsanitize=address -fprofile-arcs -ftest-coverage -fno-omit-frame-pointer -v)
-		else()
-		target_compile_options(uprotocol-cpp_static PRIVATE -Wall -Wextra -Werror -stdlib=libc++ -v)
-		target_compile_options(uprotocol-cpp PRIVATE -fPIC -Wall -Wextra -Werror -stdlib=libc++ -v)
-		endif()
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-		if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-			target_compile_options(uprotocol-cpp_static PRIVATE -Wall -Wextra -Werror -g -O0 -fprofile-arcs -ftest-coverage)
-			target_compile_options(uprotocol-cpp PRIVATE -fPIC -Wall -Wextra -Werror -g -O0 -fprofile-arcs -ftest-coverage)
-		else()
-			target_compile_options(uprotocol-cpp_static PRIVATE -Wall -Wextra -Werror)
-			target_compile_options(uprotocol-cpp PRIVATE -Wall -Wextra -Werror)
-		endif()
-endif()					  
-
-add_dependencies(uprotocol-cpp_static cloudevent_proto)
-add_dependencies(uprotocol-cpp cloudevent_proto)
 
 add_subdirectory(test)
 
+INSTALL(TARGETS up-cpp)
+INSTALL(DIRECTORY include DESTINATION .)
+INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api DESTINATION include)

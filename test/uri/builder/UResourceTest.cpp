@@ -27,8 +27,8 @@
  */
 #include <string>
 #include <gtest/gtest.h>
-#include "uprotocol-cpp/uri/builder/BuildUResource.h"
-#include "uprotocol-cpp/uri/serializer/MicroUriSerializer.h"
+#include "up-cpp/uri/builder/BuildUResource.h"
+#include "up-cpp/uri/serializer/MicroUriSerializer.h"
 
 
 using namespace uprotocol::uri;
