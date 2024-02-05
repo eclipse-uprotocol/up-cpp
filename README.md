@@ -2,27 +2,27 @@
 
 ## Welcome!
 
-The main object of this module is to enable the work with the up-client-zenoh-cpp library , the module provides the interface definitions and the utilities needed for up-client-zenoh-cpp
+This is the C++ library that extends up-core-api to provide serializers, validators, and language specific interface definitions for uProtocol. 
 
 *_IMPORTANT NOTE:_ This project is under active development*
 
 The core functional factory methods that make it more intuitive to create URIs that are used to configure source and sink (destination) elements in the uProtocol and additional helper methods.
 
-This module contains the data model structures as well as core functionality for building uProtocol and URIs for sink and source attributes.
-
-The SDKs are then used by the code generators to auto-populate service stubs with generated code that builds CloudEvents. For more information on auto-generating service stubs, please refer to uProtocol Main Project
 
 ## Getting Started
+
+The library is built and packaged using conan dependency management. 
+
 ### Requirements:
 - Compiler: GCC/G++ 11 or Clang 13
-- Conan : 1.59
+- Conan : 1.59 (2.x is not supported)
 - Ubuntu 22.04
 
 #### Ubuntu dependencies
 
 At first to make it working, you have to install some linux libraries as dependencies
 ```
-$ sudo apt-get install build-essential \
+$ sudo -E apt-get install build-essential \
       libbsd-dev \
       make \
       ninja-build \
@@ -34,29 +34,40 @@ $ sudo apt-get install build-essential \
       g++-11 \
       lcov \
       uuid-dev \
-      openssl \ 
+      openssl \
       libssl-dev
 $ pip3 install conan==1.59
 ```
 
-#### Setup SDK local repository, build and test
+## How to Use the Library
+To add up-cpp to your conan build dependencies, simply add the following to your conanfile.txt:
 ```
-$ git clone https://github.com/eclipse-uprotocol/up-core-api.git
+[requires]
+up-cpp/0.1
+```
+
+## How to Build 
+The following steps are only required to locally build and test up-cpp, if you are a user of up-cpp, you only need to follow the _How to Use the Library_ section above. 
+### Setup SDK local repository, build and test
+```
+$ git clone -b uprotocol-core-api-1.5.5 https://github.com/eclipse-uprotocol/up-core-api.git
 $ git clone https://github.com/eclipse-uprotocol/up-cpp.git
 ```
 
-#### Building locally 
+### Building locally 
 ```
 $ cd up-cpp
 $ mkdir build
 $ cd build
-$ conan install ../conaninfo
+$ conan install ../conaninfo --build=missing
 $ cmake ../
 $ make -j 
 ```
 
-#### Creating conan package locally 
-ensure that the conan profile is configured to use ABI 11 (libstdc++11: New ABI.) standards according to https://docs.conan.io/en/1.60/howtos/manage_gcc_abi.html
+### Creating conan package locally 
+If you need to create a release package for conan, please follow the steps below.
+
+**NOTE:** Ensure that the conan profile is configured to use ABI 11 (libstdc++11: New ABI.) standards according to https://docs.conan.io/en/1.60/howtos/manage_gcc_abi.html
 ```
 $ cd up-cpp
 $ conan create . --build=missing
