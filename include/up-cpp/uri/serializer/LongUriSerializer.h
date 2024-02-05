@@ -56,6 +56,34 @@ public:
      */
     static auto deserialize(std::string const& protocol_uri) -> v1::UUri;
 
+   /**
+     * Create the resource part of the Uri from a resource object.
+     * @param uResource  Resource representing a resource or an RPC method.
+     * @return Returns the String representation of the  Resource in the uProtocol URI.
+     */
+    [[nodiscard]] static auto buildResourcePartOfUri(const v1::UResource& resource) -> std::string;
+
+    /**
+     * Create the service part of the uProtocol URI from an  software entity object.
+     * @param use  Software Entity representing a service or an application.
+     * @return Returns the String representation of the  Software Entity in the uProtocol URI.
+     */
+    [[nodiscard]] static auto buildSoftwareEntityPartOfUri(const v1::UEntity& use) -> std::string;
+
+    /**
+     * Create authority part of the URI from the given UAuthority object.
+     * @param uAuthority UAuthority object of the UUri.
+     * @return Returns the string representation of Authority.
+     */
+    [[nodiscard]] static auto buildAuthorityPartOfUri(const v1::UAuthority& u_authority) -> std::string;
+
+    /**
+     * Static factory method for creating a UResource using a string that contains
+     * name + instance + message.
+     * @param resourceString String that contains the UResource information.
+     * @return Returns a UResource object.
+     */
+    
 private:
     LongUriSerializer() = default;
 
@@ -126,33 +154,6 @@ private:
     [[nodiscard]] static auto split(std::string str,
                       const std::string_view& delimiter) -> std::vector<std::string>;
 
-    /**
-     * Create the resource part of the Uri from a resource object.
-     * @param uResource  Resource representing a resource or an RPC method.
-     * @return Returns the String representation of the  Resource in the uProtocol URI.
-     */
-    [[nodiscard]] static auto buildResourcePartOfUri(const v1::UResource& resource) -> std::string;
-
-    /**
-     * Create the service part of the uProtocol URI from an  software entity object.
-     * @param use  Software Entity representing a service or an application.
-     * @return Returns the String representation of the  Software Entity in the uProtocol URI.
-     */
-    [[nodiscard]] static auto buildSoftwareEntityPartOfUri(const v1::UEntity& use) -> std::string;
-
-    /**
-     * Create authority part of the URI from the given UAuthority object.
-     * @param uAuthority UAuthority object of the UUri.
-     * @return Returns the string representation of Authority.
-     */
-    [[nodiscard]] static auto buildAuthorityPartOfUri(const v1::UAuthority& u_authority) -> std::string;
-
-    /**
-     * Static factory method for creating a UResource using a string that contains
-     * name + instance + message.
-     * @param resourceString String that contains the UResource information.
-     * @return Returns a UResource object.
-     */
     [[nodiscard]] static auto parseUResource(const std::string& resource_string) -> v1::UResource;
 
     /**
