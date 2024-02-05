@@ -59,9 +59,10 @@ include_directories(${protobuf_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api)
 
-file(GLOB 			    SRC_PROTO_CORE_API 	"${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/*.cc")
-file(GLOB_RECURSE 	SRC_FILES 			    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE 	SRC_PROTO_CORE_API 	"${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/*.cc")
+file(GLOB_RECURSE 	SRC_FILES 		"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 set(UPROTOCOL_SRC
 	${SRC_FILES}
