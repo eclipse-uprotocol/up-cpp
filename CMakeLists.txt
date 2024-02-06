@@ -83,7 +83,10 @@ else()
 						            spdlog::spdlog)
 endif()
 
-add_subdirectory(test)
+if (BUILD_TESTING)
+  enable_testing()
+  add_subdirectory(test)
+endif()
 
 INSTALL(TARGETS up-cpp)
 INSTALL(DIRECTORY include DESTINATION .)
