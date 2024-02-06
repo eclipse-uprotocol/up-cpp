@@ -29,7 +29,7 @@ else()
   find_package(Protobuf REQUIRED)
   find_package(spdlog REQUIRED)
   find_package(fmt REQUIRED)
-  set(PROTOBUF_PROTOC "protoc")
+  set(PROTOBUF_PROTOC "${Protobuf_PROTOC_EXECUTABLE}")
 endif()
 
 if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/)
@@ -57,6 +57,7 @@ endforeach()
 # add remaining directories.
 include_directories(${protobuf_INCLUDE_DIR})
 
+include_directories(${PROTOBUF_OUTPUT_DIRECTORY})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api)
