@@ -20,7 +20,6 @@
  # SPDX-FileType: SOURCE
  # SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  # SPDX-License-Identifier: Apache-2.0
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(TESTS_PATH ../test)
 
