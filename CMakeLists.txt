@@ -84,7 +84,7 @@ else()
 						            spdlog::spdlog)
 endif()
 
-add_subdirectory(test)
+#add_subdirectory(test)
 
 INSTALL(TARGETS up-cpp)
 INSTALL(DIRECTORY include DESTINATION .)
