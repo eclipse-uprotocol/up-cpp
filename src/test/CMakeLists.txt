@@ -84,6 +84,7 @@ file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/up
 # target_link_libraries(attribute_tests ${CGREEN_LIBRARY} up-cpp)
 # add_test("t-03-attribute-test" attribute_tests)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 add_executable(base64_test
 	${TESTS_PATH}/tools/base64_test.cpp)
 target_link_libraries(base64_test up-cpp ${GTEST_LIBS})
@@ -127,22 +128,22 @@ target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
 target_link_libraries(MicroUriSerializerTest up-cpp ${GTEST_LIBS})
 add_test("t-14-MicroUriSerializerTest"  MicroUriSerializerTest)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 add_executable(umessagetypes_test
 	${TESTS_PATH}/utransport/umessagetypes_test.cpp)
 target_link_libraries(umessagetypes_test up-cpp ${GTEST_LIBS})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 add_executable(upayload_test
 	${TESTS_PATH}/utransport/upayload_test.cpp)
 target_link_libraries(upayload_test up-cpp ${GTEST_LIBS})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 add_executable(upriority_test
 	${TESTS_PATH}/utransport/upriority_test.cpp)
 target_link_libraries(upriority_test up-cpp ${GTEST_LIBS})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 add_executable(userializationhint_test
 	${TESTS_PATH}/utransport/userializationhint_test.cpp)
 target_link_libraries(userializationhint_test up-cpp ${GTEST_LIBS})

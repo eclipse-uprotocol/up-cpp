@@ -58,15 +58,20 @@ endforeach()
 include_directories(${protobuf_INCLUDE_DIR})
 
 include_directories(${PROTOBUF_OUTPUT_DIRECTORY})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api)
 
 file(GLOB_RECURSE 	SRC_PROTO_CORE_API 	"${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/*.cc")
-file(GLOB_RECURSE 	SRC_FILES 		"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+#file(GLOB_RECURSE 	SRC_FILES 		      "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 set(UPROTOCOL_SRC
-	${SRC_FILES}
+	${CMAKE_CURRENT_SOURCE_DIR}/base64/base64.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/uri/IpAddress.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/uri/LongUriSerializer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/uri/MicroUriSerializer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/uuid/UuidSerializer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/uuid/Uuidv8Factory.cpp
 	${SRC_PROTO_CORE_API})
 
 add_definitions(-DFMT_HEADER_ONLY)
@@ -87,5 +92,5 @@ endif()
 add_subdirectory(test)
 
 INSTALL(TARGETS up-cpp)
-INSTALL(DIRECTORY include DESTINATION .)
+INSTALL(DIRECTORY ../include DESTINATION .)
 INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api DESTINATION include)

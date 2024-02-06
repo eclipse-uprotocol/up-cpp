@@ -30,7 +30,7 @@ class UpCpp(ConanFile):
        # self.requires("gtest/1.14.0")
 
     def layout(self):
-        cmake_layout(self, src_folder=".")
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
