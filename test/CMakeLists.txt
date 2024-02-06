@@ -127,6 +127,11 @@ target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
 target_link_libraries(MicroUriSerializerTest up-cpp ${GTEST_LIBS})
 add_test("t-14-MicroUriSerializerTest"  MicroUriSerializerTest)
 
+add_executable(UriValidatorTest ${TESTS_PATH}/uri/validator/UriValidatorTest.cpp)
+target_compile_options(UriValidatorTest PRIVATE -g -O0)
+target_link_libraries(UriValidatorTest up-cpp ${GTEST_LIBS})
+add_test("t-15-UriValidatorTest"  UriValidatorTest)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(umessagetypes_test
 	${TESTS_PATH}/utransport/umessagetypes_test.cpp)

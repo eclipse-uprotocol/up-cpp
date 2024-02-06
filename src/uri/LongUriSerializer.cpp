@@ -65,7 +65,7 @@ auto uprotocol::uri::LongUriSerializer::serialize(const v1::UUri& uri) -> std::s
  * @return Returns an UUri data object.
  */
 auto uprotocol::uri::LongUriSerializer::deserialize(std::string const& protocol_uri) -> v1::UUri {
-    if (protocol_uri.empty()) {
+    if ((nullptr == &protocol_uri) ||  protocol_uri.empty()) {
         return BuildUUri().build();
     }
 

@@ -139,8 +139,8 @@ private:
      * @param resource 
      * @return 
      */
-    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UResource &resource) -> bool {
-        return resource.has_id() && resource.id() > 0;
+    static bool isMicroForm(const uprotocol::v1::UResource &resource) {
+        return (resource.has_id() && resource.id() > 0);
     }
     
     /**
@@ -148,8 +148,8 @@ private:
       * @param resource 
       * @return 
       */
-    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UEntity &entity) -> bool {
-        return entity.has_id() && entity.id() > 0;
+    static bool isMicroForm(const uprotocol::v1::UEntity &entity) {
+        return (entity.has_id() && entity.id() > 0);
     }
     
     /**
@@ -157,7 +157,7 @@ private:
      * @param resource 
      * @return 
      */
-    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UAuthority &authority) -> bool {
+    static bool isMicroForm(const uprotocol::v1::UAuthority &authority) {
         return isEmpty(authority) || (authority.has_ip() && !authority.ip().empty()) || (authority.has_id() && !authority.id().empty());
     }
     
@@ -166,7 +166,7 @@ private:
      * @param resource 
      * @return 
      */
-    [[nodiscard]] [[maybe_unused]] auto isMicroForm(const uprotocol::v1::UUri &uri) -> bool {
+    static bool isMicroForm(const uprotocol::v1::UUri &uri) {
         return isMicroForm(uri.authority()) &&
                isMicroForm(uri.entity()) &&
                isMicroForm(uri.resource());
