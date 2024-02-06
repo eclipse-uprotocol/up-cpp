@@ -21,6 +21,8 @@ cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_CXX_STANDARD 17)
 project(up-cpp  LANGUAGES CXX)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 	conan_basic_setup()
