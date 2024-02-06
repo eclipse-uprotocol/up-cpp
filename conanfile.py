@@ -1,18 +1,13 @@
-from conan import ConanFile, tools
-from conans import ConanFile, CMake
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-import shutil
-
-class up_cpp(ConanFile):
+class UpCpp(ConanFile):
     name = "up-cpp"
-    version = "0.1"
-
-    # Optional metadata
+    package_type = "library"
     license = "Apache-2.0 license"
-    url = "https://github.com/eclipse-uprotocol/up-cpp-api"
+    url = "https://github.com/MelamudMichael/up-cpp"
     description = "This module contains the data model structures as well as core functionality for building uProtocol"
-
+    topics = ("utransport sdk", "transport")
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [False, False]}
@@ -35,7 +30,7 @@ class up_cpp(ConanFile):
         self.requires("gtest/1.14.0")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
