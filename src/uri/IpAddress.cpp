@@ -23,6 +23,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <array>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
 #include <up-cpp/uri/serializer/IpAddress.h>
