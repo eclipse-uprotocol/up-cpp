@@ -7,7 +7,8 @@ rapidjson/cci.20230929
 gtest/1.14.0
 pkgconf/2.1.0
 [generators]
-cmake
+CMakeDeps
+CMakeToolchain
 
 [layout]
 cmake_layout

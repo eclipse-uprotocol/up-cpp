@@ -21,18 +21,10 @@ cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_CXX_STANDARD 17)
 project(up-cpp  LANGUAGES CXX)
 
-option(UP_CPP_BUILD_TESTING "Build the tests" ON)
-
-if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-	conan_basic_setup()
-  set(PROTOBUF_PROTOC "${CONAN_BIN_DIRS_PROTOBUF}/protoc")
-else()
-  find_package(Protobuf REQUIRED)
-  find_package(spdlog REQUIRED)
-  find_package(fmt REQUIRED)
-  set(PROTOBUF_PROTOC "protoc")
-endif()
+find_package(Protobuf REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
+set(PROTOBUF_PROTOC "${Protobuf_PROTOC_EXECUTABLE}")
 
 if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/)
   set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
@@ -58,40 +50,39 @@ foreach(file ${PROTOBUF_DEFINITION_FILES})
         OUTPUT_VARIABLE PROTOBUF_OUTPUT_VARIABLE)
 endforeach()
 
-# add remaining directories.
 include_directories(${protobuf_INCLUDE_DIR})
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${spdlog_INCLUDE_DIR})
+include_directories(${fmt_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE 	SRC_PROTO_CORE_API 	"${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/*.cc")
-file(GLOB_RECURSE 	SRC_FILES 		"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE 	SRC_FILES 	      	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-set(UPROTOCOL_SRC
-	${SRC_FILES}
-	${SRC_PROTO_CORE_API})
+set(UPCPP_SRC
+    ${SRC_FILES}
+    ${SRC_PROTO_CORE_API})
 
 add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
-add_library(up-cpp SHARED
-			      ${UPROTOCOL_SRC})
+add_library(up-cpplib OBJECT ${UPCPP_SRC})
 
-if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  target_link_libraries(up-cpp PRIVATE
-		       			        ${CONAN_LIBS})
-else()
-	target_link_libraries(up-cpp PRIVATE
-   					  	        protobuf::protobuf
-						            spdlog::spdlog)
-endif()
+set_property(TARGET up-cpplib PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-if (BUILD_TESTING OR UP_CPP_BUILD_TESTING)
-  enable_testing()
-  add_subdirectory(test)
-endif()
+add_library(up-cpp SHARED $<TARGET_OBJECTS:up-cpplib>)
+add_library(up-cpp_static STATIC $<TARGET_OBJECTS:up-cpplib>)
+
+set_target_properties(up-cpp_static PROPERTIES OUTPUT_NAME up-cpp)
+
+target_link_libraries(up-cpp_static PRIVATE protobuf::protobuf spdlog::spdlog)
+
+target_link_libraries(up-cpp PRIVATE protobuf::protobuf spdlog::spdlog)
+
+add_subdirectory(test)
 
 INSTALL(TARGETS up-cpp)
+INSTALL(TARGETS up-cpp_static)
 INSTALL(DIRECTORY include DESTINATION .)
 INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api DESTINATION include)
