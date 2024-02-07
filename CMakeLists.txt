@@ -73,13 +73,34 @@ set(UPROTOCOL_SRC
 add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
-add_library(up-cpp SHARED
-			      ${UPROTOCOL_SRC})
+#add_library(up-cpp SHARED
+#			      ${UPROTOCOL_SRC})
+
+add_library(uprotocollib OBJECT ${UPROTOCOL_SRC})
+
+set_property(TARGET uprotocollib PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+add_library(up-cpp SHARED $<TARGET_OBJECTS:uprotocollib>)
+add_library(up-cpp_static STATIC $<TARGET_OBJECTS:uprotocollib>)
+
+set_target_properties(up-cpp_static PROPERTIES OUTPUT_NAME up-cpp)
+
+add_definitions(-DSPDLOG_FMT_EXTERNAL)
+
 
 if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  target_link_libraries(up-cpp PRIVATE
-		       			        ${CONAN_LIBS})
+
+  target_link_libraries(up-cpp_static 
+					              ${CONAN_LIBS})
+
+  target_link_libraries(up-cpp 
+					              ${CONAN_LIBS})
 else()
+
+  target_link_libraries(up-cpp_static 
+					              protobuf::protobuf
+						            spdlog::spdlog)
+
 	target_link_libraries(up-cpp PRIVATE
    					  	        protobuf::protobuf
 						            spdlog::spdlog)
