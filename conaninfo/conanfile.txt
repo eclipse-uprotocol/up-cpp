@@ -8,6 +8,7 @@ gtest/1.14.0
 pkgconf/2.1.0
 [generators]
 CMakeDeps
+CMakeToolchain
 
 [layout]
 cmake_layout
