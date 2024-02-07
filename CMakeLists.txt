@@ -21,6 +21,8 @@ cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_CXX_STANDARD 17)
 project(up-cpp  LANGUAGES CXX)
 
+option(UP_CPP_BUILD_TESTING "Build the tests" ON)
+
 if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 	conan_basic_setup()
@@ -83,7 +85,10 @@ else()
 						            spdlog::spdlog)
 endif()
 
-add_subdirectory(test)
+if (BUILD_TESTING OR UP_CPP_BUILD_TESTING)
+  enable_testing()
+  add_subdirectory(test)
+endif()
 
 INSTALL(TARGETS up-cpp)
 INSTALL(DIRECTORY include DESTINATION .)
