@@ -60,6 +60,7 @@ include_directories(${protobuf_INCLUDE_DIR})
 
 include_directories(${PROTOBUF_OUTPUT_DIRECTORY})
 include_directories(${spdlog_INCLUDE_DIR})
+include_directories(${fmt_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api)
