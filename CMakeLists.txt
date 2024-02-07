@@ -111,6 +111,7 @@ endif()
 #add_subdirectory(test)
 
 INSTALL(TARGETS up-cpp)
+INSTALL(TARGETS up-cpp_static)
 INSTALL(DIRECTORY include DESTINATION .)
 INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api DESTINATION include)
 else()
