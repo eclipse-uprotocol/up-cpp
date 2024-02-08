@@ -23,9 +23,14 @@ To add up-cpp to your conan build dependencies, simply add the following to your
 ```
 [requires]
 up-cpp/0.1
+
 [generators]
 CMakeDeps
 CMakeToolchain
+
+[layout]
+cmake_layout
+
 ```
 **NOTE:** If using conan version 1.59 Ensure that the conan profile is configured to use ABI 11 (libstdc++11: New ABI.) standards according to https://docs.conan.io/en/1.60/howtos/manage_gcc_abi.html
 
