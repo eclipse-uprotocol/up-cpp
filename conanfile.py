@@ -30,7 +30,7 @@ class UpCpp(ConanFile):
     }
 
     def source(self):
-        self.run("git clone https://github.com/eclipse-uprotocol/up-core-api.git")
+        self.run("git clone --branch uprotocol-core-api-1.5.5 https://github.com/eclipse-uprotocol/up-core-api.git")
         
     def requirements(self):
         self.requires("protobuf/3.21.12")
