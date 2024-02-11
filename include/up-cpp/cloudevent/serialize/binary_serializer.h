@@ -31,9 +31,8 @@
 #include <iostream>
 #include <memory>
 #include <optional>
-
 #include <up-cpp/cloudevent/datamodel/cloud_event.h>
-#include <up-cpp/tools/base64.h>
+#include <up-cpp/utils/base64.h>
 #include "google/protobuf/util/time_util.h"
 #include "spdlog/spdlog.h"
 
