@@ -47,8 +47,8 @@ namespace uprotocol::utils {
             ThreadPool & operator=(const ThreadPool &) = delete;
             ThreadPool & operator=(ThreadPool &&) = delete;
 
-            ThreadPool(const size_t maxNumOfThreads,
-                       const size_t maxQueueSize)
+            ThreadPool(const size_t maxQueueSize,
+                       const size_t maxNumOfThreads)
                 : queue_(maxQueueSize, 
                         std::chrono::milliseconds(timeout_)),
                 terminate_(false),
@@ -58,17 +58,17 @@ namespace uprotocol::utils {
             ~ThreadPool() {
 
                 terminate_ = true;
+
+                /* wait for the threads to terminate*/
                 for (size_t i = 0; i < threads_.size(); ++i) {
-                    if(threads_[i].joinable()) {
-                        threads_[i].join();
-                    }
+                    threads_[i].get();
                 }
             }
+
             static void worker(CyclicQueue<std::function<void()>> &queue, 
-                            bool &terminate) {
+                               bool &terminate) {
 
                 std::function<void()> funcPtr;
-
                 while (true == queue.waitPop(funcPtr) && (!terminate)) {
                     funcPtr();
                 } 
@@ -78,11 +78,16 @@ namespace uprotocol::utils {
             template<typename F, typename...Args>
             auto submit(F&& f, Args&&... args) -> std::future<decltype(f(args...))> {
 
+                if (true == terminate_) {
+                    spdlog::error("Thread pool is marked for termination");
+                    return std::future<typename std::result_of<F(Args...)>::type>();
+                }
+
                 std::lock_guard<std::mutex> lock(mutex_);
 
                 // Create a function with bounded parameters ready to execute
                 std::function<decltype(f(args...))()> func = std::bind(std::forward<F>(f), 
-                                                                    std::forward<Args>(args)...);
+                                                                       std::forward<Args>(args)...);
 
                 // Encapsulate it into a shared ptr in order to be able to copy construct / assign 
                 auto task_ptr = std::make_shared<std::packaged_task<decltype(f(args...))()>>(func);
@@ -102,10 +107,24 @@ namespace uprotocol::utils {
                     return std::future<typename std::result_of<F(Args...)>::type>();
                 }
 
+                /* cleanup finished threads */
+                for (size_t i = 0; i < threads_.size();) {
+                    std::future_status status = threads_[i].wait_for(0ms);
+                    if (std::future_status::ready == status) {
+                        // Remove the thread from the vector
+                        threads_.erase(threads_.begin() + i);
+                        // Decrease the count of threads
+                        numOfThreads_.fetch_sub(1);
+                    } else {
+                        ++i;
+                    }
+                }
+
                 if (numOfThreads_.load() < maxNumOfThreads_) {
-                    threads_.push_back(std::thread(worker, queue_, terminate_));
+                    threads_.push_back(std::async(std::launch::async, worker, std::ref(queue_), std::ref(terminate_)));
                     numOfThreads_.fetch_add(1);
                 }
+
                 // Return future from promise
                 return task_ptr->get_future();
             }
@@ -120,7 +139,7 @@ namespace uprotocol::utils {
 
         std::atomic<std::size_t> numOfThreads_;
     
-        std::vector<std::thread> threads_;
+        std::vector<std::future<void>> threads_;
         
         std::mutex mutex_;
 
