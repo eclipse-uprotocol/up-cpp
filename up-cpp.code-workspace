@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "up-cpp",
+			"path": "up/up-cpp"
+		},
+		{
+			"name": "cmake",
+			"path": "up/cmake"
+		},
+		{
+			"name": "up",
+			"path": "up"
+		},
+		{
+			"name": "up-space",
+			"path": "."
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true,
+		"cmake.configureOnOpen": false
+	}
+}
