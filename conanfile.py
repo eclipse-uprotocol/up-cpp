@@ -15,7 +15,7 @@ class UpCpp(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     conan_version = None
-    generators = "CMakeToolchain", "CMakeDeps", "pkg_config", "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv"
+    generators = "CMakeToolchain", "CMakeDeps", "pkg_config", "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv", "cmake_find_package"
     version = "0.1"
     exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "test/*"
 

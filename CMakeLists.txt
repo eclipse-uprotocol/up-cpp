@@ -18,7 +18,7 @@
  # under the License.
 
 cmake_minimum_required(VERSION 3.10.0)
-project(up-cpp VERSION 0.1.1  LANGUAGES CXX DESCRIPTION "This is the C++ library that extends up-core-api to provide serializers, validators, and language specific interface definitions for uProtocol.")
+project(up-cpp VERSION 1.5.1  LANGUAGES CXX DESCRIPTION "This is the C++ library that extends up-core-api to provide serializers, validators, and language specific interface definitions for uProtocol.")
 
 option(BUILD_TESTING "Set to OFF|ON (default is OFF) to control build of `up-cpp` tests" OFF)
 option(BUILD_UNBUNDLED "Set to OFF|ON (default is OFF) to control linking dependencies as external" OFF)
@@ -33,6 +33,14 @@ add_definitions(-DSPDLOG_FMT_EXTERNAL)
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     # message(STATUS "This is the root CMakeLists.txt file; We can set project wide settings here.")
     set(CMAKE_CXX_STANDARD 17)
+	if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Check if the file exists
+    	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include the file
+		conan_basic_setup() # Set up Conan
+	endif()
+	# place libraries in a lib directory and executables in a bin directory,
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 else()
     # message(STATUS "This is NOT the root CMakeLists.txt file; We should get project wide settings from project root.")
 endif()
@@ -46,7 +54,8 @@ add_library(${PROJECT_NAME} ${SRC_FILES})
 add_library(up::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
 	PROPERTIES
-	VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR} 
+	# create the shared library and the symbolic links
+	VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} 
 	OUTPUT_NAME ${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME}
@@ -60,7 +69,8 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(${PROJECT_NAME} PRIVATE up-core-api-protos protobuf::protobuf spdlog::spdlog)
 
 if(BUILD_TESTING)
-  add_subdirectory(test)
+	enable_testing()
+	add_subdirectory(test)
 endif()
 
 INSTALL(TARGETS ${PROJECT_NAME})
