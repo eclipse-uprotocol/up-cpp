@@ -23,14 +23,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef UATTRIBUTESBUILDER_H
-#define UATTRIBUTESBUILDER_H
+#ifndef _UATTRIBUTESBUILDER_
+#define _UATTRIBUTESBUILDER_
 
+#include <memory>
+#include <up-core-api/uri.pb.h>
+#include <up-cpp/uuid/factory/UuidFactory.h>
 #include <string>
 #include <spdlog/spdlog.h>
-#include "src/main/proto/uattributes.pb.h"
-#include "src/main/proto/uuid.pb.h"
-#include "src/main/proto/uri.pb.h"
+#include "up-core-api/uattributes.pb.h"
+#include "up-core-api/uuid.pb.h"
+#include "up-core-api/umessage.pb.h"
+
+using namespace uprotocol::uri;
+using namespace uprotocol::v1;
 
 namespace uprotocol {
 
@@ -111,4 +117,5 @@ class UAttributesBuilder {
 
 } // namespace uprotocol
 
-#endif // UATTRIBUTESBUILDER_H
+
+#endif /* _UATTRIBUTESBUILDER_*/

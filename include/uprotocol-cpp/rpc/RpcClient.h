@@ -27,7 +27,8 @@
 
 #include <future>
 #include <uprotocol-cpp/transport/datamodel/UPayload.h>
-#include <uprotocol-cpp/transport/datamodel/UAttributes.h>
+#include <uprotocol-cpp/transport/datamodel/UAttributesBuilder.h>
+#include "up-core-api/uattributes.pb.h"
 
 using namespace uprotocol::utransport;
 using namespace uprotocol::uri;
