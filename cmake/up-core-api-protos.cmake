@@ -44,6 +44,7 @@ set(MY_PROTOC_OUT_DIR ${CMAKE_BINARY_DIR}/up-core-api)
 file(GLOB_RECURSE PROTO_FILES ${MY_IMPORT_DIRS}/*.proto)
 
 add_library(up-core-api-protos STATIC ${PROTO_FILES})
+add_library(up-cpp::up-core-api-protos ALIAS up-core-api-protos)
 set_property(TARGET up-core-api-protos PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 target_include_directories(up-core-api-protos PUBLIC 

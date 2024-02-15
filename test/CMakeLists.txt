@@ -44,7 +44,7 @@ file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/up
 #			   ${PROTO_HDR_FILE}
 #			   ${PROTO_CPP_FILE})
 
-#target_link_libraries(json_serializer_test ${CGREEN_LIBRARY} ${RapidJSON_LIBRARIES} up::up-cpp)
+#target_link_libraries(json_serializer_test ${CGREEN_LIBRARY} ${RapidJSON_LIBRARIES} up-cpp::up-cpp)
 
 #add_executable(binary_serializer_test
 #				binary/binary_test.cpp
@@ -54,25 +54,25 @@ file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/up
 #				${PROTO_CPP_FILE}
 #				)
 
-#target_link_libraries(binary_serializer_test ${CGREEN_LIBRARY} up::up-cpp)
+#target_link_libraries(binary_serializer_test ${CGREEN_LIBRARY} up-cpp::up-cpp)
 #add_test("t-01-binary-serializer" binary_serializer_test)
 
 # add_executable(priority_enum_test
 # 		model/priority_test.cpp)
-# target_link_libraries(priority_enum_test ${CGREEN_LIBRARY} up::up-cpp )
+# target_link_libraries(priority_enum_test ${CGREEN_LIBRARY} up-cpp::up-cpp )
 # add_test("t-02-priority-enum-test" priority_enum_test)
 
 # add_executable(attribute_tests
 # 		model/attributes_test.cpp
 # 		${SRC_PROTO_CORE_API})
-# target_link_libraries(attribute_tests ${CGREEN_LIBRARY} up::up-cpp)
+# target_link_libraries(attribute_tests ${CGREEN_LIBRARY} up-cpp::up-cpp)
 # add_test("t-03-attribute-test" attribute_tests)
 
 add_executable(base64_test
 	tools/base64_test.cpp)
 target_link_libraries(base64_test 
  		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
         PRIVATE
 			GTest::gtest_main
 			GTest::gmock    
@@ -90,9 +90,9 @@ add_executable(UAuthorityTest
 	uri/builder/UAuthorityTest.cpp)
 target_link_libraries(UAuthorityTest 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 			spdlog::spdlog
-			up-core-api-protos
+			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -105,9 +105,9 @@ add_executable(UEntityTest
 		uri/builder/UEntityTest.cpp)
 target_link_libraries(UEntityTest 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 			spdlog::spdlog
-			up-core-api-protos
+			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -120,9 +120,9 @@ add_executable(UResourceTest
 	uri/builder/UResourceTest.cpp)
 target_link_libraries(UResourceTest 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 			spdlog::spdlog
-			up-core-api-protos
+			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -135,9 +135,9 @@ add_executable(UUriTest
 	uri/builder/UUriTest.cpp)
 target_link_libraries(UUriTest 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 			spdlog::spdlog
-			up-core-api-protos
+			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -151,9 +151,9 @@ add_executable(LongUriSerializerTest
 target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
 target_link_libraries(LongUriSerializerTest 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 			spdlog::spdlog
-			up-core-api-protos
+			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -167,9 +167,9 @@ add_executable(MicroUriSerializerTest
 target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
 target_link_libraries(MicroUriSerializerTest 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 			spdlog::spdlog
-			up-core-api-protos
+			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -183,7 +183,7 @@ add_executable(umessagetypes_test
 	utransport/umessagetypes_test.cpp)
 target_link_libraries(umessagetypes_test 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 		PRIVATE
 			GTest::gtest_main
 			GTest::gmock    
@@ -196,7 +196,7 @@ add_executable(upayload_test
 	utransport/upayload_test.cpp)
 target_link_libraries(upayload_test 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 		PRIVATE
 			GTest::gtest_main
 			GTest::gmock    
@@ -209,7 +209,7 @@ add_executable(upriority_test
 	utransport/upriority_test.cpp)
 target_link_libraries(upriority_test 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 		PRIVATE
 			GTest::gtest_main
 			GTest::gmock    
@@ -222,7 +222,7 @@ add_executable(userializationhint_test
 	utransport/userializationhint_test.cpp)
 target_link_libraries(userializationhint_test 
 		PUBLIC
-			up::up-cpp
+			up-cpp::up-cpp
 		PRIVATE
 			GTest::gtest_main
 			GTest::gmock    
