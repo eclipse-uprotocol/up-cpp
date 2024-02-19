@@ -25,7 +25,6 @@ option(BUILD_UNBUNDLED "Set to OFF|ON (default is OFF) to control linking depend
 
 find_package(protobuf REQUIRED)
 find_package(spdlog REQUIRED)
-find_package(fmt REQUIRED)
 
 add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
