@@ -42,13 +42,12 @@ class UpCpp(ConanFile):
         
     def requirements(self):
         if not self.options.build_cross_compiling:
-            self.requires("protobuf/3.21.9")
+            self.requires("protobuf/3.21.12")
         else:
-            self.requires("protobuf/3.21.9@cross/cross")
-        self.requires("spdlog/1.12.0")
-        self.requires("fmt/10.1.1")
+            self.requires("protobuf/3.21.12@cross/cross")
+        self.requires("spdlog/1.13.0")
         if self.options.build_testing:
-            self.requires("gtest/1.13.0")
+            self.requires("gtest/1.14.0")
         if self.options.build_unbundled:
             self.requires("up-core-api/{}".format(self.up_core_api_version))
         
