@@ -49,6 +49,8 @@ namespace uprotocol::utransport {
                      const size_t &dataSize,
                      const UPayloadType &type) {
                 
+                payloadType_ = type;
+
                 if ((nullptr == data) || (0 == dataSize)) {
                     data_ = nullptr;
                     refPtr_ = nullptr;
@@ -56,8 +58,6 @@ namespace uprotocol::utransport {
 
                     return;
                 }
-
-                payloadType_ = type;
 
                 switch(type) {
                     case UPayloadType::VALUE: {
@@ -124,7 +124,13 @@ namespace uprotocol::utransport {
             * @return Returns true if the data in the UPayload is empty.
             */
             bool isEmpty() {
-                return data_ == nullptr || dataSize_ == 0;
+                if ((UPayloadType::VALUE == payloadType_) && (data_ == nullptr)) {
+                    return true;
+                } else if ((UPayloadType::REFERENCE == payloadType_) && (refPtr_ == nullptr)) {
+                    return true;
+                } else {
+                    return false; 
+                }
             }
 
         private:
