@@ -18,71 +18,59 @@
  # under the License.
 
 cmake_minimum_required(VERSION 3.10.0)
-set(CMAKE_CXX_STANDARD 17)
-project(up-cpp  LANGUAGES CXX)
+project(up-cpp VERSION 1.5.1  LANGUAGES CXX DESCRIPTION "This is the C++ library that extends up-core-api to provide serializers, validators, and language specific interface definitions for uProtocol.")
 
-find_package(Protobuf REQUIRED)
+option(BUILD_TESTING "Set to OFF|ON (default is OFF) to control build of `up-cpp` tests" OFF)
+option(BUILD_UNBUNDLED "Set to OFF|ON (default is OFF) to control linking dependencies as external" OFF)
+
+find_package(protobuf REQUIRED)
 find_package(spdlog REQUIRED)
-find_package(fmt REQUIRED)
-set(PROTOBUF_PROTOC "${Protobuf_PROTOC_EXECUTABLE}")
-
-if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/)
-  set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
-elseif (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/)
-  set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/")
-elseif(UP_CORE_API_ROOT_DIR)
-  set(PROTOBUF_INPUT_DIRECTORY "${UP_CORE_API_ROOT_DIR}/uprotocol/")
-else()
-  message(FATAL_ERROR "Could not find up-core-api. Please, set UP_CORE_API_ROOT_DIR to the root directory of up-core-api.")
-endif()
-
-set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/")
-
-file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${PROTOBUF_INPUT_DIRECTORY}/*.proto")
-file(MAKE_DIRECTORY ${PROTOBUF_OUTPUT_DIRECTORY})
-
-foreach(file ${PROTOBUF_DEFINITION_FILES})
-    set(PROTOBUF_ARGUMENTS "-I=${PROTOBUF_INPUT_DIRECTORY}" "--cpp_out=${PROTOBUF_OUTPUT_DIRECTORY}" "${file}")
-    execute_process(
-        COMMAND ${PROTOBUF_PROTOC} ${PROTOBUF_ARGUMENTS}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        RESULT_VARIABLE PROTOBUF_RESULT
-        OUTPUT_VARIABLE PROTOBUF_OUTPUT_VARIABLE)
-endforeach()
-
-include_directories(${protobuf_INCLUDE_DIR})
-include_directories(${spdlog_INCLUDE_DIR})
-include_directories(${fmt_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-file(GLOB_RECURSE 	SRC_PROTO_CORE_API 	"${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/*.cc")
-file(GLOB_RECURSE 	SRC_FILES 	      	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-
-set(UPCPP_SRC
-    ${SRC_FILES}
-    ${SRC_PROTO_CORE_API})
 
 add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
-add_library(up-cpplib OBJECT ${UPCPP_SRC})
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    # message(STATUS "This is the root CMakeLists.txt file; We can set project wide settings here.")
+    set(CMAKE_CXX_STANDARD 17)
+	if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Check if the file exists
+    	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake) # Include the file
+		conan_basic_setup() # Set up Conan
+	endif()
+	# place libraries in a lib directory and executables in a bin directory,
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+else()
+    # message(STATUS "This is NOT the root CMakeLists.txt file; We should get project wide settings from project root.")
+endif()
 
-set_property(TARGET up-cpplib PROPERTY POSITION_INDEPENDENT_CODE 1)
+# Generate protobuf files
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/up-core-api-protos.cmake)
 
-add_library(up-cpp SHARED $<TARGET_OBJECTS:up-cpplib>)
-add_library(up-cpp_static STATIC $<TARGET_OBJECTS:up-cpplib>)
+file(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-set_target_properties(up-cpp_static PROPERTIES OUTPUT_NAME up-cpp)
+add_library(${PROJECT_NAME} ${SRC_FILES})
+add_library(up-cpp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+set_target_properties(${PROJECT_NAME}
+	PROPERTIES
+	# create the shared library and the symbolic links
+	VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} 
+	OUTPUT_NAME ${PROJECT_NAME}
+)
+target_include_directories(${PROJECT_NAME}
+	PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> 
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> 
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(${PROJECT_NAME} PRIVATE up-cpp::up-core-api-protos protobuf::protobuf spdlog::spdlog)
 
-target_link_libraries(up-cpp_static PRIVATE protobuf::protobuf spdlog::spdlog)
+if(BUILD_TESTING)
+	enable_testing()
+	add_subdirectory(test)
+endif()
 
-target_link_libraries(up-cpp PRIVATE protobuf::protobuf spdlog::spdlog)
-
-add_subdirectory(test)
-
-INSTALL(TARGETS up-cpp)
-INSTALL(TARGETS up-cpp_static)
+INSTALL(TARGETS ${PROJECT_NAME})
 INSTALL(DIRECTORY include DESTINATION .)
-INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api DESTINATION include)

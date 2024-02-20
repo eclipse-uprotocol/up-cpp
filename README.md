@@ -45,10 +45,12 @@ $ git clone https://github.com/eclipse-uprotocol/up-cpp.git
 ### Building locally 
 ```
 $ cd up-cpp
-$ conan install conaninfo/  --output-folder=.
-$ cd build/Release
-$ cmake ../../ -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
-$ make -j 
+$ mkdir build
+$ cd build
+
+$ conan install .. -o build_testing=True
+$ cmake -S .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON  -DCMAKE_INSTALL_PREFIX=install
+$ cmake --build . --target install -- -j 
 ```
 
 ### Creating conan package locally 

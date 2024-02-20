@@ -15,31 +15,48 @@ class UpCpp(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     conan_version = None
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv"
     version = "0.1"
     exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "test/*"
 
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_testing": [True, False],
+        "build_unbundled": [True, False],
+        "build_cross_compiling": [True, False],
     }
 
     default_options = {
         "shared": False,
         "fPIC": False,
+        "build_testing": False,
+        "build_unbundled": False,
+        "build_cross_compiling": False,
     }
-
+    up_core_api_version = "1.5.5"
+    
     def source(self):
-        self.run("git clone --branch uprotocol-core-api-1.5.5 https://github.com/eclipse-uprotocol/up-core-api.git")
+        if not self.options.build_unbundled:
+            self.run(f"git clone --branch uprotocol-core-api-{self.up_core_api_version} https://github.com/eclipse-uprotocol/up-core-api.git")
         
     def requirements(self):
-        self.requires("protobuf/3.21.12")
-        self.requires("gtest/1.14.0")
+        if not self.options.build_cross_compiling:
+            self.requires("protobuf/3.21.12")
+        else:
+            self.requires("protobuf/3.21.12@cross/cross")
         self.requires("spdlog/1.13.0")
-        self.requires("fmt/10.2.1")
+        if self.options.build_testing:
+            self.requires("gtest/1.14.0")
+        if self.options.build_unbundled:
+            self.requires("up-core-api/{}".format(self.up_core_api_version))
+        
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = self.options.build_testing
+        tc.variables["BUILD_UNBUNDLED"] = self.options.build_unbundled
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def build(self):
