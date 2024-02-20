@@ -26,14 +26,11 @@
 #ifndef _UATTRIBUTESBUILDER_
 #define _UATTRIBUTESBUILDER_
 
-#include <memory>
-#include <up-core-api/uri.pb.h>
-#include <up-cpp/uuid/factory/UuidFactory.h>
 #include <string>
 #include <spdlog/spdlog.h>
-#include "up-core-api/uattributes.pb.h"
-#include "up-core-api/uuid.pb.h"
-#include "up-core-api/umessage.pb.h"
+#include <up-core-api/uattributes.pb.h>
+#include <up-core-api/uuid.pb.h>
+#include <up-core-api/umessage.pb.h>
 
 using namespace uprotocol::uri;
 using namespace uprotocol::v1;
@@ -47,6 +44,13 @@ class UAttributesBuilder {
     public:
         UAttributesBuilder() {
             attributes_.Clear();
+        }
+
+        UAttributesBuilder(const uprotocol::v1::UUID& id, uprotocol::v1::UMessageType type, uprotocol::v1::UPriority priority) {
+            attributes_.Clear();
+            attributes_.mutable_id()->CopyFrom(id);
+            attributes_.set_type(type);
+            attributes_.set_priority(priority);
         }
 
         UAttributesBuilder& setToken(const std::string& token) {
