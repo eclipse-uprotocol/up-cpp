@@ -17,6 +17,8 @@
  # specific language governing permissions and limitations
  # under the License.
 
+ # Temporary to remove when the conan 1.x will be removed.
+ 
 cmake_minimum_required(VERSION 3.20.0)
 project(eclipse-uprotocol-up-cpp VERSION 0.1.0 LANGUAGES C CXX)
 
