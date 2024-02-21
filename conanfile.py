@@ -17,7 +17,7 @@ class UpCpp(ConanFile):
     conan_version = None
     generators = "CMakeDeps", "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv"
     version = "0.1"
-    exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "test/*"
+    exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "test/*", "up-core-api/*"
 
     options = {
         "shared": [True, False],
@@ -38,7 +38,7 @@ class UpCpp(ConanFile):
     
     def source(self):
         if not self.options.build_unbundled:
-            self.run(f"git clone --branch uprotocol-core-api-{self.up_core_api_version} https://github.com/eclipse-uprotocol/up-core-api.git")
+            //self.run(f"git clone --branch uprotocol-core-api-{self.up_core_api_version} https://github.com/eclipse-uprotocol/up-core-api.git")
         
     def requirements(self):
         if not self.options.build_cross_compiling:

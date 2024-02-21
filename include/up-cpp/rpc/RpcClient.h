@@ -26,9 +26,8 @@
 #define _RPC_CLIENT_H_
 
 #include <future>
-#include <up-cpp/transport/datamodel/UPayload.h>
-#include <up-cpp/transport/datamodel/UAttributes.h>
-#include "up-core-api/uri.pb.h"
+#include <uprotocol-cpp/transport/datamodel/UPayload.h>
+#include "up-core-api/uattributes.pb.h"
 
 using namespace uprotocol::utransport;
 using namespace uprotocol::v1;

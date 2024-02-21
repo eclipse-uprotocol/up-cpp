@@ -24,7 +24,7 @@
  */
 
 #include "spdlog/spdlog.h"
-#include <up-cpp/transport/datamodel/UAttributes.h>
+#include "up-core-api/uattributes.pb.h"
 #include <up-cpp/uuid/factory/UuidFactory.h>
 #include <up-cpp/uri/datamodel/UUri.h>
 #include <gtest/gtest.h>

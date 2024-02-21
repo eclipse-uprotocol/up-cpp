@@ -28,11 +28,11 @@
 
 #include <stdint.h>
 #include <cstddef>
-#include <up-cpp/transport/datamodel/UListener.h>
-#include <up-cpp/transport/datamodel/UPayload.h>
-#include <up-cpp/transport/datamodel/UAttributes.h>
-#include <up-core-api/uri.pb.h>
-#include <up-core-api/ustatus.pb.h>
+#include <uprotocol-cpp/transport/datamodel/UListener.h>
+#include <uprotocol-cpp/transport/datamodel/UPayload.h>
+#include <uprotocol-cpp/transport/datamodel/UAttributes.h>
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <src/main/proto/ustatus.pb.h>
 
 using namespace uprotocol::utransport;
 using namespace uprotocol::v1;

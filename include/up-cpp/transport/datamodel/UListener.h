@@ -26,11 +26,10 @@
 #ifndef _ULISTENER_H_
 #define _ULISTENER_H_
 
-#include <up-cpp/transport/datamodel/UAttributes.h>
-#include <up-core-api/ustatus.pb.h>
-#include <up-core-api/uri.pb.h>
-#include "UPayload.h"
-#include "UAttributes.h"
+#include <uprotocol-cpp/uri/datamodel/UUri.h>
+#include <src/main/proto/ustatus.pb.h>
+#include <up-core-api/uattributes.pb.h>
+#include <UPayload.h>
 
 using namespace uprotocol::v1;
 
