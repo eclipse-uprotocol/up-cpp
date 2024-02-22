@@ -41,10 +41,7 @@ class UpCpp(ConanFile):
             self.run(f"git clone --branch uprotocol-core-api-{self.up_core_api_version} https://github.com/eclipse-uprotocol/up-core-api.git")
         
     def requirements(self):
-        if not self.options.build_cross_compiling:
-            self.requires("protobuf/3.21.12")
-        else:
-            self.requires("protobuf/3.21.12@cross/cross")
+        self.requires("protobuf/3.21.12" + ("@cross/cross" if self.options.build_cross_compiling else ""))
         self.requires("spdlog/1.13.0")
         if self.options.build_testing:
             self.requires("gtest/1.14.0")
