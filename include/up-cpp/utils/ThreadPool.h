@@ -50,7 +50,7 @@ namespace uprotocol::utils {
             ThreadPool(const size_t maxQueueSize,
                        const size_t maxNumOfThreads)
                 : queue_(maxQueueSize, 
-                        std::chrono::milliseconds(timeout_)),
+                        std::chrono::milliseconds(timeoutMillisec_)),
                 terminate_(false),
                 maxNumOfThreads_(maxNumOfThreads),
                 numOfThreads_(0) {};
@@ -143,7 +143,7 @@ namespace uprotocol::utils {
         
         std::mutex mutex_;
 
-        static constexpr auto timeout_ = 100;
+        static constexpr auto timeoutMillisec_ = 100;
     };
 }
 

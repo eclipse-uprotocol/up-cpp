@@ -103,12 +103,12 @@ namespace uprotocol::utils {
 		}
 
 	private:
-		static constexpr std::chrono::milliseconds DefaultPopQueueTimeout { 5U };
+		static constexpr std::chrono::milliseconds DefaultPopQueueTimeoutMilli { 5U };
 
 		size_t queueMaxSize_;
 		mutable std::mutex mutex_;
 		std::condition_variable conditionVariable_;
-		std::chrono::milliseconds milliseconds_ { DefaultPopQueueTimeout };
+		std::chrono::milliseconds milliseconds_ { DefaultPopQueueTimeoutMilli };
 		std::queue<T> queue_;
 	};
 }
