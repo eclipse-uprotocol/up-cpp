@@ -92,7 +92,6 @@ target_link_libraries(UAuthorityTest
 		PUBLIC
 			up-cpp::up-cpp
 			spdlog::spdlog
-			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -107,7 +106,6 @@ target_link_libraries(UEntityTest
 		PUBLIC
 			up-cpp::up-cpp
 			spdlog::spdlog
-			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -122,7 +120,6 @@ target_link_libraries(UResourceTest
 		PUBLIC
 			up-cpp::up-cpp
 			spdlog::spdlog
-			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -137,7 +134,6 @@ target_link_libraries(UUriTest
 		PUBLIC
 			up-cpp::up-cpp
 			spdlog::spdlog
-			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -153,7 +149,6 @@ target_link_libraries(LongUriSerializerTest
 		PUBLIC
 			up-cpp::up-cpp
 			spdlog::spdlog
-			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
@@ -169,7 +164,6 @@ target_link_libraries(MicroUriSerializerTest
 		PUBLIC
 			up-cpp::up-cpp
 			spdlog::spdlog
-			up-cpp::up-core-api-protos
 			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
