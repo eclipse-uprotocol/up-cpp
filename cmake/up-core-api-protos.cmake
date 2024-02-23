@@ -36,8 +36,10 @@ set(MY_PROTOC_OUT_DIR ${CMAKE_BINARY_DIR}/up-core-api)
 #Load up all the proto files that need to be compiled via protoc (into header/source files)
 file(GLOB_RECURSE PROTO_FILES ${MY_IMPORT_DIRS}/*.proto)
 
-# Create an object library for up-core-api-protos
-add_library(up-core-api-protos OBJECT ${PROTO_FILES})
+#Create a library to hold the generated proto files
+add_library(up-core-api-protos STATIC ${PROTO_FILES})
+add_library(up-cpp::up-core-api-protos ALIAS up-core-api-protos)
+set_property(TARGET up-core-api-protos PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 target_include_directories(up-core-api-protos PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}> 
@@ -58,3 +60,4 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS TARGET up-core-api-protos IMPORT_DIR
 protobuf_generate(LANGUAGE cpp TARGET up-core-api-protos PROTOS ${PROTO_FILES} IMPORT_DIRS ${MY_IMPORT_DIRS} PROTOC_OUT_DIR ${MY_PROTOC_OUT_DIR})
 # restore saved previusly CMAKE_CURRENT_SOURCE_DIR
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR_TO_RESTORE})
+INSTALL(TARGETS up-core-api-protos)
