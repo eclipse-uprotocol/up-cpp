@@ -38,8 +38,8 @@ cmake_layout
 The following steps are only required to locally build and test up-cpp, if you are a user of up-cpp, you only need to follow the _How to Use the Library_ section above. 
 ### Setup SDK local repository, build and test
 ```
-$ git clone -b uprotocol-core-api-1.5.5 https://github.com/eclipse-uprotocol/up-core-api.git
 $ git clone https://github.com/eclipse-uprotocol/up-cpp.git
+$ git submodule update --init --recursive
 ```
 
 ### Building locally 
