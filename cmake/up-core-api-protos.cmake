@@ -25,8 +25,6 @@ else()
     message(FATAL_ERROR "Could not find up-core-api. Please, set UP_CORE_API_ROOT_DIR to the root directory of up-core-api.")
 endif()
 
-set(CMAKE_CURRENT_SOURCE_DIR ${MY_IMPORT_DIRS})
-
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/up-core-api")
 set(MY_PROTOC_OUT_DIR ${CMAKE_BINARY_DIR}/up-core-api)
 
