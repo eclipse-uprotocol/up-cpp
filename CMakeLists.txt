@@ -26,47 +26,6 @@ option(BUILD_UNBUNDLED "Set to OFF|ON (default is OFF) to control linking depend
 find_package(protobuf REQUIRED)
 find_package(spdlog REQUIRED)
 
-if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/)
-  set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
-elseif (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/)
-  set(PROTOBUF_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/")
-elseif(UP_CORE_API_ROOT_DIR)
-  set(PROTOBUF_INPUT_DIRECTORY "${UP_CORE_API_ROOT_DIR}/uprotocol/")
-else()
-  message(FATAL_ERROR "Could not find up-core-api. Please, set UP_CORE_API_ROOT_DIR to the root directory of up-core-api.")
-endif()
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-
-set(PROTOBUF_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/")
-
-file(GLOB_RECURSE PROTOBUF_DEFINITION_FILES "${PROTOBUF_INPUT_DIRECTORY}/*.proto")
-file(MAKE_DIRECTORY ${PROTOBUF_OUTPUT_DIRECTORY})
-
-foreach(file ${PROTOBUF_DEFINITION_FILES})
-    set(PROTOBUF_ARGUMENTS "-I=${PROTOBUF_INPUT_DIRECTORY}" "--cpp_out=${PROTOBUF_OUTPUT_DIRECTORY}" "${file}")
-    execute_process(
-        COMMAND ${PROTOBUF_PROTOC} ${PROTOBUF_ARGUMENTS}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        RESULT_VARIABLE PROTOBUF_RESULT
-        OUTPUT_VARIABLE PROTOBUF_OUTPUT_VARIABLE)
-endforeach()
-
-include_directories(${protobuf_INCLUDE_DIR})
-include_directories(${spdlog_INCLUDE_DIR})
-include_directories(${fmt_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-file(GLOB_RECURSE 	SRC_PROTO_CORE_API 	"${CMAKE_CURRENT_BINARY_DIR}/include/up-core-api/*.cc")
-file(GLOB_RECURSE 	SRC_FILES 	      	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-
-set(UPCPP_SRC
-    ${SRC_FILES}
-    ${SRC_PROTO_CORE_API})
-
 add_definitions(-DFMT_HEADER_ONLY)
 add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
