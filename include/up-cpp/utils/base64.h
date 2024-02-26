@@ -27,7 +27,7 @@
 #define _BASE64_H_
 #include <string>
 
-namespace uprotocol::tools {
+namespace uprotocol::utils {
 class Base64 {
     public:
         static std::string encode(const char* string, 

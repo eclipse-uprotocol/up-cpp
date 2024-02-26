@@ -90,6 +90,24 @@ namespace uprotocol::utransport {
                 
             }
             
+            // Copy constructor
+            UPayload(const UPayload& other) {
+    
+                data_ = std::make_unique<uint8_t[]>(other.dataSize_);
+                std::memcpy(data_.get(), other.data_.get(), other.dataSize_);
+                dataSize_ = other.dataSize_;
+                payloadType_ = other.payloadType_;
+            }
+
+            UPayload& operator=(const UPayload& other) {
+                if (this != &other) { // Self-assignment check
+                    this->data_ = std::make_unique<uint8_t[]>(other.dataSize_);
+                    std::memcpy(this->data_.get(), other.data_.get(), other.dataSize_);
+                    this->dataSize_ = other.dataSize_;
+                    this->payloadType_ = other.payloadType_;
+                }
+                return *this;
+            }
             /**
             * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
             * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
