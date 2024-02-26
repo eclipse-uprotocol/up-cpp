@@ -16,6 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Conan version
+        run: echo "${{ steps.conan.outputs.version }}"
+
       - name: Install Rust toolchain
         run: rustup component add rustfmt clippy
 
@@ -38,7 +45,7 @@ jobs:
         run: |
           mkdir -p build && cd build
           conan install .. -o build_testing=True
-          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON  -DCMAKE_INSTALL_PREFIX=install
+          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=~/local
           cmake --build . --target install -- -j
 
       - name: Run the test
