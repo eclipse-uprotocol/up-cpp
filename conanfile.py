@@ -15,31 +15,37 @@ class UpCpp(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     conan_version = None
-    generators = "CMakeDeps"
+    generators = "CMakeDeps", "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv"
     version = "0.1"
-    exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "test/*"
+    exports_sources = "CMakeLists.txt", "up-core-api/*", "include/*" ,"src/*" , "test/*", "cmake/*"
 
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_testing": [True, False],
+        "build_unbundled": [True, False],
+        "build_cross_compiling": [True, False],
     }
 
     default_options = {
         "shared": False,
         "fPIC": False,
+        "build_testing": False,
+        "build_unbundled": False,
+        "build_cross_compiling": False,
     }
-
-    def source(self):
-        self.run("git clone --branch uprotocol-core-api-1.5.5 https://github.com/eclipse-uprotocol/up-core-api.git")
         
     def requirements(self):
-        self.requires("protobuf/3.21.12")
-        self.requires("gtest/1.14.0")
+        self.requires("protobuf/3.21.12" + ("@cross/cross" if self.options.build_cross_compiling else ""))
         self.requires("spdlog/1.13.0")
-        self.requires("fmt/10.2.1")
+        if self.options.build_testing:
+            self.requires("gtest/1.14.0")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = self.options.build_testing
+        tc.variables["BUILD_UNBUNDLED"] = self.options.build_unbundled
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.generate()
 
     def build(self):

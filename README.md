@@ -38,17 +38,19 @@ cmake_layout
 The following steps are only required to locally build and test up-cpp, if you are a user of up-cpp, you only need to follow the _How to Use the Library_ section above. 
 ### Setup SDK local repository, build and test
 ```
-$ git clone -b uprotocol-core-api-1.5.5 https://github.com/eclipse-uprotocol/up-core-api.git
 $ git clone https://github.com/eclipse-uprotocol/up-cpp.git
+$ git submodule update --init --recursive
 ```
 
 ### Building locally 
 ```
 $ cd up-cpp
-$ conan install conaninfo/  --output-folder=.
-$ cd build/Release
-$ cmake ../../ -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
-$ make -j 
+$ mkdir build
+$ cd build
+
+$ conan install .. -o build_testing=True
+$ cmake -S .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON  -DCMAKE_INSTALL_PREFIX=install
+$ cmake --build . --target install -- -j 
 ```
 
 ### Creating conan package locally 
