@@ -43,7 +43,7 @@ jobs:
         run: |
           git clone -b uprotocol-core-api-1.5.6 https://github.com/eclipse-uprotocol/up-core-api.git
           git submodule update --init --recursive
-          
+
       - name: Build && install up-cpp
         shell: bash
         run: |
