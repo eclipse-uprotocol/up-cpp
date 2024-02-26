@@ -17,7 +17,7 @@ class UpCpp(ConanFile):
     conan_version = None
     generators = "CMakeDeps", "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv"
     version = "0.1"
-    exports_sources = "CMakeLists.txt", "conaninfo/*", "include/*" ,"src/*" , "test/*"
+    exports_sources = "CMakeLists.txt", "up-core-api/*", "include/*" ,"src/*" , "test/*", "cmake/*"
 
     options = {
         "shared": [True, False],
@@ -34,23 +34,12 @@ class UpCpp(ConanFile):
         "build_unbundled": False,
         "build_cross_compiling": False,
     }
-    up_core_api_version = "1.5.5"
-    
-    def source(self):
-        if not self.options.build_unbundled:
-            self.run(f"git clone --branch uprotocol-core-api-{self.up_core_api_version} https://github.com/eclipse-uprotocol/up-core-api.git")
         
     def requirements(self):
-        if not self.options.build_cross_compiling:
-            self.requires("protobuf/3.21.12")
-        else:
-            self.requires("protobuf/3.21.12@cross/cross")
+        self.requires("protobuf/3.21.12" + ("@cross/cross" if self.options.build_cross_compiling else ""))
         self.requires("spdlog/1.13.0")
         if self.options.build_testing:
             self.requires("gtest/1.14.0")
-        if self.options.build_unbundled:
-            self.requires("up-core-api/{}".format(self.up_core_api_version))
-        
 
     def generate(self):
         tc = CMakeToolchain(self)

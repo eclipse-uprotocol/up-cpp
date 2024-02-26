@@ -16,31 +16,17 @@
  # KIND, either express or implied.  See the License for the
  # specific language governing permissions and limitations
  # under the License.
-
 cmake_minimum_required(VERSION 3.18)
 # save CMAKE_CURRENT_SOURCE_DIR we will restore it on exit
 set(CMAKE_CURRENT_SOURCE_DIR_TO_RESTORE ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(protobuf CONFIG REQUIRED)
-if (BUILD_UNBUNDLED)
-    find_package(up-core-api CONFIG REQUIRED)
-    if(CMAKE_BUILD_TYPE MATCHES Debug)
-        set(UP_CORE_API_RES_DIRS ${up-core-api_RES_DIRS_DEBUG})
-    elseif(CMAKE_BUILD_TYPE MATCHES Release)
-        set(UP_CORE_API_RES_DIRS ${up-core-api_RES_DIRS_RELEASE})
-    endif()
-    set(MY_IMPORT_DIRS "${UP_CORE_API_RES_DIRS}/uprotocol")
+if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
+    set(MY_IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
 else()
-    if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
-        set(MY_IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
-    elseif (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/")
-        set(MY_IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../up-core-api/uprotocol/")
-    elseif(UP_CORE_API_ROOT_DIR)
-        set(MY_IMPORT_DIRS "${UP_CORE_API_ROOT_DIR}/uprotocol/")
-    else()
-        message(FATAL_ERROR "Could not find up-core-api. Please, set UP_CORE_API_ROOT_DIR to the root directory of up-core-api.")
-    endif()
+    message(FATAL_ERROR "Could not find up-core-api. Please, set UP_CORE_API_ROOT_DIR to the root directory of up-core-api.")
 endif()
+
 set(CMAKE_CURRENT_SOURCE_DIR ${MY_IMPORT_DIRS})
 
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/up-core-api")
@@ -49,26 +35,11 @@ set(MY_PROTOC_OUT_DIR ${CMAKE_BINARY_DIR}/up-core-api)
 #Load up all the proto files that need to be compiled via protoc (into header/source files)
 file(GLOB_RECURSE PROTO_FILES ${MY_IMPORT_DIRS}/*.proto)
 
-add_library(up-core-api-protos STATIC ${PROTO_FILES})
-add_library(up-cpp::up-core-api-protos ALIAS up-core-api-protos)
-set_property(TARGET up-core-api-protos PROPERTY POSITION_INDEPENDENT_CODE 1)
-
-target_include_directories(up-core-api-protos PUBLIC 
-    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}> 
-    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/up-core-api> 
-)
-
-if (protobuf_LITE)
-    target_link_libraries(up-core-api-protos PRIVATE protobuf::libprotobuf-lite)
-else()
-    target_link_libraries(up-core-api-protos PRIVATE protobuf::libprotobuf)
-endif()
-
-if(TARGET protobuf::libprotoc)
-    target_link_libraries(up-core-api-protos PRIVATE protobuf::libprotoc)
-endif()
+#Create an INTERFACE to hold the generated proto files
+add_library(up-core-api-protos INTERFACE ${PROTO_FILES})
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS TARGET up-core-api-protos IMPORT_DIRS ${MY_IMPORT_DIRS} PROTOC_OUT_DIR ${MY_PROTOC_OUT_DIR})
 protobuf_generate(LANGUAGE cpp TARGET up-core-api-protos PROTOS ${PROTO_FILES} IMPORT_DIRS ${MY_IMPORT_DIRS} PROTOC_OUT_DIR ${MY_PROTOC_OUT_DIR})
+
 # restore saved previusly CMAKE_CURRENT_SOURCE_DIR
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR_TO_RESTORE})

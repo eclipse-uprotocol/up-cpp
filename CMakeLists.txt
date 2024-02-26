@@ -49,23 +49,24 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/up-core-api-protos.cmake)
 
 file(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-add_library(${PROJECT_NAME} ${SRC_FILES})
+add_library(${PROJECT_NAME} ${SRC_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
 add_library(up-cpp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-set_target_properties(${PROJECT_NAME}
-	PROPERTIES
-	# create the shared library and the symbolic links
-	VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} 
-	OUTPUT_NAME ${PROJECT_NAME}
-)
+# uncoment for SOVERSION
+# set_target_properties(${PROJECT_NAME}
+# 	PROPERTIES
+# 	# create the shared library and the symbolic links
+# 	VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} 
+# 	OUTPUT_NAME ${PROJECT_NAME}
+# )
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> 
-		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> 
-	PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}/src
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}> 
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/up-core-api> 
 )
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(${PROJECT_NAME} PRIVATE up-cpp::up-core-api-protos protobuf::protobuf spdlog::spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE up-core-api-protos protobuf::protobuf spdlog::spdlog)
 
 if(BUILD_TESTING)
 	enable_testing()
@@ -74,3 +75,4 @@ endif()
 
 INSTALL(TARGETS ${PROJECT_NAME})
 INSTALL(DIRECTORY include DESTINATION .)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/up-core-api DESTINATION include FILES_MATCHING PATTERN "*.h")
