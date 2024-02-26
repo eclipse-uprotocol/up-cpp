@@ -58,7 +58,12 @@ jobs:
           cd build
           ctest
 
-
+      - name: Create up-cpp Conan package
+        shell: bash
+        run: |
+          conan create . --build=missing
+  
+  
   # NOTE: In GitHub repository settings, the "Require status checks to pass
   # before merging" branch protection rule ensures that commits are only merged
   # from branches where specific status checks have passed. These checks are
