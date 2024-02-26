@@ -27,23 +27,13 @@ jobs:
       - name: Create default Conan profile
         run: conan profile detect
 
-      - name: Install Rust toolchain
-        run: rustup component add rustfmt clippy
 
-      - name: Build and install Zenoh-c
-        shell: bash
-        run: |
-          git clone https://github.com/eclipse-zenoh/zenoh-c.git
-          cd zenoh-c && mkdir -p build && cd build 
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=~/local
-          cmake --build . --target install --config Release
-  
       - name: Fetch and link up-core-api
         shell: bash
         run: |
           git clone -b uprotocol-core-api-1.5.6 https://github.com/eclipse-uprotocol/up-core-api.git
           git submodule update --init --recursive
-          
+
       - name: Build && install up-cpp
         shell: bash
         run: |
@@ -58,7 +48,12 @@ jobs:
           cd build
           ctest
 
-
+      - name: Create up-cpp Conan package
+        shell: bash
+        run: |
+          conan create . --build=missing
+  
+  
   # NOTE: In GitHub repository settings, the "Require status checks to pass
   # before merging" branch protection rule ensures that commits are only merged
   # from branches where specific status checks have passed. These checks are
