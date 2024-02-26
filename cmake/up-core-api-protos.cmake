@@ -17,6 +17,8 @@
  # specific language governing permissions and limitations
  # under the License.
 cmake_minimum_required(VERSION 3.18)
+# save CMAKE_CURRENT_SOURCE_DIR we will restore it on exit
+set(CMAKE_CURRENT_SOURCE_DIR_TO_RESTORE ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(protobuf CONFIG REQUIRED)
 if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
@@ -24,6 +26,8 @@ if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
 else()
     message(FATAL_ERROR "Could not find up-core-api. Please, set UP_CORE_API_ROOT_DIR to the root directory of up-core-api.")
 endif()
+
+set(CMAKE_CURRENT_SOURCE_DIR ${MY_IMPORT_DIRS})
 
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/up-core-api")
 set(MY_PROTOC_OUT_DIR ${CMAKE_BINARY_DIR}/up-core-api)
@@ -36,3 +40,6 @@ add_library(up-core-api-protos INTERFACE ${PROTO_FILES})
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS TARGET up-core-api-protos IMPORT_DIRS ${MY_IMPORT_DIRS} PROTOC_OUT_DIR ${MY_PROTOC_OUT_DIR})
 protobuf_generate(LANGUAGE cpp TARGET up-core-api-protos PROTOS ${PROTO_FILES} IMPORT_DIRS ${MY_IMPORT_DIRS} PROTOC_OUT_DIR ${MY_PROTOC_OUT_DIR})
+
+# restore saved previusly CMAKE_CURRENT_SOURCE_DIR
+set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR_TO_RESTORE})

@@ -39,7 +39,7 @@ The following steps are only required to locally build and test up-cpp, if you a
 ### Setup SDK local repository, build and test
 ```
 $ git clone https://github.com/eclipse-uprotocol/up-cpp.git
-$ git submodule update --init --recursive
+$ git submodule update --init --recursive
 ```
 
 ### Building locally 
