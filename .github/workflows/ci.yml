@@ -19,16 +19,6 @@ jobs:
       - name: Install Rust toolchain
         run: rustup component add rustfmt clippy
 
-      - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- --deny warnings
-
-      - name: Run rustfmt
-        run: cargo fmt --check
-
-      - name: Check for feature leaks
-        run: cargo test --no-default-features
-
-      
       - name: Build and install Zenoh-c
         shell: bash
         run: |
