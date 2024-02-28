@@ -23,9 +23,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <uprotocol-cpp/tools/base64.h>
+#include <up-cpp/utils/base64.h>
 #include <gtest/gtest.h>
 #include <array>
+
+using namespace uprotocol::utils;
 
 class encodeDecodeTests: public ::testing::Test { 
 protected:
@@ -49,14 +51,11 @@ protected:
         size_t encodeCharArrLen = strlen(encodeCharArr);
         size_t invalidEncodeCharArrLen = strlen(invalidEncodeCharArr);
 
-        encoded = uprotocol::tools::Base64::encode(std::string(inputData));
-        decoded = uprotocol::tools::Base64::decode(encoded);
-        encodedCharStr = uprotocol::tools::Base64::encode(inputData,
-                                                          inputDataLen);
-        decodedCharStr = uprotocol::tools::Base64::decode(encodeCharArr,
-                                                          encodeCharArrLen);
-        invalidDecodedCharStr = uprotocol::tools::Base64::decode(invalidEncodeCharArr,
-                                                                 invalidEncodeCharArrLen);
+        encoded = Base64::encode(std::string(inputData));
+        decoded = Base64::decode(encoded);
+        encodedCharStr = Base64::encode(inputData, inputDataLen);
+        decodedCharStr = Base64::decode(encodeCharArr, encodeCharArrLen);
+        invalidDecodedCharStr = Base64::decode(invalidEncodeCharArr, invalidEncodeCharArrLen);
 
     }
 
@@ -78,7 +77,7 @@ TEST_F(encodeDecodeTests, base64_encode_decode_positive){
 */
 TEST_F(encodeDecodeTests, base64_encode_decode_negitive){
     
-    ASSERT_NE(uprotocol::tools::Base64::decode(invalidEncodeData), decoded);
+    ASSERT_NE(Base64::decode(invalidEncodeData), decoded);
     ASSERT_NE(invalidDecodedCharStr, decodedCharStr);
 };
 
@@ -90,10 +89,10 @@ TEST_F(encodeDecodeTests, inputType_UTF8format){
         "René Nyffenegger\n"
         "http://www.renenyffenegger.ch\n"
         "passion for data\n";
-    std::string encodedStr = uprotocol::tools::Base64::encode(reinterpret_cast<const char*>(orig.c_str()), orig.length());
+    std::string encodedStr = Base64::encode(reinterpret_cast<const char*>(orig.c_str()), orig.length());
     ASSERT_EQ(encodedStr,"UmVuw6kgTnlmZmVuZWdnZXIKaHR0cDovL3d3dy5yZW5lbnlmZmVuZWdnZXIuY2gKcGFzc2lvbiBmb3IgZGF0YQo=");
 
-    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    std::string decodedStr = Base64::decode(encodedStr);
     ASSERT_EQ(decodedStr,orig);
 };
 
@@ -107,10 +106,10 @@ TEST_F(encodeDecodeTests, enocodeString_nopadding){
     std::string inputStr2 = "abc";
     std::string encodedResStr2 = "YWJj";
 
-    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr2);
+    std::string encodedStr = Base64::encode(inputStr2);
     ASSERT_EQ(encodedStr,encodedResStr2);
 
-    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    std::string decodedStr = Base64::decode(encodedStr);
     ASSERT_EQ(decodedStr,inputStr2);
 };
 
@@ -122,10 +121,10 @@ TEST_F(encodeDecodeTests, enocodeString_twopadding){
     std::string inputStr3 = "abcd";
     std::string encodedResStr3 = "YWJjZA==";
 
-    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr3);
+    std::string encodedStr = Base64::encode(inputStr3);
     ASSERT_EQ(encodedStr,encodedResStr3);
 
-    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    std::string decodedStr = Base64::decode(encodedStr);
     ASSERT_EQ(decodedStr,inputStr3);
 };
 
@@ -137,10 +136,10 @@ TEST_F(encodeDecodeTests, enocodeString_onepadding){
     std::string inputStr4 = "abcde";
     std::string encodedResStr4 = "YWJjZGU=";
 
-    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr4);
+    std::string encodedStr = Base64::encode(inputStr4);
     ASSERT_EQ(encodedStr,encodedResStr4);
 
-    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    std::string decodedStr = Base64::decode(encodedStr);
     ASSERT_EQ(decodedStr,inputStr4);
 };
 
@@ -151,10 +150,10 @@ TEST_F(encodeDecodeTests, a_17byteData){
 
     std::string inputStr5 = "aaaaaaaaaaaaaaaaa";
 
-    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr5);
+    std::string encodedStr = Base64::encode(inputStr5);
     ASSERT_EQ(encodedStr,"YWFhYWFhYWFhYWFhYWFhYWE=");
 
-    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    std::string decodedStr = Base64::decode(encodedStr);
     ASSERT_EQ(decodedStr,inputStr5);
 };
 
@@ -165,10 +164,10 @@ TEST_F(encodeDecodeTests, inputChar_6364){
 
     std::string inputStr6 = "\x03" "\xef" "\xff" "\xf9";
 
-    std::string encodedStr = uprotocol::tools::Base64::encode(inputStr6);
+    std::string encodedStr = Base64::encode(inputStr6);
     ASSERT_EQ(encodedStr,"A+//+Q==");
 
-    std::string decodedStr = uprotocol::tools::Base64::decode(encodedStr);
+    std::string decodedStr = Base64::decode(encodedStr);
     ASSERT_EQ(decodedStr,inputStr6);
 };
 
@@ -179,13 +178,13 @@ TEST_F(encodeDecodeTests, base64_decode_unpaddedInput){
     std::string origStr = "abcdefg";
     
 
-    std::string encodeStr = uprotocol::tools::Base64::encode(origStr); //encoded str is YWJjZGVmZw==
+    std::string encodeStr = Base64::encode(origStr); //encoded str is YWJjZGVmZw==
     std::string encodeStrNoPadding = "YWJjZGVmZw"; // Note the 'missing' "=="
     ASSERT_NE(encodeStr, encodeStrNoPadding);
 
-    std::string decodedStr = uprotocol::tools::Base64::decode(encodeStr);
+    std::string decodedStr = Base64::decode(encodeStr);
     ASSERT_EQ(decodedStr, origStr);
 
-    std::string decodedStrNoPadding = uprotocol::tools::Base64::decode(encodeStrNoPadding);
+    std::string decodedStrNoPadding = Base64::decode(encodeStrNoPadding);
     ASSERT_EQ(decodedStrNoPadding, origStr);
 };

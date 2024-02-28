@@ -25,11 +25,11 @@
 /* Base64 utility is a way to convert any binary or text data into printable ASCII string format.
  *  Refer :https://en.wikipedia.org/wiki/Base64 */
 
-#include <uprotocol-cpp/tools/base64.h>
+#include <up-cpp/utils/base64.h>
 #include "spdlog/spdlog.h"
 #include <iostream>
 
-using namespace uprotocol::tools;
+using namespace uprotocol::utils;
 
 static const uint8_t pr2six[256] = {
     /* ASCII table */

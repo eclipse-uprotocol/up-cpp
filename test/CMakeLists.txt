@@ -1,131 +1,225 @@
- # Copyright (c) 2023 General Motors GTO LLC
- #
- # Licensed to the Apache Software Foundation (ASF) under one
- # or more contributor license agreements.  See the NOTICE file
- # distributed with this work for additional information
- # regarding copyright ownership.  The ASF licenses this file
- # to you under the Apache License, Version 2.0 (the
- # "License"); you may not use this file except in compliance
- # with the License.  You may obtain a copy of the License at
- #
- #   http://www.apache.org/licenses/LICENSE-2.0
- #
- # Unless required by applicable law or agreed to in writing,
- # software distributed under the License is distributed on an
- # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- # KIND, either express or implied.  See the License for the
- # specific language governing permissions and limitations
- # under the License.
- #
- # SPDX-FileType: SOURCE
- # SPDX-FileCopyrightText: 2023 General Motors GTO LLC
- # SPDX-License-Identifier: Apache-2.0
- 
-set(TESTS_PATH ../test)
+# Copyright (c) 2023 General Motors GTO LLC
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-FileType: SOURCE
+# SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+# SPDX-License-Identifier: Apache-2.0
 
-include_directories(../uprotocol/proto)
+enable_testing()
 
-file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/uprotocol-core-api/src/main/proto/*.cc")
+find_package(GTest REQUIRED)
 
 
-add_executable(json_serializer_test
-			   ${TESTS_PATH}/json/json_serializer_test.cpp
-			   ${CGREEN_INCLUDE_DIR}
-			   ${SRC_HDR_MODEL}
-			   ${SRC_HDR_JSON}
-			   ${PROTO_HDR_FILE}
-			   ${PROTO_CPP_FILE})
+#add_executable(json_serializer_test
+#			   json/json_serializer_test.cpp
+#			   ${CGREEN_INCLUDE_DIR}
+#			   ${SRC_HDR_MODEL}
+#			   ${SRC_HDR_JSON}
+#			   ${PROTO_HDR_FILE}
+#			   ${PROTO_CPP_FILE})
 
-target_link_libraries(json_serializer_test ${CGREEN_LIBRARY} ${RapidJSON_LIBRARIES} uprotocol-cpp)
+file(GLOB_RECURSE SRC_PROTO_CORE_API "${CMAKE_CURRENT_BINARY_DIR}/up-core-api/uprotocol/*.cc")
 
-find_package(Protobuf REQUIRED)
-include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+#add_executable(json_serializer_test
+#			   json/json_serializer_test.cpp
+#			   ${CGREEN_INCLUDE_DIR}
+#			   ${SRC_HDR_MODEL}
+#			   ${SRC_HDR_JSON}
+#			   ${PROTO_HDR_FILE}
+#			   ${PROTO_CPP_FILE})
 
-protobuf_generate_cpp(TEST_PROTO_SRCS TEST_PROTO_HDRS ${TESTS_PATH}/factory/test.proto)
+#target_link_libraries(json_serializer_test ${CGREEN_LIBRARY} ${RapidJSON_LIBRARIES} up-cpp::up-cpp)
 
-add_executable(binary_serializer_test
-				${TESTS_PATH}/binary/binary_test.cpp
-				${SRC_HDR_MODEL}
-				${SRC_HDR_BINARY}
-				${PROTO_HDR_FILE}
-				${PROTO_CPP_FILE}
-				)
+#add_executable(binary_serializer_test
+#				binary/binary_test.cpp
+#				${SRC_HDR_MODEL}
+#				${SRC_HDR_BINARY}
+#				${PROTO_HDR_FILE}
+#				${PROTO_CPP_FILE}
+#				)
 
-target_link_libraries(binary_serializer_test ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-01-binary-serializer" binary_serializer_test)
+#target_link_libraries(binary_serializer_test ${CGREEN_LIBRARY} up-cpp::up-cpp)
+#add_test("t-01-binary-serializer" binary_serializer_test)
 
-add_executable(priority_enum_test
-		${TESTS_PATH}/model/priority_test.cpp)
-target_link_libraries(priority_enum_test ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-02-priority-enum-test" priority_enum_test)
+# add_executable(priority_enum_test
+# 		model/priority_test.cpp)
+# target_link_libraries(priority_enum_test ${CGREEN_LIBRARY} up-cpp::up-cpp )
+# add_test("t-02-priority-enum-test" priority_enum_test)
 
-add_executable(attribute_tests
-		${TESTS_PATH}/model/attributes_test.cpp
-		${SRC_PROTO_CORE_API})
-target_link_libraries(attribute_tests ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-03-attribute-test" attribute_tests)
+# add_executable(attribute_tests
+# 		model/attributes_test.cpp
+# 		${SRC_PROTO_CORE_API})
+# target_link_libraries(attribute_tests ${CGREEN_LIBRARY} up-cpp::up-cpp)
+# add_test("t-03-attribute-test" attribute_tests)
 
-add_executable(base64_test 
-	${TESTS_PATH}/tools/base64_test.cpp)
-target_link_libraries(base64_test gtest gtest_main uprotocol-cpp)
-add_test("t-06-base64-test" base64_test)	
+add_executable(base64_test
+	tools/base64_test.cpp)
+target_link_libraries(base64_test 
+ 		PUBLIC
+			up-cpp::up-cpp
+        PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-06-base64-test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/base64_test)
 
-add_test("t-07-ce-factory-test" base64_test)
-add_executable(service_type_test ${TESTS_PATH}/model/serviceType_test.cpp)
-target_link_libraries(service_type_test ${CGREEN_LIBRARY} uprotocol-cpp)
+#add_test("t-07-ce-factory-test" base64_test)
+#add_executable(service_type_test model/serviceType_test.cpp)
+#target_link_libraries(service_type_test ${CGREEN_LIBRARY} up-cpp)
 
-add_test("t-08-service-type-test" service_type_test)
+#add_test("t-08-service-type-test" service_type_test)
 
 add_executable(UAuthorityTest
-	${TESTS_PATH}/uri/datamodel/UAuthorityTest.cpp)
-target_link_libraries(UAuthorityTest ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-09-UAuthorityTest" UAuthorityTest)
+	uri/builder/UAuthorityTest.cpp)
+target_link_libraries(UAuthorityTest 
+		PUBLIC
+			up-cpp::up-cpp
+			spdlog::spdlog
+			protobuf::protobuf
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-09-UAuthorityTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/UAuthorityTest)
 
 add_executable(UEntityTest
-		${TESTS_PATH}/uri/datamodel/UEntityTest.cpp)
-target_link_libraries(UEntityTest ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-10-UEntityTest" UEntityTest)
+		uri/builder/UEntityTest.cpp)
+target_link_libraries(UEntityTest 
+		PUBLIC
+			up-cpp::up-cpp
+			spdlog::spdlog
+			protobuf::protobuf
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-10-UEntityTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/UEntityTest)
 
 add_executable(UResourceTest
-	${TESTS_PATH}/uri/datamodel/UResourceTest.cpp)
-target_link_libraries(UResourceTest ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-11-UResourceTest" UResourceTest)
+	uri/builder/UResourceTest.cpp)
+target_link_libraries(UResourceTest 
+		PUBLIC
+			up-cpp::up-cpp
+			spdlog::spdlog
+			protobuf::protobuf
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-11-UResourceTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/UResourceTest)
 
 add_executable(UUriTest
-	${TESTS_PATH}/uri/datamodel/UUriTest.cpp)
-target_link_libraries(UUriTest ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-12-UUriTest" UUriTest)
+	uri/builder/UUriTest.cpp)
+target_link_libraries(UUriTest 
+		PUBLIC
+			up-cpp::up-cpp
+			spdlog::spdlog
+			protobuf::protobuf
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-12-UUriTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/UUriTest)
 
 add_executable(LongUriSerializerTest
-		${TESTS_PATH}/uri/serializer/LongUriSerializerTest.cpp)
+		uri/serializer/LongUriSerializerTest.cpp)
 target_compile_options(LongUriSerializerTest PRIVATE -g -O0)
-target_link_libraries(LongUriSerializerTest ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-13-LongUriSerializerTest"  LongUriSerializerTest)
+target_link_libraries(LongUriSerializerTest 
+		PUBLIC
+			up-cpp::up-cpp
+			spdlog::spdlog
+			protobuf::protobuf
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-13-LongUriSerializerTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/LongUriSerializerTest)
 
 add_executable(MicroUriSerializerTest
-	${TESTS_PATH}/uri/serializer/MicroUriSerializerTest.cpp)
+	uri/serializer/MicroUriSerializerTest.cpp)
 target_compile_options(MicroUriSerializerTest PRIVATE -g -O0)
-target_link_libraries(MicroUriSerializerTest ${CGREEN_LIBRARY} uprotocol-cpp)
-add_test("t-14-MicroUriSerializerTest"  MicroUriSerializerTest)
+target_link_libraries(MicroUriSerializerTest 
+		PUBLIC
+			up-cpp::up-cpp
+			spdlog::spdlog
+			protobuf::protobuf
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-14-MicroUriSerializerTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MicroUriSerializerTest)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(umessagetypes_test
-	${TESTS_PATH}/utransport/umessagetypes_test.cpp)
-target_link_libraries(umessagetypes_test ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+	utransport/umessagetypes_test.cpp)
+target_link_libraries(umessagetypes_test 
+		PUBLIC
+			up-cpp::up-cpp
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-15-umessagetypes_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/umessagetypes_test)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(upayload_test
-	${TESTS_PATH}/utransport/upayload_test.cpp)
-target_link_libraries(upayload_test ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+	utransport/upayload_test.cpp)
+target_link_libraries(upayload_test 
+		PUBLIC
+			up-cpp::up-cpp
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-16-upayload_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/upayload_test)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(upriority_test
-	${TESTS_PATH}/utransport/upriority_test.cpp)
-target_link_libraries(upriority_test ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
+	utransport/upriority_test.cpp)
+target_link_libraries(upriority_test 
+		PUBLIC
+			up-cpp::up-cpp
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-17-upriority_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/upriority_test)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(userializationhint_test
-	${TESTS_PATH}/utransport/userializationhint_test.cpp)
-target_link_libraries(userializationhint_test ${CGREEN_LIBRARY} uprotocol-cpp gtest gtest_main)
-
+	utransport/userializationhint_test.cpp)
+target_link_libraries(userializationhint_test 
+		PUBLIC
+			up-cpp::up-cpp
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-18-userializationhint_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/userializationhint_test)

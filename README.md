@@ -2,92 +2,64 @@
 
 ## Welcome!
 
-The main object of this module is to enable constructing and deconstructing uProtocol CloudEvents.
+This is the C++ library that extends up-core-api to provide serializers, validators, and language specific interface definitions for uProtocol. 
 
 *_IMPORTANT NOTE:_ This project is under active development*
 
-The core module contains functional factory methods for creating CloudEvents as well as functional factory methods that make it more intuitive to create URIs that are used to configure source and sink (destination) elements in the uProtocol CloudEvents.
+The core functional factory methods that make it more intuitive to create URIs that are used to configure source and sink (destination) elements in the uProtocol and additional helper methods.
 
-This module contains the data model structures as well as core functionality for building uProtocol CloudEvents and URIs for sink and source attributes.
-
-The SDKs are then used by the code generators to auto-populate service stubs with generated code that builds CloudEvents. For more information on auto-generating service stubs, please refer to uProtocol Main Project
 
 ## Getting Started
+
+The library is built and packaged using conan dependency management. 
+
 ### Requirements:
 - Compiler: GCC/G++ 11 or Clang 13
-- vcpkg
+- Conan : 1.59 or latest 2.X
 - Ubuntu 22.04
-- cgreen testing library
 
-#### Ubuntu dependencies
-
-At first to make it working, you have to install some linux libraries as dependencies
+## How to Use the Library
+To add up-cpp to your conan build dependencies, simply add the following to your conanfile.txt:
 ```
-$ sudo apt-get install build-essential \
-      libbsd-dev \
-      make \
-      ninja-build \
-      pkg-config \
-      clang-format \
-      cmake \
-      uuid \
-      gcc-11 \
-      g++-11 \
-      lcov \
-      uuid-dev \
-      openssl \ 
-      libssl-dev
-```
-#### Install cgreen testing library
+[requires]
+up-cpp/0.1
 
-In this package we're using the cgreen testing library.
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[layout]
+cmake_layout
 
 ```
- $ git clone https://github.com/cgreen-devs/cgreen.git
- $ cd cgreen
- $ make
- $ sudo make install
- ```
+**NOTE:** If using conan version 1.59 Ensure that the conan profile is configured to use ABI 11 (libstdc++11: New ABI.) standards according to https://docs.conan.io/en/1.60/howtos/manage_gcc_abi.html
 
-It should appear in /usr/local/lib and in /usr/local/include
+## How to Build 
+The following steps are only required to locally build and test up-cpp, if you are a user of up-cpp, you only need to follow the _How to Use the Library_ section above. 
+### Setup SDK local repository, build and test
+```
+$ git clone https://github.com/eclipse-uprotocol/up-cpp.git
+$ git submodule update --init --recursive
+```
 
-#### installing dependencies
+### Building locally 
 ```
-$ sudo apt-get install libgtest-dev
-$ sudo apt-get install openssl-devel
-$ sudo apt-get install libuuid-devel
-$ sudo apt-get install rapidjson-devel
-$ install spdlog : https://github.com/gabime/spdlog
-$ install cgreen : https://github.com/cgreen-devs/cgreen/blob/master/INSTALL.md 
-$ install protobuf : git clone --progress -b v3.21.12 https://github.com/protocolbuffers/protobuf
-      mkdir build & cd build\
-      cmake ../cmake \
-      -DCMAKE_BUILD_TYPE=Release \
-      -Dprotobuf_BUILD_SHARED_LIBS=ON \
-      -Dprotobuf_BUILD_TESTS=OFF; \
-      sudo -E make -j4 install
-```
-#### Setup SDK local repository, build and test
-```
-$ git clone https://github.com/eclipse-uprotocol/uprotocol-sdk-cpp.git
-$ cd uprotocol-sdk-cpp
-$ code .
-
-```
-Using VSCode with the CMake & CMake Tools plugins, following steps will be done automatically when the project is opened in VSCode. Build and test can be triggered using the extension.
-
-Please refer the following link for the CMake Tools extension:
-https://code.visualstudio.com/docs/cpp/CMake-linux
-
-If the CMake Tools plugin is not configured to auto generate, then manually run cmake and build using the following commands.
-```
-$ /usr/bin/cmake --no-warn-unused-cli -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ -S . -B build -G Ninja
+$ cd up-cpp
+$ mkdir build
 $ cd build
-$ ninja
-$ ninja test
-```
-Now you should see formatting the code with clang-format, building and running the unit tests.
 
+$ conan install .. -o build_testing=True
+$ cmake -S .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON  -DCMAKE_INSTALL_PREFIX=install
+$ cmake --build . --target install -- -j 
+```
+
+### Creating conan package locally 
+If you need to create a release package for conan, please follow the steps below.
+
+```
+$ cd up-cpp
+$ conan create . --build=missing
+```
 
 ## Show your support
 

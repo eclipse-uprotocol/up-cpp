@@ -24,7 +24,7 @@
  */
 #include <gtest/gtest.h>
 
-#include "src/main/proto/uuid.pb.h"
+#include "uprotocol/uuid.pb.h"
 #include "UuidSerializer.h"
 #include "Uuidv8Factory.h"
 
