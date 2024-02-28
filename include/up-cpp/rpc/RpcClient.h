@@ -26,7 +26,7 @@
 #define _RPC_CLIENT_H_
 
 #include <future>
-#include <uprotocol-cpp/transport/datamodel/UPayload.h>
+#include <up-cpp/transport/datamodel/UPayload.h>
 #include "up-core-api/uattributes.pb.h"
 
 using namespace uprotocol::utransport;
@@ -49,8 +49,8 @@ class RpcClient
         * @param attributes Metadata for the method invocation (i.e. priority, timeout, etc.)
         * @return Returns the CompletableFuture with the result or exception.
         */
-        virtual std::future<UPayload> invokeMethod(const UUri &topic, 
-                                                   const UPayload &payload, 
+        virtual std::future<upayload> invokeMethod(const UUri &topic, 
+                                                   const upayload &payload, 
                                                    const UAttributes &attributes) = 0;
         
         virtual ~RpcClient() {} 

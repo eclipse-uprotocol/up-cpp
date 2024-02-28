@@ -46,7 +46,7 @@ namespace uprotocol::utransport {
 			* @return Returns an Ack every time a message is received and processed.
 			*/
 			virtual UStatus onReceive(const UUri &uri, 
-									const UPayload &payload, 
+									const upayload &payload, 
 									const UAttributes &attributes) const = 0; 
 
 			virtual ~UListener() {} 

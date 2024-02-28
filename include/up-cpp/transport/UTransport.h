@@ -30,9 +30,10 @@
 #include <cstddef>
 #include <up-cpp/transport/datamodel/UListener.h>
 #include <up-cpp/transport/datamodel/UPayload.h>
-#include <up-cpp/transport/datamodel/UAttributes.h>
 #include <up-core-api/uri.pb.h>
 #include <up-core-api/ustatus.pb.h>
+#include <up-core-api/uattributes.pb.h>
+#include <up-core-api/upayload.pb.h>
 
 using namespace uprotocol::utransport;
 using namespace uprotocol::v1;
@@ -44,7 +45,7 @@ namespace uprotocol::utransport {
           public:
                
                /**
-               * Transmit UPayload to the topic using the attributes defined in UTransportAttributes.
+               * Transmit upayload to the topic using the attributes defined in UTransportAttributes.
                * @param topic Resolved UUri topic to send the payload to.
                * @param payload Actual payload.
                * @param attributes Additional transport attributes.
@@ -52,11 +53,11 @@ namespace uprotocol::utransport {
                * returns FAILSTATUS with the appropriate failure.
                */
                virtual UStatus send(const UUri &uri, 
-                                    const UPayload &payload,
+                                    const upayload &payload,
                                     const UAttributes &attributes) = 0;
 
                /**
-               * Register listener to be called when UPayload is received for the specific topic.
+               * Register listener to be called when upayload is received for the specific topic.
                * @param topic Resolved UUri for where the message arrived via the underlying transport technology.
                * @param listener The method to execute to process the date for the topic.
                * @return Returns OKSTATUS if the listener is unregistered correctly, otherwise it returns FAILSTATUS
@@ -78,7 +79,7 @@ namespace uprotocol::utransport {
                                                   const UListener &listner) = 0;
 
                virtual UStatus receive(const UUri &uri, 
-                                       const UPayload &payload, 
+                                       const upayload &payload, 
                                        const UAttributes &attributes) = 0;
                
                virtual ~UTransport() {} 

@@ -29,10 +29,11 @@
 #include <memory>
 #include <cstdint>
 #include <cstring>
+#include <up-core-api/upayload.pb.h>
 
 namespace uprotocol::utransport {
 
-    enum class UPayloadType {
+    enum class upayloadType {
         VALUE = 0, /* data passed by value - will be copied */
         REFERENCE, /* data passed by reference - the user need to ensure that the reference is valid until data is sent*/
         SHARED,    /* data passed by shared pointer */
@@ -40,14 +41,20 @@ namespace uprotocol::utransport {
     };
 
     /**
-    * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
+    * The upayload contains the clean Payload information at its raw serialized structure of a byte[]
     */
-    class UPayload {
+    class upayload {
         public:
+            void setFormat(uprotocol::v1::UPayloadFormat format){
+                format_ = format;
+            }
 
-            UPayload(const uint8_t *data, 
+            uprotocol::v1::UPayloadFormat format() const{
+                return format_;
+            }
+            upayload(const uint8_t *data, 
                      const size_t &dataSize,
-                     const UPayloadType &type) {
+                     const upayloadType &type) {
                 
                 payloadType_ = type;
 
@@ -60,7 +67,7 @@ namespace uprotocol::utransport {
                 }
 
                 switch(type) {
-                    case UPayloadType::VALUE: {
+                    case upayloadType::VALUE: {
                             data_ = std::make_unique<uint8_t[]>(dataSize);
                             if (nullptr == data_){
                                 data_ = nullptr;
@@ -73,13 +80,13 @@ namespace uprotocol::utransport {
                             }
                     }
                     break; 
-                    case UPayloadType::REFERENCE: 
-                    case UPayloadType::SHARED: {
+                    case upayloadType::REFERENCE: 
+                    case upayloadType::SHARED: {
                         refPtr_ = data;
                         dataSize_ = dataSize;
                     }
                     break;
-                    case UPayloadType::UNDEFINED:
+                    case upayloadType::UNDEFINED:
                     default: {
                         data_ = nullptr;
                         refPtr_ = nullptr;
@@ -91,7 +98,7 @@ namespace uprotocol::utransport {
             }
             
             // Copy constructor
-            UPayload(const UPayload& other) {
+            upayload(const upayload& other) {
     
                 data_ = std::make_unique<uint8_t[]>(other.dataSize_);
                 std::memcpy(data_.get(), other.data_.get(), other.dataSize_);
@@ -99,7 +106,7 @@ namespace uprotocol::utransport {
                 payloadType_ = other.payloadType_;
             }
 
-            UPayload& operator=(const UPayload& other) {
+            upayload& operator=(const upayload& other) {
                 if (this != &other) { // Self-assignment check
                     this->data_ = std::make_unique<uint8_t[]>(other.dataSize_);
                     std::memcpy(this->data_.get(), other.data_.get(), other.dataSize_);
@@ -114,7 +121,7 @@ namespace uprotocol::utransport {
             */
             const uint8_t* data() const {
 
-                if (UPayloadType::VALUE == payloadType_) {
+                if (upayloadType::VALUE == payloadType_) {
                     return data_.get();
                 }
                 else {
@@ -133,18 +140,18 @@ namespace uprotocol::utransport {
             /**
             * @return payload type
             */
-            UPayloadType type() const {
+            upayloadType type() const {
 
                 return payloadType_;
             }
 
             /**
-            * @return Returns true if the data in the UPayload is empty.
+            * @return Returns true if the data in the upayload is empty.
             */
             bool isEmpty() {
-                if ((UPayloadType::VALUE == payloadType_) && (data_ == nullptr)) {
+                if ((upayloadType::VALUE == payloadType_) && (data_ == nullptr)) {
                     return true;
-                } else if ((UPayloadType::REFERENCE == payloadType_) && (refPtr_ == nullptr)) {
+                } else if ((upayloadType::REFERENCE == payloadType_) && (refPtr_ == nullptr)) {
                     return true;
                 } else {
                     return false; 
@@ -156,7 +163,8 @@ namespace uprotocol::utransport {
             std::unique_ptr<uint8_t[]> data_ = nullptr;
             const uint8_t *refPtr_ = nullptr;
             size_t dataSize_  = 0;
-            UPayloadType payloadType_ = UPayloadType::UNDEFINED;
+            upayloadType payloadType_ = upayloadType::UNDEFINED;
+            uprotocol::v1::UPayloadFormat format_;
     };
 }
 
