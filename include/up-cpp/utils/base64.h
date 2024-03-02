@@ -40,7 +40,7 @@ class base64 final {
          * @param len : length of the input string
          * @return std::string : base64 encoded string
         */
-        static std::string encode(const char* string, 
+        static std::string encode(const char string[],
                                    size_t const len);
         /**
          * @brief Decode the base64 encoded string to original string
@@ -48,35 +48,35 @@ class base64 final {
          * @param len : length of the base64 encoded string
          * @return std::string : original string
         */
-        static std::string decode(const char* string, 
+        static std::string decode(const char string[],
                                    size_t const len);
         /**
          * @brief Encode the input string to base64 format
-         * @param str : input string to be encoded
+         * @param t_str : input string to be encoded
          * @return std::string : base64 encoded string
         */
-        static std::string encode(std::string const& str);
+        static std::string encode(std::string const& t_str);
         
         /**
          * @brief Decode the base64 encoded string to original string
-         * @param str : base64 encoded string
+         * @param t_str : base64 encoded string
          * @return std::string : original string
         */
-        static std::string decode(std::string const& str);
+        static std::string decode(std::string const& t_str);
 
         /**
          * @brief Get the length of the base64 encoded string
          * @param len : length of the input string
          * @return size_t : length of the base64 encoded string
         */
-        static size_t encodedLen(size_t len);
+        static constexpr size_t encodedLen(size_t len) noexcept;
 
         /**
          * @brief Get the length of the original string
          * @param string : base64 encoded string
          * @return size_t : length of the original string
         */
-        static size_t decodedLen(char* const string);
+        static constexpr size_t decodedLen(const char* const string) noexcept;
 
     private:
         /**
