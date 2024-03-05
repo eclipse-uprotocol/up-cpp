@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: ["**"]
+  workflow_call:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Conan version
+        run: echo "${{ steps.conan.outputs.version }}"
+
+
+      - name: Create default Conan profile
+        run: conan profile detect
+
+
+      - name: Fetch and link up-core-api
+        shell: bash
+        run: |
+          git clone -b uprotocol-core-api-1.5.6 https://github.com/eclipse-uprotocol/up-core-api.git
+          git submodule update --init --recursive
+
+      - name: Build && install up-cpp
+        shell: bash
+        run: |
+          mkdir -p build && cd build
+          conan install .. -o build_testing=True
+          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=~/local
+          cmake --build . --target install -- -j
+
+      - name: Run the test
+        shell: bash
+        run: |
+          cd build
+          ctest
+
+      - name: Create up-cpp Conan package
+        shell: bash
+        run: |
+          conan create . --build=missing
+  
+  
+  # NOTE: In GitHub repository settings, the "Require status checks to pass
+  # before merging" branch protection rule ensures that commits are only merged
+  # from branches where specific status checks have passed. These checks are
+  # specified manually as a list of workflow job names. Thus we use this extra
+  # job to signal whether all CI checks have passed.
+  ci:
+    name: CI status checks
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    steps:
+      - name: Check whether all jobs pass
+        run: echo '${{ toJson(needs) }}' | jq -e 'all(.result == "success")'

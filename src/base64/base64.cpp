@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,17 +19,17 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 /* Base64 utility is a way to convert any binary or text data into printable ASCII string format.
  *  Refer :https://en.wikipedia.org/wiki/Base64 */
 
-#include <uprotocol-cpp/tools/base64.h>
+#include <up-cpp/utils/base64.h>
 #include "spdlog/spdlog.h"
 #include <iostream>
 
-using namespace uprotocol::tools;
+using namespace uprotocol::utils;
 
 static const uint8_t pr2six[256] = {
     /* ASCII table */

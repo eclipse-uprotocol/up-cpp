@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,15 +19,14 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <string>
-#include <vector>
+#include <array>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
-#include <uprotocol-cpp/uri/serializer/IpAddress.h>
+#include <up-cpp/uri/serializer/IpAddress.h>
 
 using namespace uprotocol::uri;
 
@@ -35,17 +34,16 @@ using namespace uprotocol::uri;
  * Updates the byte format of IP address and type, from the string format.
  */
 void IpAddress::toBytes() {
-    std::array<uint8_t, IpAddress::IPV6_ADDRESS_BYTES> bytes = {0};
+    std::array<uint8_t, IpAddress::IpV6AddressBytes> bytes = {0};
     auto length = 0;
-
     if (ipString_.empty()) {
         type_ = AddressType::Local;
-    } else if (1 == inet_pton(AF_INET, ipString_.data(), &bytes)) {
+    } else if (1 == inet_pton(AF_INET, ipString_.c_str(), &bytes)) {
         type_ = AddressType::IpV4;
-        length = IpAddress::IPV4_ADDRESS_BYTES;
-    } else if (1 == inet_pton(AF_INET6, ipString_.data(), &bytes)) {
+        length = IpAddress::IpV4AddressBytes;
+    } else if (1 == inet_pton(AF_INET6, ipString_.c_str(), &bytes)) {
         type_ = AddressType::IpV6;
-        length = IpAddress::IPV6_ADDRESS_BYTES;
+        length = IpAddress::IpV6AddressBytes;
     } else {
         type_ = AddressType::Invalid;
     }
@@ -60,13 +58,16 @@ void IpAddress::toBytes() {
  */
 void IpAddress::toString() {
     if (!ipBytes_.empty()) {
+         
+        char ip_char[INET6_ADDRSTRLEN + 1];
         
-        ipString_.reserve(INET6_ADDRSTRLEN + 1);
+        auto inet_type = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
 
-        auto inetType = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
-
-        if (inet_ntop(inetType, &ipBytes_[0], ipString_.data(), INET6_ADDRSTRLEN) == nullptr) {
+        if (inet_ntop(inet_type, ipBytes_.data(), ip_char, INET6_ADDRSTRLEN) == nullptr) {
             spdlog::error("inet_ntop failed");
+        }
+        else {
+            ipString_ = ip_char;
         }
     } else {
         spdlog::error("ipBytes is empty");
