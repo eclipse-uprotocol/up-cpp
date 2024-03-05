@@ -29,7 +29,6 @@
 #include <memory>
 #include <cstdint>
 #include <cstring>
-#include <up-core-api/upayload.pb.h>
 
 namespace uprotocol::utransport {
 
@@ -45,13 +44,7 @@ namespace uprotocol::utransport {
     */
     class upayload {
         public:
-            void setFormat(uprotocol::v1::UPayloadFormat format){
-                format_ = format;
-            }
 
-            uprotocol::v1::UPayloadFormat format() const{
-                return format_;
-            }
             upayload(const uint8_t *data, 
                      const size_t &dataSize,
                      const upayloadType &type) {
@@ -164,7 +157,6 @@ namespace uprotocol::utransport {
             const uint8_t *refPtr_ = nullptr;
             size_t dataSize_  = 0;
             upayloadType payloadType_ = upayloadType::UNDEFINED;
-            uprotocol::v1::UPayloadFormat format_;
     };
 }
 

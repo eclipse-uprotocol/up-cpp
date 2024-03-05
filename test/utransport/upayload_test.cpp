@@ -34,9 +34,9 @@ protected:
     // Test objects
     const uint8_t* testData = reinterpret_cast<const uint8_t*>("Hello, World!");
     const size_t testDataSize = 13;
-    uprotocol::utransport::UPayload payload;
+    uprotocol::utransport::upayload payload;
 
-    UPayloadTest() : payload(testData, testDataSize, UPayloadType::REFERENCE) {}
+    UPayloadTest() : payload(testData, testDataSize, upayloadType::REFERENCE) {}
 };
 
 // Test the data() method
@@ -60,7 +60,7 @@ TEST_F(UPayloadTest, IsEmptyFalse)
 // Test the isEmpty() method with an empty payload
 TEST_F(UPayloadTest, IsEmptyTrue) 
 {
-    uprotocol::utransport::UPayload emptyPayload(nullptr, 0, UPayloadType::VALUE);
+    uprotocol::utransport::upayload emptyPayload(nullptr, 0, upayloadType::VALUE);
     EXPECT_TRUE(emptyPayload.isEmpty());
 }
 
