@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 #ifndef _RPC_CLIENT_H_
@@ -49,8 +49,8 @@ class RpcClient
         * @param attributes Metadata for the method invocation (i.e. priority, timeout, etc.)
         * @return Returns the CompletableFuture with the result or exception.
         */
-        virtual std::future<upayload> invokeMethod(const UUri &topic, 
-                                                   const upayload &payload, 
+        virtual std::future<UPayload> invokeMethod(const UUri &topic, 
+                                                   const UPayload &payload, 
                                                    const UAttributes &attributes) = 0;
         
         virtual ~RpcClient() {} 

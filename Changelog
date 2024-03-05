@@ -1,9 +1,9 @@
 ## Changelog
 
-- June 04 2023 17:52:23  Giorgio Zoppi <giorgio.zoppi@iotdbe.com>
+- June 04 2024 17:52:23  Giorgio Zoppi <giorgio.zoppi@iotdbe.com>
 	* Restructuring old code and deleting unused code.
     * Adding coverage and ctest support
-- June 10 2023 17:52:23  Giorgio Zoppi <giorgio.zoppi@iotdbe.com>
+- June 10 2024 17:52:23  Giorgio Zoppi <giorgio.zoppi@iotdbe.com>
 	* Cleanup uuid as much it was possible
     * Replaced current Meyer's singleton
 	* Separate include directory.
