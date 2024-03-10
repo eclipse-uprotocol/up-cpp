@@ -64,7 +64,9 @@ target_include_directories(${PROJECT_NAME}
 		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}> 
 		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/up-core-api> 
-)
+		${protobuf_INCLUDE_DIR}
+		${spdlog_INCLUDE_DIR}
+		${fmt_INCLUDE_DIR})
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(${PROJECT_NAME} 
@@ -72,12 +74,6 @@ target_link_libraries(${PROJECT_NAME}
 		up-core-api-protos 
 		protobuf::protobuf 
 		spdlog::spdlog)
-
-target_include_directories(${PROJECT_NAME} 
-	PUBLIC 
-		${protobuf_INCLUDE_DIR}
-		${spdlog_INCLUDE_DIR}
-		${fmt_INCLUDE_DIR})
 
 if(BUILD_TESTING)
 	enable_testing()
