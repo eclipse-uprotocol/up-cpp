@@ -90,7 +90,7 @@ namespace uprotocol::utransport {
                 return *this;
             }
 
-            UAttributesBuilder& setCommstatus(int32_t commstatus) {
+            UAttributesBuilder& setCommstatus(UCode commstatus) {
                 attributes_.set_commstatus(commstatus);
                 return *this;
             }
