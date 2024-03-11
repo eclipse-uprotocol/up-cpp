@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -28,11 +28,11 @@
 
 #include <stdint.h>
 #include <cstddef>
-#include <up-cpp/transport/datamodel/UListener.h>
+#include <up-cpp/transport/UListener.h>
 #include <up-cpp/transport/datamodel/UPayload.h>
-#include <up-cpp/transport/datamodel/UAttributes.h>
 #include <up-core-api/uri.pb.h>
 #include <up-core-api/ustatus.pb.h>
+#include <up-core-api/uattributes.pb.h>
 
 using namespace uprotocol::utransport;
 using namespace uprotocol::v1;
@@ -76,10 +76,6 @@ namespace uprotocol::utransport {
                */
                virtual UStatus unregisterListener(const UUri &uri, 
                                                   const UListener &listner) = 0;
-
-               virtual UStatus receive(const UUri &uri, 
-                                       const UPayload &payload, 
-                                       const UAttributes &attributes) = 0;
                
                virtual ~UTransport() {} 
      };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,18 +19,17 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #ifndef _ULISTENER_H_
 #define _ULISTENER_H_
 
-#include <up-cpp/transport/datamodel/UAttributes.h>
 #include <up-core-api/ustatus.pb.h>
 #include <up-core-api/uri.pb.h>
-#include "UPayload.h"
-#include "UAttributes.h"
+#include <up-core-api/uattributes.pb.h>
+#include <up-cpp/transport/datamodel/UPayload.h>
 
 using namespace uprotocol::v1;
 
