@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _UREQUESTLISTENER_H_
-#define _UREQUESTLISTENER_H_
+#ifndef _USUBSCRIBELISTENER_H_
+#define _USUBSCRIBELISTENER_H_
 
 #include <up-core-api/ustatus.pb.h>
 #include <up-cpp/transport/datamodel/UMessage.h>
@@ -32,13 +32,13 @@
 
 namespace uprotocol::utransport {
 
-	class RequestListener : public UListener {
+	class SubscribeListener : public UListener {
 
 		public:
 
-			virtual ~RequestListener() {} 
+			virtual ~SubscribeListener() {} 
 	};
 }
 
 
-#endif /* _UREQUESTLISTENER_H_ */
+#endif /* _USUBSCRIBELISTENER_H_ */
