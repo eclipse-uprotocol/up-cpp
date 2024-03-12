@@ -215,11 +215,25 @@ add_test("t-17-upriority_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/upriority_test)
 add_executable(userializationhint_test
 	utransport/userializationhint_test.cpp)
 target_link_libraries(userializationhint_test 
-		PUBLIC
-			up-cpp::up-cpp
-		PRIVATE
-			GTest::gtest_main
-			GTest::gmock    
-			pthread
+	PUBLIC
+		up-cpp::up-cpp
+	PRIVATE
+		GTest::gtest_main
+		GTest::gmock    
+		pthread
 )
 add_test("t-18-userializationhint_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/userializationhint_test)
+
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(uuid_test
+	uuid/uuid_test.cpp)
+target_link_libraries(uuid_test 
+	PUBLIC
+		up-cpp::up-cpp
+	PRIVATE
+		GTest::gtest_main
+		GTest::gmock    
+		pthread
+)
+
+add_test("t-18-uuid_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/uuid_test)

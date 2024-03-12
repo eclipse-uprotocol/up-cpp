@@ -23,10 +23,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include <gtest/gtest.h>
-
-#include "uprotocol/uuid.pb.h"
-#include "UuidSerializer.h"
-#include "Uuidv8Factory.h"
+#include <up-cpp/uuid/factory/Uuidv8Factory.h>
+#include <up-cpp/uuid/serializer/UuidSerializer.h>
+#include "uuid.pb.h"
 
 using namespace uprotocol::uuid;
 using namespace uprotocol::v1;
@@ -35,23 +34,23 @@ using namespace uprotocol::v1;
 TEST(UUIDTest, Class)
 {
     UUID uuId = Uuidv8Factory::create();
-    std::vector<uint8_t> vectUuid = UuidSerializer::instance().serializeToBytes(uuId);
-    UUID uuIdFromByteArr = UuidSerializer::instance().deserializeFromBytes(vectUuid);
-    EXPECT_TRUE(UuidSerializer::instance().getTime(uuId) == UuidSerializer::instance().getTime(uuIdFromByteArr));
-    EXPECT_TRUE(UuidSerializer::instance().getCount(uuId) == UuidSerializer::instance().getCount(uuIdFromByteArr));
+    std::vector<uint8_t> vectUuid = UuidSerializer::serializeToBytes(uuId);
+    UUID uuIdFromByteArr = UuidSerializer::deserializeFromBytes(vectUuid);
+    EXPECT_TRUE(UuidSerializer::getTime(uuId) == UuidSerializer::getTime(uuIdFromByteArr));
+    EXPECT_TRUE(UuidSerializer::getCount(uuId) == UuidSerializer::getCount(uuIdFromByteArr));
 
     std::string str = "0080b636-8303-8701-8ebe-7a9a9e767a9f";
-    UUID uuIdNew = UuidSerializer::instance().deserializeFromString(str);
-    EXPECT_EQ(UuidSerializer::instance().serializeToString(uuIdNew), str);
+    UUID uuIdNew = UuidSerializer::deserializeFromString(str);
+    EXPECT_EQ(UuidSerializer::serializeToString(uuIdNew), str);
 }
 
 //Negative test - serialize and deserialize
 TEST(UUIDTest, NegStringConstructor)
 {
     std::string str = "0080b636-8303-8701-8ebe-7a9a9e767a9f";
-    UUID uuIdNew = UuidSerializer::instance().deserializeFromString(str);
+    UUID uuIdNew = UuidSerializer::deserializeFromString(str);
     str = "test" +str;
-    EXPECT_NE(UuidSerializer::instance().serializeToString(uuIdNew), str);
+    EXPECT_NE(UuidSerializer::serializeToString(uuIdNew), str);
 }
 
 //Negative test - empty string
@@ -59,28 +58,28 @@ TEST(UUIDTest, NegEmptyString)
 {
     //Empty String
     std::string str = "";
-    UUID uuId = UuidSerializer::instance().deserializeFromString(str);
-    EXPECT_NE(UuidSerializer::instance().serializeToString(uuId), str);
-    EXPECT_EQ(UuidSerializer::instance().getCount(uuId), uint64_t(0));
+    UUID uuId = UuidSerializer::deserializeFromString(str);
+    EXPECT_NE(UuidSerializer::serializeToString(uuId), str);
+    EXPECT_EQ(UuidSerializer::getCount(uuId), uint64_t(0));
 }
 
 //Negative test - deserializeFromString - Invalid String with more than 32 hex characters
 TEST(UUIDTest, NegStringWithMoreThan32HexCharsTest)
 {
     std::string str = "0080b636-8303-8701-8ebe-7a9a9e767a9f-1abc";
-    UUID uuId = UuidSerializer::instance().deserializeFromString(str);
-    EXPECT_NE(UuidSerializer::instance().serializeToString(uuId), str);
-    EXPECT_EQ(UuidSerializer::instance().getCount(uuId), uint64_t(0));
+    UUID uuId = UuidSerializer::deserializeFromString(str);
+    EXPECT_NE(UuidSerializer::serializeToString(uuId), str);
+    EXPECT_EQ(UuidSerializer::getCount(uuId), uint64_t(0));
 }
 
 //Negative test deserializeFromBytes - Empty Byte vector
 TEST(UUIDTest, NegEmptyByteVector)
 {
     std::vector<uint8_t> vectEmpty;
-    UUID uuIdFromByteArr = UuidSerializer::instance().deserializeFromBytes(vectEmpty);
+    UUID uuIdFromByteArr = UuidSerializer::deserializeFromBytes(vectEmpty);
     uint64_t val(0);
 
-    EXPECT_EQ(UuidSerializer::instance().getCount(uuIdFromByteArr), val);
+    EXPECT_EQ(UuidSerializer::getCount(uuIdFromByteArr), val);
 }
 
 //Negative test  deserializeFromBytes - Greater than 16
@@ -94,10 +93,10 @@ TEST(UUIDTest, NegGreaterThanDefinedSize)
         vect[i + 8] = lsb;
     }
 
-    UUID uuIdFromByteArr = UuidSerializer::instance().deserializeFromBytes(vect);
+    UUID uuIdFromByteArr = UuidSerializer::deserializeFromBytes(vect);
     uint64_t val(0);
 
-    EXPECT_EQ(UuidSerializer::instance().getCount(uuIdFromByteArr), val);
+    EXPECT_EQ(UuidSerializer::getCount(uuIdFromByteArr), val);
 }
 
 //Negative test deserializeFromBytes - Invalid Byte vector
@@ -110,12 +109,12 @@ TEST(UUIDTest, NegInvalidByteVector)
         vect[i] = msb ;
         vect[i + 8] = lsb;
     }
-    UUID uuIdFromByteArr = UuidSerializer::instance().deserializeFromBytes(vect);
+    UUID uuIdFromByteArr = UuidSerializer::deserializeFromBytes(vect);
     uint64_t val(1);
     std::string str = "";
 
-    EXPECT_NE(UuidSerializer::instance().serializeToString(uuIdFromByteArr), str);
-    EXPECT_NE(UuidSerializer::instance().getCount(uuIdFromByteArr), val);
+    EXPECT_NE(UuidSerializer::serializeToString(uuIdFromByteArr), str);
+    EXPECT_NE(UuidSerializer::getCount(uuIdFromByteArr), val);
 }
 
 int main(int argc, char **argv)
