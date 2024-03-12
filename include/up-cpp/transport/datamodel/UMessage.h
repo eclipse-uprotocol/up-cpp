@@ -23,42 +23,38 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _ULISTENER_H_
-#define _ULISTENER_H_
+#ifndef _UMESSAGE_H_
+#define _UMESSAGE_H_
 
-#include <up-core-api/ustatus.pb.h>
-#include <up-core-api/uri.pb.h>
 #include <up-core-api/uattributes.pb.h>
-#include <up-cpp/transport/datamodel/UMessage.h>
 #include <up-cpp/transport/datamodel/UPayload.h>
 
 namespace uprotocol::utransport {
 
-	class UListener {
+    class UMessage {
 
-		public:
+        public:
 
-			/**
-			* Method called to handle/process events.
-			* @param topic Topic the underlying source of the message.
-			* @param payload Payload of the message.
-			* @param attributes Transportation attributes
-			* @return Returns an Ack every time a message is received and processed.
-			*/
-			virtual uprotocol::v1::UStatus onReceive(const uprotocol::v1::UUri &uri, 
-												  	 const uprotocol::utransport::UPayload &payload, 
-													 const uprotocol::v1::UAttributes &attributes) const = 0; 
+            UMessage(const uprotocol::utransport::UPayload &payload,
+                     const uprotocol::v1::UAttributes &attributes) {
+                
+                payload_ = &payload;
+                attributes_ = &attributes;
+            }
+ 
+            uprotocol::utransport::UPayload payload() {
+                return *payload_;
+            }
 
-			/**
-			* Method called to handle/process events.
-			* @param message Topic the underlying source of the message.
-			* @return Returns an Ack every time a message is received and processed.
-			*/
-			virtual uprotocol::v1::UStatus onReceive(uprotocol::utransport::UMessage &message) const = 0; 
+            uprotocol::v1::UAttributes attributes() {
+                return *attributes_;
+            }
+            
+        private:
 
-			virtual ~UListener() {} 
-	};
+            const uprotocol::utransport::UPayload *payload_;
+            const uprotocol::v1::UAttributes *attributes_;
+    };
 }
 
-
-#endif /* _ULISTENER_H_*/
+#endif /* _UMESSAGE_H_ */

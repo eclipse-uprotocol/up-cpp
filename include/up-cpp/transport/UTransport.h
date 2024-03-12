@@ -34,9 +34,6 @@
 #include <up-core-api/ustatus.pb.h>
 #include <up-core-api/uattributes.pb.h>
 
-using namespace uprotocol::utransport;
-using namespace uprotocol::v1;
-
 namespace uprotocol::utransport {
 
      class UTransport {
@@ -51,9 +48,9 @@ namespace uprotocol::utransport {
                * @return Returns OKSTATUS if the payload has been successfully sent (ACK'ed), otherwise it
                * returns FAILSTATUS with the appropriate failure.
                */
-               virtual UStatus send(const UUri &uri, 
-                                    const UPayload &payload,
-                                    const UAttributes &attributes) = 0;
+               virtual uprotocol::v1::UStatus send(const uprotocol::v1::UUri &uri, 
+                                                   const uprotocol::utransport::UPayload &payload,
+                                                   const uprotocol::v1::UAttributes &attributes) = 0;
 
                /**
                * Register listener to be called when UPayload is received for the specific topic.
@@ -62,8 +59,8 @@ namespace uprotocol::utransport {
                * @return Returns OKSTATUS if the listener is unregistered correctly, otherwise it returns FAILSTATUS
                * with the appropriate failure.
                */      
-               virtual UStatus registerListener(const UUri &uri,
-                                                const UListener &listner) = 0;
+               virtual uprotocol::v1::UStatus registerListener(const uprotocol::v1::UUri &uri,
+                                                               const uprotocol::utransport::UListener &listner) = 0;
 
                /**
                * Unregister a listener for a given topic. Messages arriving on this topic will no longer be processed
@@ -74,8 +71,8 @@ namespace uprotocol::utransport {
                * with the appropriate failure.
                * 
                */
-               virtual UStatus unregisterListener(const UUri &uri, 
-                                                  const UListener &listner) = 0;
+               virtual uprotocol::v1::UStatus unregisterListener(const uprotocol::v1::UUri &uri, 
+                                                                 const uprotocol::utransport::UListener &listner) = 0;
                
                virtual ~UTransport() {} 
      };

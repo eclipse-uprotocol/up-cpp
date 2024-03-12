@@ -23,42 +23,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _ULISTENER_H_
-#define _ULISTENER_H_
+#ifndef _UREQUESTLISTENER_H_
+#define _UREQUESTLISTENER_H_
 
 #include <up-core-api/ustatus.pb.h>
-#include <up-core-api/uri.pb.h>
-#include <up-core-api/uattributes.pb.h>
 #include <up-cpp/transport/datamodel/UMessage.h>
-#include <up-cpp/transport/datamodel/UPayload.h>
+#include <up-cpp/transport/UListener>
 
-namespace uprotocol::utransport {
+namespace uprotocol::transport {
 
-	class UListener {
+	class RequestListener : public UListener {
 
 		public:
-
-			/**
-			* Method called to handle/process events.
-			* @param topic Topic the underlying source of the message.
-			* @param payload Payload of the message.
-			* @param attributes Transportation attributes
-			* @return Returns an Ack every time a message is received and processed.
-			*/
-			virtual uprotocol::v1::UStatus onReceive(const uprotocol::v1::UUri &uri, 
-												  	 const uprotocol::utransport::UPayload &payload, 
-													 const uprotocol::v1::UAttributes &attributes) const = 0; 
 
 			/**
 			* Method called to handle/process events.
 			* @param message Topic the underlying source of the message.
 			* @return Returns an Ack every time a message is received and processed.
 			*/
-			virtual uprotocol::v1::UStatus onReceive(uprotocol::utransport::UMessage &message) const = 0; 
+			virtual UStatus onReceive(UMessage &message) const override = 0; 
 
-			virtual ~UListener() {} 
+			virtual UStatus onReceive(const uprotocol::v1::UUri &uri, 
+									  const UPayload &payload, 
+									  const uprotocol::v1::UAttributes &attributes) const override = 0; 
+
+
+			virtual ~URpcListener() {} 
 	};
 }
 
 
-#endif /* _ULISTENER_H_*/
+#endif /* _UREQUESTLISTENER_H_ */

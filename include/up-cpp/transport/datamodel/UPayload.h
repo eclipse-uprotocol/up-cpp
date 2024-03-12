@@ -55,6 +55,7 @@ namespace uprotocol::utransport {
     * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
     */
     class UPayload {
+        
         public:
 
             UPayload(const uint8_t *data, 

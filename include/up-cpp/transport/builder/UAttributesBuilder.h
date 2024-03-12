@@ -80,7 +80,7 @@ namespace uprotocol::utransport {
                 return *this;
             }
 
-            UAttributesBuilder& setTtl(int32_t ttl) {
+            UAttributesBuilder& setTTL(int32_t ttl) {
                 attributes_.set_ttl(ttl);
                 return *this;
             }
