@@ -26,7 +26,7 @@
 #define _RPC_CLIENT_H_
 
 #include <future>
-#include <up-cpp/transport/datamodel/UPayload.h>
+#include <up-cpp/transport/datamodel/UMessage.h>
 #include "up-core-api/uattributes.pb.h"
 
 namespace uprotocol::rpc {
@@ -51,7 +51,7 @@ namespace uprotocol::rpc {
             * @return Returns the CompletionStage with the response message or exception with the failure
             * reason as {@link UStatus}.
             */
-            virtual std::future<uprotocol::utransport::UPayload> invokeMethod(const uprotocol::v1::UUri &topic, 
+            virtual std::future<uprotocol::utransport::UMessage> invokeMethod(const uprotocol::v1::UUri &topic, 
                                                                               const uprotocol::utransport::UPayload &payload, 
                                                                               const uprotocol::v1::CallOptions &options) = 0;
             
