@@ -128,6 +128,10 @@ namespace uprotocol::utransport {
             const uint8_t* data() const {
 
                 if (UPayloadType::VALUE == payloadType_) {
+                    if (nullptr == data_) {
+                        return nullptr;
+                    }
+                   
                     return data_.get();
                 }
                 else {

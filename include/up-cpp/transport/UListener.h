@@ -45,7 +45,7 @@ namespace uprotocol::utransport {
 			* @param attributes Transportation attributes
 			* @return Returns an Ack every time a message is received and processed.
 			*/
-			virtual uprotocol::v1::UStatus onReceive(const uprotocol::v1::UUri &uri, 
+		/* DEPRECATED - Should be deleted*/	virtual uprotocol::v1::UStatus onReceive(const uprotocol::v1::UUri &uri, 
 												  	 const uprotocol::utransport::UPayload &payload, 
 													 const uprotocol::v1::UAttributes &attributes) const = 0; 
 
