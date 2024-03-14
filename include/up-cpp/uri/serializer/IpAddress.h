@@ -25,16 +25,18 @@
 #ifndef IP_ADDRESS_H_
 #define IP_ADDRESS_H_
 
-#include <iostream> 
+#include <iostream>
 namespace uprotocol::uri {
 
 /**
+ * @brief
  * IpAddress holds the string and byte representaion.
  */
-class IpAddress {
+class IpAddress final {
 
 public:
     /**
+     * @brief
      * The type of address used for Micro URI.
      */
     enum class AddressType : uint8_t {
@@ -46,67 +48,89 @@ public:
     };
 
     /**
+     * @brief
      * Constructor with IP address in string format.
+     * @param ipAddressString : IP address in string format.
      */
-    explicit IpAddress(std::string_view ipString) : ipString_(ipString) {
+     IpAddress(std::string_view ipAddressString) : ipString_(ipAddressString) {
         toBytes();
     }
 
     /**
+     * @brief
      * Constructor with IP address in byte format.
+     * @param ipAddressBytes : IP address in byte format.
+     * @param ipAddressType : Type of IP address.
      */
-    IpAddress(std::vector<uint8_t> const& ipBytes, AddressType type) : type_(type) , ipBytes_(ipBytes) {
+    IpAddress(std::vector<uint8_t> const& ipAddressBytes, AddressType ipAddressType) : type_(ipAddressType) , ipBytes_(ipAddressBytes) {
         toString();
 
     }
 
     /**
+     * @brief
      * Get the type of IP address.
+     * @return AddressType : Type of IP address.
      */
-    auto getType() const { return type_; }
+    AddressType getType() const noexcept { return type_; }
 
     /**
+     * @brief
      * Get the string format of IP address.
+     * @return std::string : IP address in string format.
      */
-    auto getString() const -> std::string { return ipString_; }
+    std::string getString() const noexcept {
+        return ipString_;
+    };
 
     /**
+     * @brief
      * Get the byte format of IP address.
+     * @return std::vector<uint8_t> : IP address in byte format.
      */
-    auto getBytes() const { return ipBytes_; }  
-
-    /**
-     * Number of bytes in IPv4 address.
-     */
-    static constexpr uint8_t IpV4AddressBytes = 4;
-    /**
-     * Number of bytes in IPv6 address.
-     */
-    static constexpr uint8_t IpV6AddressBytes = 16;
+    std::vector<uint8_t> getBytes() const { return ipBytes_; }
 
 private:
     /**
+     * @brief
      * Updates the byte format of IP address and type, from the string format.
      */
     void toBytes();
 
     /**
+     * @brief
      * Updates the string format of IP address.
      */
     void toString();
 
     /**
+     * @brief
+     * Number of bytes in IPv4 address.
+     */
+    static constexpr uint8_t IpV4AddressBytes = 4U;
+    /**
+     * @brief
+     * Number of bytes in IPv6 address.
+     */
+    static constexpr uint8_t IpV6AddressBytes = 16U;
+
+    /**
+     * @brief
      * Type of the IP addess.
      */
     AddressType type_ = AddressType::Invalid;
     /**
+     * @brief
      * IP address in byte format.
      */
     std::vector<uint8_t> ipBytes_{};
+
     /**
+     * @brief
      * IP address in string format.
      */
     std::string ipString_;
+
 
 }; // class IpAddress
 
