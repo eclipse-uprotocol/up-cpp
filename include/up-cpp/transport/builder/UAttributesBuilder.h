@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 General Motors GTO LLC
+ * Copyright (c) 2023 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -27,79 +27,83 @@
 #define _UATTRIBUTESBUILDER_
 
 #include <string>
+#include <spdlog/spdlog.h>
 #include <up-core-api/uattributes.pb.h>
 #include <up-core-api/uuid.pb.h>
 
-using namespace uprotocol::v1;
-
 namespace uprotocol::utransport {
 
-    class UAttributesBuilder {
-        private:
-            uprotocol::v1::UAttributes attributes_;
+class UAttributesBuilder {
+    private:
+        uprotocol::v1::UAttributes attributes_;
 
-        public:
-            UAttributesBuilder() {
-                attributes_.Clear();
-            }
+    public:
+        UAttributesBuilder() {
+            attributes_.Clear();
+        }
 
-            UAttributesBuilder(const uprotocol::v1::UUID& id, uprotocol::v1::UMessageType type, uprotocol::v1::UPriority priority) {
-                attributes_.Clear();
-                attributes_.mutable_id()->CopyFrom(id);
-                attributes_.set_type(type);
-                attributes_.set_priority(priority);
-            }
+        UAttributesBuilder(const uprotocol::v1::UUID& id, uprotocol::v1::UMessageType type, uprotocol::v1::UPriority priority) {
+            attributes_.Clear();
+            attributes_.mutable_id()->CopyFrom(id);
+            attributes_.set_type(type);
+            attributes_.set_priority(priority);
+        }
 
-            UAttributesBuilder& setToken(const std::string& token) {
-                attributes_.set_token(token);
-                return *this;
-            }
+        UAttributesBuilder& setToken(const std::string& token) {
 
-            UAttributesBuilder& setId(const uprotocol::v1::UUID& id) {
-                attributes_.mutable_id()->CopyFrom(id);
-                return *this;
-            }
+            attributes_.set_token(token);
+            return *this;
+        }
 
-            UAttributesBuilder& setSink(const uprotocol::v1::UUri& sink) {
-                attributes_.mutable_sink()->CopyFrom(sink);
-                return *this;
-            }
+        UAttributesBuilder& setId(const uprotocol::v1::UUID& id) {
 
-            UAttributesBuilder& setReqid(const uprotocol::v1::UUID& reqid) {
-                attributes_.mutable_reqid()->CopyFrom(reqid);
-                return *this;
-            }
+            attributes_.mutable_id()->CopyFrom(id);
+            return *this;
+        }
 
-            UAttributesBuilder& setType(uprotocol::v1::UMessageType type) {
-                attributes_.set_type(type);
-                return *this;
-            }
+        UAttributesBuilder& setSink(const uprotocol::v1::UUri& sink) {
 
-            UAttributesBuilder& setPriority(uprotocol::v1::UPriority priority) {
-                attributes_.set_priority(priority);
-                return *this;
-            }
+            attributes_.mutable_sink()->CopyFrom(sink);
+            return *this;
+        }
 
-            UAttributesBuilder& setTTL(int32_t ttl) {
-                attributes_.set_ttl(ttl);
-                return *this;
-            }
+        UAttributesBuilder& setReqid(const uprotocol::v1::UUID& reqid) {
 
-            UAttributesBuilder& setPermissionLevel(int32_t permission_level) {
-                attributes_.set_permission_level(permission_level);
-                return *this;
-            }
+            attributes_.mutable_reqid()->CopyFrom(reqid);
+            return *this;
+        }
 
-            UAttributesBuilder& setCommstatus(UCode commstatus) {
-                attributes_.set_commstatus(commstatus);
-                return *this;
-            }
+        UAttributesBuilder& setType(uprotocol::v1::UMessageType type) {
+            attributes_.set_type(type);
+            return *this;
+        }
 
-            uprotocol::v1::UAttributes build() const {
-                return attributes_;
-            }
-    };
+        UAttributesBuilder& setPriority(uprotocol::v1::UPriority priority) {
+            attributes_.set_priority(priority);
+            return *this;
+        }
 
-} // namespace uprotocol::utransport
+        UAttributesBuilder& setTTL(int32_t ttl) {
+            attributes_.set_ttl(ttl);
+            return *this;
+        }
+
+        UAttributesBuilder& setPermissionLevel(int32_t permission_level) {
+            attributes_.set_permission_level(permission_level);
+            return *this;
+        }
+
+        UAttributesBuilder& setCommstatus(uprotocol::v1::UCode commstatus) {
+            attributes_.set_commstatus(commstatus);
+            return *this;
+        }
+
+        uprotocol::v1::UAttributes build() const {
+            return attributes_;
+        }
+};
+
+} // namespace uprotocol
+
 
 #endif /* _UATTRIBUTESBUILDER_*/
