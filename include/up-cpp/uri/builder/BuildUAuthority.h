@@ -1,5 +1,5 @@
 /*
- 
+
  * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -18,12 +18,12 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- * 
+ *
  * SPDX-FileType: SOURCE
  * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
- 
- 
+
+
  */
 
 #ifndef UPROTOCOL_CPP_BUILDUAUTHORITY_H
@@ -37,6 +37,7 @@
 #include <string_view>
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
+#include "../tools/IpAddress.h"
 #include "../tools/Utils.h"
 #include "up-core-api/uri.pb.h"
 
@@ -45,7 +46,7 @@ namespace uprotocol::uri {
         uprotocol::v1::UAuthority authority_;
     public:
         BuildUAuthority() { authority_.Clear(); }
-    
+
         /**
          * set name of the authority. if name is empty or blank, an error will be logged and the name will not be set
          * if name is already set, it will not be changed
@@ -74,7 +75,7 @@ namespace uprotocol::uri {
          * if name is already set, it will not be changed
          * @param device std::string
          * @param domain std::string
-         * @return 
+         * @return
          */
         auto setName(const std::string &device, const std::string &domain) -> BuildUAuthority & {
             if (authority_.has_name() && !authority_.name().empty()) {
@@ -95,45 +96,39 @@ namespace uprotocol::uri {
             setName(device + "." + domain);
             return *this;
         }
-    
+
         /**
          * set authority IP address. if address is empty or blank, an error will be logged and the address will not be set
          * wrong IP address format will be ignored
          * @param address std::string
-         * @return 
+         * @return
          */
         auto setIp(const std::string &address) -> BuildUAuthority & {
+            return setIp(IpAddress(address));
+        }
+
+        /**
+         * set authority IP address. if address is empty or blank, an error will be logged and the address will not be set
+         * wrong IP address format will be ignored
+         * @param address IpAddress
+         * @return
+         */
+        auto setIp(const IpAddress &address) -> BuildUAuthority & {
             if (authority_.has_ip() && !authority_.ip().empty()) {
                 spdlog::error("UAutority already has ip set {}. Ignoring setIp()", authority_.ip());
                 return *this;
             }
-            std::string m_address = isBlank(address) ? "" : address;
-            
-            char ip_char[INET6_ADDRSTRLEN + 1];
-            memset(ip_char, 0, INET6_ADDRSTRLEN + 1);
-            if (in6_addr ipv6{}; inet_pton(AF_INET6, m_address.c_str(), &ipv6) == 1) {
-                if (inet_ntop(AF_INET6,
-                              &ipv6,
-                              ip_char,
-                              INET6_ADDRSTRLEN) != nullptr) {
-                    authority_.set_ip(ip_char);
-                }
-            } else if (struct in_addr ipv4{}; inet_pton(AF_INET, m_address.c_str(), &ipv4) == 1) {
-                if (inet_ntop(AF_INET,
-                              &ipv4, 
-                              ip_char, 
-                              INET_ADDRSTRLEN) != nullptr) {
-                    authority_.set_ip(ip_char);
-                } else {
-                    spdlog::error<std::string_view>("UAutority address is not a valid IPV4 address. Ignoring setIp()");
-                    return *this;
-                }
-            } else {
+
+            if (address.getType() == IpAddress::AddressType::Invalid) {
                 spdlog::error<std::string_view>("UAutority address is not a valid IP address. Ignoring setIp()");
+                return *this;
             }
+
+            authority_.set_ip(address.getBytesString());
+
             return *this;
         }
-        
+
         auto setId(const std::string &id) -> BuildUAuthority & {
             if (authority_.has_id() && !authority_.id().empty()) {
                 spdlog::error("UAutority already has a id set {}. Ignoring setId()", authority_.id());
@@ -142,7 +137,7 @@ namespace uprotocol::uri {
             authority_.set_id(id.c_str());
             return *this;
         }
-        
+
         auto build() const -> uprotocol::v1::UAuthority {
             return authority_;
         }
