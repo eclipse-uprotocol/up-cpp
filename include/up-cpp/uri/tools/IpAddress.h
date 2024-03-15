@@ -75,6 +75,19 @@ public:
      */
     auto getBytes() const { return ipBytes_; }  
 
+
+    /**
+     * Get the byte format of IP address, but in a string-like container
+     * to better interface with flat buffers.
+     */
+    auto getBytesString() const {
+        // char is a signed int - explicit reinterpretation from unsigned char
+        // is required here since we want to preserve the exact binary data
+        std::string_view ipBytesString(
+                reinterpret_cast<StrBytesPtr>(ipBytes_.data()), ipBytes_.size());
+        return static_cast<std::string>(ipBytesString);
+    }
+
     /**
      * Number of bytes in IPv4 address.
      */
@@ -107,6 +120,14 @@ private:
      * IP address in string format.
      */
     std::string ipString_;
+
+    using Bytes = typename std::decay_t<decltype(ipBytes_)>::value_type;
+    using StrBytes = typename std::string_view::value_type;
+    using StrBytesPtr = typename std::string_view::const_pointer;
+
+    static_assert(sizeof(StrBytes) == sizeof(Bytes),
+        "Mismatch in size between string_view value type and ipBytes_ "
+        "value type invalidates reinterpret_cast used in constructor.");
 
 }; // class IpAddress
 
