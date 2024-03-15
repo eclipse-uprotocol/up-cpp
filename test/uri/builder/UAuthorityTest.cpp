@@ -160,12 +160,54 @@ TEST(UAUTHRITY, testLongUriEmptyDomain) {
 }
 
 // Test create a remote uAuthority that supports micro UUris.
-TEST(UAUTHRITY, testMicroUriUAuthority) {
+TEST(UAUTHRITY, testMicroUriUAuthorityIpv4) {
     std::string address = "127.0.0.1";
+    std::string addressBytes{127, 0, 0, 1};
+
     auto u_authority = BuildUAuthority().setIp(address).build();
+
     assertFalse(u_authority.has_name());
     assertTrue(u_authority.has_ip());
-    assertEquals(address, u_authority.ip());
+    assertEquals(addressBytes, u_authority.ip());
+    assertFalse(isLocal(u_authority));
+    assertTrue(isRemote(u_authority));
+    assertFalse(isResolved(u_authority));
+    assertFalse(isEmpty(u_authority));
+    assertTrue(isMicroForm(u_authority));
+    assertFalse(isLongForm(u_authority));
+}
+
+// Test create a remote uAuthority that supports micro UUris.
+TEST(UAUTHRITY, testMicroUriUAuthorityIpv6) {
+    std::string address = "2001:db8::00c0:ffee";
+    std::vector<uint8_t> addressUintBytes{0x20, 0x01, 0x0d, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xc0, 0xff, 0xee};
+    std::string addressBytes;
+    for (auto v : addressUintBytes) {
+        addressBytes += *reinterpret_cast<int8_t*>(&v);
+    }
+
+    auto u_authority = BuildUAuthority().setIp(address).build();
+
+    assertFalse(u_authority.has_name());
+    assertTrue(u_authority.has_ip());
+    assertEquals(addressBytes, u_authority.ip());
+    assertFalse(isLocal(u_authority));
+    assertTrue(isRemote(u_authority));
+    assertFalse(isResolved(u_authority));
+    assertFalse(isEmpty(u_authority));
+    assertTrue(isMicroForm(u_authority));
+    assertFalse(isLongForm(u_authority));
+}
+
+// Test create a remote uAuthority that supports micro UUris.
+TEST(UAUTHRITY, testMicroUriUAuthorityId) {
+    std::string address = "someid";
+
+    auto u_authority = BuildUAuthority().setId(address).build();
+
+    assertFalse(u_authority.has_name());
+    assertTrue(u_authority.has_id());
+    assertEquals(address, u_authority.id());
     assertFalse(isLocal(u_authority));
     assertTrue(isRemote(u_authority));
     assertFalse(isResolved(u_authority));
