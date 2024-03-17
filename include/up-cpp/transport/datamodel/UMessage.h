@@ -35,20 +35,17 @@ namespace uprotocol::utransport {
 
         public:
 
-            UMessage() {
-                payload_ = nullptr;
+            UMessage() : payload_(nullptr, 0, UPayloadType::REFERENCE){
                 attributes_ = nullptr;
             }
 
             UMessage(const uprotocol::utransport::UPayload &payload,
-                     const uprotocol::v1::UAttributes &attributes) {
-                
-                payload_ = &payload;
+                     const uprotocol::v1::UAttributes &attributes) : payload_(payload.data(), payload.size(), UPayloadType::VALUE) {
                 attributes_ = &attributes;
             }
  
             void setPayload(uprotocol::utransport::UPayload &payload) {
-                payload_ = &payload;
+                payload_ = payload;
             }
 
             void setAttributes(uprotocol::v1::UAttributes &attributes) {
@@ -56,15 +53,11 @@ namespace uprotocol::utransport {
             }
 
             uprotocol::utransport::UPayload payload() {
-                if (nullptr != payload_) {
-                    return *payload_;
-                } 
-
-                return UPayload(nullptr, 0, UPayloadType::VALUE);
+               return payload_;
             }
 
             uprotocol::v1::UAttributes attributes() {
-                if (nullptr != payload_) {
+                if (nullptr != attributes_) {
                     return *attributes_;
                 }
 
@@ -75,7 +68,7 @@ namespace uprotocol::utransport {
             
         private:
 
-            const uprotocol::utransport::UPayload *payload_;
+            uprotocol::utransport::UPayload payload_;
             const uprotocol::v1::UAttributes *attributes_;
     };
 }
