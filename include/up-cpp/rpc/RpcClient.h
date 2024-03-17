@@ -27,9 +27,16 @@
 
 #include <future>
 #include <up-cpp/transport/datamodel/UMessage.h>
-#include "up-core-api/uattributes.pb.h"
+#include <up-core-api/uattributes.pb.h>
+#include <up-core-api/ustatus.pb.h>
 
 namespace uprotocol::rpc {
+
+    struct RpcResponse {
+        uprotocol::v1::UStatus status;
+        uprotocol::utransport::UMessage message;
+    };
+
     /**
     * RpcClient is an interface used by code generators for uProtocol services defined in proto files such as
     * the core uProtocol services found in https://github.com/eclipse-uprotocol/uprotocol-core-api. the interface 
@@ -51,9 +58,9 @@ namespace uprotocol::rpc {
             * @return Returns the CompletionStage with the response message or exception with the failure
             * reason as {@link UStatus}.
             */
-            virtual std::future<uprotocol::utransport::UMessage> invokeMethod(const uprotocol::v1::UUri &topic, 
-                                                                              const uprotocol::utransport::UPayload &payload, 
-                                                                              const uprotocol::v1::CallOptions &options) = 0;
+            virtual std::future<RpcResponse> invokeMethod(const uprotocol::v1::UUri &topic, 
+                                                          const uprotocol::utransport::UPayload &payload, 
+                                                          const uprotocol::v1::CallOptions &options) = 0;
             
             virtual ~RpcClient() {} 
     };
