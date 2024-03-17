@@ -200,6 +200,18 @@ target_link_libraries(uattributes_test
 add_test("t-16-uattributes_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/uattributes_test)
 
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(userializationhint_test
+	utransport/userializationhint_test.cpp)
+target_link_libraries(userializationhint_test 
+	PUBLIC
+		up-cpp::up-cpp
+	PRIVATE
+		GTest::gtest_main
+		GTest::gmock    
+		pthread
+)
+
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(uuid_test
 	uuid/uuid_test.cpp)
 target_link_libraries(uuid_test 
