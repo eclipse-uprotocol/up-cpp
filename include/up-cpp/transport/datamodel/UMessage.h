@@ -60,7 +60,9 @@ namespace uprotocol::utransport {
                     return *payload_;
                 }
 
-                return UPayload(nullptr, 0, UPayloadType::REFERENCE);
+                static uprotocol::utransport::UPayload emptyPayload(nullptr, 0, UPayloadType::REFERENCE);
+
+                return emptyPayload;
             }
 
             const uprotocol::v1::UAttributes& attributes() {
@@ -68,7 +70,7 @@ namespace uprotocol::utransport {
                     return *attributes_;
                 }
 
-                uprotocol::v1::UAttributes emptyAttributes;
+                static uprotocol::v1::UAttributes emptyAttributes;
 
                 return emptyAttributes;
             }

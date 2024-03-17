@@ -26,6 +26,7 @@
 #define _RPC_CLIENT_H_
 
 #include <future>
+#include <up-cpp/transport/UListener.h>
 #include <up-cpp/transport/datamodel/UMessage.h>
 #include <up-core-api/uattributes.pb.h>
 #include <up-core-api/ustatus.pb.h>
@@ -62,6 +63,11 @@ namespace uprotocol::rpc {
                                                           const uprotocol::utransport::UPayload &payload, 
                                                           const uprotocol::v1::CallOptions &options) = 0;
             
+            virtual uprotocol::v1::UStatus invokeMethod(const uprotocol::v1::UUri &topic,
+                                                        const uprotocol::utransport::UPayload &payload,
+                                                        const uprotocol::v1::CallOptions &options,
+                                                        const uprotocol::utransport::UListener &callback) = 0;
+
             virtual ~RpcClient() {} 
     };
 }

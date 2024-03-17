@@ -60,7 +60,7 @@ namespace uprotocol::utransport {
                * with the appropriate failure.
                */      
                virtual uprotocol::v1::UStatus registerListener(const uprotocol::v1::UUri &uri,
-                                                               const uprotocol::utransport::UListener &listner) = 0;
+                                                               const uprotocol::utransport::UListener &listener) = 0;
 
                /**
                * Unregister a listener for a given topic. Messages arriving on this topic will no longer be processed
@@ -72,7 +72,7 @@ namespace uprotocol::utransport {
                * 
                */
                virtual uprotocol::v1::UStatus unregisterListener(const uprotocol::v1::UUri &uri, 
-                                                                 const uprotocol::utransport::UListener &listner) = 0;
+                                                                 const uprotocol::utransport::UListener &listener) = 0;
                
                virtual ~UTransport() {} 
      };
