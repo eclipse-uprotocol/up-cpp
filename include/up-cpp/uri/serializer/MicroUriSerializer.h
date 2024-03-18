@@ -29,7 +29,7 @@
 #include <up-cpp/uri/builder/BuildUAuthority.h>
 #include <up-cpp/uri/builder/BuildEntity.h>
 #include <up-cpp/uri/builder/BuildUResource.h>
-#include "up-cpp/uri/serializer/IpAddress.h"
+#include "up-cpp/uri/tools/IpAddress.h"
 
 using AddressType = uprotocol::uri::IpAddress::AddressType;
 

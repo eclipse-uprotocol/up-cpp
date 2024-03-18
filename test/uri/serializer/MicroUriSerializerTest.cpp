@@ -26,7 +26,7 @@
 #include <gtest/gtest.h>
 #include <up-cpp/uri/serializer/MicroUriSerializer.h>
 #include <up-cpp/uri/builder/BuildUUri.h>
-#include <up-cpp/uri/serializer/IpAddress.h>
+#include <up-cpp/uri/tools/IpAddress.h>
 #include <up-cpp/uri/tools/Utils.h>
 
 using namespace uprotocol::uri;
