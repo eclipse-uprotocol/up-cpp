@@ -37,18 +37,6 @@ namespace uprotocol::utransport {
 	class UListener {
 
 		public:
-
-			/**
-			* Method called to handle/process events.
-			* @param topic Topic the underlying source of the message.
-			* @param payload Payload of the message.
-			* @param attributes Transportation attributes
-			* @return Returns an Ack every time a message is received and processed.
-			*/
-		/* DEPRECATED - Should be deleted*/	virtual uprotocol::v1::UStatus onReceive(const uprotocol::v1::UUri &uri, 
-												  	 const uprotocol::utransport::UPayload &payload, 
-													 const uprotocol::v1::UAttributes &attributes) const = 0; 
-
 			/**
 			* Method called to handle/process events.
 			* @param message Topic the underlying source of the message.
