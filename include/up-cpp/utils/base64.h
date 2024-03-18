@@ -28,24 +28,61 @@
 #include <string>
 
 namespace uprotocol::utils {
-class Base64 {
+/**
+ * @brief Base64 utility is a way to convert any binary or text data into printable ASCII string format.
+ *  Refer :https://en.wikipedia.org/wiki/Base64
+*/
+class base64 final {
     public:
-        static std::string encode(const char* string, 
-                                  const size_t len);
-
-        static std::string decode(const char* string, 
-                                  const size_t len);
+        /**
+         * @brief Encode the input string to base64 format
+         * @param string : input string to be encoded
+         * @param len : length of the input string
+         * @return std::string : base64 encoded string
+        */
+        static std::string encode(const char string[],
+                                   size_t const len);
+        /**
+         * @brief Decode the base64 encoded string to original string
+         * @param string : base64 encoded string
+         * @param len : length of the base64 encoded string
+         * @return std::string : original string
+        */
+        static std::string decode(const char string[],
+                                   size_t const len);
+        /**
+         * @brief Encode the input string to base64 format
+         * @param t_str : input string to be encoded
+         * @return std::string : base64 encoded string
+        */
+        static std::string encode(std::string const& t_str);
         
-        static std::string encode(std::string const& str);
-        
-        static std::string decode(std::string const& str);
+        /**
+         * @brief Decode the base64 encoded string to original string
+         * @param t_str : base64 encoded string
+         * @return std::string : original string
+        */
+        static std::string decode(std::string const& t_str);
 
-        static size_t encodedLen(size_t len);
+        /**
+         * @brief Get the length of the base64 encoded string
+         * @param len : length of the input string
+         * @return size_t : length of the base64 encoded string
+        */
+        static constexpr size_t encodedLen(size_t len) noexcept;
 
-        static size_t decodedLen(const char* string);
+        /**
+         * @brief Get the length of the original string
+         * @param string : base64 encoded string
+         * @return size_t : length of the original string
+        */
+        static constexpr size_t decodedLen(const char* const string) noexcept;
 
     private:
-        Base64() = default;
+        /**
+         * @brief Default constructor
+        */
+        base64() = default;
 };
 }  //   namespace uprotocol::tools
 #endif  //_BASE64_H_

@@ -28,14 +28,17 @@
 #include <spdlog/spdlog.h>
 #include <up-cpp/uri/serializer/IpAddress.h>
 
-using namespace uprotocol::uri;
+using uprotocol::uri::IpAddress;
+
+namespace uprotocol::uri {
 
 /**
+ * @brief
  * Updates the byte format of IP address and type, from the string format.
  */
 void IpAddress::toBytes() {
-    std::array<uint8_t, IpAddress::IpV6AddressBytes> bytes = {0};
-    auto length = 0;
+    std::array<uint8_t, IpAddress::IpV6AddressBytes> bytes = {0U};
+    uint8_t length = 0U;
     if (ipString_.empty()) {
         type_ = AddressType::Local;
     } else if (1 == inet_pton(AF_INET, ipString_.c_str(), &bytes)) {
@@ -48,28 +51,33 @@ void IpAddress::toBytes() {
         type_ = AddressType::Invalid;
     }
 
-    for (auto i = 0; i < length; i++) {
+    for (uint8_t i = 0U; i < length; i++) {
         this->ipBytes_.push_back(bytes[i]);
     }
 }
 
 /**
+ * @brief
  * Updates the string format of IP address.
  */
 void IpAddress::toString() {
     if (!ipBytes_.empty()) {
-         
-        char ip_char[INET6_ADDRSTRLEN + 1];
-        
-        auto inet_type = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
+        std::array<char, INET6_ADDRSTRLEN + 1> ip_char; // Declare ip_char as an array of characters
+        uint64_t inet_type;
+        if (type_ == AddressType::IpV4) {
+            inet_type = static_cast<uint64_t>(AF_INET);
+        } else {
+            inet_type = static_cast<uint64_t>(AF_INET6);
+        }
 
-        if (inet_ntop(inet_type, ipBytes_.data(), ip_char, INET6_ADDRSTRLEN) == nullptr) {
+        if (inet_ntop(static_cast<int>(inet_type), ipBytes_.data(), ip_char.data(), static_cast<socklen_t>(INET6_ADDRSTRLEN)) == nullptr) {
             spdlog::error("inet_ntop failed");
         }
         else {
-            ipString_ = ip_char;
+            ipString_ = std::string(ip_char.data());
         }
     } else {
         spdlog::error("ipBytes is empty");
     }
+}
 }
