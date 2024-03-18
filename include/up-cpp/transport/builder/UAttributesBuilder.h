@@ -61,6 +61,12 @@ class UAttributesBuilder {
             return *this;
         }
 
+        UAttributesBuilder& setSource(const uprotocol::v1::UUri& source) {
+
+            attributes_.mutable_source()->CopyFrom(source);
+            return *this;
+        }
+
         UAttributesBuilder& setSink(const uprotocol::v1::UUri& sink) {
 
             attributes_.mutable_sink()->CopyFrom(sink);
