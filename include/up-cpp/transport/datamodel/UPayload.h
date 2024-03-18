@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -39,10 +39,23 @@ namespace uprotocol::utransport {
         UNDEFINED  /* invalid */
     };
 
+    // The Serialization format for the data stored in UPayload.
+    enum UPayloadFormat {
+        UNSPECIFIED = 0,             /* Payload format was not is not set */
+        PROTOBUF_WRAPPED_IN_ANY = 1, /* Payload is an Any protobuf message that contains the packed payload */
+        PROTOBUF = 2,                /* Protobuf serialization format */
+        JSON = 3,                    /* JSON serialization format */
+        SOMEIP = 4,                  /* Basic SOME/IP serialization format */
+        SOMEIP_TLV = 5,              /* SOME/IP TLV format */
+        RAW = 6,                     /* RAW (binary) format */
+        TEXT = 7                     /* Text format */
+    };          
+
     /**
     * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
     */
     class UPayload {
+        
         public:
 
             UPayload(const uint8_t *data, 
@@ -115,6 +128,10 @@ namespace uprotocol::utransport {
             const uint8_t* data() const {
 
                 if (UPayloadType::VALUE == payloadType_) {
+                    if (nullptr == data_) {
+                        return nullptr;
+                    }
+                   
                     return data_.get();
                 }
                 else {
@@ -138,6 +155,15 @@ namespace uprotocol::utransport {
                 return payloadType_;
             }
 
+           /**
+            * @return format type
+            */
+            UPayloadFormat format() const {
+
+                return payloadFormat_;
+            }
+
+
             /**
             * @return Returns true if the data in the UPayload is empty.
             */
@@ -151,12 +177,17 @@ namespace uprotocol::utransport {
                 }
             }
 
+            void setFormat(const UPayloadFormat &format) {
+                payloadFormat_ = format;
+            }
+
         private:
             
             std::unique_ptr<uint8_t[]> data_ = nullptr;
             const uint8_t *refPtr_ = nullptr;
             size_t dataSize_  = 0;
             UPayloadType payloadType_ = UPayloadType::UNDEFINED;
+            UPayloadFormat payloadFormat_ = UPayloadFormat::RAW;
     };
 }
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2023 General Motors GTO LLC
+# Copyright (c) 2024 General Motors GTO LLC
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -18,7 +18,7 @@
 # under the License.
 #
 # SPDX-FileType: SOURCE
-# SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+# SPDX-FileCopyrightText: 2024 General Motors GTO LLC
 # SPDX-License-Identifier: Apache-2.0
 
 enable_testing()
@@ -173,19 +173,6 @@ target_link_libraries(MicroUriSerializerTest
 add_test("t-14-MicroUriSerializerTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MicroUriSerializerTest)
 
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
-add_executable(umessagetypes_test
-	utransport/umessagetypes_test.cpp)
-target_link_libraries(umessagetypes_test 
-		PUBLIC
-			up-cpp::up-cpp
-		PRIVATE
-			GTest::gtest_main
-			GTest::gmock    
-			pthread
-)
-add_test("t-15-umessagetypes_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/umessagetypes_test)
-
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(upayload_test
 	utransport/upayload_test.cpp)
 target_link_libraries(upayload_test 
@@ -198,31 +185,19 @@ target_link_libraries(upayload_test
 )
 add_test("t-16-upayload_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/upayload_test)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
-add_executable(upriority_test
-	utransport/upriority_test.cpp)
-target_link_libraries(upriority_test 
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+add_executable(uattributes_test
+	utransport/uattributes_test.cpp)
+target_link_libraries(uattributes_test 
 		PUBLIC
 			up-cpp::up-cpp
+			protobuf::protobuf
 		PRIVATE
 			GTest::gtest_main
 			GTest::gmock    
 			pthread
 )
-add_test("t-17-upriority_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/upriority_test)
-
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
-add_executable(userializationhint_test
-	utransport/userializationhint_test.cpp)
-target_link_libraries(userializationhint_test 
-	PUBLIC
-		up-cpp::up-cpp
-	PRIVATE
-		GTest::gtest_main
-		GTest::gmock    
-		pthread
-)
-add_test("t-18-userializationhint_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/userializationhint_test)
+add_test("t-16-uattributes_test" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/uattributes_test)
 
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(uuid_test
