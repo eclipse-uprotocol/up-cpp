@@ -55,11 +55,11 @@ namespace uprotocol::uri {
          */
         auto setName(const std::string &name) -> BuildUAuthority & {
             if (authority_.has_name() && !authority_.name().empty()) {
-                spdlog::error("UAutority already has a remote set. Ignoring setName()");
+                spdlog::error("UAuthority already has a remote set. Ignoring setName()");
                 return *this;
             }
             if (isBlank(name)) {
-                spdlog::error("UAutority name is blank. Ignoring setName()");
+                spdlog::error("UAuthority name is blank. Ignoring setName()");
                 return *this;
             } else {
                 auto tmp  = name;
@@ -79,11 +79,11 @@ namespace uprotocol::uri {
          */
         auto setName(const std::string &device, const std::string &domain) -> BuildUAuthority & {
             if (authority_.has_name() && !authority_.name().empty()) {
-                spdlog::error("UAutority already has a name {} set. Ignoring setName()", authority_.name());
+                spdlog::error("UAuthority already has a name {} set. Ignoring setName()", authority_.name());
                 return *this;
             }
             if (isBlank(device) && isBlank(domain)) {
-                spdlog::error("UAutority device or domain is blank. Ignoring setName()");
+                spdlog::error("UAuthority device or domain is blank. Ignoring setName()");
                 return *this;
             }
             if (isBlank(device)) {
@@ -115,12 +115,12 @@ namespace uprotocol::uri {
          */
         auto setIp(const IpAddress &address) -> BuildUAuthority & {
             if (authority_.has_ip() && !authority_.ip().empty()) {
-                spdlog::error("UAutority already has ip set {}. Ignoring setIp()", authority_.ip());
+                spdlog::error("UAuthority already has ip set {}. Ignoring setIp()", authority_.ip());
                 return *this;
             }
 
             if (address.getType() == IpAddress::AddressType::Invalid) {
-                spdlog::error<std::string_view>("UAutority address is not a valid IP address. Ignoring setIp()");
+                spdlog::error<std::string_view>("UAuthority address is not a valid IP address. Ignoring setIp()");
                 return *this;
             }
 
@@ -131,7 +131,7 @@ namespace uprotocol::uri {
 
         auto setId(const std::string &id) -> BuildUAuthority & {
             if (authority_.has_id() && !authority_.id().empty()) {
-                spdlog::error("UAutority already has a id set {}. Ignoring setId()", authority_.id());
+                spdlog::error("UAuthority already has a id set {}. Ignoring setId()", authority_.id());
                 return *this;
             }
             authority_.set_id(id.c_str());
