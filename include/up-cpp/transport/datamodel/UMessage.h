@@ -33,52 +33,41 @@ namespace uprotocol::utransport {
 
     class UMessage {
 
-        public:
+    public:
 
-            UMessage() {
-                attributes_ = nullptr;
-                payload_ = nullptr;
-            }
+        // Default constructor with member initializer list
+        UMessage() : payload_(nullptr, 0, UPayloadType::REFERENCE), attributes_() {}
 
-            UMessage(const uprotocol::utransport::UPayload &payload,
-                     const uprotocol::v1::UAttributes &attributes) {
-                        
-                payload_ = &payload;
-                attributes_ = &attributes;
-            }
- 
-            void setPayload(uprotocol::utransport::UPayload &payload) {
-                payload_ = &payload;
-            }
+        // Constructor with parameters and member initializer list
+        UMessage(uprotocol::utransport::UPayload &payload,
+                 uprotocol::v1::UAttributes attributes) :
+            payload_(payload),
+            attributes_(attributes) { }
 
-            void setAttributes(uprotocol::v1::UAttributes &attributes) {
-                attributes_ = &attributes;
-            }
+        // Setter for payload with move semantics
+        void setPayload(uprotocol::utransport::UPayload &payload) {
+            payload_ = payload;
+        }
 
-            const uprotocol::utransport::UPayload& payload() {
-                if (nullptr != payload_) {
-                    return *payload_;
-                }
+        // Setter for attributes with move semantics
+        void setAttributes(uprotocol::v1::UAttributes &attributes) {
+            attributes_ = attributes;
+        }
 
-                static uprotocol::utransport::UPayload emptyPayload(nullptr, 0, UPayloadType::REFERENCE);
+        // Getter for payload
+        const uprotocol::utransport::UPayload& payload() const {
+            return payload_;
+        }
 
-                return emptyPayload;
-            }
+        // Getter for attributes
+        const uprotocol::v1::UAttributes& attributes() const {
+            return attributes_;
+        }
 
-            const uprotocol::v1::UAttributes& attributes() {
-                if (nullptr != attributes_) {
-                    return *attributes_;
-                }
+    private:
 
-                static uprotocol::v1::UAttributes emptyAttributes;
-
-                return emptyAttributes;
-            }
-            
-        private:
-
-            const uprotocol::utransport::UPayload *payload_;
-            const uprotocol::v1::UAttributes *attributes_;
+        uprotocol::utransport::UPayload payload_;
+        uprotocol::v1::UAttributes attributes_;
     };
 }
 

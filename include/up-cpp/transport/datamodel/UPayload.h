@@ -55,104 +55,83 @@ namespace uprotocol::utransport {
     * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
     */
     class UPayload {
-        
+
         public:
+            // Constructor
+            UPayload(const uint8_t* ptr, 
+                     const size_t size, 
+                     const UPayloadType &type) : dataSize_(size), type_(type) {
 
-            UPayload(const uint8_t *data, 
-                     const size_t &dataSize,
-                     const UPayloadType &type) {
-                
-                payloadType_ = type;
-
-                if ((nullptr == data) || (0 == dataSize)) {
-                    data_ = nullptr;
-                    refPtr_ = nullptr;
-                    dataSize_ = 0;
-
-                    return;
+                if (type == UPayloadType::REFERENCE) {
+                    dataPtr_ = std::shared_ptr<const uint8_t[]>(ptr, [](const uint8_t*){});
+                } else {
+                    dataPtr_ = std::shared_ptr<const uint8_t[]>(new uint8_t[dataSize_], [](const uint8_t* p){ delete[] p; });
+                    if (nullptr != ptr) {
+                        std::memcpy(const_cast<uint8_t*>(dataPtr_.get()), ptr, dataSize_);
+                    }
                 }
-
-                switch(type) {
-                    case UPayloadType::VALUE: {
-                            data_ = std::make_unique<uint8_t[]>(dataSize);
-                            if (nullptr == data_){
-                                data_ = nullptr;
-                                dataSize_ = 0;
-                            } else {
-                                memcpy(data_.get(),
-                                       data,
-                                       dataSize);      
-                                dataSize_ = dataSize;
-                            }
-                    }
-                    break; 
-                    case UPayloadType::REFERENCE: 
-                    case UPayloadType::SHARED: {
-                        refPtr_ = data;
-                        dataSize_ = dataSize;
-                    }
-                    break;
-                    case UPayloadType::UNDEFINED:
-                    default: {
-                        data_ = nullptr;
-                        refPtr_ = nullptr;
-                        dataSize_ = 0;
-                    }
-                    break;
-                }
-                
             }
-            
+
             // Copy constructor
-            UPayload(const UPayload& other) {
-    
-                data_ = std::make_unique<uint8_t[]>(other.dataSize_);
-                std::memcpy(data_.get(), other.data_.get(), other.dataSize_);
-                dataSize_ = other.dataSize_;
-                payloadType_ = other.payloadType_;
+            UPayload(const UPayload& other) 
+                : dataSize_(other.dataSize_), type_(other.type_) {
+                if (type_ == UPayloadType::REFERENCE) {
+                    dataPtr_ = other.dataPtr_;
+                } else {
+                    dataPtr_ = std::shared_ptr<const uint8_t[]>(new uint8_t[dataSize_], [](const uint8_t* p){ delete[] p; });
+                    std::memcpy(const_cast<uint8_t*>(dataPtr_.get()), other.dataPtr_.get(), dataSize_);
+                }
             }
 
+            // Assignment operator
             UPayload& operator=(const UPayload& other) {
-                if (this != &other) { // Self-assignment check
-                    this->data_ = std::make_unique<uint8_t[]>(other.dataSize_);
-                    std::memcpy(this->data_.get(), other.data_.get(), other.dataSize_);
-                    this->dataSize_ = other.dataSize_;
-                    this->payloadType_ = other.payloadType_;
+                if (this != &other) {
+                    dataSize_ = other.dataSize_;
+                    type_ = other.type_;
+                    if (type_ == UPayloadType::REFERENCE) {
+                        dataPtr_ = other.dataPtr_;
+                    } else {
+                        dataPtr_ = std::shared_ptr<const uint8_t[]>(new uint8_t[dataSize_], [](const uint8_t* p){ delete[] p; });
+                        std::memcpy(const_cast<uint8_t*>(dataPtr_.get()), other.dataPtr_.get(), dataSize_);
+
+                    }
                 }
                 return *this;
             }
+
+            // Move constructor
+            UPayload(UPayload&& other) noexcept 
+                : dataPtr_(std::move(other.dataPtr_)), dataSize_(other.dataSize_), type_(other.type_) {
+                other.dataSize_ = 0;
+            }
+
+            // Move assignment operator
+            UPayload& operator=(UPayload&& other) noexcept {
+                if (this != &other) {
+                    dataSize_ = other.dataSize_;
+                    type_ = other.type_;
+                    dataPtr_ = std::move(other.dataPtr_);
+                    other.dataSize_ = 0;
+                }
+                return *this;
+            }
+
+            void setFormat(const UPayloadFormat &format) {
+                payloadFormat_ = format;
+            }
+
             /**
-            * The actual serialized or raw data, which can be deserialized or simply used as is using the hint.
-            * @return Returns the actual serialized or raw data, which can be deserialized or simply used as is using the hint.
+            * @return data
             */
             const uint8_t* data() const {
-
-                if (UPayloadType::VALUE == payloadType_) {
-                    if (nullptr == data_) {
-                        return nullptr;
-                    }
-                   
-                    return data_.get();
-                }
-                else {
-                    return refPtr_;
-                }
+                return dataPtr_.get();
             }
 
             /**
-            * @return Returns the size of the data
+            * @return size
             */
             size_t size() const {
-
                 return dataSize_;
-            }
-
-            /**
-            * @return payload type
-            */
-            UPayloadType type() const {
-
-                return payloadType_;
             }
 
            /**
@@ -162,31 +141,15 @@ namespace uprotocol::utransport {
 
                 return payloadFormat_;
             }
-
-
-            /**
-            * @return Returns true if the data in the UPayload is empty.
-            */
-            bool isEmpty() {
-                if ((UPayloadType::VALUE == payloadType_) && (data_ == nullptr)) {
-                    return true;
-                } else if ((UPayloadType::REFERENCE == payloadType_) && (refPtr_ == nullptr)) {
-                    return true;
-                } else {
-                    return false; 
-                }
-            }
-
-            void setFormat(const UPayloadFormat &format) {
-                payloadFormat_ = format;
+            
+            bool isEmpty() const {
+                return dataSize_ == 0;
             }
 
         private:
-            
-            std::unique_ptr<uint8_t[]> data_ = nullptr;
-            const uint8_t *refPtr_ = nullptr;
-            size_t dataSize_  = 0;
-            UPayloadType payloadType_ = UPayloadType::UNDEFINED;
+            std::shared_ptr<const uint8_t[]> dataPtr_;
+            size_t dataSize_;
+            UPayloadType type_;
             UPayloadFormat payloadFormat_ = UPayloadFormat::RAW;
     };
 }
