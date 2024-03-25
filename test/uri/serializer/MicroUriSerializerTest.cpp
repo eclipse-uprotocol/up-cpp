@@ -287,7 +287,7 @@ TEST(UUri, testDeserializeWithValidIpv4Uri) {
     assertTrue(u_uri.resource().has_id());
     assertEquals(u_uri.resource().id(), 5);
     assertTrue(u_uri.authority().has_ip());
-    assertEquals(u_uri.authority().ip(), "192.168.1.100");
+    assertEquals(u_uri.authority().ip(), IpAddress("192.168.1.100").getBytesString());
 }
 
 // Test deserialize with valid IPv6 micro uri.
@@ -309,18 +309,16 @@ TEST(UUri, testDeserializeWithValidIpv6Uri) {
     assertTrue(isMicroForm(u_uri));
     assertFalse(isResolved(u_uri));
     assertFalse(isLongForm(u_uri));
-    assertFalse(isEmpty(u_uri.authority()));
-    assertTrue(u_uri.authority().has_ip());
-    assertEquals(u_uri.authority().ip(), ipv6);
     assertTrue(u_uri.entity().has_version_major());
     assertEquals(u_uri.entity().version_major(), 1);
     assertTrue(u_uri.entity().has_id());
     assertEquals(u_uri.entity().id(), 2);
     assertTrue(u_uri.resource().has_id());
     assertEquals(u_uri.resource().id(), 5);
+    assertFalse(isEmpty(u_uri.authority()));
     assertTrue(u_uri.authority().has_ip());
     assertFalse(u_uri.authority().ip().empty());
-    assertEquals(u_uri.authority().ip(), ipv6);
+    assertEquals(u_uri.authority().ip(), ip_address.getBytesString());
 }
 
 // Test deserialize with valid id micro uri.
