@@ -48,5 +48,4 @@ namespace uprotocol::utransport {
 	};
 }
 
-
 #endif /* _ULISTENER_H_*/
