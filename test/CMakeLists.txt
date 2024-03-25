@@ -172,6 +172,21 @@ target_link_libraries(MicroUriSerializerTest
 )
 add_test("t-14-MicroUriSerializerTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MicroUriSerializerTest)
 
+add_executable(IpAddressTest
+	uri/tools/IpAddressTest.cpp)
+target_compile_options(IpAddressTest PRIVATE -g -O0)
+target_link_libraries(IpAddressTest 
+		PUBLIC
+			up-cpp::up-cpp
+			spdlog::spdlog
+			protobuf::protobuf
+		PRIVATE
+			GTest::gtest_main
+			GTest::gmock    
+			pthread
+)
+add_test("t-14-IpAddressTest" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/IpAddressTest)
+
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
 add_executable(upayload_test
 	utransport/upayload_test.cpp)
