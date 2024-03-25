@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,13 +19,17 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 #ifndef IP_ADDRESS_H_
 #define IP_ADDRESS_H_
 
-#include <iostream> 
+#include <string>
+#include <string_view>
+#include <type_traits>
+#include <vector>
+
 namespace uprotocol::uri {
 
 /**
@@ -38,27 +42,28 @@ public:
      * The type of address used for Micro URI.
      */
     enum class AddressType : uint8_t {
-        Local=0,
+        Local=0, //Remove?
         IpV4,
         IpV6,
-        Id,
+        Id, //Remove?
         Invalid
     };
 
     /**
      * Constructor with IP address in string format.
      */
-    explicit IpAddress(std::string_view ipString) : ipString_(ipString) {
-        toBytes();
+    explicit IpAddress(std::string_view const ipString) : ipString_(ipString) {
+        fromString();
     }
 
     /**
      * Constructor with IP address in byte format.
      */
-    IpAddress(std::vector<uint8_t> const& ipBytes, AddressType type) : type_(type) , ipBytes_(ipBytes) {
-        toString();
-
+    IpAddress(std::vector<uint8_t> const& ipBytes, AddressType type) : type_(type), ipBytes_(ipBytes) {
+        fromBytes();
     }
+
+    //IpAddress(UAuthority const&);
 
     /**
      * Get the type of IP address.
@@ -73,8 +78,7 @@ public:
     /**
      * Get the byte format of IP address.
      */
-    auto getBytes() const { return ipBytes_; }  
-
+    auto getBytes() const { return ipBytes_; }
 
     /**
      * Get the byte format of IP address, but in a string-like container
@@ -99,27 +103,29 @@ public:
 
 private:
     /**
-     * Updates the byte format of IP address and type, from the string format.
+     *  Updates the state of this instance from the value of the ipString_ field
      */
-    void toBytes();
+    void fromString();
 
     /**
-     * Updates the string format of IP address.
+     * Updates state of this instance from the value of the ipBytes_ field
      */
-    void toString();
+    void fromBytes();
 
     /**
      * Type of the IP addess.
      */
     AddressType type_ = AddressType::Invalid;
+
     /**
      * IP address in byte format.
      */
     std::vector<uint8_t> ipBytes_{};
+
     /**
      * IP address in string format.
      */
-    std::string ipString_;
+    std::string ipString_{};
 
     using Bytes = typename std::decay_t<decltype(ipBytes_)>::value_type;
     using StrBytes = typename std::string_view::value_type;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -28,48 +28,103 @@
 #include <spdlog/spdlog.h>
 #include <up-cpp/uri/tools/IpAddress.h>
 
-using namespace uprotocol::uri;
-
-/**
- * Updates the byte format of IP address and type, from the string format.
- */
-void IpAddress::toBytes() {
-    std::array<uint8_t, IpAddress::IpV6AddressBytes> bytes = {0};
-    auto length = 0;
-    if (ipString_.empty()) {
-        type_ = AddressType::Local;
-    } else if (1 == inet_pton(AF_INET, ipString_.c_str(), &bytes)) {
-        type_ = AddressType::IpV4;
-        length = IpAddress::IpV4AddressBytes;
-    } else if (1 == inet_pton(AF_INET6, ipString_.c_str(), &bytes)) {
-        type_ = AddressType::IpV6;
-        length = IpAddress::IpV6AddressBytes;
-    } else {
-        type_ = AddressType::Invalid;
+namespace {
+    namespace uri {
+        using namespace uprotocol::uri;
     }
 
-    for (auto i = 0; i < length; i++) {
-        this->ipBytes_.push_back(bytes[i]);
-    }
+    /// Controls whether buffers created when converting address formats have
+    /// `shrink_to_fit()` called on them. This should be set to true only if
+    /// it seems reasonably likely that large numbers of IpAddress instances
+    /// will be kept around for long times.
+    constexpr bool OPTION_SHRINK_BUFFERS = false;
 }
 
 /**
- * Updates the string format of IP address.
+ * Updates the state of the IP object from the value of the ipString_ field
  */
-void IpAddress::toString() {
-    if (!ipBytes_.empty()) {
-         
-        char ip_char[INET6_ADDRSTRLEN + 1];
-        
-        auto inet_type = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
+void uri::IpAddress::fromString() {
+    if (std::vector<uint8_t> bytes(IpV6AddressBytes, 0);
+            1 == inet_pton(AF_INET6, ipString_.c_str(), bytes.data())) {
+        type_ = AddressType::IpV6;
+        ipBytes_ = std::move(bytes);
+        return;
 
-        if (inet_ntop(inet_type, ipBytes_.data(), ip_char, INET6_ADDRSTRLEN) == nullptr) {
-            spdlog::error("inet_ntop failed");
+    } else if (bytes.resize(IpV4AddressBytes);
+            1 == inet_pton(AF_INET, ipString_.c_str(), bytes.data())) {
+        if constexpr (OPTION_SHRINK_BUFFERS) {
+            bytes.shrink_to_fit();
         }
-        else {
-            ipString_ = ip_char;
+        type_ = AddressType::IpV4;
+        ipBytes_ = std::move(bytes);
+        return;
+    }
+
+    spdlog::error("ipString does not contain a valid IPv4 / IPv6 address");
+    type_ = AddressType::Invalid;
+    ipString_.clear();
+}
+
+/**
+ * Updates state of the IP object from the value of the ipBytes_ field
+ */
+void uri::IpAddress::fromBytes() {
+    if (ipBytes_.empty()) {
+        spdlog::error("ipBytes is empty");
+        type_ = AddressType::Invalid;
+        return;
+    }
+
+    if (type_ == AddressType::IpV6) {
+        if (ipBytes_.size() == IpV6AddressBytes) {
+            ipString_.resize(INET6_ADDRSTRLEN);
+        } else {
+            spdlog::error("ipBytes is the wrong size for an IPv6 address");
+            type_ = AddressType::Invalid;
+            ipBytes_.clear();
+            return;
+        }
+    } else if (type_ == AddressType::IpV4) {
+        if (ipBytes_.size() == IpV4AddressBytes) {
+            ipString_.resize(INET_ADDRSTRLEN);
+        } else {
+            spdlog::error("ipBytes is the wrong size for an IPv4 address");
+            type_ = AddressType::Invalid;
+            ipBytes_.clear();
+            return;
         }
     } else {
-        spdlog::error("ipBytes is empty");
+        spdlog::error("type is not one of IPv4 or IPv6");
+        type_ = AddressType::Invalid;
+        ipBytes_.clear();
+        return;
+    }
+         
+    // Note: handling AddressType::Invalid and other non IP types by returning
+    // in the conditional block above allows this check to assume that type
+    // is *either* IpV4 OR IpV6 and not any of the other possible values.
+    auto inet_type = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
+
+    if (inet_ntop(inet_type, ipBytes_.data(), ipString_.data(), ipString_.size()) == nullptr) {
+        spdlog::error("inet_ntop failed");
+        type_ = AddressType::Invalid;
+        ipBytes_.clear();
+        ipString_.clear();
+        return;
+    }
+
+    // std::string can happily hold null characters in the middle of its
+    // buffer. Since we expanded to the maximum length of a given address
+    // type, we need to find where the real end of the string provided
+    // by inet_ntop is and truncate to that.
+    auto term = ipString_.find_first_of('\0');
+    if (ipString_.npos != term) {
+        ipString_.resize(term);
+    // If these IpAddress objects are kept around in any quantity,
+    // we might want to purge the excess memory once the string
+    // is resized.
+        if constexpr (OPTION_SHRINK_BUFFERS) {
+            ipString_.shrink_to_fit();
+        }
     }
 }
