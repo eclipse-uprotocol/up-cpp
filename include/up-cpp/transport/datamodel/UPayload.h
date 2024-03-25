@@ -120,12 +120,16 @@ namespace uprotocol::utransport {
                 payloadFormat_ = format;
             }
 
-            // Getter for data
+            /**
+            * @return data
+            */
             const uint8_t* data() const {
                 return dataPtr_.get();
             }
 
-            // Getter for size
+            /**
+            * @return size
+            */
             size_t size() const {
                 return dataSize_;
             }

@@ -42,8 +42,7 @@ namespace uprotocol::utransport {
         UMessage(uprotocol::utransport::UPayload &payload,
                  uprotocol::v1::UAttributes attributes) :
             payload_(payload),
-            attributes_(attributes) {
-            }
+            attributes_(attributes) { }
 
         // Setter for payload with move semantics
         void setPayload(uprotocol::utransport::UPayload &payload) {
