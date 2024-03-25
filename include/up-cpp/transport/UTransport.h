@@ -48,8 +48,7 @@ namespace uprotocol::utransport {
                * @return Returns OKSTATUS if the payload has been successfully sent (ACK'ed), otherwise it
                * returns FAILSTATUS with the appropriate failure.
                */
-               virtual uprotocol::v1::UStatus send(const uprotocol::utransport::UPayload &payload,
-                                                   const uprotocol::v1::UAttributes &attributes) = 0;
+               virtual uprotocol::v1::UStatus send(const uprotocol::utransport::UMessage &message) = 0;
 
                /**
                * Register listener to be called when UPayload is received for the specific topic.
