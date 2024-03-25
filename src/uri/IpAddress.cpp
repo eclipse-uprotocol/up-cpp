@@ -27,18 +27,51 @@
 #include <arpa/inet.h>
 #include <spdlog/spdlog.h>
 #include <up-cpp/uri/tools/IpAddress.h>
+#include "up-core-api/uri.pb.h"
 
 namespace {
     namespace uri {
         using namespace uprotocol::uri;
     }
 
+    using UAuthority = uprotocol::v1::UAuthority;
+
     /// Controls whether buffers created when converting address formats have
     /// `shrink_to_fit()` called on them. This should be set to true only if
     /// it seems reasonably likely that large numbers of IpAddress instances
     /// will be kept around for long times.
     constexpr bool OPTION_SHRINK_BUFFERS = false;
+
+    std::vector<uint8_t> bytesFromAuthority(UAuthority const& authority) {
+        std::vector<uint8_t> addressBytes;
+        if (authority.has_ip() && authority.ip().size() > 0) {
+            auto const& addrByteStr = authority.ip();
+            std::transform(addrByteStr.begin(), addrByteStr.end(),
+                    std::back_inserter(addressBytes),
+                    [](char c){ return *reinterpret_cast<uint8_t*>(&c); });
+        }
+        return addressBytes;
+    }
+
+    uri::IpAddress::AddressType typeFromAuthority(UAuthority const& authority) {
+        if (authority.has_ip()) {
+            if (authority.ip().size() == uri::IpAddress::IpV4AddressBytes) {
+                return uri::IpAddress::AddressType::IpV4;
+            } else if (authority.ip().size() == uri::IpAddress::IpV6AddressBytes) {
+                return uri::IpAddress::AddressType::IpV6;
+            }
+            spdlog::error("UAuthority has IP address, but size ({}) does not "
+                    "match expected for IPv4 or IPv6", authority.ip().size());
+        } else {
+            spdlog::error("UAuthority does not have IP address");
+        }
+        return uri::IpAddress::AddressType::Invalid;
+    }
 }
+
+uri::IpAddress::IpAddress(uprotocol::v1::UAuthority const& authority)
+    : IpAddress(bytesFromAuthority(authority), typeFromAuthority(authority))
+{ }
 
 /**
  * Updates the state of the IP object from the value of the ipString_ field

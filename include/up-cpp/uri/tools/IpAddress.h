@@ -30,6 +30,13 @@
 #include <type_traits>
 #include <vector>
 
+// Forward declare UAuthority so we can implement a constructor that consumes it
+namespace uprotocol {
+namespace v1 {
+class UAuthority;
+}
+}
+
 namespace uprotocol::uri {
 
 /**
@@ -63,7 +70,7 @@ public:
         fromBytes();
     }
 
-    //IpAddress(UAuthority const&);
+    IpAddress(uprotocol::v1::UAuthority const&);
 
     /**
      * Get the type of IP address.

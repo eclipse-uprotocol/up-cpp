@@ -30,6 +30,7 @@
 #include <arpa/inet.h>
 #include <gtest/gtest.h>
 #include "up-cpp/uri/tools/IpAddress.h"
+#include "up-cpp/uri/builder/BuildUAuthority.h"
 
 
 using namespace uprotocol::uri;
@@ -69,6 +70,29 @@ TEST(IPADDR, testFromBytesIpv4) {
     byteString[0] = *reinterpret_cast<const char*>(&leadingByte);
 
     auto ipa = IpAddress(byteForm, IpAddress::AddressType::IpV4);
+    assertEquals(IpAddress::AddressType::IpV4, ipa.getType());
+    assertEquals(address, ipa.getString());
+    assertEquals(byteForm, ipa.getBytes());
+    assertEquals(byteFormFromInt, ipa.getBytes());
+    assertEquals(byteString, ipa.getBytesString());
+}
+
+// Make sure construction from an IPv4 UAuthority works
+TEST(IPADDR, testFromUAuthorityIpv4) {
+
+    BuildUAuthority uauthBuilder;
+    const std::string address{"172.16.6.53"};
+    const std::vector<uint8_t> byteForm{172, 16, 6, 53};
+    std::vector<uint8_t> byteFormFromInt(4);
+    const uint32_t fromInt = htonl(0xac100635);
+    memcpy(byteFormFromInt.data(), &fromInt, byteFormFromInt.size());
+    std::string byteString{0, 16, 6, 53};
+    const uint8_t leadingByte{172};
+    byteString[0] = *reinterpret_cast<const char*>(&leadingByte);
+
+    auto uauth = uauthBuilder.setIp(address).build();
+
+    auto ipa = IpAddress(uauth);
     assertEquals(IpAddress::AddressType::IpV4, ipa.getType());
     assertEquals(address, ipa.getString());
     assertEquals(byteForm, ipa.getBytes());
@@ -143,13 +167,49 @@ TEST(IPADDR, testFromBytesIpv6) {
             {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
 }
 
+// Make sure construction from an IPv6 UAuthority works.
+TEST(IPADDR, testFromUAuthIpv6) {
+    auto testAddress = [&](std::string &&address, std::vector<uint8_t> &&byteForm) {
+        std::string byteString;
+        for (auto v : byteForm) {
+            byteString += *reinterpret_cast<int8_t*>(&v);
+        }
+
+        BuildUAuthority uauthBuilder;
+        auto uauth = uauthBuilder.setIp(address).build();
+
+        auto ipa = IpAddress(uauth);
+        assertEquals(IpAddress::AddressType::IpV6, ipa.getType());
+        assertEquals(address, ipa.getString());
+        assertEquals(byteForm, ipa.getBytes());
+        assertEquals(byteString, ipa.getBytesString());
+    };
+
+    testAddress("2001:db8::c0:ffee",
+            {0x20, 0x01, 0x0d, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xc0, 0xff, 0xee});
+    testAddress("::1",
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1});
+    testAddress("::",
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    testAddress("abcd:ef01:2345:6789:abcd:ef01:2345:6789",
+            {0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89});
+    // See RFC4291 Section 2.2, item 3
+    testAddress("::13.1.68.3",
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x0d, 0x01, 0x44, 0x03});
+    testAddress("::ffff:13.1.68.3",
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 0x0d, 0x01, 0x44, 0x03});
+
+    // We use this address in a later test, so we sure it is valid here first
+    testAddress("1:203:405:607:809:a0b:c0d:e0f",
+            {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
+}
+
 // Try a bunch of invalid address strings to see if we can trip up the parser
 TEST(IPADDR, testFromStringInvalid) {
     auto testAddress = [&](std::string const &&address) {
         auto ipa = IpAddress(address);
         assertEquals(IpAddress::AddressType::Invalid, ipa.getType());
         assertEquals("", ipa.getString());
-        //assertEquals(address, ipa.getString());
         assertTrue(ipa.getBytes().empty());
         assertTrue(ipa.getBytesString().empty());
     };
@@ -288,6 +348,119 @@ TEST(IPADDR, testFromBytesInvalid) {
     }
 }
 
+// Try a bunch of invalid authorities to see if we can trip up the parser
+TEST(IPADDR, testFromUAuthorityInvalid) {
+    auto testAuthority = [&](auto const &&uauth) {
+        auto ipa = IpAddress(uauth);
+        assertEquals(IpAddress::AddressType::Invalid, ipa.getType());
+        assertEquals("", ipa.getString());
+        assertTrue(ipa.getBytes().empty());
+        assertTrue(ipa.getBytesString().empty());
+    };
+
+    {
+        // Empty (local) authority
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.build());
+    }
+
+    {
+        // Name authority
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.setName("127.0.0.1").build());
+    }
+
+    {
+        // Name authority
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.setName("::1").build());
+    }
+
+    {
+        // Name authority (with bytes)
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.setName({127, 1, 1, 1}).build());
+    }
+
+    {
+        // Name authority (with bytes)
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.setName({20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}).build());
+    }
+
+    {
+        // ID authority
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.setId("1.1.1.1").build());
+    }
+
+    {
+        // ID authority
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.setId("::1").build());
+    }
+
+    {
+        // ID authority (with bytes)
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.setId({1, 1, 1, 1}).build());
+    }
+
+    {
+        // ID authority (with bytes)
+        BuildUAuthority uauthBuild;
+        testAuthority(uauthBuild.setId({20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}).build());
+    }
+
+    {
+        // IPv4 authority with wrong length
+        auto buildBadIp = [&](std::string const &&ip) {
+            BuildUAuthority uauthBuild;
+            // Start with a valid IP so we know it's a good authority, then change
+            // the authority's IP field to different (invalid) lengths
+            constexpr std::string_view validIp{"1.1.1.1"};
+            auto uauth = uauthBuild.setIp(static_cast<std::string>(validIp)).build();
+            // Check we started valid
+            assertEquals(validIp, IpAddress(uauth).getString());
+            uauth.set_ip(ip);
+            return uauth;
+        };
+
+        // Too small
+        testAuthority(buildBadIp({}));
+        testAuthority(buildBadIp({1}));
+        testAuthority(buildBadIp({1, 2}));
+        testAuthority(buildBadIp({1, 2, 3}));
+        // Too big
+        testAuthority(buildBadIp({1, 2, 3, 4, 5}));
+        testAuthority(buildBadIp({1, 2, 3, 4, 5, 6}));
+    }
+
+    {
+        // IPv6 authority with wrong length
+        auto buildBadIp = [&](std::string const &&ip) {
+            BuildUAuthority uauthBuild;
+            // Start with a valid IP so we know it's a good authority, then change
+            // the authority's IP field to different (invalid) lengths
+            constexpr std::string_view validIp{"::1"};
+            auto uauth = uauthBuild.setIp(static_cast<std::string>(validIp)).build();
+            // Check we started valid
+            assertEquals(validIp, IpAddress(uauth).getString());
+            uauth.set_ip(ip);
+            return uauth;
+        };
+
+        // Too small
+        testAuthority(buildBadIp({}));
+        testAuthority(buildBadIp({1}));
+        testAuthority(buildBadIp({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}));
+        testAuthority(buildBadIp({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}));
+        // Too big
+        testAuthority(buildBadIp({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}));
+        testAuthority(buildBadIp({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}));
+    }
+}
+
 TEST(IPADDR, testFromBytesTypeMismatch) {
     IpAddress::AddressType currentType = IpAddress::AddressType::Invalid;
 
@@ -301,14 +474,6 @@ TEST(IPADDR, testFromBytesTypeMismatch) {
     };
 
     currentType = IpAddress::AddressType::Invalid;
-    testAddress({0, 1, 2, 3});
-    testAddress({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
-
-    currentType = IpAddress::AddressType::Local;
-    testAddress({0, 1, 2, 3});
-    testAddress({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
-
-    currentType = IpAddress::AddressType::Id;
     testAddress({0, 1, 2, 3});
     testAddress({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
 
