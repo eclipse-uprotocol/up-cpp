@@ -1,4 +1,4 @@
-# Uprotocol C++ SDK 
+# Uprotocol C++ Library 
 
 ## Welcome!
 
