@@ -42,7 +42,8 @@ TEST(UAttributesTest, Class)
     // Create a UAttributes object with some values
     UMessageType type = UMessageType::UMESSAGE_TYPE_PUBLISH;
     UPriority priority = UPriority::UPRIORITY_CS0;
-    UAttributesBuilder builder(id, type, priority);
+    UUri uri;
+    UAttributesBuilder builder(uri,id, type, priority);
     
     UAttributes nonEmptyAttributes = builder.build();
 
