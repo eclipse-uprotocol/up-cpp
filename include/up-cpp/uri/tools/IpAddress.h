@@ -48,11 +48,9 @@ public:
     /**
      * The type of address used for Micro URI.
      */
-    enum class AddressType : uint8_t {
-        Local=0, //Remove?
+    enum class Type {
         IpV4,
         IpV6,
-        Id, //Remove?
         Invalid
     };
 
@@ -66,7 +64,7 @@ public:
     /**
      * Constructor with IP address in byte format.
      */
-    IpAddress(std::vector<uint8_t> const& ipBytes, AddressType type) : type_(type), ipBytes_(ipBytes) {
+    IpAddress(std::vector<uint8_t> const& ipBytes, Type type) : type_(type), ipBytes_(ipBytes) {
         fromBytes();
     }
 
@@ -122,7 +120,7 @@ private:
     /**
      * Type of the IP addess.
      */
-    AddressType type_ = AddressType::Invalid;
+    Type type_ = Type::Invalid;
 
     /**
      * IP address in byte format.

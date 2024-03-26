@@ -31,9 +31,15 @@
 #include <up-cpp/uri/builder/BuildUResource.h>
 #include "up-cpp/uri/tools/IpAddress.h"
 
-using AddressType = uprotocol::uri::IpAddress::AddressType;
-
 namespace uprotocol::uri {
+
+enum class AuthorityType : uint8_t {
+    Local = 0,
+    IpV4,
+    IpV6,
+    Id,
+    Invalid
+};
 
 /**
  * UUri Serializer that serializes a UUri to a vector<uint8_t> (micro format) per
@@ -63,23 +69,23 @@ private:
     /**
      * find the address type enum 
      * @param type 
-     * @return std::optional<AddressType> std::nullopt if not found and AddressType if foundddr
+     * @return std::optional<AuthorityType> std::nullopt if not found and AuthorityType if foundddr
      */
-    [[nodiscard]] static auto getAddressType(uint8_t type) -> std::optional<AddressType>;
+    [[nodiscard]] static auto getAuthorityType(uint8_t type) -> std::optional<AuthorityType>;
     /**
      * Check that the micro URI size fit the definitions
      * @param size 
      * @param address_type 
      * @return 
      */
-    [[nodiscard]] static auto checkMicroUriSize(std::size_t size, AddressType address_type) -> bool;
+    [[nodiscard]] static auto checkMicroUriSize(std::size_t size, AuthorityType type) -> bool;
     /**
      * Get UAthority from the address and type
      * @param addr 
      * @param type 
      * @return uprotocol::v1::UAuthority if address is not valid UAuthority return empty
      */
-    [[nodiscard]] static auto getUauthority(const std::vector<uint8_t> &addr, AddressType type) -> uprotocol::v1::UAuthority;
+    [[nodiscard]] static auto getUauthority(const std::vector<uint8_t> &addr, AuthorityType type) -> uprotocol::v1::UAuthority;
     /**
      * Debug function to print the ip address
      * @param ip 
@@ -110,7 +116,7 @@ private:
     /**
      * Starting position of the IP address in the micro URI.
      */
-    static constexpr uint8_t IpaddressStartPosition = LocalMicroUriLength;
+    static constexpr uint8_t AuthorityStartPosition = LocalMicroUriLength;
     /**
      * Starting position of the entity id in the micro URI.
      */
