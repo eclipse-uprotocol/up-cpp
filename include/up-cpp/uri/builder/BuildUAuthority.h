@@ -119,7 +119,7 @@ namespace uprotocol::uri {
                 return *this;
             }
 
-            if (address.getType() == IpAddress::AddressType::Invalid) {
+            if (address.getType() == IpAddress::Type::Invalid) {
                 spdlog::error<std::string_view>("UAuthority address is not a valid IP address. Ignoring setIp()");
                 return *this;
             }
