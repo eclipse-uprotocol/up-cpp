@@ -121,6 +121,11 @@ namespace uprotocol::uri {
 
             if (address.getType() == IpAddress::Type::Invalid) {
                 spdlog::error<std::string_view>("UAuthority address is not a valid IP address. Ignoring setIp()");
+                // Note: setting an empty string here will allow the micro
+                //       serializer to detect that something was wrong instead
+                //       of thinking it has been asked to serialize a Local
+                //       authority.
+                authority_.set_ip("");
                 return *this;
             }
 
@@ -134,7 +139,7 @@ namespace uprotocol::uri {
                 spdlog::error("UAuthority already has a id set {}. Ignoring setId()", authority_.id());
                 return *this;
             }
-            authority_.set_id(id.c_str());
+            authority_.set_id(id);
             return *this;
         }
 
