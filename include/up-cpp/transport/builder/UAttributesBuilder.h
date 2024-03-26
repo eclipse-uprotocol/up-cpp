@@ -28,6 +28,7 @@
 
 #include <string>
 #include <spdlog/spdlog.h>
+#include <up-cpp/uuid/factory/Uuidv8Factory.h>
 #include <up-core-api/uattributes.pb.h>
 #include <up-core-api/uuid.pb.h>
 
@@ -111,6 +112,32 @@ class UAttributesBuilder {
 
         uprotocol::v1::UAttributes build() const {
             return attributes_;
+        }
+
+        static UAttributesBuilder publish(const uprotocol::v1::UUri& source, uprotocol::v1::UPriority priority) {
+            auto uuid = uprotocol::uuid::Uuidv8Factory::create();
+            UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_PUBLISH, priority);
+            return inst;
+        }
+
+        static UAttributesBuilder notification(const uprotocol::v1::UUri& source, const uprotocol::v1::UUri& sink, uprotocol::v1::UPriority priority) {
+            auto uuid = uprotocol::uuid::Uuidv8Factory::create();
+            UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_PUBLISH, priority);
+            inst.setSink(sink);
+            return inst;
+        }
+
+        static UAttributesBuilder request(const uprotocol::v1::UUri& source, const uprotocol::v1::UUri& sink, uprotocol::v1::UPriority priority, int32_t ttl) {
+            auto uuid = uprotocol::uuid::Uuidv8Factory::create();
+            UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_REQUEST, priority);
+            inst.setSink(sink).setTTL(ttl);
+            return inst;
+        }
+
+        static UAttributesBuilder response(const uprotocol::v1::UUri& source, const uprotocol::v1::UUri& sink, uprotocol::v1::UPriority priority, const uprotocol::v1::UUID& uuid) {
+            UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_RESPONSE, priority);
+            inst.setSink(sink);
+            return inst;
         }
 };
 
