@@ -50,7 +50,7 @@ TEST(IPADDR, testFromStringIpv4) {
     const std::string byteString{127, 0, 0, 1};
 
     auto ipa = IpAddress(address);
-    assertEquals(IpAddress::AddressType::IpV4, ipa.getType());
+    assertEquals(IpAddress::Type::IpV4, ipa.getType());
     assertEquals(address, ipa.getString());
     assertEquals(byteForm, ipa.getBytes());
     assertEquals(byteFormFromInt, ipa.getBytes());
@@ -69,8 +69,8 @@ TEST(IPADDR, testFromBytesIpv4) {
     const uint8_t leadingByte{172};
     byteString[0] = *reinterpret_cast<const char*>(&leadingByte);
 
-    auto ipa = IpAddress(byteForm, IpAddress::AddressType::IpV4);
-    assertEquals(IpAddress::AddressType::IpV4, ipa.getType());
+    auto ipa = IpAddress(byteForm, IpAddress::Type::IpV4);
+    assertEquals(IpAddress::Type::IpV4, ipa.getType());
     assertEquals(address, ipa.getString());
     assertEquals(byteForm, ipa.getBytes());
     assertEquals(byteFormFromInt, ipa.getBytes());
@@ -93,7 +93,7 @@ TEST(IPADDR, testFromUAuthorityIpv4) {
     auto uauth = uauthBuilder.setIp(address).build();
 
     auto ipa = IpAddress(uauth);
-    assertEquals(IpAddress::AddressType::IpV4, ipa.getType());
+    assertEquals(IpAddress::Type::IpV4, ipa.getType());
     assertEquals(address, ipa.getString());
     assertEquals(byteForm, ipa.getBytes());
     assertEquals(byteFormFromInt, ipa.getBytes());
@@ -109,7 +109,7 @@ TEST(IPADDR, testFromStringIpv6) {
         }
 
         auto ipa = IpAddress(address);
-        assertEquals(IpAddress::AddressType::IpV6, ipa.getType());
+        assertEquals(IpAddress::Type::IpV6, ipa.getType());
         assertEquals(address, ipa.getString());
         assertEquals(byteForm, ipa.getBytes());
         assertEquals(byteString, ipa.getBytesString());
@@ -141,8 +141,8 @@ TEST(IPADDR, testFromBytesIpv6) {
             byteString += *reinterpret_cast<int8_t*>(&v);
         }
 
-        auto ipa = IpAddress(byteForm, IpAddress::AddressType::IpV6);
-        assertEquals(IpAddress::AddressType::IpV6, ipa.getType());
+        auto ipa = IpAddress(byteForm, IpAddress::Type::IpV6);
+        assertEquals(IpAddress::Type::IpV6, ipa.getType());
         assertEquals(address, ipa.getString());
         assertEquals(byteForm, ipa.getBytes());
         assertEquals(byteString, ipa.getBytesString());
@@ -179,7 +179,7 @@ TEST(IPADDR, testFromUAuthIpv6) {
         auto uauth = uauthBuilder.setIp(address).build();
 
         auto ipa = IpAddress(uauth);
-        assertEquals(IpAddress::AddressType::IpV6, ipa.getType());
+        assertEquals(IpAddress::Type::IpV6, ipa.getType());
         assertEquals(address, ipa.getString());
         assertEquals(byteForm, ipa.getBytes());
         assertEquals(byteString, ipa.getBytesString());
@@ -208,7 +208,7 @@ TEST(IPADDR, testFromUAuthIpv6) {
 TEST(IPADDR, testFromStringInvalid) {
     auto testAddress = [&](std::string const &&address) {
         auto ipa = IpAddress(address);
-        assertEquals(IpAddress::AddressType::Invalid, ipa.getType());
+        assertEquals(IpAddress::Type::Invalid, ipa.getType());
         assertEquals("", ipa.getString());
         assertTrue(ipa.getBytes().empty());
         assertTrue(ipa.getBytesString().empty());
@@ -297,18 +297,18 @@ TEST(IPADDR, testFromStringInvalid) {
 
 // Try a bunch of invalid address bytes to see if we can trip up the parser
 TEST(IPADDR, testFromBytesInvalid) {
-    IpAddress::AddressType currentType = IpAddress::AddressType::Invalid;
+    IpAddress::Type currentType = IpAddress::Type::Invalid;
 
     auto testAddress = [&](std::vector<uint8_t> &&byteForm) {
         auto ipa = IpAddress(byteForm, currentType);
-        assertEquals(IpAddress::AddressType::Invalid, ipa.getType());
+        assertEquals(IpAddress::Type::Invalid, ipa.getType());
         assertTrue(ipa.getString().empty());
         static decltype(byteForm) emptyVec{};
         assertEquals(emptyVec, ipa.getBytes());
         assertTrue(ipa.getBytesString().empty());
     };
 
-    currentType = IpAddress::AddressType::IpV4;
+    currentType = IpAddress::Type::IpV4;
     // Too small
     testAddress({});
     testAddress({0});
@@ -318,7 +318,7 @@ TEST(IPADDR, testFromBytesInvalid) {
     testAddress({0, 1, 2, 3, 4});
     testAddress({0, 1, 2, 3, 4, 5});
 
-    currentType = IpAddress::AddressType::IpV6;
+    currentType = IpAddress::Type::IpV6;
     // Too small
     testAddress({});
     testAddress({0});
@@ -341,9 +341,9 @@ TEST(IPADDR, testFromBytesInvalid) {
             hugeIpBuf.push_back(addrWord++);
         }
         auto otherHugeBuf = hugeIpBuf;
-        currentType = IpAddress::AddressType::IpV4;
+        currentType = IpAddress::Type::IpV4;
         testAddress(std::move(hugeIpBuf));
-        currentType = IpAddress::AddressType::IpV6;
+        currentType = IpAddress::Type::IpV6;
         testAddress(std::move(otherHugeBuf));
     }
 }
@@ -352,7 +352,7 @@ TEST(IPADDR, testFromBytesInvalid) {
 TEST(IPADDR, testFromUAuthorityInvalid) {
     auto testAuthority = [&](auto const &&uauth) {
         auto ipa = IpAddress(uauth);
-        assertEquals(IpAddress::AddressType::Invalid, ipa.getType());
+        assertEquals(IpAddress::Type::Invalid, ipa.getType());
         assertEquals("", ipa.getString());
         assertTrue(ipa.getBytes().empty());
         assertTrue(ipa.getBytesString().empty());
@@ -462,25 +462,25 @@ TEST(IPADDR, testFromUAuthorityInvalid) {
 }
 
 TEST(IPADDR, testFromBytesTypeMismatch) {
-    IpAddress::AddressType currentType = IpAddress::AddressType::Invalid;
+    IpAddress::Type currentType = IpAddress::Type::Invalid;
 
     auto testAddress = [&](std::vector<uint8_t> &&byteForm) {
         auto ipa = IpAddress(byteForm, currentType);
-        assertEquals(IpAddress::AddressType::Invalid, ipa.getType());
+        assertEquals(IpAddress::Type::Invalid, ipa.getType());
         assertTrue(ipa.getString().empty());
         static decltype(byteForm) emptyVec{};
         assertEquals(emptyVec, ipa.getBytes());
         assertTrue(ipa.getBytesString().empty());
     };
 
-    currentType = IpAddress::AddressType::Invalid;
+    currentType = IpAddress::Type::Invalid;
     testAddress({0, 1, 2, 3});
     testAddress({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
 
-    currentType = IpAddress::AddressType::IpV4;
+    currentType = IpAddress::Type::IpV4;
     testAddress({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});
 
-    currentType = IpAddress::AddressType::IpV6;
+    currentType = IpAddress::Type::IpV6;
     testAddress({0, 1, 2, 3});
 
 }

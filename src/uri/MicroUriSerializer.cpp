@@ -28,7 +28,6 @@
 #include <up-cpp/uri/tools/IpAddress.h>
 
 using uprotocol::uri::IpAddress;
-using AddressType = IpAddress::AddressType;
 using namespace uprotocol::uri;
 
 /**
@@ -92,17 +91,21 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
     // UP_VERSION
     uri.push_back(UpVersion);
     
-    AddressType address_type = AddressType::Invalid;
+    AuthorityType authority_type = AuthorityType::Invalid;
     if (!address.empty() && u_uri.authority().has_ip()) {
         uprotocol::uri::IpAddress ip_address(address);
-        if (address_type = ip_address.getType(); address_type == AddressType::Invalid) {
+        if (auto address_type = ip_address.getType(); address_type == IpAddress::Type::Invalid) {
             return std::vector<uint8_t>();
+        } else if ( address_type == IpAddress::Type::IpV4 ) {
+            authority_type = AuthorityType::IpV4;
+        } else if ( address_type == IpAddress::Type::IpV6 ) {
+            authority_type = AuthorityType::IpV6;
         }
     } else if (!address.empty() && u_uri.authority().has_id()) {
-        address_type = AddressType::Id;
+        authority_type = AuthorityType::Id;
     }
     
-    uri.push_back(static_cast<uint8_t>(address_type));
+    uri.push_back(static_cast<uint8_t>(authority_type));
 
     // URESOURCE_ID
     uri.push_back(static_cast<uint8_t>(resource_id >> 8)); // 8 msb bits
@@ -124,7 +127,7 @@ auto MicroUriSerializer::serialize(const uprotocol::v1::UUri& u_uri) -> std::vec
         return uri;
     }
     
-    // not local, then it is a remote address with IP
+    // not local, then it is a remote authority with IP or ID
     addIpOrId(u_uri, uri, address);
     
     return uri;
@@ -159,11 +162,11 @@ auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> u
         return BuildUUri().build();
     }
     // IPADDRESS_TYPE
-    auto address_type = getAddressType(micro_uri[1]);
-    if (!address_type) {
+    auto authority_type = getAuthorityType(micro_uri[1]);
+    if (!authority_type) {
         return BuildUUri().build();
     }
-    if (!checkMicroUriSize(micro_uri.size(), address_type.value())) {
+    if (!checkMicroUriSize(micro_uri.size(), authority_type.value())) {
         return BuildUUri().build();
     }
     if (micro_uri[0] != UpVersion) {
@@ -171,8 +174,8 @@ auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> u
         return BuildUUri().build();
     }
     // UAUTORITY_ADDRESS
-    std::vector<uint8_t> ip(micro_uri.begin() + IpaddressStartPosition, micro_uri.end());
-    auto u_authority = getUauthority(ip, address_type.value());
+    std::vector<uint8_t> ip(micro_uri.begin() + AuthorityStartPosition, micro_uri.end());
+    auto u_authority = getUauthority(ip, authority_type.value());
     // UENTITY_ID
     auto entity_id = (static_cast<uint16_t>(micro_uri[EntityIdStartPosition]) << 8) | micro_uri[EntityIdStartPosition + 1];
     // UE_VERSION
@@ -209,18 +212,18 @@ auto MicroUriSerializer::deserialize(std::vector<uint8_t> const& micro_uri) -> u
 }
 
 /**
- * get AddressType from uint8_t
+ * get AuthorityType from uint8_t
  * @param type as it represented in micrUri format
- * @return std::optional<AddressType>
+ * @return std::optional<AuthorityType>
  */
-auto MicroUriSerializer::getAddressType(uint8_t type) -> std::optional<AddressType> {
-    switch (static_cast<AddressType>(type)) {
-        case AddressType::IpV4:
-        case AddressType::IpV6:
-        case AddressType::Local:
-        case AddressType::Id:
-        case AddressType::Invalid: // must be since it supports empty authority
-            return static_cast<AddressType>(type);
+auto MicroUriSerializer::getAuthorityType(uint8_t type) -> std::optional<AuthorityType> {
+    switch (static_cast<AuthorityType>(type)) {
+        case AuthorityType::IpV4:
+        case AuthorityType::IpV6:
+        case AuthorityType::Local:
+        case AuthorityType::Id:
+        case AuthorityType::Invalid: // must be since it supports empty authority
+            return static_cast<AuthorityType>(type);
         default:
             spdlog::error("micro uri address type is not supported");
             return std::nullopt;
@@ -230,17 +233,17 @@ auto MicroUriSerializer::getAddressType(uint8_t type) -> std::optional<AddressTy
 /**
  * check if microUri size is valid
  * @param size
- * @param address_type
+ * @param authority_type
  * @return 
  */
-auto MicroUriSerializer::checkMicroUriSize(std::size_t size, AddressType address_type) -> bool {
+auto MicroUriSerializer::checkMicroUriSize(std::size_t size, AuthorityType authority_type) -> bool {
     switch (size) {
         case LocalMicroUriLength:
         case IpV4MicroUriLength:
         case IpV6MicroUriLength:
             return true;
         default: {
-            if (address_type == AddressType::Id) {
+            if (authority_type == AuthorityType::Id) {
                 if (size <= UAutorityIdMaxLength + LocalMicroUriLength) {
                     return true;
                 }
@@ -255,17 +258,20 @@ auto MicroUriSerializer::checkMicroUriSize(std::size_t size, AddressType address
 /**
  * get UAuthority from IP address or ID
  * @param addr vector that containes either IP address or ID
- * @param type AddressType type of the passed address
+ * @param type AuthorityType type of the passed authority vector
  * @return uprotocol::v1::UAuthority. If the address is empty or illegal, then it returns an empty UAuthority.
  */
-auto MicroUriSerializer::getUauthority(const std::vector<uint8_t> &addr, AddressType type) -> uprotocol::v1::UAuthority {
+auto MicroUriSerializer::getUauthority(const std::vector<uint8_t> &addr, AuthorityType type) -> uprotocol::v1::UAuthority {
     switch (type) {
-        case AddressType::IpV4:
-        case AddressType::IpV6: {
-            IpAddress ip_address(addr, type);
+        case AuthorityType::IpV4: {
+            IpAddress ip_address(addr, IpAddress::Type::IpV4);
             return createMicroRemote(ip_address.getString());
         }
-        case AddressType::Id: {
+        case AuthorityType::IpV6: {
+            IpAddress ip_address(addr, IpAddress::Type::IpV6);
+            return createMicroRemote(ip_address.getString());
+        }
+        case AuthorityType::Id: {
             return createMicroRemoteWithId(addr);
         }
         default:

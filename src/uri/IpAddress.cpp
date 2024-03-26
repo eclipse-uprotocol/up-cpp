@@ -53,19 +53,19 @@ namespace {
         return addressBytes;
     }
 
-    uri::IpAddress::AddressType typeFromAuthority(UAuthority const& authority) {
+    uri::IpAddress::Type typeFromAuthority(UAuthority const& authority) {
         if (authority.has_ip()) {
             if (authority.ip().size() == uri::IpAddress::IpV4AddressBytes) {
-                return uri::IpAddress::AddressType::IpV4;
+                return uri::IpAddress::Type::IpV4;
             } else if (authority.ip().size() == uri::IpAddress::IpV6AddressBytes) {
-                return uri::IpAddress::AddressType::IpV6;
+                return uri::IpAddress::Type::IpV6;
             }
             spdlog::error("UAuthority has IP address, but size ({}) does not "
                     "match expected for IPv4 or IPv6", authority.ip().size());
         } else {
             spdlog::error("UAuthority does not have IP address");
         }
-        return uri::IpAddress::AddressType::Invalid;
+        return uri::IpAddress::Type::Invalid;
     }
 }
 
@@ -79,7 +79,7 @@ uri::IpAddress::IpAddress(uprotocol::v1::UAuthority const& authority)
 void uri::IpAddress::fromString() {
     if (std::vector<uint8_t> bytes(IpV6AddressBytes, 0);
             1 == inet_pton(AF_INET6, ipString_.c_str(), bytes.data())) {
-        type_ = AddressType::IpV6;
+        type_ = Type::IpV6;
         ipBytes_ = std::move(bytes);
         return;
 
@@ -88,13 +88,13 @@ void uri::IpAddress::fromString() {
         if constexpr (OPTION_SHRINK_BUFFERS) {
             bytes.shrink_to_fit();
         }
-        type_ = AddressType::IpV4;
+        type_ = Type::IpV4;
         ipBytes_ = std::move(bytes);
         return;
     }
 
     spdlog::error("ipString does not contain a valid IPv4 / IPv6 address");
-    type_ = AddressType::Invalid;
+    type_ = Type::Invalid;
     ipString_.clear();
 }
 
@@ -104,43 +104,43 @@ void uri::IpAddress::fromString() {
 void uri::IpAddress::fromBytes() {
     if (ipBytes_.empty()) {
         spdlog::error("ipBytes is empty");
-        type_ = AddressType::Invalid;
+        type_ = Type::Invalid;
         return;
     }
 
-    if (type_ == AddressType::IpV6) {
+    if (type_ == Type::IpV6) {
         if (ipBytes_.size() == IpV6AddressBytes) {
             ipString_.resize(INET6_ADDRSTRLEN);
         } else {
             spdlog::error("ipBytes is the wrong size for an IPv6 address");
-            type_ = AddressType::Invalid;
+            type_ = Type::Invalid;
             ipBytes_.clear();
             return;
         }
-    } else if (type_ == AddressType::IpV4) {
+    } else if (type_ == Type::IpV4) {
         if (ipBytes_.size() == IpV4AddressBytes) {
             ipString_.resize(INET_ADDRSTRLEN);
         } else {
             spdlog::error("ipBytes is the wrong size for an IPv4 address");
-            type_ = AddressType::Invalid;
+            type_ = Type::Invalid;
             ipBytes_.clear();
             return;
         }
     } else {
         spdlog::error("type is not one of IPv4 or IPv6");
-        type_ = AddressType::Invalid;
+        type_ = Type::Invalid;
         ipBytes_.clear();
         return;
     }
          
-    // Note: handling AddressType::Invalid and other non IP types by returning
+    // Note: handling Type::Invalid and other non IP types by returning
     // in the conditional block above allows this check to assume that type
     // is *either* IpV4 OR IpV6 and not any of the other possible values.
-    auto inet_type = (type_ == AddressType::IpV4) ? AF_INET : AF_INET6;
+    auto inet_type = (type_ == Type::IpV4) ? AF_INET : AF_INET6;
 
     if (inet_ntop(inet_type, ipBytes_.data(), ipString_.data(), ipString_.size()) == nullptr) {
         spdlog::error("inet_ntop failed");
-        type_ = AddressType::Invalid;
+        type_ = Type::Invalid;
         ipBytes_.clear();
         ipString_.clear();
         return;
