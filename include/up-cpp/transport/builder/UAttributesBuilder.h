@@ -42,9 +42,14 @@ class UAttributesBuilder {
             attributes_.Clear();
         }
 
-        UAttributesBuilder(const uprotocol::v1::UUID& id, uprotocol::v1::UMessageType type, uprotocol::v1::UPriority priority) {
+        UAttributesBuilder(uprotocol::v1::UUri source,
+                           const uprotocol::v1::UUID& id, 
+                           uprotocol::v1::UMessageType type, 
+                           uprotocol::v1::UPriority priority) {
+
             attributes_.Clear();
             attributes_.mutable_id()->CopyFrom(id);
+            attributes_.mutable_source()->CopyFrom(source);
             attributes_.set_type(type);
             attributes_.set_priority(priority);
         }

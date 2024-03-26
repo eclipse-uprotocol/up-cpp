@@ -33,25 +33,28 @@ using namespace uprotocol::utils;
 
 static const uint8_t pr2six[256] = {
     /* ASCII table */
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 64, 64, 63,
-    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 64, 64, 64, 64, 64,
-    64,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 64, 64, 64, 64, 64,
-    64, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
-    64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 62U, 64U, 64U, 64U, 63U,
+    52U, 53U, 54U, 55U, 56U, 57U, 58U, 59U, 60U, 61U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U,  0U,  1U,  2U,  3U,  4U,  5U,  6U,  7U,  8U,  9U, 10U, 11U, 12U, 13U, 14U,
+    15U, 16U, 17U, 18U, 19U, 20U, 21U, 22U, 23U, 24U, 25U, 64U, 64U, 64U, 64U, 64U,
+    64U, 26U, 27U, 28U, 29U, 30U, 31U, 32U, 33U, 34U, 35U, 36U, 37U, 38U, 39U, 40U,
+    41U, 42U, 43U, 44U, 45U, 46U, 47U, 48U, 49U, 50U, 51U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U,
+    64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U, 64U
 };
 
-static const char basis64[] =
+/**
+ * @brief Base64 utility for encoding and decoding data.
+ * Refer: https://en.wikipedia.org/wiki/Base64
+ */
+static constexpr const char basis64[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 std::string Base64::encode(const char* string,
@@ -60,58 +63,52 @@ std::string Base64::encode(const char* string,
     size_t i;
 
     for (i = 0U; i < len - 2; i += 3) {
-		encoded.push_back(basis64[(string[i] >> 2) & 0x3F]);
-
-		encoded.push_back(basis64[((string[i] & 0x3) << 4) |
-						  ((size_t) (string[i + 1] & 0xF0) >> 4)]);
-
-		encoded.push_back(basis64[((string[i + 1] & 0xF) << 2) |
-						  ((size_t) (string[i + 2] & 0xC0) >> 6)]);
-
-		encoded.push_back(basis64[string[i + 2] & 0x3F]);
+        encoded.push_back(basis64[(string[i] >> 2) & 0x3Fu]);
+        encoded.push_back(basis64[((string[i] & 0x03u) << 4) |
+                                  ((static_cast<size_t>(string[i + 1]) & 0xF0u) >> 4)]);
+        encoded.push_back(basis64[((string[i + 1] & 0x0Fu) << 2) |
+                                  ((static_cast<size_t>(string[i + 2]) & 0xC0u) >> 6)]);
+        encoded.push_back(basis64[string[i + 2] & 0x3Fu]);
     }
 
     if (i < len) {
-		encoded.push_back(basis64[(string[i] >> 2) & 0x3F]);
-		if (i == (len - 1)) {
-				encoded.push_back(basis64[((string[i] & 0x3) << 4)]);
-				encoded.push_back('=');
+        encoded.push_back(basis64[(string[i] >> 2) & 0x3Fu]);
+        if (i == (len - 1)) {
+            encoded.push_back(basis64[((string[i] & 0x03u) << 4)]);
+            encoded.push_back('=');
         } else {
-			encoded.push_back(basis64[((string[i] & 0x3) << 4) |
-							((size_t) (string[i + 1] & 0xF0) >> 4)]);
-			encoded.push_back(basis64[((string[i + 1] & 0xF) << 2)]);
-		}
-   		encoded.push_back('=');
+            encoded.push_back(basis64[((string[i] & 0x03u) << 4) |
+                                      ((static_cast<size_t>(string[i + 1]) & 0xF0u) >> 4)]);
+            encoded.push_back(basis64[((string[i + 1] & 0x0Fu) << 2)]);
+        }
+        encoded.push_back('=');
     }
 
-  //  encoded.push_back('\0');
-     
     return encoded;
-};
+}
 
-std::string Base64::decode(const char* string, 
+std::string Base64::decode(const char* string,
                            const size_t len) {
+
+    (void)len;
     std::string decoded;
 
-    auto bufin = reinterpret_cast<const uint8_t *>(string);
+    auto bufin = reinterpret_cast<const uint8_t*>(string);
     while (pr2six[*(bufin++)] <= 63);
-   
-    auto nprbytes = (bufin - reinterpret_cast<const uint8_t *>(string)) - 1;
-    
-    bufin = reinterpret_cast<const uint8_t *>(string);
+
+    auto nprbytes = (bufin - reinterpret_cast<const uint8_t*>(string)) - 1;
+
+    bufin = reinterpret_cast<const uint8_t*>(string);
 
     while (nprbytes > 4) {
         decoded.push_back(static_cast<uint8_t>((pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4)));
-
         decoded.push_back(static_cast<uint8_t>((pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2)));
-
         decoded.push_back(static_cast<uint8_t>((pr2six[bufin[2]] << 6 | pr2six[bufin[3]])));
-        
+
         bufin += 4;
         nprbytes -= 4;
     }
 
-    /* Note: (nprbytes == 1) would be an error, so just ingore that case */
     if (nprbytes > 1) {
         decoded.push_back(static_cast<uint8_t>((pr2six[*bufin] << 2 | pr2six[bufin[1]] >> 4)));
     }
@@ -119,16 +116,16 @@ std::string Base64::decode(const char* string,
         decoded.push_back(static_cast<uint8_t>((pr2six[bufin[1]] << 4 | pr2six[bufin[2]] >> 2)));
     }
     if (nprbytes > 3) {
-       decoded.push_back(static_cast<uint8_t>((pr2six[bufin[2]] << 6 | pr2six[bufin[3]])));
+        decoded.push_back(static_cast<uint8_t>((pr2six[bufin[2]] << 6 | pr2six[bufin[3]])));
     }
 
     return decoded;
-};
+}
 
 std::string Base64::encode(std::string const& t_str) {
     return Base64::encode(reinterpret_cast<const char*>(t_str.c_str()),
                           t_str.length());
-};
+}
 
 std::string Base64::decode(std::string const& t_str) {
     return Base64::decode(reinterpret_cast<const char*>(t_str.c_str()),
@@ -136,18 +133,15 @@ std::string Base64::decode(std::string const& t_str) {
 }
 
 size_t Base64::encodedLen(size_t len) {
-
     return ((len + 2) / 3 * 4);
 }
 
 size_t Base64::decodedLen(const char* string) {
-
-    auto bufin = reinterpret_cast<const uint8_t *>(string);
+    auto bufin = reinterpret_cast<const uint8_t*>(string);
     while (pr2six[*(bufin++)] <= 63);
 
-    size_t nprbytes = (bufin - reinterpret_cast<const uint8_t *>(string)) - 1;
+    size_t nprbytes = (bufin - reinterpret_cast<const uint8_t*>(string)) - 1;
     size_t nbytesdecoded = ((nprbytes + 3) / 4) * 3;
 
     return nbytesdecoded + 1;
-
 }
