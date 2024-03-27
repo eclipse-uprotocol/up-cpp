@@ -42,19 +42,25 @@ using namespace uprotocol::uri;
 // Make sure construction from an IPv4 string address works
 TEST(IPADDR, testFromStringIpv4) {
 
-    const std::string address{"127.0.0.1"};
-    const std::vector<uint8_t> byteForm{127, 0, 0, 1};
-    std::vector<uint8_t> byteFormFromInt(4);
-    const uint32_t fromInt = htonl(0x7f000001);
-    memcpy(byteFormFromInt.data(), &fromInt, byteFormFromInt.size());
-    const std::string byteString{127, 0, 0, 1};
+    auto test_address = [](std::string const&& address,
+            std::vector<uint8_t> const&& byteForm, uint32_t const fromInt) {
+        std::vector<uint8_t> byteFormFromInt(4);
+        const uint32_t netInt = htonl(fromInt);
+        memcpy(byteFormFromInt.data(), &netInt, byteFormFromInt.size());
+        const std::string_view byteString(
+                reinterpret_cast<std::string_view::const_pointer>(
+                    byteForm.data()), byteForm.size());
 
-    auto ipa = IpAddress(address);
-    assertEquals(IpAddress::Type::IpV4, ipa.getType());
-    assertEquals(address, ipa.getString());
-    assertEquals(byteForm, ipa.getBytes());
-    assertEquals(byteFormFromInt, ipa.getBytes());
-    assertEquals(byteString, ipa.getBytesString());
+        auto ipa = IpAddress(address);
+        assertEquals(IpAddress::Type::IpV4, ipa.getType());
+        assertEquals(address, ipa.getString());
+        assertEquals(byteForm, ipa.getBytes());
+        assertEquals(byteFormFromInt, ipa.getBytes());
+        assertEquals(byteString, ipa.getBytesString());
+    };
+
+    test_address("127.0.0.1", {127, 0, 0, 1}, 0x7f000001);
+    test_address("0.0.0.1", {0, 0, 0, 1}, 0x00000001);
 }
 
 // Make sure construction from a binary IPv4 address works
@@ -223,6 +229,7 @@ TEST(IPADDR, testFromStringInvalid) {
     testAddress("1.1.1.1 and some words");
     testAddress("200.200.200.200 and some words");
     testAddress("10.O.0.0");
+    testAddress("0.0.0.01"); // This was a real surprise
     testAddress("10.0.0.0/8");
     testAddress("172.160.100.101.1");
     testAddress("192.168.254.200/24");
