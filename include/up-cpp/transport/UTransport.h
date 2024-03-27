@@ -42,9 +42,7 @@ namespace uprotocol::utransport {
                
                /**
                * Transmit UPayload to the topic using the attributes defined in UTransportAttributes.
-               * @param topic Resolved UUri topic to send the payload to.
-               * @param payload Actual payload.
-               * @param attributes Additional transport attributes.
+               * @param message message to be sent
                * @return Returns OKSTATUS if the payload has been successfully sent (ACK'ed), otherwise it
                * returns FAILSTATUS with the appropriate failure.
                */
