@@ -55,6 +55,13 @@ public:
     [[nodiscard]] static auto serialize(const uprotocol::v1::UUri& u_uri) -> std::vector<uint8_t>;
 
     /**
+     * Serialize a UAuthority into a vector<uint8_t> following the Micro-URI specifications.
+     * @param u_auth The UAuthority data object.
+     * @return Returns a vector<uint8_t> representing the serialized UAuthority.
+     */
+    [[nodiscard]] static auto serialize(const uprotocol::v1::UAuthority& u_auth) -> std::pair<AuthorityType, std::vector<uint8_t>>;
+
+    /**
      * Deserialize a vector<uint8_t> into a UUri object.
      * @param micro_uri A vector<uint8_t> uProtocol micro URI.
      * @return Returns an UUri data object from the serialized format of a micro URI.
@@ -97,10 +104,14 @@ private:
      * The length of the micro URI header.
      */
     static constexpr uint32_t MicroUriHeaderLength = 8;
+public:
     /**
      * The length of a local micro URI.
+     * @remarks Public because the Zenoh client URI mapping spec requires other
+     *          code modules to know how long a local micro URI is.
      */
     static constexpr uint32_t LocalMicroUriLength = MicroUriHeaderLength;
+private:
     /**
      * The length of a IPv4 micro URI.
      */
@@ -133,10 +144,15 @@ private:
      */
     static constexpr uint32_t IdMicroUriMaxLength =
         MicroUriHeaderLength + UAuthorityIdLenSize + UAuthorityIdMaxLength;
+public:
     /**
      * Starting position of the Authority in the micro URI.
+     * @remarks Public because the Zenoh client URI mapping spec requires other
+     *          code modules to know _where_ the start of the authority section
+     *          is in the micro URI.
      */
-    static constexpr uint8_t AuthorityStartPosition = LocalMicroUriLength;
+    static constexpr uint8_t AuthorityStartPosition = MicroUriHeaderLength;
+private:
     /**
      * Position of the ID_LEN field in ID micro URIs.
      */
