@@ -52,14 +52,12 @@ namespace uprotocol::uri {
          * @return 
          */
         auto setAutority(uprotocol::v1::UAuthority const &authority) -> BuildUUri & {
-            if (uri_.has_authority()) {
+            if (uri_.has_authority() && !isEmpty(uri_.authority())) {
                 spdlog::error("UUri already has a authority set. Ignoring setAuthority()");
                 return *this;
             }
             
-            if (!isEmpty(authority)) {
-                uri_.mutable_authority()->CopyFrom(authority);
-            }
+            uri_.mutable_authority()->CopyFrom(authority);
             return *this;
         }
         /**
@@ -72,9 +70,8 @@ namespace uprotocol::uri {
                 spdlog::error("UUri already has a entity set. Ignoring setEntity()");
                 return *this;
             }
-            if (!isEmpty(entity)) {
-                uri_.mutable_entity()->CopyFrom(entity);
-            }
+
+            uri_.mutable_entity()->CopyFrom(entity);
             return *this;
         }
         /**
@@ -83,13 +80,12 @@ namespace uprotocol::uri {
          * @return 
          */
         auto setResource(uprotocol::v1::UResource const &resource) -> BuildUUri & {
-            if (uri_.has_resource()) {
+            if (uri_.has_resource() && !isEmpty(uri_.resource())) {
                 spdlog::error("UUri already has a resource set. Ignoring setResource()");
                 return *this;
             }
-            if (!isEmpty(resource)) {
-                uri_.mutable_resource()->CopyFrom(resource);
-            }
+
+            uri_.mutable_resource()->CopyFrom(resource);
             return *this;
         }
         /**
