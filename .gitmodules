@@ -1,3 +1,4 @@
 [submodule "up-core-api"]
 	path = up-core-api
 	url = https://github.com/eclipse-uprotocol/up-core-api.git
+	tag = uprotocol-core-api-1.5.7
