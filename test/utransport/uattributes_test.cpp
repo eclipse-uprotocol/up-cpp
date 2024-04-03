@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,18 +19,17 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "spdlog/spdlog.h"
-#include <up-cpp/transport/datamodel/UAttributes.h>
+#include <up-cpp/transport/builder/UAttributesBuilder.h>
 #include <up-cpp/uuid/factory/UuidFactory.h>
-#include <up-cpp/uri/datamodel/UUri.h>
 #include <gtest/gtest.h>
 
-using namespace uprotocol::utransport;
 using namespace uprotocol::uuid;
+using namespace uprotocol::v1;
+using namespace uprotocol::utransport;
 
 // Test the UAttributes class
 TEST(UAttributesTest, Class) 
@@ -41,30 +40,17 @@ TEST(UAttributesTest, Class)
     auto id = UuidFactory::create();
 
     // Create a UAttributes object with some values
-    UMessageType type = UMessageType::PUBLISH;
-    UPriority priority = UPriority::STANDARD;
-    UAttributesBuilder builder(id, type, priority);
+    UMessageType type = UMessageType::UMESSAGE_TYPE_PUBLISH;
+    UPriority priority = UPriority::UPRIORITY_CS0;
+    UUri uri;
+    UAttributesBuilder builder(uri,id, type, priority);
     
-    builder.withTtl(100);
-    builder.withToken("sample_token");
-    builder.withHint(USerializationHint::JSON);
-    builder.withSink(UUri(UAuthority::local(), 
-                          UEntity::longFormat("body.access"),
-                          UResource::longFormat("door")));
-    builder.withPermissionLevel(5);
-    builder.withCommStatus(200);
-    builder.withReqId(id);
     UAttributes nonEmptyAttributes = builder.build();
 
 
     // Test getters for the attributes
     EXPECT_EQ(nonEmptyAttributes.type(), type);
     EXPECT_EQ(nonEmptyAttributes.priority(), priority);
-    EXPECT_EQ(nonEmptyAttributes.ttl().value_or(0), 100);
-    EXPECT_EQ(nonEmptyAttributes.token().value_or(""), "sample_token");
-    EXPECT_EQ(nonEmptyAttributes.serializationHint().value(), USerializationHint::JSON);
-    EXPECT_EQ(nonEmptyAttributes.plevel().value_or(0), 5);
-    EXPECT_EQ(nonEmptyAttributes.commstatus().value_or(0), 200);
 }
 
 int main(int argc, char** argv)

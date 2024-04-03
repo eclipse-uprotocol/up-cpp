@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 General Motors GTO LLC
+ * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,40 +19,33 @@
  * under the License.
  * 
  * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
+ * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #ifndef _ULISTENER_H_
 #define _ULISTENER_H_
 
-#include <up-cpp/transport/datamodel/UAttributes.h>
 #include <up-core-api/ustatus.pb.h>
 #include <up-core-api/uri.pb.h>
-#include "UPayload.h"
-#include "UAttributes.h"
-
-using namespace uprotocol::v1;
+#include <up-core-api/uattributes.pb.h>
+#include <up-cpp/transport/datamodel/UMessage.h>
+#include <up-cpp/transport/datamodel/UPayload.h>
 
 namespace uprotocol::utransport {
 
 	class UListener {
-		public:
 
+		public:
 			/**
 			* Method called to handle/process events.
-			* @param topic Topic the underlying source of the message.
-			* @param payload Payload of the message.
-			* @param attributes Transportation attributes
+			* @param message Topic the underlying source of the message.
 			* @return Returns an Ack every time a message is received and processed.
 			*/
-			virtual UStatus onReceive(const UUri &uri, 
-									const UPayload &payload, 
-									const UAttributes &attributes) const = 0; 
+			virtual uprotocol::v1::UStatus onReceive(uprotocol::utransport::UMessage &message) const = 0; 
 
 			virtual ~UListener() {} 
 	};
 }
-
 
 #endif /* _ULISTENER_H_*/
