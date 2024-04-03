@@ -29,11 +29,17 @@
 #include <up-cpp/uri/builder/BuildUAuthority.h>
 #include <up-cpp/uri/builder/BuildEntity.h>
 #include <up-cpp/uri/builder/BuildUResource.h>
-#include "up-cpp/uri/serializer/IpAddress.h"
-
-using AddressType = uprotocol::uri::IpAddress::AddressType;
+#include "up-cpp/uri/tools/IpAddress.h"
 
 namespace uprotocol::uri {
+
+enum class AuthorityType : uint8_t {
+    Local = 0,
+    IpV4,
+    IpV6,
+    Id,
+    Invalid
+};
 
 /**
  * UUri Serializer that serializes a UUri to a vector<uint8_t> (micro format) per
@@ -49,11 +55,18 @@ public:
     [[nodiscard]] static auto serialize(const uprotocol::v1::UUri& u_uri) -> std::vector<uint8_t>;
 
     /**
-     * Deserialize a vector<uint8_t> into a UUri object.
-     * @param microUri A vector<uint8_t> uProtocol micro URI.
-     * @return Returns an UUri data object from the serialized format of a microUri.
+     * Serialize a UAuthority into a vector<uint8_t> following the Micro-URI specifications.
+     * @param u_auth The UAuthority data object.
+     * @return Returns a vector<uint8_t> representing the serialized UAuthority.
      */
-    [[nodiscard]] static auto deserialize(std::vector<uint8_t> const& addr) -> uprotocol::v1::UUri;
+    [[nodiscard]] static auto serialize(const uprotocol::v1::UAuthority& u_auth) -> std::pair<AuthorityType, std::vector<uint8_t>>;
+
+    /**
+     * Deserialize a vector<uint8_t> into a UUri object.
+     * @param micro_uri A vector<uint8_t> uProtocol micro URI.
+     * @return Returns an UUri data object from the serialized format of a micro URI.
+     */
+    [[nodiscard]] static auto deserialize(std::vector<uint8_t> const& micro_uri) -> uprotocol::v1::UUri;
 
 private:
     /**
@@ -61,56 +74,89 @@ private:
      */
     MicroUriSerializer() = default;
     /**
-     * find the address type enum 
+     * Deserialize an AuthorityType from uint8_t
      * @param type 
-     * @return std::optional<AddressType> std::nullopt if not found and AddressType if foundddr
+     * @return AuthorityType, with AuthorityType::Invalid indicating an unsupported type
      */
-    [[nodiscard]] static auto getAddressType(uint8_t type) -> std::optional<AddressType>;
+    [[nodiscard]] static auto getAuthorityType(uint8_t type) -> AuthorityType;
     /**
      * Check that the micro URI size fit the definitions
      * @param size 
-     * @param address_type 
+     * @param type 
      * @return 
      */
-    [[nodiscard]] static auto checkMicroUriSize(std::size_t size, AddressType address_type) -> bool;
+    [[nodiscard]] static auto checkMicroUriSize(std::size_t size, AuthorityType type) -> bool;
     /**
      * Get UAthority from the address and type
      * @param addr 
      * @param type 
      * @return uprotocol::v1::UAuthority if address is not valid UAuthority return empty
      */
-    [[nodiscard]] static auto getUauthority(const std::vector<uint8_t> &addr, AddressType type) -> uprotocol::v1::UAuthority;
+    [[nodiscard]] static auto getUauthority(const std::vector<uint8_t> &addr, AuthorityType type) -> uprotocol::v1::UAuthority;
     /**
      * Debug function to print the ip address
      * @param ip 
      * @return 
      */
     [[maybe_unused]] static auto printIp(std::vector<uint8_t> ip);
-    
+
     /**
-     * Add the ip address to the micro URI
-     * @param u_uri vector of uint8_t representing the micro URI
-     * @param uri uprotocol::v1::UUri
-     * @param address String of the ip address or the ID
+     * The length of the micro URI header.
      */
-    [[maybe_unused]] static auto addIpOrId(const uprotocol::v1::UUri &u_uri, std::vector<uint8_t> &uri, std::string &address) -> void;
-    
+    static constexpr uint32_t MicroUriHeaderLength = 8;
+public:
     /**
-         * The length of a local micro URI.
-         */
-    static constexpr uint32_t LocalMicroUriLength = 8;
+     * The length of a local micro URI.
+     * @remarks Public because the Zenoh client URI mapping spec requires other
+     *          code modules to know how long a local micro URI is.
+     */
+    static constexpr uint32_t LocalMicroUriLength = MicroUriHeaderLength;
+private:
     /**
      * The length of a IPv4 micro URI.
      */
-    static constexpr uint32_t IpV4MicroUriLength = 12;
+    static constexpr uint32_t IpV4MicroUriLength =
+        MicroUriHeaderLength + IpAddress::IpV4AddressBytes;
     /**
      * The length of a IPv6 micro URI.
      */
-    static constexpr uint32_t IpV6MicroUriLength = 24;
+    static constexpr uint32_t IpV6MicroUriLength =
+        MicroUriHeaderLength + IpAddress::IpV6AddressBytes;
     /**
-     * Starting position of the IP address in the micro URI.
+     * the length of the ID length field in the micro URI. 
      */
-    static constexpr uint8_t IpaddressStartPosition = LocalMicroUriLength;
+    static constexpr uint8_t UAuthorityIdLenSize = 1;
+    /**
+     * the min size of id string in the micro URI. 
+     */
+    static constexpr uint8_t UAuthorityIdMinLength = 1;
+    /**
+     * the max size of id string in the micro URI. 
+     */
+    static constexpr uint8_t UAuthorityIdMaxLength = 255;
+    /**
+     * The minimum length of an ID micro URI.
+     */
+    static constexpr uint32_t IdMicroUriMinLength =
+        MicroUriHeaderLength + UAuthorityIdLenSize + UAuthorityIdMinLength;
+    /**
+     * The maximum length of an ID micro URI.
+     */
+    static constexpr uint32_t IdMicroUriMaxLength =
+        MicroUriHeaderLength + UAuthorityIdLenSize + UAuthorityIdMaxLength;
+public:
+    /**
+     * Starting position of the Authority in the micro URI.
+     * @remarks Public because the Zenoh client URI mapping spec requires other
+     *          code modules to know _where_ the start of the authority section
+     *          is in the micro URI.
+     */
+    static constexpr uint8_t AuthorityStartPosition = MicroUriHeaderLength;
+private:
+    /**
+     * Position of the ID_LEN field in ID micro URIs.
+     */
+    static constexpr uint8_t IdLengthPosition = AuthorityStartPosition;
     /**
      * Starting position of the entity id in the micro URI.
      */
@@ -123,10 +169,6 @@ private:
      * UE version position in the micro URI.
      */
     static constexpr uint8_t UeVersionPosition = EntityIdStartPosition + 2;
-    /**
-     * the max size of id string in the micro URI. 
-     */
-    static constexpr uint8_t UAutorityIdMaxLength = 255;
     /**
      * The version of the UProtocol.
      */
