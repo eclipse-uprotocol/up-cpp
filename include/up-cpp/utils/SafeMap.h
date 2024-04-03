@@ -24,7 +24,6 @@
 #ifndef UP_CPP_SAFE_MAP_H
 #define UP_CPP_SAFE_MAP_H
 
-#include <any>
 #include <functional>
 #include <map>
 #include <mutex>
@@ -109,16 +108,30 @@ public:
     ///////////////////////////////////////////////////////////////////////////
     /////////////// New interfaces for safe bulk transactions /////////////////
     ///////////////////////////////////////////////////////////////////////////
-    using ModifyTxn = std::function<std::any(MapT&)>;
-    std::any transact(ModifyTxn &&f) {
+    template<typename RT>
+    using ModifyTxn = std::function<RT(MapT&)>;
+
+    template<typename RT>
+    RT transact(ModifyTxn<RT> &&f) {
         std::unique_lock lock(map_lock_);
         return f(*this);
     }
 
-    using ConstTxn = std::function<std::any(MapT const&)>;
-    std::any transact(ConstTxn &&f) const {
+    void transact(ModifyTxn<void> &&f) {
+        transact<void>(std::move(f));
+    }
+
+    template<typename RT>
+    using ConstTxn = std::function<RT(MapT const&)>;
+
+    template<typename RT>
+    RT transact(ConstTxn<RT> &&f) const {
         std::shared_lock lock(map_lock_);
         return f(*this);
+    }
+
+    void transact(ConstTxn<void> &&f) const {
+        transact<void>(std::move(f));
     }
 
     ///////////////////////////////////////////////////////////////////////////
