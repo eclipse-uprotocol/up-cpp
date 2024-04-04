@@ -74,7 +74,7 @@ namespace uprotocol::utransport {
 
             // Copy constructor
             UPayload(const UPayload& other) 
-                : dataSize_(other.dataSize_), type_(other.type_) {
+                : dataSize_(other.dataSize_), type_(other.type_), payloadFormat_(other.payloadFormat_) {
                 if (type_ == UPayloadType::REFERENCE) {
                     dataPtr_ = other.dataPtr_;
                 } else {
@@ -88,6 +88,7 @@ namespace uprotocol::utransport {
                 if (this != &other) {
                     dataSize_ = other.dataSize_;
                     type_ = other.type_;
+                    payloadFormat_ = other.payloadFormat_;
                     if (type_ == UPayloadType::REFERENCE) {
                         dataPtr_ = other.dataPtr_;
                     } else {
@@ -101,8 +102,7 @@ namespace uprotocol::utransport {
 
             // Move constructor
             UPayload(UPayload&& other) noexcept 
-                : dataPtr_(std::move(other.dataPtr_)), dataSize_(other.dataSize_), type_(other.type_) {
-                other.dataSize_ = 0;
+                : dataPtr_(std::move(other.dataPtr_)), dataSize_(other.dataSize_), type_(other.type_), payloadFormat_(other.payloadFormat_){
             }
 
             // Move assignment operator
@@ -111,6 +111,7 @@ namespace uprotocol::utransport {
                     dataSize_ = other.dataSize_;
                     type_ = other.type_;
                     dataPtr_ = std::move(other.dataPtr_);
+                    payloadFormat_ = other.payloadFormat_;
                     other.dataSize_ = 0;
                 }
                 return *this;
