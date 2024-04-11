@@ -58,7 +58,7 @@ If you need to create a release package for conan, please follow the steps below
 
 ```
 $ cd up-cpp
-$ conan create . --build=missing
+$ conan create . x.y.z@ --build=missing
 ```
 
 ## Show your support
