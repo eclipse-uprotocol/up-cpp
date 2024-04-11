@@ -16,7 +16,6 @@ class UpCpp(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     conan_version = None
     generators = "CMakeDeps", "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv"
-    # version = "0.1.1-dev" # set version from command line
     exports_sources = "CMakeLists.txt", "up-core-api/*", "include/*" ,"src/*" , "test/*", "cmake/*"
 
     options = {
@@ -31,7 +30,7 @@ class UpCpp(ConanFile):
         "shared": False,
         "fPIC": False,
         "build_testing": False,
-        "build_unbundled": False,
+        "build_unbundled": True,
         "build_cross_compiling": False,
     }
         
