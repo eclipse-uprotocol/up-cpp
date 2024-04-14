@@ -51,7 +51,7 @@ jobs:
       - name: Create up-cpp Conan package
         shell: bash
         run: |
-          conan create . --build=missing
+          conan create . --build=missing --version=1.2.3
   
   
   # NOTE: In GitHub repository settings, the "Require status checks to pass
