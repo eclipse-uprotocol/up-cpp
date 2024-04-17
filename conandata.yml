@@ -1,4 +1,7 @@
-sources:
-  "0.1.2":
-    url: "https://github.com/MelamudMichael/up-cpp/archive/refs/tags/0.1.2.tar.gz"
-    sha256: "ac9c80e6c809ba88fd6f85ed05eaef5d3e13c6aee9de4529b8664daeaca64209"
+proto:
+  # When new spec is released, replace this entry with the new spec release version and tag
+  "1.5.7":
+    ssh: "git@github.com:eclipse-uprotocol/up-core-api.git"
+    https: "https://github.com/eclipse-uprotocol/up-core-api.git"
+    sha256: "c5ad309f74db78a6d2154886404e3c13895f3dd50846ac526b5b0b3433005414"
+    tag: "uprotocol-core-api-1.5.7"

@@ -1,25 +1,15 @@
-.idea/*
-build/*
-CMakeCache.txt
-CMakeFiles/
-Makefile
-cmake-build-debug/
-cmake-build-release/
-cmake_install.cmake
-/proto/cloudevents.pb.cc
-/proto/cloudevents.pb.h
-/proto/libproto.a
-/test_app
-/libcloudeventGM.a
-/json_serializer_test
-/binary_serializer_test
-/service_type_test
-.vscode/settings.json
-/.cmake/
+# ignore editor caches
+.vscode/
+.idea/
+
+# ensure we don't check in the cloned .proto
+up-core-api/
+
+# ignore build artifacts
+build/
 /build.ninja
-/Testing/Temporary/LastTest.log
 /.ninja_deps
 /.ninja_log
-.vscode
-up-core-api/
-/include/uprotocol-cpp/uri/datamodel/
+
+# ignore presets file generated as part of conan install
+CMakeUserPresets.json

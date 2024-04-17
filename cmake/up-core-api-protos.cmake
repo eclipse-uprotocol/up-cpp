@@ -21,10 +21,10 @@ cmake_minimum_required(VERSION 3.18)
 set(CMAKE_CURRENT_SOURCE_DIR_TO_RESTORE ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(protobuf CONFIG REQUIRED)
-if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
-    set(MY_IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/up-core-api/uprotocol/")
+if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_PATH}")
+    set(MY_IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_PATH}")
 else()
-    message(FATAL_ERROR "Could not find up-core-api. Please, set UP_CORE_API_ROOT_DIR to the root directory of up-core-api.")
+    message(FATAL_ERROR "Could not find up-core-api protos. Please run conan source . to clone them.")
 endif()
 
 set(CMAKE_CURRENT_SOURCE_DIR ${MY_IMPORT_DIRS})
