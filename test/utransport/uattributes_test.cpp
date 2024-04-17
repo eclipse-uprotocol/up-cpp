@@ -82,11 +82,11 @@ TEST(UAttributesTest, BuildingRequestResponse)
     EXPECT_EQ(request.sink().entity().name(), "test_service");
     EXPECT_EQ(request.sink().resource().name(), "rpc");
     EXPECT_EQ(request.sink().resource().instance(), "test_function");
-    EXPECT_EQ(request.ttl(), 1000);
     EXPECT_EQ(request.source().entity().name(), "hartley_app");
     EXPECT_EQ(request.source().resource().name(), "rpc");
-    EXPECT_EQ(request.source().resource().id(), 0);
     EXPECT_EQ(request.source().resource().instance(), "response");
+    EXPECT_EQ(request.source().resource().id(), 0);
+    EXPECT_EQ(request.ttl(), 1000);
     EXPECT_EQ(request.type(), UMessageType::UMESSAGE_TYPE_REQUEST);
     EXPECT_EQ(request.priority(), UPriority::UPRIORITY_CS4);
 
