@@ -213,15 +213,17 @@ class UAttributesBuilder {
         
         /// @brief Static factory method to build response message header. 
         ///
-        /// Build UAttributes object used for response messages with the given source, sink, priority, and uuid.
-        /// @param source The source URI of the message.
-        /// @param sink The sink URI of the message.
-        /// @param priority The priority of the message.
-        /// @param uuid The unique identifier of the message.
+        /// Build UAttributes object used for response messages with the given source, sink, priority, and request id.
+        /// @param source The response source URI (i.e. the method URI that we are sending a response for).
+        /// @param sink The response sink URI (i.e the the return address of the client that originally invoked the method).
+        /// @param priority The priority of the message, MUST be the same as the request message priority.
+        /// @param reqid The id from the original request message.
         /// @return A new UAttributesBuilder instance.
-        static UAttributesBuilder response(const uprotocol::v1::UUri& source, const uprotocol::v1::UUri& sink, uprotocol::v1::UPriority priority, const uprotocol::v1::UUID& uuid) {
+        static UAttributesBuilder response(const uprotocol::v1::UUri& source, const uprotocol::v1::UUri& sink, uprotocol::v1::UPriority priority, const uprotocol::v1::UUID& reqid) {
+            auto uuid = uprotocol::uuid::Uuidv8Factory::create();
             UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_RESPONSE, priority);
             inst.setSink(sink);
+            inst.setReqid(reqid);
             return inst;
         }
 };
