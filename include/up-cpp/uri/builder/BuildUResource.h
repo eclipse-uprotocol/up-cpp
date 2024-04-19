@@ -95,11 +95,7 @@ namespace uprotocol::uri {
          * @return
          */
         auto setID(const uint32_t &id) -> BuildUResource & {
-            if (0 == id) {
-                spdlog::error("UResource id cannot be 0");
-            } else {
-                resource_.set_id(id);
-            }
+            resource_.set_id(id);
             return *this;
         }
         /**
@@ -140,12 +136,8 @@ namespace uprotocol::uri {
          * @return 
          */
         auto setRpcRequest(const uint32_t id) -> BuildUResource & {
-            if (0 == id) {
-                spdlog::error("UResource id cannot be 0");
-            } else {
-                setName("rpc");
-                setID(id);
-            }
+            setName("rpc");
+            setID(id);
             return *this;
         }
         /**
