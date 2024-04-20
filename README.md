@@ -22,7 +22,7 @@ The library is built and packaged using conan dependency management.
 To add up-cpp to your conan build dependencies, simply add the following to your conanfile.txt:
 ```
 [requires]
-up-cpp/0.1
+up-cpp/0.1.2-dev
 
 [generators]
 CMakeDeps
