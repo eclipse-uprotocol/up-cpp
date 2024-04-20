@@ -271,7 +271,7 @@ TEST(UResource, testResolvedFormatEmptyId) {
     assertEquals(name, u_resource.name());
     assertEquals(instance, u_resource.instance());
     assertEquals(message, u_resource.message());
-    assertFalse(u_resource.has_id());
+    assertEquals(id, u_resource.id());
     assertFalse(isEmpty(u_resource));
     assertFalse(isResolved(u_resource));
     assertTrue(isLongForm(u_resource));
@@ -300,7 +300,7 @@ TEST(UResource, testResolvedFormatWithOnlyMessage) {
     assertTrue(u_resource.name().empty());
     assertTrue(u_resource.instance().empty());
     assertEquals(message, u_resource.message());
-    assertFalse(u_resource.has_id());
+    assertEquals(id, u_resource.id());
     assertFalse(isEmpty(u_resource));
     assertFalse(isResolved(u_resource));
     assertFalse(isLongForm(u_resource));
@@ -373,15 +373,16 @@ TEST(UResource, testRpcRequestMicroFormat) {
 TEST(UResource, testRpcRequestMicroFormatWithoutId) {
     uint16_t id = 0;
     auto u_resource = BuildUResource().setRpcRequest(id).build();
-    assertTrue("rpc" != u_resource.name());
+
+    assertEquals("rpc", u_resource.name());
     assertTrue(u_resource.instance().empty());
     assertTrue(u_resource.message().empty());
-    assertFalse(u_resource.has_id());
+    assertEquals(id, u_resource.id());
     assertTrue(isEmpty(u_resource));
     assertFalse(isResolved(u_resource));
     assertFalse(isLongForm(u_resource));
     assertFalse(isMicroForm(u_resource));
-    assertFalse(isRPCMethod(u_resource));
+    assertTrue(isRPCMethod(u_resource));
 }
 
 // Test creating resolved rpc request for long and micro formatted UUri.
