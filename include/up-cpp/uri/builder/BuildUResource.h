@@ -1,5 +1,4 @@
 /*
- 
  * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,8 +21,6 @@
  * SPDX-FileType: SOURCE
  * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
- 
- 
  */
 
 #ifndef UPROTOCOL_CPP_BUILDURESOURCE_H
@@ -45,122 +42,98 @@ namespace uprotocol::uri {
         uprotocol::v1::UResource resource_;
 
     public:
-        BuildUResource() { resource_.Clear();}
+        BuildUResource();
+
         /**
-         * set name of the resource. if name is empty or blank, an error will be logged and the name will not be set
+         * set name of the resource. if name is empty or blank, an error will
+         * be logged and the name will not be set
+         *
          * if name is already set, it will not be changed
+         *
          * @param name
          * @return
          */
-        auto setName(const std::string &name) -> BuildUResource & {
-            if (isBlank(name)) {
-                spdlog::error("UResource name cannot be empty");
-            } else {
-                resource_.set_name(name);
-            }
-            return *this;
-        }
+        auto setName(const std::string &name) -> BuildUResource &;
+
         /**
-         * set instance of the resource. if instance is empty or blank, an error will be logged and the instance will not be set
+         * set instance of the resource. if instance is empty or blank, an
+         * error will be logged and the instance will not be set
+         *
          * if instance is already set, it will not be changed   
+         *
          * @param instance 
          * @return 
          */
-        auto setInstance(const std::string &instance) -> BuildUResource & {
-            if (isBlank(instance)) {
-                spdlog::error("UResource instance cannot be empty");
-            } else {
-                resource_.set_instance(instance);
-            }
-            return *this;
-        }
+        auto setInstance(const std::string &instance) -> BuildUResource &;
+
         /**
-         * set message of the resource. if message is empty or blank, an error will be logged and the message will not be set
+         * set message of the resource. if message is empty or blank, an error
+         * will be logged and the message will not be set
+         *
          * if message is already set, it will not be changed
+         *
          * @param message
          * @return
          */
-        auto setMessage(const std::string &message) -> BuildUResource & {
-            if (isBlank(message)) {
-                spdlog::error("UResource message cannot be empty");
-            } else {
-                resource_.set_message(message);
-            }
-            return *this;
-        }
+        auto setMessage(const std::string &message) -> BuildUResource &;
+
         /**
-         * set id of the resource. if id is 0, an error will be logged and the id will not be set
+         * set id of the resource. if id is 0, an error will be logged and the
+         * id will not be set
+         *
          * if id is already set, it will not be changed
+         *
          * @param id
          * @return
          */
-        auto setID(const uint32_t &id) -> BuildUResource & {
-            resource_.set_id(id);
-            return *this;
-        }
+        auto setID(const uint32_t &id) -> BuildUResource &;
+
         /**
-         * set id of the resource. if id is 0, an error will be logged and the id will not be set
+         * set id of the resource. if id is 0, an error will be logged and the
+         * id will not be set
+         *
          * if id is already set, it will not be changed
+         *
          * @param id
          * @return
          */
-        auto setRpcRequest(const std::string &method) -> BuildUResource & {
-            if (isBlank(method)) {
-                spdlog::error("UResource method cannot be empty");
-            } else {
-                resource_.set_name("rpc");
-                resource_.set_instance(method);
-            }
-            return *this;
-        }
+        auto setRpcRequest(const std::string &method) -> BuildUResource &;
+
         /**
-         * set Rpc request with both method and id. a wrapper method on setName, setId and set instance
+         * set Rpc request with both method and id. a wrapper method on
+         * setName, setId and set instance
+         *
          * @param method 
          * @param id 
          * @return 
          */
-        auto setRpcRequest(const std::string &method, uint32_t id) -> BuildUResource & {
-            if (isBlank(method) || 0 == id) {
-                spdlog::error("UResource method cannot be empty");
-            } else {
-                setName("rpc");
-                setInstance(method);
-                setID(id);
-            }
-            return *this;
-        }
+        auto setRpcRequest(
+                const std::string &method, uint32_t id) -> BuildUResource &;
+
         /**
          * set Rpc request with id. a wrapper method on setName, setId
+         *
          * @param method 
          * @param id 
          * @return 
          */
-        auto setRpcRequest(const uint32_t id) -> BuildUResource & {
-            setName("rpc");
-            setID(id);
-            return *this;
-        }
+        auto setRpcRequest(const uint32_t id) -> BuildUResource &;
+
         /**
          * set RPC response 
          * @return 
          */
-        auto setRpcResponse() -> BuildUResource & {
-            setName("rpc");
-            setInstance("response");
-            setID(0);
-            return *this;
-        }
+        auto setRpcResponse() -> BuildUResource &;
+
         /**
          * 
          * @return uprotocol::v1::UResource
          */
-        auto build() const -> uprotocol::v1::UResource {
-            return resource_;
-        }
+        auto build() const -> uprotocol::v1::UResource;
     };
     
-    [[nodiscard]] [[maybe_unused]] auto static isRPCMethod(const uprotocol::v1::UResource &resource) -> bool {
-        return resource.name() == "rpc";
-    }
+    [[nodiscard]] [[maybe_unused]] auto static isRPCMethod(
+            const uprotocol::v1::UResource &resource) -> bool;
+
 }  // namespace uprotocol::uri
 #endif //UPROTOCOL_CPP_BUILDURESOURCE_H

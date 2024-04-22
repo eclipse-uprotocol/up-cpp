@@ -67,7 +67,7 @@ public:
     static UUID create();
 private:
     /** Retrieves the past UUID's MSB part    */
-    static uint64_t getLastMsb() { return lastMsb_; }
+    static uint64_t getLastMsb();
 
     /** Represents allowable clock drift tolerance    */
     static constexpr uint64_t clockDriftTolerance_ = 10000000;

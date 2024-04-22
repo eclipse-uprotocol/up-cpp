@@ -36,42 +36,59 @@
 
 namespace uprotocol::utransport {
 
-     class UTransport {
+    class UTransport {
 
-          public:
-               
-               /**
-               * Transmit UPayload to the topic using the attributes defined in UTransportAttributes.
-               * @param message message to be sent
-               * @return Returns OKSTATUS if the payload has been successfully sent (ACK'ed), otherwise it
-               * returns FAILSTATUS with the appropriate failure.
-               */
-               virtual uprotocol::v1::UStatus send(const uprotocol::utransport::UMessage &message) = 0;
+        public:
 
-               /**
-               * Register listener to be called when UPayload is received for the specific topic.
-               * @param topic Resolved UUri for where the message arrived via the underlying transport technology.
-               * @param listener The method to execute to process the date for the topic.
-               * @return Returns OKSTATUS if the listener is unregistered correctly, otherwise it returns FAILSTATUS
-               * with the appropriate failure.
-               */      
-               virtual uprotocol::v1::UStatus registerListener(const uprotocol::v1::UUri &uri,
-                                                               const uprotocol::utransport::UListener &listener) = 0;
+            /**
+             * Transmit UPayload to the topic using the attributes defined in
+             * UTransportAttributes.
+             *
+             * @param message message to be sent
+             *
+             * @return Returns OKSTATUS if the payload has been successfully 
+             *         sent (ACK'ed), otherwise it returns FAILSTATUS with the
+             *         appropriate failure.
+             */
+            virtual uprotocol::v1::UStatus send(
+                    const uprotocol::utransport::UMessage &message) = 0;
 
-               /**
-               * Unregister a listener for a given topic. Messages arriving on this topic will no longer be processed
-               * by this listener.
-               * @param topic Resolved UUri for where the listener was registered to receive messages from.
-               * @param listener The method to execute to process the date for the topic.
-               * @return Returns OKSTATUS if the listener is unregistered correctly, otherwise it returns FAILSTATUS
-               * with the appropriate failure.
-               * 
-               */
-               virtual uprotocol::v1::UStatus unregisterListener(const uprotocol::v1::UUri &uri, 
-                                                                 const uprotocol::utransport::UListener &listener) = 0;
-               
-               virtual ~UTransport() {} 
-     };
+            /**
+             * Register listener to be called when UPayload is received for the
+             * specific topic.
+             *
+             * @param topic Resolved UUri for where the message arrived via the
+             *              underlying transport technology.
+             * @param listener The method to execute to process the date for
+             *                 the topic.
+             *
+             * @return Returns OKSTATUS if the listener is unregistered
+             *         correctly, otherwise it returns FAILSTATUS
+             *         with the appropriate failure.
+             */      
+            virtual uprotocol::v1::UStatus registerListener(
+                    const uprotocol::v1::UUri &uri,
+                    const uprotocol::utransport::UListener &listener) = 0;
+
+            /**
+             * Unregister a listener for a given topic. Messages arriving on
+             * this topic will no longer be processed by this listener.
+             *
+             * @param topic Resolved UUri for where the listener was registered
+             *              to receive messages from.
+             * @param listener The method to execute to process the date for
+             *                 the topic.
+             *
+             * @return Returns OKSTATUS if the listener is unregistered
+             *         correctly, otherwise it returns FAILSTATUS with the
+             *         appropriate failure.
+             */
+            virtual uprotocol::v1::UStatus unregisterListener(
+                    const uprotocol::v1::UUri &uri, 
+                    const uprotocol::utransport::UListener &listener) = 0;
+
+            virtual ~UTransport() = default;
+    };
 }
 
 #endif /*_UTRANSPORT_*/

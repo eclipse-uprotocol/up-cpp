@@ -33,26 +33,41 @@
 namespace uprotocol::utransport {
 
     enum class UPayloadType {
-        VALUE = 0, /* data passed by value - will be copied */
-        REFERENCE, /* data passed by reference - the user need to ensure that the reference is valid until data is sent*/
-        SHARED,    /* data passed by shared pointer */
-        UNDEFINED  /* invalid */
+        /** data passed by value - will be copied */
+        VALUE = 0,
+        /** data passed by reference - the user need to ensure that the
+         *  reference is valid until data is sent */
+        REFERENCE,
+        /** data passed by shared pointer */
+        SHARED,
+        /** invalid */
+        UNDEFINED
     };
 
     // The Serialization format for the data stored in UPayload.
     enum UPayloadFormat {
-        UNSPECIFIED = 0,             /* Payload format was not is not set */
-        PROTOBUF_WRAPPED_IN_ANY = 1, /* Payload is an Any protobuf message that contains the packed payload */
-        PROTOBUF = 2,                /* Protobuf serialization format */
-        JSON = 3,                    /* JSON serialization format */
-        SOMEIP = 4,                  /* Basic SOME/IP serialization format */
-        SOMEIP_TLV = 5,              /* SOME/IP TLV format */
-        RAW = 6,                     /* RAW (binary) format */
-        TEXT = 7                     /* Text format */
+        /** Payload format was not is not set */
+        UNSPECIFIED = 0,
+        /** Payload is an Any protobuf message that contains the packed
+         *  payload */
+        PROTOBUF_WRAPPED_IN_ANY = 1,
+        /** Protobuf serialization format */
+        PROTOBUF = 2,
+        /** JSON serialization format */
+        JSON = 3,
+        /** Basic SOME/IP serialization format */
+        SOMEIP = 4,
+        /** SOME/IP TLV format */
+        SOMEIP_TLV = 5,
+        /** RAW (binary) format */
+        RAW = 6,
+        /** Text format */
+        TEXT = 7
     };          
 
     /**
-    * The UPayload contains the clean Payload information at its raw serialized structure of a byte[]
+    * The UPayload contains the clean Payload information at its raw serialized
+    * structure of a byte[]
     */
     class UPayload {
 
@@ -60,92 +75,38 @@ namespace uprotocol::utransport {
             // Constructor
             UPayload(const uint8_t* ptr, 
                      const size_t size, 
-                     const UPayloadType &type) : dataSize_(size), type_(type) {
-
-                if (type == UPayloadType::REFERENCE) {
-                    dataPtr_ = std::shared_ptr<const uint8_t[]>(ptr, [](const uint8_t*){});
-                } else {
-                    dataPtr_ = std::shared_ptr<const uint8_t[]>(new uint8_t[dataSize_], [](const uint8_t* p){ delete[] p; });
-                    if (nullptr != ptr) {
-                        std::memcpy(const_cast<uint8_t*>(dataPtr_.get()), ptr, dataSize_);
-                    }
-                }
-            }
+                     const UPayloadType &type);
 
             // Copy constructor
-            UPayload(const UPayload& other) 
-                : dataSize_(other.dataSize_), type_(other.type_), payloadFormat_(other.payloadFormat_) {
-                if (type_ == UPayloadType::REFERENCE) {
-                    dataPtr_ = other.dataPtr_;
-                } else {
-                    dataPtr_ = std::shared_ptr<const uint8_t[]>(new uint8_t[dataSize_], [](const uint8_t* p){ delete[] p; });
-                    std::memcpy(const_cast<uint8_t*>(dataPtr_.get()), other.dataPtr_.get(), dataSize_);
-                }
-            }
+            UPayload(const UPayload& other);
 
             // Assignment operator
-            UPayload& operator=(const UPayload& other) {
-                if (this != &other) {
-                    dataSize_ = other.dataSize_;
-                    type_ = other.type_;
-                    payloadFormat_ = other.payloadFormat_;
-                    if (type_ == UPayloadType::REFERENCE) {
-                        dataPtr_ = other.dataPtr_;
-                    } else {
-                        dataPtr_ = std::shared_ptr<const uint8_t[]>(new uint8_t[dataSize_], [](const uint8_t* p){ delete[] p; });
-                        std::memcpy(const_cast<uint8_t*>(dataPtr_.get()), other.dataPtr_.get(), dataSize_);
-
-                    }
-                }
-                return *this;
-            }
+            UPayload& operator=(const UPayload& other);
 
             // Move constructor
-            UPayload(UPayload&& other) noexcept 
-                : dataPtr_(std::move(other.dataPtr_)), dataSize_(other.dataSize_), type_(other.type_), payloadFormat_(other.payloadFormat_){
-            }
+            UPayload(UPayload&& other) noexcept;
 
             // Move assignment operator
-            UPayload& operator=(UPayload&& other) noexcept {
-                if (this != &other) {
-                    dataSize_ = other.dataSize_;
-                    type_ = other.type_;
-                    dataPtr_ = std::move(other.dataPtr_);
-                    payloadFormat_ = other.payloadFormat_;
-                    other.dataSize_ = 0;
-                }
-                return *this;
-            }
+            UPayload& operator=(UPayload&& other) noexcept;
 
-            void setFormat(const UPayloadFormat &format) {
-                payloadFormat_ = format;
-            }
+            void setFormat(const UPayloadFormat &format);
 
             /**
             * @return data
             */
-            const uint8_t* data() const {
-                return dataPtr_.get();
-            }
+            const uint8_t* data() const;
 
             /**
             * @return size
             */
-            size_t size() const {
-                return dataSize_;
-            }
+            size_t size() const;
 
            /**
             * @return format type
             */
-            UPayloadFormat format() const {
-
-                return payloadFormat_;
-            }
+            UPayloadFormat format() const;
             
-            bool isEmpty() const {
-                return dataSize_ == 0;
-            }
+            bool isEmpty() const;
 
         private:
             std::shared_ptr<const uint8_t[]> dataPtr_;

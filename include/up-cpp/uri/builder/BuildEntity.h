@@ -1,5 +1,4 @@
 /*
- 
  * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,8 +21,6 @@
  * SPDX-FileType: SOURCE
  * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
- 
- 
  */
 
 #ifndef UPROTOCOL_CPP_BUILDENTITY_H
@@ -43,93 +40,66 @@
 namespace uprotocol::uri {
     class BuildUEntity {
         uprotocol::v1::UEntity entity_;
-    
+
     public:
         /**
          * BuildUEntity constractor
-         * 
          */
-        BuildUEntity() { entity_.Clear();}
-        
+        BuildUEntity();
+
         /**
-         * set name of the entity. if name is empty or blank, an error will be logged and the name will not be set
-         * if name is already set, it will not be changed
+         * set name of the entity. if name is empty or blank, an error will be
+         * logged and the name will not be set if name is already set, it will
+         * not be changed
+         *
          * @param name 
          * @return 
          */
-        auto setName(const std::string &name) -> BuildUEntity & {
-            if (isBlank(name)) {
-                spdlog::error("UEntity name cannot be empty or blanks");
-            } else {
-                entity_.set_name(name);
-            }
-            return *this;
-        }
-        
+        auto setName(const std::string &name) -> BuildUEntity &;
+
         /**
-         * set id of the entity. if id is 0 or already set, it will not be changed
+         * set id of the entity. if id is 0 or already set, it will not
+         * be changed
+         *
          * @param id 
          * @return 
          */
-        auto setId(const uint32_t &id) -> BuildUEntity & {
-            if (0 == id || entity_.has_id()) {
-                return *this;
-            }
-            entity_.set_id(id);
-            return *this;
-        }
-        
+        auto setId(const uint32_t &id) -> BuildUEntity &;
+
         /**
-         * set string version of the entity can be in the form "2.7", that can set major and minor values.
-         * if version is empty or blank, an error will be logged and the version will not be set
+         * set string version of the entity can be in the form "2.7", that can
+         * set major and minor values.
+         *
+         * if version is empty or blank, an error will be logged and the
+         * version will not be set
+         *
          * if version is already set, it will not be changed
+         *
          * @param version 
          * @return 
          */
-        auto setVersion(const std::string &version) -> BuildUEntity & {
-            if (version.empty()) {
-                return *this;
-            }
-            if (auto res = version.find('.'); res == std::string::npos) {
-                auto ver = std::stoi(version);
-                if (ver < 0) {
-                    return *this;
-                }
-                entity_.set_version_major(ver);
-            } else {
-                auto ver = std::stoi(version.substr(0, res));
-                entity_.set_version_major(ver);
-                ver = std::stoi(version.substr(res + 1));
-                entity_.set_version_minor(ver);
-            }
-            return *this;
-        }
-        
+        auto setVersion(const std::string &version) -> BuildUEntity &;
+
         /**
          * set major version of the entity.
+         *
          * @param majorVersion 
          * @return 
          */
-        auto setMajorVersion(const uint32_t &majorVersion) -> BuildUEntity & {
-            entity_.set_version_major(majorVersion);
-            return *this;
-        }
+        auto setMajorVersion(const uint32_t &majorVersion) -> BuildUEntity &;
+
         /**
          * set minor version of the entity.
+         *
          * @param minorVersion 
          * @return 
          */
-        auto setMinorVersion(const uint32_t &minorVersion) -> BuildUEntity & {
-            entity_.set_version_minor(minorVersion);
-            return *this;
-        }
+        auto setMinorVersion(const uint32_t &minorVersion) -> BuildUEntity &;
+
         /**
-         * 
          * @return uprotocol::v1::UEntity
          */
-        auto build() const -> uprotocol::v1::UEntity {
-            return entity_;
-        }
+        auto build() const -> uprotocol::v1::UEntity;
     };
 }  // namespace uprotocol::uri
 

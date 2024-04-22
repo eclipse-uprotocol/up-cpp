@@ -30,11 +30,9 @@
 namespace uprotocol::utils {
 class Base64 {
     public:
-        static std::string encode(const char* string, 
-                                  const size_t len);
+        static std::string encode(const char* string, const size_t len);
 
-        static std::string decode(const char* string, 
-                                  const size_t len);
+        static std::string decode(const char* string, const size_t len);
         
         static std::string encode(std::string const& str);
         
@@ -47,5 +45,6 @@ class Base64 {
     private:
         Base64() = default;
 };
+
 }  //   namespace uprotocol::tools
 #endif  //_BASE64_H_

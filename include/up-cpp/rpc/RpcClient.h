@@ -39,46 +39,64 @@ namespace uprotocol::rpc {
     };
 
     /**
-    * RpcClient is an interface used by code generators for uProtocol services defined in proto files such as
-    * the core uProtocol services found in https://github.com/eclipse-uprotocol/uprotocol-core-api. the interface 
-    * provides a clean contract for mapping a RPC request to a response. For more details please refer to
+    * RpcClient is an interface used by code generators for uProtocol services
+    * defined in proto files such as the core uProtocol services found in
+    * https://github.com/eclipse-uprotocol/uprotocol-core-api. the interface 
+    * provides a clean contract for mapping a RPC request to a response. For
+    * more details please refer to
     * https://github.com/eclipse-uprotocol/uprotocol-spec/blob/main/up-l2/README.adoc[RpcClient Specifications]
     */
     class RpcClient 
     {
         public:
             /**
-            * API for clients to invoke a method (send an RPC request) and receive the response (the returned 
-            * {@link CompletionStage} {@link UPayload}. <br>
-            * Client will set method to be the URI of the method they want to invoke, 
-            * payload to the request message, and attributes with the various metadata for the 
-            * method invocation.
-            * @param methodUri The method URI to be invoked, ex (long form): /example.hello_world/1/rpc.SayHello.
-            * @param requestPayload The request message to be sent to the server.
-            * @param options RPC method invocation call options, see {@link CallOptions}
-            * @return Returns the CompletionStage with the response message or exception with the failure
-            * reason as {@link UStatus}.
+            * API for clients to invoke a method (send an RPC request) and
+            * receive the response (the returned {@link CompletionStage}
+            * {@link UPayload}. <br>
+            *
+            * Client will set method to be the URI of the method they want to
+            * invoke, payload to the request message, and attributes with the
+            * various metadata for the method invocation.
+            *
+            * @param methodUri The method URI to be invoked, ex (long form):
+            *                  /example.hello_world/1/rpc.SayHello.
+            * @param requestPayload The request message to be sent to
+            *                       the server.
+            * @param options RPC method invocation call options, see
+            *                {@link CallOptions}
+            *
+            * @return Returns the CompletionStage with the response message or
+            * exception with the failure reason as {@link UStatus}.
             */
-            virtual std::future<RpcResponse> invokeMethod(const uprotocol::v1::UUri &topic, 
-                                                          const uprotocol::utransport::UPayload &payload, 
-                                                          const uprotocol::v1::CallOptions &options) = 0;
+            virtual std::future<RpcResponse> invokeMethod(
+                    const uprotocol::v1::UUri &topic, 
+                    const uprotocol::utransport::UPayload &payload, 
+                    const uprotocol::v1::CallOptions &options) = 0;
 
             /**
-            * API for clients to invoke a method (send an RPC request) and receive the response (the returned 
-            * {@link CompletionStage} {@link UPayload}. <br>
-            * Client will set method to be the URI of the method they want to invoke, 
-            * payload to the request message, and attributes with the various metadata for the 
-            * method invocation.
-            * @param methodUri The method URI to be invoked, ex (long form): /example.hello_world/1/rpc.SayHello.
-            * @param requestPayload The request message to be sent to the server.
-            * @param options RPC method invocation call options, see {@link CallOptions}
+            * API for clients to invoke a method (send an RPC request) and
+            * receive the response (the returned {@link CompletionStage}
+            * {@link UPayload}. <br>
+            *
+            * Client will set method to be the URI of the method they want to
+            * invoke, payload to the request message, and attributes with the
+            * various metadata for the method invocation.
+            *
+            * @param methodUri The method URI to be invoked, ex (long form):
+            *                  /example.hello_world/1/rpc.SayHello.
+            * @param requestPayload The request message to be sent to
+            *                       the server.
+            * @param options RPC method invocation call options,
+            *                see {@link CallOptions}
             * @param callback that will be called once the future is complete
+            *
             * @return UStatus
             */
-            virtual uprotocol::v1::UStatus invokeMethod(const uprotocol::v1::UUri &topic,
-                                                        const uprotocol::utransport::UPayload &payload,
-                                                        const uprotocol::v1::CallOptions &options,
-                                                        const uprotocol::utransport::UListener &callback) = 0;
+            virtual uprotocol::v1::UStatus invokeMethod(
+                    const uprotocol::v1::UUri &topic,
+                    const uprotocol::utransport::UPayload &payload,
+                    const uprotocol::v1::CallOptions &options,
+                    const uprotocol::utransport::UListener &callback) = 0;
 
             virtual ~RpcClient() {} 
     };

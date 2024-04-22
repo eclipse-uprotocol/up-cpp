@@ -32,15 +32,18 @@ using namespace uprotocol::v1;
 
 /**
  * Classs for creating different UUID factory classes( v6, v8..etc)
- * C++ does not support static virtual..so make it as class instead of interface
+ * C++ does not support static virtual..so make it as class instead
+ * of interface
  */
 class UuidFactory {
 public:
     /**
-     * Creates UUID object that will have 2 64bit long integers represents MSB and LSB
+     * Creates UUID object that will have 2 64bit long integers represents
+     * MSB and LSB
+     *
      * @return UUID Returns UUID object
      */
-    static UUID create() { return UUID(); };
+    static UUID create();
 
     virtual ~UuidFactory() = default;
 

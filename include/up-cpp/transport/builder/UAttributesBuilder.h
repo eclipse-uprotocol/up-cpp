@@ -36,20 +36,19 @@ namespace uprotocol::utransport {
 
 /// @brief UAttributesBuilder to build UAttributes Objects.
 ///
-/// The class provides a fluent interface to build UAttributes objects with the desired attributes.
+/// The class provides a fluent interface to build UAttributes objects with the
+/// desired attributes.
 class UAttributesBuilder {
     private:
         uprotocol::v1::UAttributes attributes_;
 
     public:
-        UAttributesBuilder() {
-            attributes_.Clear();
-        }
+        UAttributesBuilder();
 
         /// @brief Constructor for UAttributesBuilder.
         ///
-        /// The constructor initializes the UAttributes object with the required attributes that 
-        /// MUST be present for all instances.
+        /// The constructor initializes the UAttributes object with the
+        /// required attributes that MUST be present for all instances.
         ///
         /// @param source The source URI of the message.
         /// @param id The unique identifier of the message.
@@ -58,174 +57,134 @@ class UAttributesBuilder {
         UAttributesBuilder(uprotocol::v1::UUri source,
                            const uprotocol::v1::UUID& id, 
                            uprotocol::v1::UMessageType type, 
-                           uprotocol::v1::UPriority priority) {
-
-            attributes_.Clear();
-            attributes_.mutable_id()->CopyFrom(id);
-            attributes_.mutable_source()->CopyFrom(source);
-            attributes_.set_type(type);
-            attributes_.set_priority(priority);
-        }
+                           uprotocol::v1::UPriority priority);
 
         /// @brief Set the token attribute of the UAttributes object.
         ///
         /// @param token The token to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setToken(const std::string& token) {
-
-            attributes_.set_token(token);
-            return *this;
-        }
+        UAttributesBuilder& setToken(const std::string& token);
 
         /// @brief Set the id attribute of the UAttributes object.
         ///
         /// @param id The id to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setId(const uprotocol::v1::UUID& id) {
-
-            attributes_.mutable_id()->CopyFrom(id);
-            return *this;
-        }
+        UAttributesBuilder& setId(const uprotocol::v1::UUID& id);
 
         /// @brief Set the source attribute of the UAttributes object.
         ///
         /// @param source The source URI to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setSource(const uprotocol::v1::UUri& source) {
-
-            attributes_.mutable_source()->CopyFrom(source);
-            return *this;
-        }
+        UAttributesBuilder& setSource(const uprotocol::v1::UUri& source);
 
         /// @brief Set the sink attribute of the UAttributes object.
         ///
         /// @param sink The sink URI to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setSink(const uprotocol::v1::UUri& sink) {
-
-            attributes_.mutable_sink()->CopyFrom(sink);
-            return *this;
-        }
+        UAttributesBuilder& setSink(const uprotocol::v1::UUri& sink);
 
         /// @brief Set the reqid attribute of the UAttributes object.
         ///
         /// @param reqid The reqid to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setReqid(const uprotocol::v1::UUID& reqid) {
-
-            attributes_.mutable_reqid()->CopyFrom(reqid);
-            return *this;
-        }
+        UAttributesBuilder& setReqid(const uprotocol::v1::UUID& reqid);
 
         /// @brief Set the type attribute of the UAttributes object.
         ///
         /// @param type The type to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setType(uprotocol::v1::UMessageType type) {
-            attributes_.set_type(type);
-            return *this;
-        }
+        UAttributesBuilder& setType(uprotocol::v1::UMessageType type);
 
         /// @brief Set the priority attribute of the UAttributes object.
         ///
         /// @param priority The priority to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setPriority(uprotocol::v1::UPriority priority) {
-            attributes_.set_priority(priority);
-            return *this;
-        }
+        UAttributesBuilder& setPriority(uprotocol::v1::UPriority priority);
 
         /// @brief Set the ttl attribute of the UAttributes object.
         ///
         /// @param ttl The ttl to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setTTL(int32_t ttl) {
-            attributes_.set_ttl(ttl);
-            return *this;
-        }
+        UAttributesBuilder& setTTL(int32_t ttl);
 
         /// @brief Set the permission_level attribute of the UAttributes object.
         ///
         /// @param permission_level The permission_level to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setPermissionLevel(int32_t permission_level) {
-            attributes_.set_permission_level(permission_level);
-            return *this;
-        }
+        UAttributesBuilder& setPermissionLevel(int32_t permission_level);
 
         /// @brief Set the commstatus attribute of the UAttributes object.
         ///
         /// @param commstatus The commstatus to set.
         /// @return A reference to the UAttributesBuilder object.
-        UAttributesBuilder& setCommstatus(uprotocol::v1::UCode commstatus) {
-            attributes_.set_commstatus(commstatus);
-            return *this;
-        }
+        UAttributesBuilder& setCommstatus(uprotocol::v1::UCode commstatus);
 
         /// @brief Build the UAttributes object with the attributes that are set.
         ///
         /// @return The UAttributes object with the set attributes.
-        uprotocol::v1::UAttributes build() const {
-            return attributes_;
-        }
+        uprotocol::v1::UAttributes build() const;
 
         /// @brief Static factory method to build request messages header.
         /// 
-        /// Build publish type of UAttributes header with the given source and priority.
+        /// Build publish type of UAttributes header with the given source
+        /// and priority.
+        ///
         /// @param source The source URI of the message.
         /// @param priority The priority of the message.
         /// @return A new UAttributesBuilder instance.
-        static UAttributesBuilder publish(const uprotocol::v1::UUri& source, uprotocol::v1::UPriority priority) {
-            auto uuid = uprotocol::uuid::Uuidv8Factory::create();
-            UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_PUBLISH, priority);
-            return inst;
-        }
+        static UAttributesBuilder publish(
+                const uprotocol::v1::UUri& source,
+                uprotocol::v1::UPriority priority);
 
         /// @brief Static factory method to build notification message header.
         ///
-        /// Build a UAttributes object used for notification messages with the given source, sink, and priority.
+        /// Build a UAttributes object used for notification messages with the
+        /// given source, sink, and priority.
+        ///
         /// @param source The source URI of the message.
         /// @param sink The sink URI of the message.
         /// @param priority The priority of the message.
         /// @return A new UAttributesBuilder instance.
-        static UAttributesBuilder notification(const uprotocol::v1::UUri& source, const uprotocol::v1::UUri& sink, uprotocol::v1::UPriority priority) {
-            auto uuid = uprotocol::uuid::Uuidv8Factory::create();
-            UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_NOTIFICATION, priority);
-            inst.setSink(sink);
-            return inst;
-        }
+        static UAttributesBuilder notification(
+                const uprotocol::v1::UUri& source,
+                const uprotocol::v1::UUri& sink,
+                uprotocol::v1::UPriority priority);
 
         /// @brief Static factory method to builds request message header.
         ///
-        /// Build a UAttributes object used for request type of messages with the given source, sink, priority, and ttl.
+        /// Build a UAttributes object used for request type of messages with
+        /// the given source, sink, priority, and ttl.
+        ///
         /// @param source The source URI of the message.
         /// @param sink The sink URI of the message.
         /// @param priority The priority of the message.
         /// @param ttl The time-to-live of the message.
         /// @return A new UAttributesBuilder instance.
-        static UAttributesBuilder request(const uprotocol::v1::UUri& source, const uprotocol::v1::UUri& sink, uprotocol::v1::UPriority priority, int32_t ttl) {
-            auto uuid = uprotocol::uuid::Uuidv8Factory::create();
-            UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_REQUEST, priority);
-            inst.setSink(sink).setTTL(ttl);
-            return inst;
-        }
+        static UAttributesBuilder request(
+                const uprotocol::v1::UUri& source,
+                const uprotocol::v1::UUri& sink,
+                uprotocol::v1::UPriority priority,
+                int32_t ttl);
 
         
         /// @brief Static factory method to build response message header. 
         ///
-        /// Build UAttributes object used for response messages with the given source, sink, priority, and request id.
-        /// @param source The response source URI (i.e. the method URI that we are sending a response for).
-        /// @param sink The response sink URI (i.e the the return address of the client that originally invoked the method).
-        /// @param priority The priority of the message, MUST be the same as the request message priority.
+        /// Build UAttributes object used for response messages with the given
+        /// source, sink, priority, and request id.
+        ///
+        /// @param source The response source URI (i.e. the method URI that we
+        ///               are sending a response for).
+        /// @param sink The response sink URI (i.e the the return address of
+        ///             the client that originally invoked the method).
+        /// @param priority The priority of the message, MUST be the same as
+        ///                 the request message priority.
         /// @param reqid The id from the original request message.
         /// @return A new UAttributesBuilder instance.
-        static UAttributesBuilder response(const uprotocol::v1::UUri& source, const uprotocol::v1::UUri& sink, uprotocol::v1::UPriority priority, const uprotocol::v1::UUID& reqid) {
-            auto uuid = uprotocol::uuid::Uuidv8Factory::create();
-            UAttributesBuilder inst(source, uuid, uprotocol::v1::UMessageType::UMESSAGE_TYPE_RESPONSE, priority);
-            inst.setSink(sink);
-            inst.setReqid(reqid);
-            return inst;
-        }
+        static UAttributesBuilder response(
+                const uprotocol::v1::UUri& source,
+                const uprotocol::v1::UUri& sink,
+                uprotocol::v1::UPriority priority,
+                const uprotocol::v1::UUID& reqid);
 };
 
 } // namespace uprotocol

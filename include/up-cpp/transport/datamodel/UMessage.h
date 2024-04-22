@@ -36,33 +36,24 @@ namespace uprotocol::utransport {
     public:
 
         // Default constructor with member initializer list
-        UMessage() : payload_(nullptr, 0, UPayloadType::REFERENCE), attributes_() {}
+        UMessage();
 
         // Constructor with parameters and member initializer list
-        UMessage(uprotocol::utransport::UPayload &payload,
-                 uprotocol::v1::UAttributes attributes) :
-            payload_(payload),
-            attributes_(attributes) { }
+        UMessage(
+                uprotocol::utransport::UPayload &payload,
+                uprotocol::v1::UAttributes attributes);
 
         // Setter for payload with move semantics
-        void setPayload(uprotocol::utransport::UPayload &payload) {
-            payload_ = payload;
-        }
+        void setPayload(uprotocol::utransport::UPayload &payload);
 
         // Setter for attributes with move semantics
-        void setAttributes(uprotocol::v1::UAttributes &attributes) {
-            attributes_ = attributes;
-        }
+        void setAttributes(uprotocol::v1::UAttributes &attributes);
 
         // Getter for payload
-        const uprotocol::utransport::UPayload& payload() const {
-            return payload_;
-        }
+        const uprotocol::utransport::UPayload& payload() const;
 
         // Getter for attributes
-        const uprotocol::v1::UAttributes& attributes() const {
-            return attributes_;
-        }
+        const uprotocol::v1::UAttributes& attributes() const;
 
     private:
 

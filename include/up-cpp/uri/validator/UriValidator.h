@@ -30,10 +30,7 @@
 
 namespace uprotocol::uri {
 
-bool valid_uri(const std::string& uri) {
-    auto uri_view = LongUriSerializer::deserialize(uri);
-    return !isEmpty(uri_view);
-}
+bool valid_uri(const std::string& uri);
 
 }  // namespace uprotocol::uri
 

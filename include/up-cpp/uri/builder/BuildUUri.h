@@ -1,5 +1,4 @@
 /*
- 
  * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,12 +21,11 @@
  * SPDX-FileType: SOURCE
  * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
- 
- 
  */
 
 #ifndef UPROTOCOL_CPP_BUILDUURI_H
 #define UPROTOCOL_CPP_BUILDUURI_H
+
 #include <algorithm>
 #include <cctype>
 #include <optional>
@@ -44,50 +42,33 @@ namespace uprotocol::uri {
         uprotocol::v1::UUri uri_;
     
     public:
-        BuildUUri() { uri_.Clear(); }
+        BuildUUri();
         
         /**
          * Set the Autority part of the URI
+         *
          * @param authority 
          * @return 
          */
-        auto setAutority(uprotocol::v1::UAuthority const &authority) -> BuildUUri & {
-            if (uri_.has_authority() && !isEmpty(uri_.authority())) {
-                spdlog::error("UUri already has a authority set. Ignoring setAuthority()");
-                return *this;
-            }
-            
-            uri_.mutable_authority()->CopyFrom(authority);
-            return *this;
-        }
+        auto setAutority(
+                uprotocol::v1::UAuthority const &authority) -> BuildUUri &;
+
         /**
          * Set the Entity part of the URI
+         *
          * @param entity 
          * @return 
          */
-        auto setEntity(uprotocol::v1::UEntity const &entity) -> BuildUUri & {
-            if (uri_.has_entity()) {
-                spdlog::error("UUri already has a entity set. Ignoring setEntity()");
-                return *this;
-            }
+        auto setEntity(uprotocol::v1::UEntity const &entity) -> BuildUUri &;
 
-            uri_.mutable_entity()->CopyFrom(entity);
-            return *this;
-        }
         /**
          * Set the Resource part of the URI
          * @param resource 
          * @return 
          */
-        auto setResource(uprotocol::v1::UResource const &resource) -> BuildUUri & {
-            if (uri_.has_resource() && !isEmpty(uri_.resource())) {
-                spdlog::error("UUri already has a resource set. Ignoring setResource()");
-                return *this;
-            }
+        auto setResource(
+                uprotocol::v1::UResource const &resource) -> BuildUUri &;
 
-            uri_.mutable_resource()->CopyFrom(resource);
-            return *this;
-        }
         /**
          * return the UUri protobuf object
          * @return 
@@ -96,14 +77,15 @@ namespace uprotocol::uri {
             return uri_;
         }
     };
+
     /**
      * Check if UUri is RpcMethod
+     *
      * @param uri 
      * @return 
      */
-    [[nodiscard]] [[maybe_unused]] auto static isRPCMethod(const uprotocol::v1::UUri &uri) -> bool {
-        return uri.resource().name() == "rpc";
-    }
+    [[nodiscard]] [[maybe_unused]] auto static isRPCMethod(
+            const uprotocol::v1::UUri &uri) -> bool;
     
     
 }  // namespace uprotocol::uri

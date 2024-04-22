@@ -57,45 +57,35 @@ public:
     /**
      * Constructor with IP address in string format.
      */
-    explicit IpAddress(std::string_view const ipString) : ipString_(ipString) {
-        fromString();
-    }
+    explicit IpAddress(std::string_view const ipString);
 
     /**
      * Constructor with IP address in byte format.
      */
-    IpAddress(std::vector<uint8_t> const& ipBytes, Type type) : type_(type), ipBytes_(ipBytes) {
-        fromBytes();
-    }
+    IpAddress(std::vector<uint8_t> const& ipBytes, Type type);
 
     IpAddress(uprotocol::v1::UAuthority const&);
 
     /**
      * Get the type of IP address.
      */
-    auto getType() const { return type_; }
+    auto getType() const;
 
     /**
      * Get the string format of IP address.
      */
-    auto getString() const -> std::string { return ipString_; }
+    auto getString() const -> std::string;
 
     /**
      * Get the byte format of IP address.
      */
-    auto getBytes() const { return ipBytes_; }
+    auto getBytes() const;
 
     /**
      * Get the byte format of IP address, but in a string-like container
      * to better interface with flat buffers.
      */
-    auto getBytesString() const {
-        // char is a signed int - explicit reinterpretation from unsigned char
-        // is required here since we want to preserve the exact binary data
-        std::string_view ipBytesString(
-                reinterpret_cast<StrBytesPtr>(ipBytes_.data()), ipBytes_.size());
-        return static_cast<std::string>(ipBytesString);
-    }
+    auto getBytesString() const;
 
     /**
      * Number of bytes in IPv4 address.

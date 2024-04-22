@@ -37,70 +37,24 @@ namespace uprotocol::utils {
 	public:
 		explicit CyclicQueue(
 			const size_t maxSize,
-			const std::chrono::milliseconds milliseconds) :
-				queueMaxSize_{maxSize},
-				milliseconds_{milliseconds} {}
+			const std::chrono::milliseconds milliseconds);
 
 		CyclicQueue(const CyclicQueue&) = delete;
 		CyclicQueue &operator=(const CyclicQueue&) = delete;
 
 		virtual ~CyclicQueue() = default;
 
-		bool push(T& data) noexcept	{
-			std::unique_lock<std::mutex> uniqueLock(mutex_);
-			if (queueMaxSize_ == queue_.size()) {
-				queue_.pop();
-			}
+		bool push(T& data) noexcept;
 
-			queue_.push(std::move(data));
-			uniqueLock.unlock();
+		bool isFull(void) const noexcept;
 
-			conditionVariable_.notify_one();
-			
-			return true;
-		}
+		bool isEmpty(void) const noexcept;
 
-		bool isFull(void) const noexcept {
-			std::unique_lock<std::mutex> uniqueLock(mutex_);
+		bool waitPop(T& popped_value) noexcept;
 
-			return queueMaxSize_ == queue_.size();
-		}
+		size_t size(void) const noexcept;
 
-		bool isEmpty(void) const noexcept {
-			std::unique_lock<std::mutex> uniqueLock(mutex_);
-
-			return queue_.empty();
-		}
-
-		bool waitPop(T& popped_value) noexcept {
-			std::unique_lock<std::mutex> uniqueLock(mutex_);
-			if (queue_.empty()) {
-				conditionVariable_.wait_for(
-					uniqueLock,
-					milliseconds_);
-
-				if (queue_.empty())	{
-					return false;
-				}
-			}
-
-			popped_value = std::move(queue_.front());
-			queue_.pop();
-
-			return true;
-		}
-
-		size_t size(void) const noexcept {
-			std::unique_lock<std::mutex> uniqueLock(mutex_);
-			return queue_.size();
-		}
-
-		void clear(void) noexcept {
-			std::unique_lock<std::mutex> uniqueLock(mutex_);
-			while (!queue_.empty()) {
-				queue_.pop();
-			}
-		}
+		void clear(void) noexcept;
 
 	private:
 		static constexpr std::chrono::milliseconds DefaultPopQueueTimeoutMilli { 5U };

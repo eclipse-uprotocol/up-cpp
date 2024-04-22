@@ -31,14 +31,7 @@
 class RandomGenerator {
 
     public:
-        static uint64_t GenerateRandom() {
-
-            std::random_device dev;
-            std::mt19937 rng(dev());
-            std::uniform_int_distribution<std::mt19937::result_type> dist_64(1, UINT64_MAX);  // distribution in range [1, UINT64_MAX]
-
-            return dist_64(rng);
-        }
+        static uint64_t GenerateRandom();
 };
 
 #endif  // __RANDOM_GEN_H__

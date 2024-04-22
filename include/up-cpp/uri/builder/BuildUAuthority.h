@@ -1,5 +1,4 @@
 /*
-
  * Copyright (c) 2024 General Motors GTO LLC
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,8 +21,6 @@
  * SPDX-FileType: SOURCE
  * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
-
-
  */
 
 #ifndef UPROTOCOL_CPP_BUILDUAUTHORITY_H
@@ -44,108 +41,61 @@
 namespace uprotocol::uri {
     class BuildUAuthority {
         uprotocol::v1::UAuthority authority_;
+
     public:
-        BuildUAuthority() { authority_.Clear(); }
+        BuildUAuthority();
 
         /**
-         * set name of the authority. if name is empty or blank, an error will be logged and the name will not be set
+         * set name of the authority. if name is empty or blank, an error will
+         * be logged and the name will not be set
+         *
          * if name is already set, it will not be changed
+         *
          * @param name
          * @return
          */
-        auto setName(const std::string &name) -> BuildUAuthority & {
-            if (authority_.has_name() && !authority_.name().empty()) {
-                spdlog::error("UAuthority already has a remote set. Ignoring setName()");
-                return *this;
-            }
-            if (isBlank(name)) {
-                spdlog::error("UAuthority name is blank. Ignoring setName()");
-                return *this;
-            } else {
-                auto tmp  = name;
-                std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                               [](unsigned char c) { return std::tolower(c); });
-                authority_.set_name(std::move(tmp));
-            }
-            return *this;
-        }
+        auto setName(const std::string &name) -> BuildUAuthority &;
 
         /**
-         * set authority name using device and domain. if both device and domain are blank, an error will be logged and the name will not be set
+         * set authority name using device and domain. if both device and
+         * domain are blank, an error will be logged and the name will not
+         * be set
+         *
          * if name is already set, it will not be changed
+         *
          * @param device std::string
          * @param domain std::string
          * @return
          */
-        auto setName(const std::string &device, const std::string &domain) -> BuildUAuthority & {
-            if (authority_.has_name() && !authority_.name().empty()) {
-                spdlog::error("UAuthority already has a name {} set. Ignoring setName()", authority_.name());
-                return *this;
-            }
-            if (isBlank(device) && isBlank(domain)) {
-                spdlog::error("UAuthority device or domain is blank. Ignoring setName()");
-                return *this;
-            }
-            if (isBlank(device)) {
-                setName(domain);
-                return *this;
-            } else if (isBlank(domain)) {
-                setName(device);
-                return *this;
-            }
-            setName(device + "." + domain);
-            return *this;
-        }
+        auto setName(
+                const std::string &device,
+                const std::string &domain) -> BuildUAuthority &;
 
         /**
-         * set authority IP address. if address is empty or blank, an error will be logged and the address will not be set
+         * set authority IP address. if address is empty or blank, an error
+         * will be logged and the address will not be set
+         *
          * wrong IP address format will be ignored
+         *
          * @param address std::string
          * @return
          */
-        auto setIp(const std::string &address) -> BuildUAuthority & {
-            return setIp(IpAddress(address));
-        }
+        auto setIp(const std::string &address) -> BuildUAuthority;
 
         /**
-         * set authority IP address. if address is empty or blank, an error will be logged and the address will not be set
+         * set authority IP address. if address is empty or blank, an error
+         * will be logged and the address will not be set
+         *
          * wrong IP address format will be ignored
+         *
          * @param address IpAddress
          * @return
          */
-        auto setIp(const IpAddress &address) -> BuildUAuthority & {
-            if (authority_.has_ip() && !authority_.ip().empty()) {
-                spdlog::error("UAuthority already has ip set {}. Ignoring setIp()", authority_.ip());
-                return *this;
-            }
+        auto setIp(const IpAddress &address) -> BuildUAuthority &;
 
-            if (address.getType() == IpAddress::Type::Invalid) {
-                spdlog::error<std::string_view>("UAuthority address is not a valid IP address. Ignoring setIp()");
-                // Note: setting an empty string here will allow the micro
-                //       serializer to detect that something was wrong instead
-                //       of thinking it has been asked to serialize a Local
-                //       authority.
-                authority_.set_ip("");
-                return *this;
-            }
+        auto setId(const std::string &id) -> BuildUAuthority &;
 
-            authority_.set_ip(address.getBytesString());
-
-            return *this;
-        }
-
-        auto setId(const std::string &id) -> BuildUAuthority & {
-            if (authority_.has_id() && !authority_.id().empty()) {
-                spdlog::error("UAuthority already has a id set {}. Ignoring setId()", authority_.id());
-                return *this;
-            }
-            authority_.set_id(id);
-            return *this;
-        }
-
-        auto build() const -> uprotocol::v1::UAuthority {
-            return authority_;
-        }
+        auto build() const -> uprotocol::v1::UAuthority;
     };
 }  // namespace uprotocol::uri
 
