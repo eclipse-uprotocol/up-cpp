@@ -1,0 +1,12 @@
+# Part of the CloudEvent Library
+# Exceptions. See /LICENSE for license information.
+
+---
+BasedOnStyle: Google
+AllowShortBlocksOnASingleLine: 'false'
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: 'false'
+DerivePointerAlignment: 'false'
+ExperimentalAutoDetectBinPacking: 'false'
+FixNamespaceComments: 'true'
+PointerAlignment: Left
