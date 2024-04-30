@@ -22,22 +22,19 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _UUID_V8_FACTORY_H_
-#define _UUID_V8_FACTORY_H_
+#ifndef UP_CPP_DATAMODEL_BUILDER_UUID_H
+#define UP_CPP_DATAMODEL_BUILDER_UUID_H
 
-#include "RandomGen.h"
-#include "UuidFactory.h"
 #include <up-core-api/uuid.pb.h>
 
-namespace uprotocol::uuid {
+namespace uprotocol::datamodel::builder {
 /*
-*  UUIDv8Factory factory class designed to create UUID in v8 version.
+*  @brief Builder class designed to build UUID v8 objects for uProtocol.
 *
-*  UUIDv8 can only be built using the static factory methods of the class
-*  given that the UUIDv8 datamodel is based off the previous UUID generated.
 *  The UUID is based off the draft-ietf-uuidrev-rfc4122bis and UUIDv7 with
 *  some modifications that are discussed below. The diagram below shows the
 *  specification for the UUID:
+*
 *      0                   1                   2                   3
 *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -52,54 +49,104 @@ namespace uprotocol::uuid {
 *
 * | Field      | RFC2119 |
 * | -----      | --------|
-* | unix_ts_ms | 48 bit big-endian unsigned number of Unix epoch timestamp in milliseconds as per Section 6.1  of RFC
-* | ver        | MUST be 8 per Section 4.2 of draft-ietf-uuidrev-rfc4122bis
-* | counter    | MUST be a 12 bit counter field that is reset at each unix_ts_ms tick, and incremented for each UUID generated
-*                within the 1ms precision of unix_ts_ms The counter provides the ability to generate 4096 events within 1ms
-*                however the precision of the clock is still 1ms accuracy
+* | unix_ts_ms | 48 bit big-endian unsigned number of Unix epoch timestamp in
+*                milliseconds as per Section 6.1  of RFC |
+* | ver        | MUST be 8 per Section 4.2 of draft-ietf-uuidrev-rfc4122bis |
+* | counter    | MUST be a 12 bit counter field that is reset at each
+*                unix_ts_ms tick, and incremented for each UUID generated
+*                within the 1ms precision of unix_ts_ms The counter provides
+*                the ability to generate 4096 events within 1ms however the
+*                precision of the clock is still 1ms accuracy |
 * | var        | MUST be the The 2 bit variant defined by Section 4.1 of RFC |
-* |rand_b      | MUST 62 bits random number that is generated at initialization time of the uE only and reused otherwise |
+* | rand_b     | MUST 62 bits random number that is generated at initialization
+*                time of the uE only and reused otherwise |
 *
 * */
-class Uuidv8Factory : public UuidFactory {
-public:
-    /** factory function that generates the UUID */
-    static UUID create();
+struct UuidBuilder {
+    /// @brief Get a UuidBuilder in the default, production mode.
+    ///
+    /// @remarks This should be used in most cases.
+    ///
+    /// @returns A UuidBuilder in the default, production mode.
+    static UuidBuilder getBuilder();
+
+    /// @brief Get a UuidBuilder in the test mode.
+    ///
+    /// The testing mode of UuidBuilder allows for the time and random sources
+    /// to be replaced such that deterministic tests can be written in
+    /// situations where the normal behavior of UuidBuilder would interfere.
+    ///
+    /// @remarks The provided UuidBuilder starts with an identical state to
+    ///          one returned by getBuilder() with one difference: it will
+    ///          allow customization of its behavior through the `withX()`
+    ///          interfaces.
+    ///
+    /// @returns A UuidBuilder in the test mode.
+    static UuidBuilder getTestBuilder();
+
+    /// @brief Sets the time source for a UuidBuilder in test mode.
+    ///
+    /// @post All built UUIDs will use the provided function to get time
+    ///       values instead of calling `std::chrono::system_clock::now()`
+    ///
+    /// @note This can only be used with a UuidBuilder created with the
+    ///       getTestBuilder() interface.
+    ///
+    /// @param A callable that returns a time_point. Will be called whenever
+    ///        build() is called to populate the time field in the built UUID.
+    ///
+    /// @throws std::domain_error If called on a non-test UuidBuilder.
+    /// @returns A reference to thus UuidBuilder.
+    UuidBuilder& withTimeSource(std::function<std::chrono::system_clock::time_point()>&&);
+
+    /// @brief Sets the random value source for a UuidBuilder in test mode.
+    ///
+    /// @post All built UUIDs will use the provided function to get random
+    ///       values instead of using a true random source.
+    ///
+    /// @note This can only be used with a UuidBuilder created with the
+    ///       getTestBuilder() interface.
+    ///
+    /// @param A callable that returns a uint64_t. Will be called whenever
+    ///        build() is called in place of the default random value source.
+    ///
+    /// @throws std::domain_error If called on a non-test UuidBuilder.
+    /// @returns A reference to thus UuidBuilder.
+    UuidBuilder& withRandomSource(std::function<uint64_t()>&&);
+
+    /// @brief Replaces the UuidSharedState with a new, non-shared, default
+    ///        state.
+    ///
+    /// @post The globally shared UUID state will no longer be used for
+    ///       building UUIDs from this instance.
+    /// @post This instance will have the default values in its (non)shared
+    ///       state.
+    ///
+    /// @note This can only be used with a UuidBuilder created with the
+    ///       getTestBuilder() interface.
+    ///
+    /// @throws std::domain_error If called on a non-test UuidBuilder.
+    /// @returns A reference to thus UuidBuilder.
+    UuidBuilder& withIndependentState();
+
+    /// @brief Creates a uProtocol UUID based on the builder's current state.
+    ///
+    /// @remarks As part of the UUID v7/v8 spec, there is a shared state for
+    ///          all UUID builders within a process. Test builders can override
+    ///          this with the withIndependentState() interface.
+    v1::UUID build();
+
 private:
-    /** Retrieves the past UUID's MSB part    */
-    static uint64_t getLastMsb();
+    UuidBuilder();
 
-    /** Represents allowable clock drift tolerance    */
-    static constexpr uint64_t clockDriftTolerance_ = 10000000;
+    const bool testing_{false};
+    std::function<std::chrono::system_clock::time_point()> time_source_;
+    std::function<uint64_t()> random_source_;
 
-    /**  Represents UUID version- 4 bits(1000). Occupies bits 48 through 51. */
-    static constexpr uint64_t version_ = 8L << 12;
+    struct UuidSharedState;
+    std::shared_ptr<UuidSharedState> shared_state_;
+};
 
-    /** Represents UUID variant 2 bit (10)    */
-    static constexpr uint64_t variant_ = 0x8000000000000000L;
+} //namespace  uprotocol::datamodel::builder
 
-    /** Its used for masking bits in random number */
-    static constexpr uint64_t randomMask_ = 0x3fffffffffffffffL;
-
-    /** Represents the maxCount of UUID nodes to track previous history  */
-    static constexpr uint64_t maxCount_ = 0xfff;
-
-    /* Using atomic, so we need not implment locking
-    *  lastMsb_ to maintain the previous values of msb
-    *  so that they help in tracking the past UUID's time and count.
-    *  It will be shared across all UUID instanaces
-    */
-    static inline std::atomic<uint64_t> lastMsb_;
-
-    /** Represents MSB part of UUID */
-    static inline uint64_t msb_;
-
-    /** Represents LSB part of UUID */
-    static inline uint64_t lsb_ = (RandomGenerator::GenerateRandom()
-                                   & randomMask_) | variant_;
-
-}; // class UUIDv8Factory
-
-} //namespace  uprotocol::uuid
-
-#endif //_UUID_V8_FACTORY_H_
+#endif // UP_CPP_DATAMODEL_BUILDER_UUID_H

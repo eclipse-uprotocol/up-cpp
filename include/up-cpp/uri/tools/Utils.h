@@ -39,77 +39,15 @@
 namespace uprotocol::uri {
 
     /**
-     * isBlank
-     * is a string blank or containes only white spaces 
-     *
-     * @param str the string to check
-     *
-     * @return true if empty or with only white spaces
-     */
-    [[nodiscard]] [[maybe_unused]] static auto isBlank(
-            std::string_view str) -> bool;
-
-    /**
-     * isEmpty
-     * is Entity empty
-     *
-     * @param entity 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] static auto isEmpty(
-            uprotocol::v1::UEntity const &entity) -> bool;
-
-    /**
-     * isEmpty
-     * is Resource empty
-     *
-     * @param resource 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] static auto isEmpty(
-            uprotocol::v1::UResource const &resource) -> bool;
-
-    /**
-     * isEmpty
-     * is Authority empty
-     *
-     * @param authority 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] static auto isEmpty(
-            uprotocol::v1::UAuthority const &authority) -> bool;
-
-    /**
      * isEmpty
      * is Uri empty
+     * NOTE: Only whitespace is also empty
      *
      * @param uri 
      * @return 
      */
     [[nodiscard]] [[maybe_unused]] static auto isEmpty(
             uprotocol::v1::UUri const &uri) -> bool;
-
-    /**
-     * @param authority 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] auto static isResolved(
-            [[maybe_unused]] uprotocol::v1::UAuthority const &authority)
-        -> bool;
-
-    /**
-     * @param entity 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] auto static isResolved(
-            uprotocol::v1::UEntity const &entity) -> bool;
-
-    /**
-     * @param resource 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] auto static isResolved(
-            uprotocol::v1::UResource const &resource) -> bool;
 
     /**
      * isResolved
@@ -121,47 +59,12 @@ namespace uprotocol::uri {
     [[nodiscard]] [[maybe_unused]] auto static isResolved(
             [[maybe_unused]] v1::UUri const& uri) -> bool;
 
-
     /**
      * @param authority 
      * @return 
      */
     [[nodiscard]] [[maybe_unused]] auto static isLocal(
-            uprotocol::v1::UAuthority const &authority) -> bool;
-
-    /**
-     * @param authority 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] auto static isRemote(
-            uprotocol::v1::UAuthority const &authority) -> bool;
-
-    /**
-     * @param s 
-     * @param o 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] auto static operator==(
-            const uprotocol::v1::UAuthority &s,
-            const uprotocol::v1::UAuthority &o) -> bool;
-
-    /**
-     * @param s 
-     * @param o 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] auto static operator==(
-            const uprotocol::v1::UEntity &s,
-            const uprotocol::v1::UEntity &o) -> bool;
-
-    /**
-     * @param s 
-     * @param o 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] auto static operator==(
-            const uprotocol::v1::UResource &s,
-            const uprotocol::v1::UResource &o) -> bool;
+            uprotocol::v1::UUri const &uri) -> bool;
 
     /**
      * @param s 
@@ -171,34 +74,6 @@ namespace uprotocol::uri {
     [[nodiscard]] [[maybe_unused]] auto static operator==(
             const uprotocol::v1::UUri &s,
             const uprotocol::v1::UUri &o) -> bool;
-
-    /**
-     * @param authority 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] static auto isLongForm(
-            const uprotocol::v1::UAuthority &authority) -> bool;
-
-    /**
-     * @param entity 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] static auto isLongForm(
-            const uprotocol::v1::UEntity &entity) -> bool;
-
-    /**
-     * @param resource 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] static auto isLongForm(
-            const uprotocol::v1::UResource &resource) -> bool;
-
-    /**
-     * @param uri 
-     * @return 
-     */
-    [[nodiscard]] [[maybe_unused]] static auto isLongForm(
-            const uprotocol::v1::UUri &uri) -> bool;
 
 }  // namespace uprotocol::uri;
 

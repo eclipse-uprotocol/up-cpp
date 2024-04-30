@@ -22,92 +22,35 @@
  * SPDX-FileCopyrightText: 2023 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _UUID_SERIALIZER_H_
-#define _UUID_SERIALIZER_H_
+#ifndef UP_CPP_DATAMODEL_SERIALIZER_UUID_H
+#define UP_CPP_DATAMODEL_SERIALIZER_UUID_H
 
 #include <up-core-api/uuid.pb.h>
-#include <spdlog/spdlog.h>
+#include <up-core-api/upayload.pb.h>
+#include <string>
+#include <vector>
+#include <cstdint>
 
-namespace uprotocol::uuid {
-using namespace uprotocol::v1;
+/// @brief Collection of interfaces for converting uprotocol::v1::UUID objects
+///        between protobuf and alternative representations.
+namespace uprotocol::datamodel::serializer::uuid {
 
-/**
- * UUIDSerializer class is to provided serialize/de serilize functions for UUID
- * UUID to a string or UUID to byte stream and vice versa
- * Also provides  helper functions on UUID
- */
-class UuidSerializer {
-    public:
+/// @brief Converts to and from a human-readable string representation of UUID
+struct AsString {
+    [[nodiscard]] static std::string serialize(v1::UUID);
+    [[nodiscard]] static v1::UUID deserialize(const std::string&);
 
-        /**
-         * @brief Support for serializing UUID objects into their String format.
-         * @param uuid UUID object  to be serialized to the String format.
-         * @return Returns the String format of the supplied UUID
-         */
-        static std::string serializeToString(UUID uuid);
+    constexpr static v1::PayloadFormat format{v1::PayloadFormat::UPAYLOAD_FORMAT_TEXT};
+};
 
-        /**
-         *
-         * @brief Support for serializing UUID objects into their Byte stream.
-         * @param uuid UUID object  to be serialized to the byte array format.
-         * @return Returns  UUIDv8 in  vector of byte stream
-         *
-         */
-        static std::vector<uint8_t> serializeToBytes(UUID uuid);
+/// @brief Converts to and from byte vector representation of UUID
+struct AsBytes {
+    [[nodiscard]] static std::vector<uint8_t> serialize(v1::UUID);
+    [[nodiscard]] static v1::UUID deserialize(const std::vector<uint8_t>&);
 
-        /**
-         * @brief Deserialize a String into a UUID object.
-         * @param uuid String equivalent UUID
-         * @return Returns an UUID data object.
-         */
-        static UUID deserializeFromString(std::string uuidStr);
+    constexpr static v1::PayloadFormat format{v1::PayloadFormat::UPAYLOAD_FORMAT_RAW};
+};
 
-        /**
-         * @brief Deserialize a byte stream into a UUID object.
-         * @param uuid UUID represented in byte stream equivalent
-         * @return Returns an UUID data object.
-         */
-        static UUID deserializeFromBytes(std::vector<uint8_t> bytes);
+} // namespace uprotocol::datamodel::serializer::uuid
 
-        /**
-         * @brief extracts UTC time at from current UUID object
-         * @param uuid UUID object
-         * @return UTC time
-         */
-        static uint64_t getTime(UUID uuid);
-
-        /**
-         * @brief return current count of UUID numbers generated
-         * @param uuid UUID object
-         * @return count
-         */
-        static uint64_t getCount(UUID uuid);
-
-    private:
-        UuidSerializer() = default;
-
-        /**
-         * @brief Utility function to set msb and lsb and create UUID object
-         * @param msb 64 bit MSB part of UUID
-         * @param lsb 64 bit LSB part of UUID
-         * @return UUID
-         */
-        static UUID createUUID(uint64_t msb, uint64_t lsb);
-
-        /**
-         * @brief takes uuid in the string form and writes it to uuidOut
-         * @param str uuid in string
-         * @param[out]  uuidOut  uuid is stored in vector of size 16
-         * @return int - failure status
-         */
-        static int uuidFromString(
-                std::string str, std::vector<uint8_t> &uuidOut);
-
-        /** UUID array size */
-        static constexpr int uuidSize_ = 16;
-
-}; // UuidSerializer
-
-} // namespace uprotocol::uuid
-
-#endif //_UUID_SERIALIZER_H_
+#endif // UP_CPP_DATAMODEL_SERIALIZER_UUID_H

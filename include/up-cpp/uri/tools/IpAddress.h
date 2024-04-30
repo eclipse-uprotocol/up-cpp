@@ -22,25 +22,19 @@
  * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef IP_ADDRESS_H_
-#define IP_ADDRESS_H_
+#ifndef UP_CPP_UTILS_IPADDRESS_H
+#define UP_CPP_UTILS_IPADDRESS_H
 
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <vector>
 
-// Forward declare UAuthority so we can implement a constructor that consumes it
-namespace uprotocol {
-namespace v1 {
-class UAuthority;
-}
-}
-
-namespace uprotocol::uri {
+namespace uprotocol::utils {
 
 /**
  * IpAddress holds the string and byte representaion.
+ * Can be used to normalize IP address string formats
  */
 class IpAddress {
 
@@ -57,35 +51,33 @@ public:
     /**
      * Constructor with IP address in string format.
      */
-    explicit IpAddress(std::string_view const ipString);
+    IpAddress(std::string_view const ipString);
 
     /**
      * Constructor with IP address in byte format.
      */
     IpAddress(std::vector<uint8_t> const& ipBytes, Type type);
 
-    IpAddress(uprotocol::v1::UAuthority const&);
-
     /**
      * Get the type of IP address.
      */
-    auto getType() const;
+    Type getType() const;
 
     /**
      * Get the string format of IP address.
      */
-    auto getString() const -> std::string;
+    const std::string& getString() const;
 
     /**
      * Get the byte format of IP address.
      */
-    auto getBytes() const;
+    const std::vector<uint8_t> getBytes() const;
 
     /**
      * Get the byte format of IP address, but in a string-like container
      * to better interface with flat buffers.
      */
-    auto getBytesString() const;
+    std::string getBytesString() const;
 
     /**
      * Number of bytes in IPv4 address.
@@ -132,6 +124,6 @@ private:
 
 }; // class IpAddress
 
-} // namespace uprotocol::uri
+} // namespace uprotocol::utils
 
-#endif // IP_ADDRESS_H_
+#endif // UP_CPP_UTILS_IPADDRESS_H

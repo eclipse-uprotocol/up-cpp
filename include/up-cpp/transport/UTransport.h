@@ -23,72 +23,112 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _UTRANSPORT_
-#define _UTRANSPORT_
+#ifndef UP_CPP_TRANSPORT_UTRANSPORT_H
+#define UP_CPP_TRANSPORT_UTRANSPORT_H
 
-#include <stdint.h>
-#include <cstddef>
-#include <up-cpp/transport/UListener.h>
-#include <up-cpp/transport/datamodel/UPayload.h>
+#include <up-cpp/utils/CallbackConnection.h>
 #include <up-core-api/uri.pb.h>
+#include <up-core-api/umessage.pb.h>
 #include <up-core-api/ustatus.pb.h>
-#include <up-core-api/uattributes.pb.h>
 
-namespace uprotocol::utransport {
+namespace uprotocol::transport {
 
+    /// @brief Abstract base class for all transport implementations.
     class UTransport {
+
+        /// @brief Connection interface used for seft-terminating listener registrations
+        using CallbackConnection = uprotocol::callbacks::Connection<void, const uprotocol::v1::UMessage&>;
 
         public:
 
             /**
-             * Transmit UPayload to the topic using the attributes defined in
-             * UTransportAttributes.
+             * @brief Send a message.
              *
-             * @param message message to be sent
+             * Must be implemented by the transport client library.
              *
-             * @return Returns OKSTATUS if the payload has been successfully 
-             *         sent (ACK'ed), otherwise it returns FAILSTATUS with the
-             *         appropriate failure.
+             * @param message UMessage to be sent. Contains all the information
+             *                needed to send the message as UAttributes and
+             *                UPayload
+             *
+             * @returns * OKSTATUS if the payload has been successfully 
+             *            sent (ACK'ed)
+             *          * FAILSTATUS with the appropriate failure.
              */
-            virtual uprotocol::v1::UStatus send(
-                    const uprotocol::utransport::UMessage &message) = 0;
+            [[nodiscard]] virtual uprotocol::v1::UStatus send(
+                    const uprotocol::v1::UMessage &message) = 0;
+
+            /// @brief Callback function (void(const UMessage&))
+            using ListenCallback = CallbackConnection::Callback;
+
+            /// @brief Handle representing the callback connection.
+            ///
+            /// These handles will automatically disconnect the callback when
+            /// destroyed or when .reset() is called. They can be cast to bool
+            /// to check if they are connected.
+            using ListenHandle = CallbackConnection::Handle;
 
             /**
-             * Register listener to be called when UPayload is received for the
-             * specific topic.
+             * @brief Register listener to be called when UMessage is received
+             *        for the given URI.
              *
-             * @param topic Resolved UUri for where the message arrived via the
-             *              underlying transport technology.
-             * @param listener The method to execute to process the date for
-             *                 the topic.
+             * @param uri Resolved UUri for where messages are expected to
+             *            arrived via the underlying transport technology.
+             * @param listener Callback to be called when a message is received
+             *                 at the given URI. The UMessage will be provided
+             *                 as a parameter when the callback is called.
              *
-             * @return Returns OKSTATUS if the listener is unregistered
-             *         correctly, otherwise it returns FAILSTATUS
-             *         with the appropriate failure.
+             * @returns * OKSTATUS and a connected ListenHandle if the listener
+             *            was registered successfully.
+             *          * FAILSTATUS with the appropriate failure and an
+             *            unconnected ListenHandle otherwise.
              */      
-            virtual uprotocol::v1::UStatus registerListener(
+            [[nodiscard]] std::tuple<uprotocol::v1::UStatus, ListenHandle>
+                registerListener(
                     const uprotocol::v1::UUri &uri,
-                    const uprotocol::utransport::UListener &listener) = 0;
-
-            /**
-             * Unregister a listener for a given topic. Messages arriving on
-             * this topic will no longer be processed by this listener.
-             *
-             * @param topic Resolved UUri for where the listener was registered
-             *              to receive messages from.
-             * @param listener The method to execute to process the date for
-             *                 the topic.
-             *
-             * @return Returns OKSTATUS if the listener is unregistered
-             *         correctly, otherwise it returns FAILSTATUS with the
-             *         appropriate failure.
-             */
-            virtual uprotocol::v1::UStatus unregisterListener(
-                    const uprotocol::v1::UUri &uri, 
-                    const uprotocol::utransport::UListener &listener) = 0;
+                    ListenCallback&& listener);
 
             virtual ~UTransport() = default;
-    };
-}
 
-#endif /*_UTRANSPORT_*/
+        protected:
+            /// @brief Represents the callable end of a callback connection.
+            ///
+            /// This is a shared_ptr wrapping a callbacks::Connection. The
+            /// Connection will automatically disconnect from the matching
+            /// handle when destroyed. The Connection can be called directly
+            /// to invoke the callback.
+            using ConnectedCallback = CallbackConnection::Callable;
+
+            /// @brief Register listener to be called when UMessage is received
+            ///        for the given URI.
+            ///
+            /// The transport library is required to implement this.
+            ///
+            /// @remarks If this doesn't return OKSTATUS, the public wrapping
+            ///          version of registerListener() will reset the connection
+            ///          handle before returning it to the caller.
+            ///
+            /// @param uri Resolved UUri for where messages are expected to
+            ///            arrived via the underlying transport technology.
+            /// @param listener shared_ptr to a connected callback object, to be
+            ///                 called when a message is received.
+            ///
+            /// @returns * OKSTATUS if the listener was registered successfully.
+            ///          * FAILSTATUS with the appropriate failure otherwise.
+            [[nodiscard]] virtual uprotocol::v1::UStatus registerListener(
+                    const uprotocol::v1::UUri &uri,
+                    ConnectedCallback&& listener) = 0;
+
+            /// @brief Clean up on listener disconnect.
+            ///
+            /// The transport library can optionally implement this if it needs
+            /// to clean up when a callbacks::Connection is dropped.
+            ///
+            /// @note The default implementation does nothing.
+            ///
+            /// @param listener shared_ptr of the Connection that has been
+            ///                 broken.
+            virtual void cleanupListener(ConnectedCallback listener);
+    };
+} // namespace uprotocol::transport
+
+#endif // UP_CPP_TRANSPORT_UTRANSPORT_H

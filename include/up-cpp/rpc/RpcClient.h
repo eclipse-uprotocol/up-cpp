@@ -22,21 +22,15 @@
  * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef _RPC_CLIENT_H_
-#define _RPC_CLIENT_H_
+#ifndef UP_CPP_RPC_CLIENT_H
+#define UP_CPP_RPC_CLIENT_H
 
 #include <future>
-#include <up-cpp/transport/UListener.h>
-#include <up-cpp/transport/datamodel/UMessage.h>
 #include <up-core-api/uattributes.pb.h>
+#include <up-core-api/umessage.pb.h>
 #include <up-core-api/ustatus.pb.h>
 
 namespace uprotocol::rpc {
-
-    struct RpcResponse {
-        uprotocol::v1::UStatus status;
-        uprotocol::utransport::UMessage message;
-    };
 
     /**
     * RpcClient is an interface used by code generators for uProtocol services
@@ -68,37 +62,14 @@ namespace uprotocol::rpc {
             * @return Returns the CompletionStage with the response message or
             * exception with the failure reason as {@link UStatus}.
             */
-            virtual std::future<RpcResponse> invokeMethod(
+            virtual std::future<uprotocol::v1::UMessage> invokeMethod(
                     const uprotocol::v1::UUri &topic, 
-                    const uprotocol::utransport::UPayload &payload, 
-                    const uprotocol::v1::CallOptions &options) = 0;
+                    const uprotocol::v1::UPayload &payload, 
+                    const uprotocol::v1::CallOptions &options) = delete;
 
-            /**
-            * API for clients to invoke a method (send an RPC request) and
-            * receive the response (the returned {@link CompletionStage}
-            * {@link UPayload}. <br>
-            *
-            * Client will set method to be the URI of the method they want to
-            * invoke, payload to the request message, and attributes with the
-            * various metadata for the method invocation.
-            *
-            * @param methodUri The method URI to be invoked, ex (long form):
-            *                  /example.hello_world/1/rpc.SayHello.
-            * @param requestPayload The request message to be sent to
-            *                       the server.
-            * @param options RPC method invocation call options,
-            *                see {@link CallOptions}
-            * @param callback that will be called once the future is complete
-            *
-            * @return UStatus
-            */
-            virtual uprotocol::v1::UStatus invokeMethod(
-                    const uprotocol::v1::UUri &topic,
-                    const uprotocol::utransport::UPayload &payload,
-                    const uprotocol::v1::CallOptions &options,
-                    const uprotocol::utransport::UListener &callback) = 0;
-
-            virtual ~RpcClient() {} 
+            virtual ~RpcClient() = default;
     };
-}
-#endif /*_RPC_CLIENT_H_*/
+
+} //namespace uprotocol::rpc
+
+#endif // UP_CPP_RPC_CLIENT_H
