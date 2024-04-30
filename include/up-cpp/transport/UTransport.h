@@ -1,27 +1,25 @@
-/*
- * Copyright (c) 2024 General Motors GTO LLC
- *
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- * 
- * SPDX-FileType: SOURCE
- * SPDX-FileCopyrightText: 2024 General Motors GTO LLC
- * SPDX-License-Identifier: Apache-2.0
- */
+// Copyright (c) 2024 General Motors GTO LLC
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+// SPDX-FileType: SOURCE
+// SPDX-FileCopyrightText: 2024 General Motors GTO LLC
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef UP_CPP_TRANSPORT_UTRANSPORT_H
 #define UP_CPP_TRANSPORT_UTRANSPORT_H
@@ -41,19 +39,17 @@ namespace uprotocol::transport {
 
         public:
 
-            /**
-             * @brief Send a message.
-             *
-             * Must be implemented by the transport client library.
-             *
-             * @param message UMessage to be sent. Contains all the information
-             *                needed to send the message as UAttributes and
-             *                UPayload
-             *
-             * @returns * OKSTATUS if the payload has been successfully 
-             *            sent (ACK'ed)
-             *          * FAILSTATUS with the appropriate failure.
-             */
+            /// @brief Send a message.
+            ///
+            /// Must be implemented by the transport client library.
+            ///
+            /// @param message UMessage to be sent. Contains all the information
+            ///               needed to send the message as UAttributes and
+            ///               UPayload
+            ///
+            /// @returns * OKSTATUS if the payload has been successfully
+            ///           sent (ACK'ed)
+            ///         * FAILSTATUS with the appropriate failure.
             [[nodiscard]] virtual uprotocol::v1::UStatus send(
                     const uprotocol::v1::UMessage &message) = 0;
 
@@ -67,21 +63,19 @@ namespace uprotocol::transport {
             /// to check if they are connected.
             using ListenHandle = CallbackConnection::Handle;
 
-            /**
-             * @brief Register listener to be called when UMessage is received
-             *        for the given URI.
-             *
-             * @param uri Resolved UUri for where messages are expected to
-             *            arrived via the underlying transport technology.
-             * @param listener Callback to be called when a message is received
-             *                 at the given URI. The UMessage will be provided
-             *                 as a parameter when the callback is called.
-             *
-             * @returns * OKSTATUS and a connected ListenHandle if the listener
-             *            was registered successfully.
-             *          * FAILSTATUS with the appropriate failure and an
-             *            unconnected ListenHandle otherwise.
-             */      
+            /// @brief Register listener to be called when UMessage is received
+            ///       for the given URI.
+            ///
+            /// @param uri Resolved UUri for where messages are expected to
+            ///           arrived via the underlying transport technology.
+            /// @param listener Callback to be called when a message is received
+            ///                at the given URI. The UMessage will be provided
+            ///                as a parameter when the callback is called.
+            ///
+            /// @returns * OKSTATUS and a connected ListenHandle if the listener
+            ///           was registered successfully.
+            ///         * FAILSTATUS with the appropriate failure and an
+            ///           unconnected ListenHandle otherwise.
             [[nodiscard]] std::tuple<uprotocol::v1::UStatus, ListenHandle>
                 registerListener(
                     const uprotocol::v1::UUri &uri,
