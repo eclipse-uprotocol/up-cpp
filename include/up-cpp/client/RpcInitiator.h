@@ -57,10 +57,10 @@ public:
 	///
 	/// @return Returns the CompletionStage with the response message or
 	/// exception with the failure reason as {@link UStatus}.
-	virtual std::future<uprotocol::v1::UMessage> invokeMethod(
-	    const uprotocol::v1::UUri& topic,
-	    const uprotocol::v1::UPayload& payload,
-	    const uprotocol::v1::CallOptions& options) = delete;
+	virtual std::future<v1::UMessage> invokeMethod(
+	    const v1::UUri& topic,
+	    const v1::UPayload& payload,
+	    const v1::CallOptions& options) = delete;
 
 	virtual ~RpcClient() = default;
 };

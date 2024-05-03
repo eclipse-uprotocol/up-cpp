@@ -36,7 +36,7 @@ class UTransport {
 	/// @brief Connection interface used for seft-terminating listener
 	/// registrations
 	using CallbackConnection =
-	    uprotocol::callbacks::Connection<void, const uprotocol::v1::UMessage&>;
+	    uprotocol::callbacks::Connection<void, const v1::UMessage&>;
 
 public:
 	/// @brief Send a message.
@@ -50,8 +50,8 @@ public:
 	/// @returns * OKSTATUS if the payload has been successfully
 	///           sent (ACK'ed)
 	///         * FAILSTATUS with the appropriate failure.
-	[[nodiscard]] virtual uprotocol::v1::UStatus send(
-	    const uprotocol::v1::UMessage& message) = 0;
+	[[nodiscard]] virtual v1::UStatus send(
+	    const v1::UMessage& message) = 0;
 
 	/// @brief Callback function (void(const UMessage&))
 	using ListenCallback = typename CallbackConnection::Callback;
@@ -76,8 +76,8 @@ public:
 	///           was registered successfully.
 	///         * FAILSTATUS with the appropriate failure and an
 	///           unconnected ListenHandle otherwise.
-	[[nodiscard]] std::tuple<uprotocol::v1::UStatus, ListenHandle>
-	registerListener(const uprotocol::v1::UUri& uri, ListenCallback&& listener);
+	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle>
+	registerListener(const v1::UUri& uri, ListenCallback&& listener);
 
 	virtual ~UTransport() = default;
 
@@ -106,8 +106,8 @@ protected:
 	///
 	/// @returns * OKSTATUS if the listener was registered successfully.
 	///          * FAILSTATUS with the appropriate failure otherwise.
-	[[nodiscard]] virtual uprotocol::v1::UStatus registerListener(
-	    const uprotocol::v1::UUri& uri, ConnectedCallback&& listener) = 0;
+	[[nodiscard]] virtual v1::UStatus registerListener(
+	    const v1::UUri& uri, ConnectedCallback&& listener) = 0;
 
 	/// @brief Clean up on listener disconnect.
 	///
