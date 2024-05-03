@@ -6,7 +6,7 @@ PROTOBUF_HDRDIR=/home/gzy3g3/projects/uspace/ultifi/build-x86_64-release-build_t
 
 PROTOBUF_OBJS=$(addprefix $(PROTOBUF_OBJDIR), file.pb.cc.o  uattributes.pb.cc.o  umessage.pb.cc.o  upayload.pb.cc.o  uprotocol_options.pb.cc.o  uri.pb.cc.o  ustatus.pb.cc.o  uuid.pb.cc.o)
 
-CFLAGS= --std=c++17 -I$(PROTOBUF_HDRDIR) -I$(GOOGLE_PROTOBUF_HDRDIR)
+CFLAGS= -g --std=c++17 -I$(PROTOBUF_HDRDIR) -I$(GOOGLE_PROTOBUF_HDRDIR)
 
 
 demo : demo.o UpCoreApi.o $(PROTOBUF_OBJS)

@@ -109,27 +109,35 @@ int main(int argc, char *argv[])
 #endif
     {
         cout << "\n\n%%%%%%%%%%%%%%%%%%% UAttributes" << endl;
-        UUID uuid;
-        uuid.msb(100).lsb(200);
+        string s;
+        {
+            UUID uuid;
+            uuid.msb(100).lsb(200);
 
-        UAttributes uattr;
-        // uattr.id(UUID().msb(100).lsb(200));
-        uattr.type(UMessageType::UMESSAGE_TYPE_REQUEST);
-        uattr.priority(UPriority::UPRIORITY_CS3);
-        uattr.ttl(1234).permission_level(4321).commstatus(UCode::NOT_FOUND).reqid(uuid);
-        uattr.token("token");
-        uattr.traceparent("traceparent");
-        cout << "####################### from_string" << endl;
-        cout << uattr.to_string() << endl;
-        // data.authority(UAuthority().name("uA")).entity(UEntity().name("uE")).resource(UResource().name("uR").message("msg"));
-        auto s = uattr.serialize();
-
-        UAttributes data;
-        data.deserialize(s);
-        cout << "####################### to_string" << endl;
-        cout << data.to_string() << endl;
-        cout << "-----------------------" << endl;
-        cout << "token = " << data.token() << endl;
-        cout << "traceparent = " << data.traceparent() << endl;
+            UAttributes uattr;
+            // uattr.id(UUID().msb(100).lsb(200));
+            uattr.type(UMessageType::UMESSAGE_TYPE_REQUEST);
+            uattr.priority(UPriority::UPRIORITY_CS3);
+            uattr.ttl(1234).permission_level(4321).commstatus(UCode::NOT_FOUND).reqid(uuid);
+            uattr.token("token");
+            uattr.traceparent("traceparent");
+            cout << "####################### from_string" << endl;
+            cout << uattr.to_string() << endl;
+            // data.authority(UAuthority().name("uA")).entity(UEntity().name("uE")).resource(UResource().name("uR").message("msg"));
+            cout << "before serialize" << endl;
+            cout << "after serialize" << endl;
+            s = uattr.serialize();
+        }
+        cout << "after first block" << endl;
+        {
+            UAttributes data;
+            data.deserialize(s);
+            cout << "####################### to_string" << endl;
+            cout << data.to_string() << endl;
+            cout << "-----------------------" << endl;
+            cout << "token = " << data.token() << endl;
+            cout << "traceparent = " << data.traceparent() << endl;
+        }
+        cout << "after deserialize" << endl;
     }
 }

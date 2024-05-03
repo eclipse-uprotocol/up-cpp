@@ -24,6 +24,7 @@ struct UUID {
     std::shared_ptr<Impl> pImpl;
 
     UUID();
+    ~UUID();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -60,6 +61,7 @@ struct UStatus {
     std::shared_ptr<Impl> pImpl;
 
     UStatus();
+    ~UStatus();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -76,6 +78,7 @@ struct UUri {
     std::shared_ptr<Impl> pImpl;
 
     UUri();
+    ~UUri();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -95,6 +98,7 @@ struct UAuthority {
     std::shared_ptr<Impl> pImpl;
 
     UAuthority();
+    ~UAuthority();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -108,6 +112,7 @@ struct UEntity {
     std::shared_ptr<Impl> pImpl;
 
     UEntity();
+    ~UEntity();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -130,6 +135,7 @@ struct UResource {
     std::shared_ptr<Impl> pImpl;
 
     UResource();
+    ~UResource();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -152,6 +158,7 @@ struct UUriBatch {
     std::shared_ptr<Impl> pImpl;
 
     UUriBatch();
+    ~UUriBatch();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -181,6 +188,7 @@ struct UAttributes {
     std::shared_ptr<Impl> pImpl;
 
     UAttributes();
+    ~UAttributes();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -224,6 +232,7 @@ struct CallOptions {
     std::shared_ptr<Impl> pImpl;
 
     CallOptions();
+    ~CallOptions();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -254,6 +263,7 @@ struct UPayload {
     std::shared_ptr<Impl> pImpl;
 
     UPayload();
+    ~UPayload();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -273,6 +283,7 @@ struct UMessage {
     std::shared_ptr<Impl> pImpl;
 
     UMessage();
+    ~UMessage();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;

@@ -12,6 +12,7 @@ public_header = '''#pragma once
 
 #################################################################################################
 impl_header = '''#include "{hdr_name}"
+#include <iostream>
 
 template <typename T, typename FN, class... VAR_TYPES>
 void generic_set_check(const std::variant<VAR_TYPES...>& v, FN&& fn)
@@ -40,6 +41,24 @@ T generic_get_convert(const V& value)
         return value;
     }}
 }}
+
+
+template <typename T>
+static void trace_outer(const char * func, int lineno, const void* _this, const std::shared_ptr<T>& pImpl)
+{{
+    using namespace std;
+    cout << func << " line=" << lineno << " this=" << _this << " pImpl=" << pImpl.get() << '/' << pImpl.use_count() << endl;
+}}
+#define TRACE_OUTER(_this, pImpl) trace_outer(__PRETTY_FUNCTION__, __LINE__, _this, pImpl);
+
+
+static void trace_impl(const char * func, int lineno, const void* _this, const void* ptr)
+{{
+    using namespace std;
+    cout << func << " lineno=" << lineno << " this=" << _this << " ptr=" << ptr << endl;
+}}
+#define TRACE_IMPL(_this, ptr) trace_impl(__PRETTY_FUNCTION__, __LINE__, _this, ptr);
+
 '''
 
 #################################################################################################
@@ -49,6 +68,7 @@ struct {cls_name} {{
     std::shared_ptr<Impl> pImpl;
 
     {cls_name}();
+    ~{cls_name}();
     std::string serialize() const;
     void deserialize(const std::string&);
     std::string to_string() const;
@@ -76,11 +96,30 @@ public_repeated_member = '''
 impl_private_class_header = '''\
 struct {cls_name}::Impl {{
     {nspace}::{cls_name}* ptr;
-    inline Impl() {{ ptr = new {nspace}::{cls_name}(); }}
-    inline ~Impl() {{ delete ptr; }}
+
+    inline Impl()
+    {{
+        ptr = new {nspace}::{cls_name}();
+        TRACE_IMPL(this, ptr)
+    }}
+
+    inline ~Impl()
+    {{
+        TRACE_IMPL(this, ptr)
+        delete ptr;
+        TRACE_IMPL(this, ptr)
+    }}
 }};
 
-{cls_name}::{cls_name}() : pImpl(new Impl) {{}}
+{cls_name}::{cls_name}() : pImpl(new Impl)
+{{
+    TRACE_OUTER(this, pImpl)
+}}
+
+{cls_name}::~{cls_name}()
+{{
+    TRACE_OUTER(this, pImpl)
+}}
 
 std::string {cls_name}::serialize() const
 {{
@@ -89,9 +128,15 @@ std::string {cls_name}::serialize() const
     return output;
 }}
 
-void {cls_name}::deserialize(const std::string& data) {{ pImpl->ptr->ParseFromString(data); }}
+void {cls_name}::deserialize(const std::string& data)
+{{
+    pImpl->ptr->ParseFromString(data);
+}}
 
-std::string {cls_name}::to_string() const {{ return pImpl->ptr->DebugString(); }}
+std::string {cls_name}::to_string() const
+{{
+    return pImpl->ptr->DebugString();
+}}
 '''
 
 
@@ -99,12 +144,14 @@ std::string {cls_name}::to_string() const {{ return pImpl->ptr->DebugString(); }
 impl_required_native_member = '''
 {cls_name}& {cls_name}::{member_name}(const {arg_type}& arg)
 {{
+    TRACE_OUTER(this, pImpl)
     pImpl->ptr->set_{member_name}(arg);
     return *this;
 }}
 
 {arg_type} {cls_name}::{member_name}() const
 {{
+    TRACE_OUTER(this, pImpl)
     return pImpl->ptr->{member_name}();
 }}
 '''
@@ -113,12 +160,14 @@ impl_required_native_member = '''
 impl_required_nonnative_member = '''
 {cls_name}& {cls_name}::{member_name}(const {arg_type}& arg)
 {{
+    TRACE_OUTER(this, pImpl)
     pImpl->ptr->set_allocated_{member_name}(arg.pImpl->ptr);
     return *this;
 }}
 
 {arg_type} {cls_name}::{member_name}() const
 {{
+    TRACE_OUTER(this, pImpl)
     {arg_type} ret;
     *(ret.pImpl->ptr) = pImpl->ptr->{member_name}();
     return ret;
@@ -129,6 +178,7 @@ impl_required_nonnative_member = '''
 impl_required_member_enum = '''
 {cls_name}& {cls_name}::{member_name}(const {arg_type}& arg)
 {{
+    TRACE_OUTER(this, pImpl)
     pImpl->ptr->set_{member_name}(static_cast<{nspace}::{arg_type}>(arg));
     return *this;
 }}
@@ -143,12 +193,14 @@ impl_required_member_enum = '''
 impl_optional_member = '''
 {cls_name}& {cls_name}::{member_name}(const {arg_type}& arg)
 {{
+    TRACE_OUTER(this, pImpl)
     pImpl->ptr->set_{member_name}(arg);
     return *this;
 }}
 
 std::optional<{arg_type}> {cls_name}::{member_name}() const
 {{
+    TRACE_OUTER(this, pImpl)
     if (!pImpl->ptr->has_{member_name}()) return std::optional<{arg_type}>();
     return pImpl->ptr->{member_name}();
 }}
@@ -158,12 +210,14 @@ std::optional<{arg_type}> {cls_name}::{member_name}() const
 impl_optional_member_enum = '''
 {cls_name}& {cls_name}::{member_name}(const {arg_type}& arg)
 {{
+    TRACE_OUTER(this, pImpl)
     pImpl->ptr->set_{member_name}(static_cast<{nspace}::{arg_type}>(arg));
     return *this;
 }}
 
 std::optional<{arg_type}> {cls_name}::{member_name}() const
 {{
+    TRACE_OUTER(this, pImpl)
     if (!pImpl->ptr->has_{member_name}()) return std::optional<{arg_type}>();
     return static_cast<{arg_type}>(pImpl->ptr->{member_name}());
 }}
@@ -173,6 +227,7 @@ std::optional<{arg_type}> {cls_name}::{member_name}() const
 impl_repeated_member = '''
 {cls_name}& {cls_name}::{member_name}(const std::vector<{arg_type}>& arg)
 {{
+    TRACE_OUTER(this, pImpl)
     pImpl->ptr->clear_{member_name}();
     for (const auto& n : arg) {{
         auto p = pImpl->ptr->add_{member_name}();
@@ -183,6 +238,7 @@ impl_repeated_member = '''
 
 std::vector<{arg_type}> {cls_name}::{member_name}() const
 {{
+    TRACE_OUTER(this, pImpl)
     std::vector<{arg_type}> ret;
     size_t len = pImpl->ptr->{member_name}_size();
     ret.reserve(len);
@@ -195,6 +251,7 @@ std::vector<{arg_type}> {cls_name}::{member_name}() const
 impl_repeated_member_enum = '''
 {cls_name}& {cls_name}::{member_name}(const std::vector<{arg_type}>& arg)
 {{
+    TRACE_OUTER(this, pImpl)
     pImpl->ptr->clear_{member_name}();
     for (const auto& n : arg) {{
         auto p = pImpl->ptr->add_{member_name}();
@@ -205,6 +262,7 @@ impl_repeated_member_enum = '''
 
 std::vector<{arg_type}> {cls_name}::{member_name}() const
 {{
+    TRACE_OUTER(this, pImpl)
     std::vector<{arg_type}> ret;
     size_t len = pImpl->ptr->{member_name}_size();
     ret.reserve(len);
@@ -227,12 +285,14 @@ def impl_oneof_member(cls_name, member_name, arg_type, nspace):
     results = f'''
 {cls_name}& {cls_name}::{member_name}(const std::variant<{v_list}>& arg)
 {{
+    TRACE_OUTER(this, pImpl)
 {set_body}
     return *this;
 }}
 
 std::variant<{v_list}> {cls_name}::{member_name}() const
 {{
+    TRACE_OUTER(this, pImpl)
 {get_body}
 }}
 '''
