@@ -43,7 +43,7 @@ namespace uprotocol::datamodel::builder {
 /// when one of the build methods is called.
 ///
 /// @remarks For recurring messages (e.g. periodic publishing), the builder
-///          instance can be held and reused by calling .buildWithPayload()
+///          instance can be held and reused by calling .build(payload)
 ///          for each new set of message data.
 struct UMessageBuilder {
 	/// @brief Pre-populates a message builder with the attributes of a
@@ -109,7 +109,7 @@ struct UMessageBuilder {
 	/// @throws TODO(gregmedd) InvalidUuid if ID fails validation.
 	/// @throws TODO(gregmedd) InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "response" message
-	static UMessageBuilder responseTo(const v1::UMessage& request);
+	static UMessageBuilder response(const v1::UMessage& request);
 
 	/// @brief Specify an ID to use for the message in place of the
 	///        auto-generated ID.
@@ -215,18 +215,6 @@ struct UMessageBuilder {
 	/// @return A built message with no UPayload populated.
 	[[nodiscard]] v1::UMessage build() const;
 
-	/// @brief Creates a UMessage with a provided payload based on the
-	///        builder's current state.
-	///
-	/// @param value_bytes A byte array to be used as the value for the
-	///                    message's UPayload.
-	/// @param format The data format of the value in value_bytes.
-	///
-	/// @return A built message with the provided payload data embedded.
-	[[nodiscard]] v1::UMessage buildWithPayloadValue(
-	    const std::vector<uint8_t>& value_bytes,
-	    v1::UPayloadFormat format) const;
-
 	/// @brief Creates a UMessage with a provided protobuf payload based on
 	///        the builder's current state.
 	///
@@ -241,24 +229,46 @@ struct UMessageBuilder {
 	///
 	/// @return A built message with the provided payload data embedded.
 	template <typename ProtobufT>
-	[[nodiscard]] v1::UMessage buildWithPayloadValue(
-	    const ProtobufT&) const;
+	[[nodiscard]] v1::UMessage build(const ProtobufT&) const;
 
 	/// @brief Creates a UMessage based on the builder's current state by
 	///        serializing the ValueT through the Serializer.
 	///
+	/// This interface would be invoked something like this:
+	/// 
+	///     builder.build<ToPayload>(foo)
+	///
 	/// @tparam Serializer An object capable of serializing ValueT. Must
-	///                    provide a
-	///                    `static std::vector<uint8_t> serialize(ValueT)`
-	///                    method and a
-	///                    `static const UPayloadFormatT format` field.
+	///                    provide a `static UPayload serialize(ValueT)`
+	///                    method.
 	/// @tparam ValueT Automatically inferred unserialized payload value
 	///                type, serializable using the Serializer.
 	///
+	/// @param Payload value that will be serialized and sent.
+	///
 	/// @return A built message with the provided payload data embedded.
 	template <typename Serializer, typename ValueT>
-	[[nodiscard]] v1::UMessage buildWithPayloadValue(
-	    const ValueT&) const;
+	[[nodiscard]] v1::UMessage build(const ValueT&) const;
+
+	/// @brief Creates a UMessage with a provided payload based on the
+	///        builder's current state.
+	///
+	/// @param value_bytes A byte array to be used as the value for the
+	///                    message's UPayload.
+	/// @param format The data format of the value in value_bytes.
+	///
+	/// @return A built message with the provided payload data embedded.
+	[[nodiscard]] v1::UMessage build(
+			const std::vector<uint8_t>& value_bytes,
+			v1::UPayloadFormat format) const;
+
+	/// @brief Creates a UMessage with a provided payload based on the
+	///        builder's current state.
+	///
+	/// @param A pre-packaged UPayload to embed in the message.
+	///
+	/// @return A built message with the provided payload data embedded.
+	[[nodiscard]] v1::UMessage build(v1::UPayload&&) const;
 
 private:
 	UMessageBuilder();
