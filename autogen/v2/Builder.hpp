@@ -60,9 +60,7 @@ member_type cls::member##_get(const std::optional<member_type>& arg) \
 
 
 
-#define ENUM_EXPOSE(cls, member, member_type) \
-    cls& member(const std::optional<member_type>& = std::nullopt); \
-    member_type member##_get(const std::optional<member_type>& = std::nullopt);
+#define ENUM_EXPOSE(cls, member, member_type) SCALAR_EXPOSE(cls, member, member_type)
 
 #define ENUM_IMPLEMENT(cls, member, member_type) \
 cls& cls::member(const std::optional<member_type>& arg) \
@@ -91,3 +89,19 @@ member_type cls::member(const std::optional<member_type>& arg) \
     ret.pImpl->no_delete = true; \
     return ret; \
 };
+
+#if 0
+#define VAR_EXPOSE(cls, member, member_type)  SCALAR_EXPOSE(cls, member, member_type)
+
+#define VAR_IMPLEMENT(cls, member, member_type) \
+cls& cls::member(const std::optional<member_type>& arg) \
+{ \
+    if (arg) pImpl->storage->set_##member(*arg); \
+    return *this; \
+} \
+member_type cls::member##_get(const std::optional<member_type>& arg) \
+{ \
+    if (arg) pImpl->storage->set_##member(*arg); \
+    return pImpl->storage->member(); \
+};
+#endif

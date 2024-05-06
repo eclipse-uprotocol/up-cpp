@@ -22,6 +22,7 @@ struct X {
     SCALAR_EXPOSE(X, s, std::string)
     // SCALAR_EXPOSE(X, os, std::optional<std::string>)
     ENUM_EXPOSE(X, e, OuterEnum)
+    // VAR_EXPOSE(X, data, std::variant<std::string, double, int>)
 };
 
 struct Y {

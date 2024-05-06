@@ -12,6 +12,11 @@ message X {
     int32 i = 1;
     string s = 2;
     InnerEnum e = 3;
+    oneof alt {
+        string as = 4;
+        double ad = 5;
+        sint32 ai = 6;
+    }
 }
 
 message Y {

@@ -19,6 +19,7 @@ SCALAR_IMPLEMENT(X, i, int)
 SCALAR_IMPLEMENT(X, s, std::string)
 // SCALAR_IMPLEMENT(X, os, std::optional<std::string>)
 // ENUM_EXPOSE(X, e, OuterEnum)
+// VAR_IMPLEMENT(X, data, )
 
 BUILDER_IMPLEMENT(Y, tutorial::Y);
 SCALAR_IMPLEMENT(Y, i, int)
