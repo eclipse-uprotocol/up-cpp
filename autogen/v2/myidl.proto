@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package tutorial;
+
+enum InnerEnum {
+    one = 0;
+    two = 1;
+    three = 2;
+}
+
+message X {
+    int32 i = 1;
+    string s = 2;
+    InnerEnum e = 3;
+}
+
+message Y {
+    int32 i = 1;
+    string s = 2;
+    X x = 3;
+}
