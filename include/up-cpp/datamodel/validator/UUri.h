@@ -106,10 +106,10 @@ struct InvalidUUri : public std::invalid_argument {
 	// Inherit constructors
 	using std::invalid_argument::invalid_argument;
 
-	InvalidUUri(InvalidUUri&&);
-	InvalidUUri(const InvalidUUri&);
+	InvalidUUri(InvalidUUri&&) noexcept;
+	InvalidUUri& operator=(InvalidUUri&&) noexcept;
 
-	InvalidUUri& operator=(InvalidUUri&&);
+	InvalidUUri(const InvalidUUri&);
 	InvalidUUri& operator=(const InvalidUUri&);
 };
 

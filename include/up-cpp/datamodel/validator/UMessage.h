@@ -105,10 +105,10 @@ struct InvalidUMessage : public std::invalid_argument {
 	// Inherit constructors
 	using std::invalid_argument::invalid_argument;
 
-	InvalidUMessage(InvalidUMessage&&);
-	InvalidUMessage(const InvalidUMessage&);
+	InvalidUMessage(InvalidUMessage&&) noexcept;
+	InvalidUMessage& operator=(InvalidUMessage&&) noexcept;
 
-	InvalidUMessage& operator=(InvalidUMessage&&);
+	InvalidUMessage(const InvalidUMessage&);
 	InvalidUMessage& operator=(const InvalidUMessage&);
 };
 

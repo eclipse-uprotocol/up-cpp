@@ -69,20 +69,20 @@ struct IpAddress {
 
     /// @brief Constructs an IP address from a string representation of
 	///        an address.
-    IpAddress(std::string_view const ipString);
+    explicit IpAddress(std::string_view const ip_string);
 
     /// @brief Constructs an IP address from a binary representation of
 	///        an address.
-    IpAddress(std::vector<uint8_t> const& ipBytes, Type type);
+    IpAddress(std::vector<uint8_t> const& ip_bytes, Type type);
 
     /// @brief Get the type of this IP address.
-    Type getType() const;
+    [[nodiscard]] Type getType() const;
 
 	/// @brief Gets the nomalized string representation of this IP address.
-    const std::string& getString() const;
+    [[nodiscard]] const std::string& getString() const;
 
     /// @brief Gets the binary representation of this IP address.
-    const std::vector<uint8_t> getBytes() const;
+    [[nodiscard]] const std::vector<uint8_t>& getBytes() const;
 
     /// @brief Gets the binary representation of this IP address, wrapped in a
 	///        string-like container to better interface with protobuf.
@@ -90,13 +90,13 @@ struct IpAddress {
 	/// Protobuf uses std::string as a generic byte container, so this can be
 	/// useful for embedding compact, binary representations of IP addresses
 	/// into a protobuf message.
-    std::string getBytesString() const;
+    [[nodiscard]] std::string getBytesString() const;
 
     /// @brief Number of bytes in IPv4 address.
-    static constexpr uint8_t IpV4AddressBytes = 4;
+    static constexpr uint8_t ip_v4_address_bytes = 4;
 
     /// @brief Number of bytes in IPv6 address.
-    static constexpr uint8_t IpV6AddressBytes = 16;
+    static constexpr uint8_t ip_v6_address_bytes = 16;
 
 private:
     /// @brief Updates the state of this instance from the value of the

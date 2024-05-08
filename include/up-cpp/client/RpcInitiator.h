@@ -41,7 +41,7 @@ namespace uprotocol::client {
 class RpcInitiator {
 public:
     /// @brief Constructs an initiator connected to a given transport
-    RpcInitiator(std::shared_ptr<transport::UTransport> transport);
+    explicit RpcInitiator(std::shared_ptr<transport::UTransport> transport);
 
     /// @brief Gets a new UMessageBuilder configured for generating RPC request
     ///        messages targeting a specific RPC method.
@@ -82,4 +82,4 @@ private:
 
 }  // namespace uprotocol::client
 
-#endif  // UP_CPP_CLIENT_RPCINITIRATOR_H
+#endif  // UP_CPP_CLIENT_RPCINITIATOR_H

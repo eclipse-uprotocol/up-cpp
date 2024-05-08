@@ -25,7 +25,7 @@
 #include <up-core-api/ustatus.pb.h>
 #include <up-core-api/uattributes.pb.h>
 #include <up-core-api/uri.pb.h>
-#include <up-cpp/datamodel/builder/UMessageBuilder.h>
+#include <up-cpp/datamodel/builder/UMessage.h>
 #include <up-cpp/transport/UTransport.h>
 #include <utility>
 #include <memory>
@@ -57,16 +57,16 @@ struct Publisher {
 
     /// @brief Wrapper to build and publish a payload in a single step.
     ///
-    /// @param buildArgs Arguments to forward to UMessageBuilder::build().
-    ///                  Note that this can be omitted completely to call
-    ///                  build() with no parameters.
+    /// @param build_args Arguments to forward to UMessageBuilder::build().
+    ///                   Note that this can be omitted completely to call
+    ///                   build() with no parameters.
     ///
     /// @see datamodel::builder::UMessageBuilder::build
     template<typename... Args>
-    v1::UStatus publish(Args&&... buildArgs) {
+    v1::UStatus publish(Args&&... build_args) {
         auto message =
-            publishBuilder_.build(
-                    std::forward<Args>(buildArgs)...);
+            publish_builder_.build(
+                    std::forward<Args>(build_args)...);
 
         return transport_->send(std::move(message));
     }
@@ -79,20 +79,19 @@ struct Publisher {
     /// @param value The payload data to serialize and send.
     ///
     /// @see datamodel::builder::UMessageBuilder::build
-    template<typename Serializer, template ValueT>
+    template<typename Serializer, typename ValueT>
     v1::UStatus publish(const ValueT& value) {
         auto message =
-            publishBuilder_.build<Serializer>(
-                    std::forward<Args>(buildArgs)...);
+            publish_builder_.build<Serializer>(value);
 
         return transport_->send(std::move(message));
     }
 
     ~Publisher() = default;
 
-protected:
+private:
     std::shared_ptr<transport::UTransport> transport_;
-	datamodel::builder::UMessageBuilder publishBuilder_;
+	datamodel::builder::UMessageBuilder publish_builder_;
 };
 
 }  // namespace uprotocol::client

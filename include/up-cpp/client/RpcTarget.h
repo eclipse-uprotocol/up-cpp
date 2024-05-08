@@ -45,11 +45,11 @@ struct RpcTarget {
     /// @brief Constructs an initiator connected to a given transport.
 	///
 	/// @param transport Transport to offer the RPC method through.
-	/// @param methodName URI representing the name clients will use to invoke
-	///                   the RPC method.
+	/// @param method_name URI representing the name clients will use to invoke
+	///                    the RPC method.
 	/// @param callback Method that will be called when requests are received.
     RpcTarget(std::shared_ptr<transport::UTransport> transport,
-			const v1::UUri& methodName, RpcMethod&& callback);
+			const v1::UUri& method_name, RpcMethod&& callback);
 
 	/// @brief Builder type for messages sent by this client
 	using MessageBuilder = datamodel::builder::UMessageBuilder;
@@ -80,15 +80,15 @@ struct RpcTarget {
 	///       sendResponse() instead.
 	///
 	/// @param request The request message to send a response to.
-	/// @param buildArgs Arguments to forward to UMessageBuilder::build().
-	///                  Note that this can be omitted completely to call
-	///                  build() with no parameters.
+	/// @param build_args Arguments to forward to UMessageBuilder::build().
+	///                   Note that this can be omitted completely to call
+	///                   build() with no parameters.
 	///
 	/// @see datamodel::builder::UMessageBuilder::build
 	template<typename... Args>
-	v1::UStatus respondTo(const v1::UMessage& request, Args&&... buildArgs) {
+	v1::UStatus respondTo(const v1::UMessage& request, Args&&... build_args) {
 		auto message = responseBuilder(request)
-			.buildWithPayload(std::forward<Args>(buildArgs)...);
+			.build(std::forward<Args>(build_args)...);
 		return sendResponse(std::move(message));
 	}
 
@@ -105,16 +105,16 @@ struct RpcTarget {
 	/// @param value The payload data to serialize and send.
 	///
 	/// @see datamodel::builder::UMessageBuilder::build
-	template<typename Serializer, template ValueT>
+	template<typename Serializer, typename ValueT>
 	v1::UStatus respondTo(const v1::UMessage& request, const ValueT& value) {
 		auto message = responseBuilder(request)
-			.buildWithPayload<Serializer>(value);
+			.build<Serializer>(value);
 		return sendResponse(std::move(message));
 	}
 
 	~RpcTarget() = default;
 
-protected:
+private:
 	/// @brief Transport instance that will be used for communication
 	std::shared_ptr<transport::UTransport> transport_;
 

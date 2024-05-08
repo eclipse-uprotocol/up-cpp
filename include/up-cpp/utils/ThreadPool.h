@@ -43,15 +43,11 @@ namespace uprotocol::utils {
             ThreadPool & operator=(const ThreadPool &) = delete;
             ThreadPool & operator=(ThreadPool &&) = delete;
 
-            ThreadPool(const size_t maxQueueSize,
-                    const size_t maxNumOfThreads,
-					std::chrono::milliseconds timeout);
+            ThreadPool(const size_t max_queue_size,
+                    const size_t max_num_of_threads,
+					std::chrono::milliseconds task_timeout);
 
             ~ThreadPool();
-
-            static void worker(
-                    CyclicQueue<std::function<void()>> &queue,
-                    bool &terminate);
 
             // Submit a function to be executed asynchronously by the pool
             template<typename F, typename...Args>
@@ -67,6 +63,6 @@ namespace uprotocol::utils {
             std::mutex mutex_;
             const std::chrono::milliseconds timeout_;
     };
-}
+} // namespace uprotocol::utils
 
 #endif // UP_CPP_UTILS_THREADPOOL_H

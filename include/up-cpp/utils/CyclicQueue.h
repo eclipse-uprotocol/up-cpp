@@ -19,8 +19,8 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation          
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_UTILS_CYCLIC_QUEUE_H
-#define UP_CPP_UTILS_CYCLIC_QUEUE_H
+#ifndef UP_CPP_UTILS_CYCLICQUEUE_H
+#define UP_CPP_UTILS_CYCLICQUEUE_H
 
 #include <queue>
 #include <mutex>
@@ -33,7 +33,7 @@ namespace uprotocol::utils {
 template<typename T>
 class CyclicQueue final {
 public:
-	explicit CyclicQueue(const size_t maxSize);
+	explicit CyclicQueue(const size_t max_size);
 
 	CyclicQueue(const CyclicQueue&) = delete;
 	CyclicQueue &operator=(const CyclicQueue&) = delete;
@@ -43,8 +43,8 @@ public:
 	void push(T&& data) noexcept;
 	void push(const T& data) noexcept;
 
-	bool isFull(void) const noexcept;
-	bool isEmpty(void) const noexcept;
+	bool isFull() const noexcept;
+	bool isEmpty() const noexcept;
 
 	// Blocking pop()
 	bool pop(T& popped_value) noexcept;
@@ -54,9 +54,9 @@ public:
 	bool tryPopFor(T& popped_value, std::chrono::milliseconds limit) noexcept;
 	bool tryPopUntil(T& popped_value, std::chrono::system_clock::time_point when) noexcept;
 
-	size_t size(void) const noexcept;
+	size_t size() const noexcept;
 
-	void clear(void) noexcept;
+	void clear() noexcept;
 
 private:
 	size_t queueMaxSize_;
@@ -65,5 +65,6 @@ private:
 	std::queue<T> queue_;
 };
 
-}
-#endif // UP_CPP_UTILS_CYCLIC_QUEUE_H
+} // namespace uprotocol::utils
+
+#endif // UP_CPP_UTILS_CYCLICQUEUE_H

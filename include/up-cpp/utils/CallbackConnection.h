@@ -92,7 +92,7 @@ struct [[nodiscard]] Connection {
 	///       not been reset).
 	///     * False if the connection has been broken (i.e. the Handle was
 	///       discarded or reset).
-	operator bool() const;
+	explicit operator bool() const;
 
 	/// @brief Calls the callback, returning a value.
 	///
@@ -135,8 +135,14 @@ private:
 
 public:  // But actually still private thanks to the PCT
 	/// @brief Semi-private constructor. Use the static establish() instead.
-	Connection(std::shared_ptr<Callback> cb, PrivateConstructToken)
-	    : callback_(cb) {}
+	Connection(std::shared_ptr<Callback> cb, PrivateConstructToken);
+
+	// Connection is only ever available wrapped in a std::shared_ptr.
+	// It cannot be moved or copied directly without breaking the
+	// corresponding handle, so those constructors are disabled.
+	Connection(Connection&&) = delete;
+	Connection(const Connection&) = delete;
+	Connection& operator=(const Connection&) = delete;
 
 private:
 	// The CalleeHandle is allowed to use sever() to terminate the connection
@@ -152,13 +158,6 @@ private:
 	// Note: would use std::atomic<std::weak_ptr<Callback>> if we had C++20
 	std::mutex callback_mtx_;
 	std::weak_ptr<Callback> callback_;
-
-	// Connection is only ever available wrapped in a std::shared_ptr.
-	// It cannot be moved or copied directly without breaking the
-	// corresponding handle, so those constructors are disabled.
-	Connection(Connection&&) = delete;
-	Connection(const Connection&) = delete;
-	Connection& operator=(const Connection&) = delete;
 };
 
 template <typename RT, typename... Args>
@@ -167,13 +166,22 @@ struct [[nodiscard]] CalleeHandle {
 	using Callback = typename Conn::Callback;
 	using Cleanup = typename Conn::Cleanup;
 
+	/// @brief Default construction results in an non-connected handle
 	CalleeHandle();
 
+	/// @brief Creates a connected handle. Only usable by Connection
 	CalleeHandle(std::shared_ptr<Conn> conn, std::shared_ptr<Callback> cb,
 	             std::optional<Cleanup>&& cu,
 	             typename Conn::PrivateConstructToken);
 
-	CalleeHandle(CalleeHandle&&);
+	/// @brief Handles can be moved
+	///
+	/// @post The old handle will be disconnected and the new handle will be
+	///       connected where the old one previously was.
+	CalleeHandle(CalleeHandle&&) noexcept;
+
+	CalleeHandle(const CalleeHandle&) = delete;
+	CalleeHandle& operator=(const CalleeHandle&) = delete;
 
 	/// @brief Destructor: severs the connection, waiting until all active
 	///        callbacks have completed.
@@ -183,17 +191,22 @@ struct [[nodiscard]] CalleeHandle {
 	///        completed.
 	void reset();
 
+	/// @brief Check if the connection is still valid.
+	///
+	/// @returns
+	///     * True if the connection is valid (i.e. at least one other
+	///       reference to the connection still exists).
+	///     * False if the connection has been broken (i.e. This handle has
+	///       been reset/moved, or all other references to the connection
+	///       have been discarded)
 	explicit operator bool() const;
 
 private:
 	std::shared_ptr<Conn> connection_;
 	std::shared_ptr<Callback> callback_;
 	std::optional<Cleanup> cleanup_;
-
-	CalleeHandle(const CalleeHandle&) = delete;
-	CalleeHandle& operator=(const CalleeHandle&) = delete;
 };
 
-}  // namespace uprotocol::callbacks
+}  // namespace uprotocol::utils::callbacks
 
 #endif // UP_CPP_UTILS_CALLBACKCONNECTION_H

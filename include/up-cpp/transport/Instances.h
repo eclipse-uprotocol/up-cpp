@@ -55,8 +55,8 @@ namespace uprotocol::transport {
 ///                       returned by this function.
 ///                       Note that `void` is a special case, described below.
 ///
-/// @param defaultSource A UUri containing only an Authority and Entity that is
-///                      used as the default source for some operations.
+/// @param default_source A UUri containing only an Authority and Entity that
+///                       is used as the default source for some operations.
 /// @param config A path to a transport implementation-specific configuration
 ///               file. For transports that do not need additional parameters
 ///               to operate, this path may be empty.
@@ -66,7 +66,7 @@ namespace uprotocol::transport {
 ///          base UTransport interface.
 template<class TransportImpl = void>
 [[nodiscard]] std::shared_ptr<UTransport> getTransport(
-		const v1::UUri& defaultSource,
+		const v1::UUri& default_source,
 		const std::filesystem::path& config);
 
 /// @brief Selects a transport implementation and corresponding config file
@@ -88,8 +88,8 @@ template<class TransportImpl = void>
 /// @see readTransportSelectFile Supporting utility function for loading a
 ///      transport-selecting configuration file and returning its parameters.
 ///
-/// @param defaultSource A UUri containing only an Authority and Entity that is
-///                      used as the default source for some operations.
+/// @param default_source A UUri containing only an Authority and Entity that
+///                       is used as the default source for some operations.
 /// @param config A path to a file containing the transport selection
 ///               parameters. The name from that file will be used to determine
 ///               which getTransport<TransportImpl> will be called, and the
@@ -102,7 +102,7 @@ template<class TransportImpl = void>
 ///          base UTransport interface.
 template<>
 [[nodiscard]] std::shared_ptr<UTransport> getTransport<void>(
-		const v1::UUri& defaultSource,
+		const v1::UUri& default_source,
 		const std::filesystem::path& config);
 
 /// @brief Reads a transport-selecting config file for getTransport<void>()
@@ -113,8 +113,8 @@ template<>
 /// @returns A string containing the name of the transport and the path to the
 ///          transport-specific configuration file, both as read from the
 ///          configuration file provided.
-tuple<std::string, std::filesystem::path> readTransportConfig(
-		const std::filesystem::path&)
+std::tuple<std::string, std::filesystem::path> readTransportConfig(
+		const std::filesystem::path&);
 
 /// @brief Exception thrown when using getTransport<void>() representing an
 ///        unknown transport name was read from the config file.
@@ -123,8 +123,8 @@ struct UnknownTransportImpl : public std::runtime_error {
 	using runtime_error::runtime_error;
 
 	// Move interfaces
-	UnknownTransportImpl(UnknownTransportImpl&&);
-	UnknownTransportImpl& operator=(UnknownTransportImpl&&);
+	UnknownTransportImpl(UnknownTransportImpl&&) noexcept;
+	UnknownTransportImpl& operator=(UnknownTransportImpl&&) noexcept;
 
 	// Copy interfaces
 	UnknownTransportImpl(const UnknownTransportImpl&);

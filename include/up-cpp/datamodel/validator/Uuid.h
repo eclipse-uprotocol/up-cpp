@@ -35,6 +35,12 @@ namespace uprotocol::datamodel::validator::uuid {
     struct InvalidUuid : public std::invalid_argument {
         // Inherit constructors
         using std::invalid_argument::invalid_argument;
+
+	InvalidUuid(InvalidUuid&&) noexcept;
+	InvalidUuid& operator=(InvalidUuid&&) noexcept;
+
+	InvalidUuid(const InvalidUuid&);
+	InvalidUuid& operator=(const InvalidUuid&);
     };
 
     /// @name Validity checks

@@ -52,7 +52,7 @@ class UTransport {
 	/// @brief Connection interface used for self-terminating listener
 	/// registrations
 	using CallbackConnection =
-	    callbacks::Connection<void, const v1::UMessage&>;
+	    utils::callbacks::Connection<void, const v1::UMessage&>;
 
 public:
 	/// @brief Constructor
@@ -63,7 +63,7 @@ public:
 	/// @throws uprotocol::datamodel::validator::uuri::InvalidUUri
 	///         if the provided UUri contains a resource, or is missing an
 	///         authority or entity.
-	UTransport(const v1::UUri&);
+	explicit UTransport(const v1::UUri&);
 
 	/// @brief Send a message.
 	///
@@ -79,14 +79,14 @@ public:
 	[[nodiscard]] virtual v1::UStatus send(const v1::UMessage& message) = 0;
 
 	/// @brief Callback function (void(const UMessage&))
-	using ListenCallback = typename callbacks::CallbackConnection::Callback;
+	using ListenCallback = typename CallbackConnection::Callback;
 
 	/// @brief Handle representing the callback connection.
 	///
 	/// These handles will automatically disconnect the callback when
 	/// destroyed or when .reset() is called. They can be cast to bool
 	/// to check if they are connected.
-	using ListenHandle = typename callbacks::CallbackConnection::Handle;
+	using ListenHandle = typename CallbackConnection::Handle;
 
 	/// @brief Register listener to be called when UMessage is received
 	///        for the given URI.
@@ -112,8 +112,8 @@ public:
 	/// @param listener Callback to be called when a message is received
 	///                 at the given URI. The UMessage will be provided
 	///                 as a parameter when the callback is called.
-	/// @param sourceFilter Resolved UUri for where messages are expected to
-	///                     have been sent from.
+	/// @param source_filter Resolved UUri for where messages are expected to
+	///                      have been sent from.
 	///
 	/// @returns * OKSTATUS and a connected ListenHandle if the listener
 	///            was registered successfully.
@@ -121,7 +121,7 @@ public:
 	///            unconnected ListenHandle otherwise.
 	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle>
 	registerListener(const v1::UUri& uri, ListenCallback&& listener,
-			const v1::UUri& sourceFilter);
+			const v1::UUri& source_filter);
 
 	/// @brief Gets the default source Authority and Entity for all clients
 	///        using this transport instance.
@@ -138,7 +138,7 @@ protected:
 	/// Connection will automatically disconnect from the matching
 	/// handle when destroyed. The Connection can be called directly
 	/// to invoke the callback.
-	using CallableConn = typename callbacks::CallbackConnection::Callable;
+	using CallableConn = typename CallbackConnection::Callable;
 
 	/// @brief Register listener to be called when UMessage is received
 	///        for the given URI.
@@ -172,8 +172,8 @@ protected:
 	///            arrived via the underlying transport technology.
 	/// @param listener shared_ptr to a connected callback object, to be
 	///                 called when a message is received.
-	/// @param sourceFilter Resolved UUri for where messages are expected to
-	///                     have been sent from.
+	/// @param source_filter Resolved UUri for where messages are expected to
+	///                      have been sent from.
 	///
 	/// @returns * OKSTATUS if the listener was registered successfully.
 	///          * FAILSTATUS with the appropriate failure otherwise.
@@ -182,7 +182,7 @@ protected:
 	///                 source, and that would be handled at the next layer up.
 	[[nodiscard]] virtual v1::UStatus registerListener(
 	    const v1::UUri& uri, CallableConn&& listener,
-		const v1::UUri& sourceFilter) = 0;
+		const v1::UUri& source_filter) = 0;
 
 	/// @brief Clean up on listener disconnect.
 	///
@@ -194,9 +194,10 @@ protected:
 	/// @param listener shared_ptr of the Connection that has been broken.
 	virtual void cleanupListener(CallableConn listener);
 
+private:
 	/// @brief Default source Authority and Entity for all clients using this
 	///        transport instance.
-	v1::UUri defaultSource_;
+	const v1::UUri defaultSource_;
 };
 
 }  // namespace uprotocol::transport
