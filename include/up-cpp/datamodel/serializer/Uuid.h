@@ -22,8 +22,8 @@
 #ifndef UP_CPP_DATAMODEL_SERIALIZER_UUID_H
 #define UP_CPP_DATAMODEL_SERIALIZER_UUID_H
 
-#include <up-core-api/upayload.pb.h>
-#include <up-core-api/uuid.pb.h>
+#include <uprotocol/v1/upayload.pb.h>
+#include <uprotocol/v1/uuid.pb.h>
 
 #include <cstdint>
 #include <string>

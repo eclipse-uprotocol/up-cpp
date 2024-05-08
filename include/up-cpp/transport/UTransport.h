@@ -22,9 +22,9 @@
 #ifndef UP_CPP_TRANSPORT_UTRANSPORT_H
 #define UP_CPP_TRANSPORT_UTRANSPORT_H
 
-#include <up-core-api/umessage.pb.h>
-#include <up-core-api/uri.pb.h>
-#include <up-core-api/ustatus.pb.h>
+#include <uprotocol/v1/umessage.pb.h>
+#include <uprotocol/v1/uri.pb.h>
+#include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/utils/CallbackConnection.h>
 
 #include <tuple>

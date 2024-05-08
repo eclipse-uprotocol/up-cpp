@@ -22,8 +22,8 @@
 #ifndef UP_CPP_CLIENT_RPCINITIATOR_H
 #define UP_CPP_CLIENT_RPCINITIATOR_H
 
-#include <up-core-api/umessage.pb.h>
-#include <up-core-api/ustatus.pb.h>
+#include <uprotocol/v1/umessage.pb.h>
+#include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
 #include <up-cpp/transport/UTransport.h>
 

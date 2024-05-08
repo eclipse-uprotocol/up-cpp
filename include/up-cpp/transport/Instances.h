@@ -22,7 +22,7 @@
 #ifndef UP_CPP_TRANSPORT_INSTANCES_H
 #define UP_CPP_TRANSPORT_INSTANCES_H
 
-#include <up-core-api/uri.pb.h>
+#include <uprotocol/v1/uri.pb.h>
 #include <up-cpp/transport/UTransport.h>
 
 #include <filesystem>

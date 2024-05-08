@@ -22,7 +22,7 @@
 #ifndef UP_CPP_DATAMODEL_VALIDATOR_UURI_H
 #define UP_CPP_DATAMODEL_VALIDATOR_UURI_H
 
-#include <up-core-api/uri.pb.h>
+#include <uprotocol/v1/uri.pb.h>
 
 /// @brief Validators for UUri objects.
 namespace uprotocol::datamodel::validator::uri {

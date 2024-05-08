@@ -22,11 +22,11 @@
 #ifndef UP_CPP_DATAMODEL_BUILDER_UMESSAGE_H
 #define UP_CPP_DATAMODEL_BUILDER_UMESSAGE_H
 
-#include <up-core-api/uattributes.pb.h>
-#include <up-core-api/umessage.pb.h>
-#include <up-core-api/upayload.pb.h>
-#include <up-core-api/uri.pb.h>
-#include <up-core-api/uuid.pb.h>
+#include <uprotocol/v1/uattributes.pb.h>
+#include <uprotocol/v1/umessage.pb.h>
+#include <uprotocol/v1/upayload.pb.h>
+#include <uprotocol/v1/uri.pb.h>
+#include <uprotocol/v1/uuid.pb.h>
 
 #include <cstdint>
 #include <string>

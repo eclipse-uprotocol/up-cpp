@@ -22,7 +22,7 @@
 #ifndef UP_CPP_DATAMODEL_BUILDER_UUID_H
 #define UP_CPP_DATAMODEL_BUILDER_UUID_H
 
-#include <up-core-api/uuid.pb.h>
+#include <uprotocol/v1/uuid.pb.h>
 
 #include <chrono>
 #include <cstdint>

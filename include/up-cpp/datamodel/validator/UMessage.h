@@ -22,7 +22,7 @@
 #ifndef UP_CPP_DATAMODEL_VALIDATOR_UMESSAGE_H
 #define UP_CPP_DATAMODEL_VALIDATOR_UMESSAGE_H
 
-#include <up-core-api/umessage.pb.h>
+#include <uprotocol/v1/umessage.pb.h>
 
 /// @brief Validators for UMessage objects.
 ///

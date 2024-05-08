@@ -22,7 +22,7 @@
 #ifndef UP_CPP_DATAMODEL_SERIALIZER_UURI_H
 #define UP_CPP_DATAMODEL_SERIALIZER_UURI_H
 
-#include <up-core-api/uri.pb.h>
+#include <uprotocol/v1/uri.pb.h>
 
 #include <string>
 
