@@ -26,6 +26,7 @@
 #include <up-core-api/uri.pb.h>
 #include <up-core-api/ustatus.pb.h>
 #include <up-cpp/utils/CallbackConnection.h>
+
 #include <tuple>
 
 namespace uprotocol::transport {
@@ -101,8 +102,8 @@ public:
 	///            was registered successfully.
 	///          * FAILSTATUS with the appropriate failure and an
 	///            unconnected ListenHandle otherwise.
-	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle>
-	registerListener(const v1::UUri& uri, ListenCallback&& listener);
+	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle> registerListener(
+	    const v1::UUri& uri, ListenCallback&& listener);
 
 	/// @brief Register listener to be called when UMessage is received
 	///        for the given URI, filtered by message source.
@@ -119,9 +120,9 @@ public:
 	///            was registered successfully.
 	///          * FAILSTATUS with the appropriate failure and an
 	///            unconnected ListenHandle otherwise.
-	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle>
-	registerListener(const v1::UUri& uri, ListenCallback&& listener,
-			const v1::UUri& source_filter);
+	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle> registerListener(
+	    const v1::UUri& uri, ListenCallback&& listener,
+	    const v1::UUri& source_filter);
 
 	/// @brief Gets the default source Authority and Entity for all clients
 	///        using this transport instance.
@@ -182,7 +183,7 @@ protected:
 	///                 source, and that would be handled at the next layer up.
 	[[nodiscard]] virtual v1::UStatus registerListener(
 	    const v1::UUri& uri, CallableConn&& listener,
-		const v1::UUri& source_filter) = 0;
+	    const v1::UUri& source_filter) = 0;
 
 	/// @brief Clean up on listener disconnect.
 	///

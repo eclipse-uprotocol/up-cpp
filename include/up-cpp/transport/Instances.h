@@ -22,8 +22,9 @@
 #ifndef UP_CPP_TRANSPORT_INSTANCES_H
 #define UP_CPP_TRANSPORT_INSTANCES_H
 
-#include <up-cpp/transport/UTransport.h>
 #include <up-core-api/uri.pb.h>
+#include <up-cpp/transport/UTransport.h>
+
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -64,10 +65,9 @@ namespace uprotocol::transport {
 /// @throws std::filesystem::filesystem_error on config file access errors.
 /// @returns A shared pointer to a TransportImpl, viewed through the abstract
 ///          base UTransport interface.
-template<class TransportImpl = void>
+template <class TransportImpl = void>
 [[nodiscard]] std::shared_ptr<UTransport> getTransport(
-		const v1::UUri& default_source,
-		const std::filesystem::path& config);
+    const v1::UUri& default_source, const std::filesystem::path& config);
 
 /// @brief Selects a transport implementation and corresponding config file
 ///        based on the contents of a provided configuration file.
@@ -100,10 +100,9 @@ template<class TransportImpl = void>
 /// @throws std::filesystem::filesystem_error on config file access errors.
 /// @returns A shared pointer to a TransportImpl, viewed through the abstract
 ///          base UTransport interface.
-template<>
+template <>
 [[nodiscard]] std::shared_ptr<UTransport> getTransport<void>(
-		const v1::UUri& default_source,
-		const std::filesystem::path& config);
+    const v1::UUri& default_source, const std::filesystem::path& config);
 
 /// @brief Reads a transport-selecting config file for getTransport<void>()
 ///
@@ -114,7 +113,7 @@ template<>
 ///          transport-specific configuration file, both as read from the
 ///          configuration file provided.
 std::tuple<std::string, std::filesystem::path> readTransportConfig(
-		const std::filesystem::path&);
+    const std::filesystem::path&);
 
 /// @brief Exception thrown when using getTransport<void>() representing an
 ///        unknown transport name was read from the config file.

@@ -23,6 +23,7 @@
 #define UP_CPP_DATAMODEL_SERIALIZER_UURI_H
 
 #include <up-core-api/uri.pb.h>
+
 #include <string>
 
 /// @brief Collection of interfaces for converting uprotocol::v1::UUri objects
@@ -32,10 +33,10 @@ namespace uprotocol::datamodel::serializer::uri {
 /// @brief Converts to and from a human-readable string representation of UUri
 ///        according to the UUri spec.
 struct AsString {
-    [[nodiscard]] std::string serialize(const v1::UUri&);
-    [[nodiscard]] v1::UUri deserialize(const std::string&);
+	[[nodiscard]] std::string serialize(const v1::UUri&);
+	[[nodiscard]] v1::UUri deserialize(const std::string&);
 };
 
-} // namespace uprotocol::datamodel::serializer::uri
+}  // namespace uprotocol::datamodel::serializer::uri
 
-#endif // UP_CPP_DATAMODEL_SERIALIZER_UURI_H
+#endif  // UP_CPP_DATAMODEL_SERIALIZER_UURI_H

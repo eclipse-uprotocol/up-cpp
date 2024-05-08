@@ -25,8 +25,9 @@
 #include <up-core-api/uattributes.pb.h>
 #include <up-core-api/umessage.pb.h>
 #include <up-core-api/upayload.pb.h>
-#include <up-core-api/uuid.pb.h>
 #include <up-core-api/uri.pb.h>
+#include <up-core-api/uuid.pb.h>
+
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -94,8 +95,7 @@ struct UMessageBuilder {
 	/// @throws InvalidUuid if ID fails validation.
 	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "response" message
-	static UMessageBuilder response(v1::UUri&& reply_to,
-	                                v1::UUID&& request_id,
+	static UMessageBuilder response(v1::UUri&& reply_to, v1::UUID&& request_id,
 	                                v1::UUri&& invoked_method);
 
 	/// @brief Pre-populates a message builder with the attributes of an
@@ -256,9 +256,8 @@ struct UMessageBuilder {
 	/// @param format The data format of the value in value_bytes.
 	///
 	/// @return A built message with the provided payload data embedded.
-	[[nodiscard]] v1::UMessage build(
-			const std::vector<uint8_t>& value_bytes,
-			v1::UPayloadFormat format) const;
+	[[nodiscard]] v1::UMessage build(const std::vector<uint8_t>& value_bytes,
+	                                 v1::UPayloadFormat format) const;
 
 	/// @brief Creates a UMessage with a provided payload based on the
 	///        builder's current state.

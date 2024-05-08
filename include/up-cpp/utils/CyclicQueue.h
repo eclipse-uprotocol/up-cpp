@@ -22,21 +22,21 @@
 #ifndef UP_CPP_UTILS_CYCLICQUEUE_H
 #define UP_CPP_UTILS_CYCLICQUEUE_H
 
-#include <queue>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <queue>
 
 namespace uprotocol::utils {
 
 /// @brief Queue that enforces a maximum size by evicting the oldest entry to
 ///        make room for new ones.
-template<typename T>
+template <typename T>
 class CyclicQueue final {
 public:
 	explicit CyclicQueue(const size_t max_size);
 
 	CyclicQueue(const CyclicQueue&) = delete;
-	CyclicQueue &operator=(const CyclicQueue&) = delete;
+	CyclicQueue& operator=(const CyclicQueue&) = delete;
 
 	virtual ~CyclicQueue() = default;
 
@@ -52,7 +52,8 @@ public:
 	bool tryPop(T& popped_value) noexcept;
 	// Time-limited blocking pop()s
 	bool tryPopFor(T& popped_value, std::chrono::milliseconds limit) noexcept;
-	bool tryPopUntil(T& popped_value, std::chrono::system_clock::time_point when) noexcept;
+	bool tryPopUntil(T& popped_value,
+	                 std::chrono::system_clock::time_point when) noexcept;
 
 	size_t size() const noexcept;
 
@@ -65,6 +66,6 @@ private:
 	std::queue<T> queue_;
 };
 
-} // namespace uprotocol::utils
+}  // namespace uprotocol::utils
 
-#endif // UP_CPP_UTILS_CYCLICQUEUE_H
+#endif  // UP_CPP_UTILS_CYCLICQUEUE_H

@@ -22,47 +22,44 @@
 #ifndef UP_CPP_UTILS_THREADPOOL_H
 #define UP_CPP_UTILS_THREADPOOL_H
 
+#include <up-cpp/utils/CyclicQueue.h>
+
+#include <atomic>
+#include <chrono>
 #include <functional>
 #include <future>
+#include <mutex>
 #include <thread>
 #include <vector>
-#include <atomic>
-#include <mutex>
-#include <up-cpp/utils/CyclicQueue.h>
-#include <chrono>
 
 namespace uprotocol::utils {
 
-    class ThreadPool
-    {
-        public:
+class ThreadPool {
+public:
+	ThreadPool(const ThreadPool&) = delete;
+	ThreadPool(ThreadPool&&) = delete;
 
-            ThreadPool(const ThreadPool &) = delete;
-            ThreadPool(ThreadPool &&) = delete;
+	ThreadPool& operator=(const ThreadPool&) = delete;
+	ThreadPool& operator=(ThreadPool&&) = delete;
 
-            ThreadPool & operator=(const ThreadPool &) = delete;
-            ThreadPool & operator=(ThreadPool &&) = delete;
+	ThreadPool(const size_t max_queue_size, const size_t max_num_of_threads,
+	           std::chrono::milliseconds task_timeout);
 
-            ThreadPool(const size_t max_queue_size,
-                    const size_t max_num_of_threads,
-					std::chrono::milliseconds task_timeout);
+	~ThreadPool();
 
-            ~ThreadPool();
+	// Submit a function to be executed asynchronously by the pool
+	template <typename F, typename... Args>
+	auto submit(F&& f, Args&&... args) -> std::future<decltype(f(args...))>;
 
-            // Submit a function to be executed asynchronously by the pool
-            template<typename F, typename...Args>
-                auto submit(F&& f, Args&&... args) -> std::future<decltype(f(args...))>;
+private:
+	CyclicQueue<std::function<void()>> queue_;
+	bool terminate_;
+	size_t maxNumOfThreads_;
+	std::atomic<std::size_t> numOfThreads_;
+	std::vector<std::future<void>> threads_;
+	std::mutex mutex_;
+	const std::chrono::milliseconds timeout_;
+};
+}  // namespace uprotocol::utils
 
-        private:
-
-            CyclicQueue<std::function<void()>> queue_;
-            bool terminate_;
-            size_t maxNumOfThreads_;
-            std::atomic<std::size_t> numOfThreads_;
-            std::vector<std::future<void>> threads_;
-            std::mutex mutex_;
-            const std::chrono::milliseconds timeout_;
-    };
-} // namespace uprotocol::utils
-
-#endif // UP_CPP_UTILS_THREADPOOL_H
+#endif  // UP_CPP_UTILS_THREADPOOL_H

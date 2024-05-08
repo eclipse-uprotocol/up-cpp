@@ -26,7 +26,8 @@
 
 /// @brief Validators for UMessage objects.
 ///
-/// See https://github.com/eclipse-uprotocol/up-spec/blob/main/basics/uattributes.adoc
+/// See
+/// https://github.com/eclipse-uprotocol/up-spec/blob/main/basics/uattributes.adoc
 namespace uprotocol::datamodel::validator::message {
 
 /// @brief Checks if UMessage is a valid UMessage of any format.
@@ -69,8 +70,8 @@ namespace uprotocol::datamodel::validator::message {
 ///   * Message priority must be the priority from the request message
 ///   * Message must not set permission_level
 ///   * Message must not set token
-[[nodiscard]] bool isValidRpcResponseFor(
-		const v1::UMessage& request, const v1::UMessage& response);
+[[nodiscard]] bool isValidRpcResponseFor(const v1::UMessage& request,
+                                         const v1::UMessage& response);
 
 /// @brief Checks if UMessage is valid for publishing to a topic
 ///

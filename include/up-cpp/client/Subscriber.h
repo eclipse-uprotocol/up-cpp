@@ -22,11 +22,12 @@
 #ifndef UP_CPP_CLIENT_SUBSCRIBER_H
 #define UP_CPP_CLIENT_SUBSCRIBER_H
 
-#include <up-cpp/transport/UTransport.h>
-#include <up-core-api/ustatus.pb.h>
 #include <up-core-api/uri.pb.h>
-#include <tuple>
+#include <up-core-api/ustatus.pb.h>
+#include <up-cpp/transport/UTransport.h>
+
 #include <memory>
+#include <tuple>
 
 /// @brief Interface for uEntities to subscribe published topics
 ///
@@ -50,10 +51,9 @@ namespace uprotocol::client::Subscriber {
 ///          * FAILSTATUS with the appropriate failure and an unconnected
 ///            ListenHandle otherwise.
 [[nodiscard]] std::tuple<v1::UStatus, transport::UTransport::ListenHandle>
-    subscribe(
-            std::shared_ptr<transport::UTransport> transport,
-            const v1::UUri& topic,
-            transport::UTransport::ListenCallback&& callback);
+subscribe(std::shared_ptr<transport::UTransport> transport,
+          const v1::UUri& topic,
+          transport::UTransport::ListenCallback&& callback);
 
 }  // namespace uprotocol::client::Subscriber
 

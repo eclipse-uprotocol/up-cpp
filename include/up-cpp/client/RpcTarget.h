@@ -23,11 +23,12 @@
 #define UP_CPP_CLIENT_RPCTARGET_H
 
 #include <up-core-api/umessage.pb.h>
-#include <up-core-api/ustatus.pb.h>
 #include <up-core-api/uri.pb.h>
-#include <up-cpp/transport/UTransport.h>
+#include <up-core-api/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
 #include <up-cpp/datamodel/validator/UMessage.h>
+#include <up-cpp/transport/UTransport.h>
+
 #include <memory>
 #include <utility>
 
@@ -39,17 +40,17 @@ namespace uprotocol::client {
 /// UTransport API; in this instance, it is the request-handling half of the
 /// RPC model.
 struct RpcTarget {
-    /// @brief Callback function signature for implementing the RPC method.
-    using RpcMethod = transport::UTransport::ListenCallback;
+	/// @brief Callback function signature for implementing the RPC method.
+	using RpcMethod = transport::UTransport::ListenCallback;
 
-    /// @brief Constructs an initiator connected to a given transport.
+	/// @brief Constructs an initiator connected to a given transport.
 	///
 	/// @param transport Transport to offer the RPC method through.
 	/// @param method_name URI representing the name clients will use to invoke
 	///                    the RPC method.
 	/// @param callback Method that will be called when requests are received.
-    RpcTarget(std::shared_ptr<transport::UTransport> transport,
-			const v1::UUri& method_name, RpcMethod&& callback);
+	RpcTarget(std::shared_ptr<transport::UTransport> transport,
+	          const v1::UUri& method_name, RpcMethod&& callback);
 
 	/// @brief Builder type for messages sent by this client
 	using MessageBuilder = datamodel::builder::UMessageBuilder;
@@ -61,7 +62,7 @@ struct RpcTarget {
 	///          sent for is the safest option.
 	///
 	/// @see datamodel::builder::UMessageBuilder::response
-	template<typename... Args>
+	template <typename... Args>
 	static MessageBuilder responseBuilder(Args&&... args) {
 		return MessageBuilder::response(std::forward<Args>(args)...);
 	}
@@ -85,10 +86,10 @@ struct RpcTarget {
 	///                   build() with no parameters.
 	///
 	/// @see datamodel::builder::UMessageBuilder::build
-	template<typename... Args>
+	template <typename... Args>
 	v1::UStatus respondTo(const v1::UMessage& request, Args&&... build_args) {
-		auto message = responseBuilder(request)
-			.build(std::forward<Args>(build_args)...);
+		auto message =
+		    responseBuilder(request).build(std::forward<Args>(build_args)...);
 		return sendResponse(std::move(message));
 	}
 
@@ -105,10 +106,9 @@ struct RpcTarget {
 	/// @param value The payload data to serialize and send.
 	///
 	/// @see datamodel::builder::UMessageBuilder::build
-	template<typename Serializer, typename ValueT>
+	template <typename Serializer, typename ValueT>
 	v1::UStatus respondTo(const v1::UMessage& request, const ValueT& value) {
-		auto message = responseBuilder(request)
-			.build<Serializer>(value);
+		auto message = responseBuilder(request).build<Serializer>(value);
 		return sendResponse(std::move(message));
 	}
 

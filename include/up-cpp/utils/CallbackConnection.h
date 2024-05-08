@@ -209,4 +209,4 @@ private:
 
 }  // namespace uprotocol::utils::callbacks
 
-#endif // UP_CPP_UTILS_CALLBACKCONNECTION_H
+#endif  // UP_CPP_UTILS_CALLBACKCONNECTION_H

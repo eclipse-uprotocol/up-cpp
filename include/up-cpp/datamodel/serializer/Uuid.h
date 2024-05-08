@@ -22,11 +22,12 @@
 #ifndef UP_CPP_DATAMODEL_SERIALIZER_UUID_H
 #define UP_CPP_DATAMODEL_SERIALIZER_UUID_H
 
-#include <up-core-api/uuid.pb.h>
 #include <up-core-api/upayload.pb.h>
+#include <up-core-api/uuid.pb.h>
+
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 /// @brief Collection of interfaces for converting uprotocol::v1::UUID objects
 ///        between protobuf and alternative representations.
@@ -34,16 +35,16 @@ namespace uprotocol::datamodel::serializer::uuid {
 
 /// @brief Converts to and from a human-readable string representation of UUID
 struct AsString {
-    [[nodiscard]] static std::string serialize(v1::UUID);
-    [[nodiscard]] static v1::UUID deserialize(const std::string&);
+	[[nodiscard]] static std::string serialize(v1::UUID);
+	[[nodiscard]] static v1::UUID deserialize(const std::string&);
 };
 
 /// @brief Converts to and from byte vector representation of UUID
 struct AsBytes {
-    [[nodiscard]] static std::vector<uint8_t> serialize(v1::UUID);
-    [[nodiscard]] static v1::UUID deserialize(const std::vector<uint8_t>&);
+	[[nodiscard]] static std::vector<uint8_t> serialize(v1::UUID);
+	[[nodiscard]] static v1::UUID deserialize(const std::vector<uint8_t>&);
 };
 
-} // namespace uprotocol::datamodel::serializer::uuid
+}  // namespace uprotocol::datamodel::serializer::uuid
 
-#endif // UP_CPP_DATAMODEL_SERIALIZER_UUID_H
+#endif  // UP_CPP_DATAMODEL_SERIALIZER_UUID_H
