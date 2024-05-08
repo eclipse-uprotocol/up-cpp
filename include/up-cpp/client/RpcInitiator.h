@@ -1,32 +1,34 @@
-// Copyright (c) 2024 General Motors GTO LLC
-//
-// Licensed to the Apache Software Foundation (ASF) under one
-// or more contributor license agreements.  See the NOTICE file
-// distributed with this work for additional information
-// regarding copyright ownership.  The ASF licenses this file
-// to you under the Apache License, Version 2.0 (the
-// "License"); you may not use this file except in compliance
-// with the License.  You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-//
-// SPDX-FileType: SOURCE
-// SPDX-FileCopyrightText: 2024 General Motors GTO LLC
+// Copyright (c) 2024 Contributors to the Eclipse Foundation                    
+//                                                                              
+// See the NOTICE file(s) distributed with this work for additional                
+// information regarding copyright ownership.                                   
+//                                                                              
+// Licensed under the Apache License, Version 2.0 (the "License");                 
+// you may not use this file except in compliance with the License.                
+// You may obtain a copy of the License at                                      
+//                                                                              
+//     http://www.apache.org/licenses/LICENSE-2.0                               
+//                                                                              
+// Unless required by applicable law or agreed to in writing, software             
+// distributed under the License is distributed on an "AS IS" BASIS,               
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.        
+// See the License for the specific language governing permissions and            
+// limitations under the License.                                               
+//                                                                              
+// SPDX-FileType: SOURCE                                                        
+// SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation          
 // SPDX-License-Identifier: Apache-2.0
+
 #ifndef UP_CPP_CLIENT_RPCINITIATOR_H
 #define UP_CPP_CLIENT_RPCINITIATOR_H
 
-#include <up-core-api/uattributes.pb.h>
+#include <up-cpp/transport/UTransport.h>
+#include <up-cpp/datamodel/builder/UMessage.h>
 #include <up-core-api/umessage.pb.h>
 #include <up-core-api/ustatus.pb.h>
-
+#include <future>
+#include <memory>
+#include <variant>
 #include <future>
 
 namespace uprotocol::client {
@@ -39,7 +41,7 @@ namespace uprotocol::client {
 class RpcInitiator {
 public:
     /// @brief Constructs an initiator connected to a given transport
-    RpcInitiator(std::shared_ptr<UTransport> transport);
+    RpcInitiator(std::shared_ptr<transport::UTransport> transport);
 
     /// @brief Gets a new UMessageBuilder configured for generating RPC request
     ///        messages targeting a specific RPC method.
@@ -54,7 +56,7 @@ public:
     /// @remarks Each call to this method will produce a new builder instance.
     ///
     /// @returns A request UMessageBuilder
-    [[nodiscard]] UMessageBuilder requestBuilder(
+    [[nodiscard]] datamodel::builder::UMessageBuilder requestBuilder(
             v1::UUri&& target_method,
             std::chrono::milliseconds ttl) const;
 
@@ -75,9 +77,9 @@ public:
     ~RpcInitiator() = default;
 
 private:
-    std::shared_ptr<UTransport> transport_;
+    std::shared_ptr<transport::UTransport> transport_;
 };
 
-}  // namespace uprotocol::rpc
+}  // namespace uprotocol::client
 
 #endif  // UP_CPP_CLIENT_RPCINITIRATOR_H

@@ -1,34 +1,32 @@
-/// Copyright (c) 2024 General Motors GTO LLC
-///
-/// Licensed to the Apache Software Foundation (ASF) under one
-/// or more contributor license agreements.  See the NOTICE file
-/// distributed with this work for additional information
-/// regarding copyright ownership.  The ASF licenses this file
-/// to you under the Apache License, Version 2.0 (the
-/// "License"); you may not use this file except in compliance
-/// with the License.  You may obtain a copy of the License at
-///
-///   http://www.apache.org/licenses/LICENSE-2.0
-///
-/// Unless required by applicable law or agreed to in writing,
-/// software distributed under the License is distributed on an
-/// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-/// KIND, either express or implied.  See the License for the
-/// specific language governing permissions and limitations
-/// under the License.
-///
-/// SPDX-FileType: SOURCE
-/// SPDX-FileCopyrightText: 2024 General Motors GTO LLC
-/// SPDX-License-Identifier: Apache-2.0
-///
+// Copyright (c) 2024 Contributors to the Eclipse Foundation                    
+//                                                                              
+// See the NOTICE file(s) distributed with this work for additional                
+// information regarding copyright ownership.                                   
+//                                                                              
+// Licensed under the Apache License, Version 2.0 (the "License");                 
+// you may not use this file except in compliance with the License.                
+// You may obtain a copy of the License at                                      
+//                                                                              
+//     http://www.apache.org/licenses/LICENSE-2.0                               
+//                                                                              
+// Unless required by applicable law or agreed to in writing, software             
+// distributed under the License is distributed on an "AS IS" BASIS,               
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.        
+// See the License for the specific language governing permissions and            
+// limitations under the License.                                               
+//                                                                              
+// SPDX-FileType: SOURCE                                                        
+// SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation          
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef UP_CPP_DATAMODEL_BUILDER_UMESSAGE_H
 #define UP_CPP_DATAMODEL_BUILDER_UMESSAGE_H
 
+#include <up-core-api/uattributes.pb.h>
 #include <up-core-api/umessage.pb.h>
 #include <up-core-api/upayload.pb.h>
 #include <up-core-api/uuid.pb.h>
-
+#include <up-core-api/uri.pb.h>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -51,7 +49,7 @@ struct UMessageBuilder {
 	///
 	/// @param topic UUri the message will be published to.
 	///
-	/// @throws TODO(gregmedd) InvalidUUri if URI fails validation.
+	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "publish" message
 	static UMessageBuilder publish(v1::UUri&& topic);
 
@@ -61,7 +59,7 @@ struct UMessageBuilder {
 	/// @param origin UUri the message will be sent from.
 	/// @param destination UUri the message will be sent to.
 	///
-	/// @throws TODO(gregmedd) InvalidUUri if URI fails validation.
+	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "notification" message
 	static UMessageBuilder notification(v1::UUri&& origin,
 	                                    v1::UUri&& destination);
@@ -75,7 +73,7 @@ struct UMessageBuilder {
 	///            will still be considered valid. Must be greater than 0
 	///            and fit within a uint32_t.
 	///
-	/// @throws TODO(gregmedd) InvalidUUri if URI fails validation.
+	/// @throws InvalidUUri if URI fails validation.
 	/// @throws std::out_of_range if (ttl <= 0) or (ttl > uint32_t max).
 	/// @returns UMessageBuilder configured to build a "request" message
 	static UMessageBuilder request(v1::UUri&& invoke_method,
@@ -93,8 +91,8 @@ struct UMessageBuilder {
 	/// @param request_id ID from the originating request.
 	/// @param invoked_method UUri where the RPC request was serviced.
 	///
-	/// @throws TODO(gregmedd) InvalidUuid if ID fails validation.
-	/// @throws TODO(gregmedd) InvalidUUri if URI fails validation.
+	/// @throws InvalidUuid if ID fails validation.
+	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "response" message
 	static UMessageBuilder response(v1::UUri&& reply_to,
 	                                v1::UUID&& request_id,
@@ -106,8 +104,8 @@ struct UMessageBuilder {
 	///
 	/// @param request The request UMesssage to generate a response to.
 	///
-	/// @throws TODO(gregmedd) InvalidUuid if ID fails validation.
-	/// @throws TODO(gregmedd) InvalidUUri if URI fails validation.
+	/// @throws InvalidUuid if ID fails validation.
+	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "response" message
 	static UMessageBuilder response(const v1::UMessage& request);
 
@@ -129,7 +127,7 @@ struct UMessageBuilder {
 	///
 	/// @param The UUID to use for built messages.
 	///
-	/// @throws TODO(gregmedd) InvalidUuid if ID fails validation.
+	/// @throws InvalidUuid if ID fails validation.
 	/// @returns A reference to this UMessageBuilder
 	UMessageBuilder& withMessageId(const v1::UUID&);
 

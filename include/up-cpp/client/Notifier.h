@@ -1,39 +1,43 @@
-// Copyright (c) 2024 General Motors GTO LLC
-//
-// Licensed to the Apache Software Foundation (ASF) under one
-// or more contributor license agreements.  See the NOTICE file
-// distributed with this work for additional information
-// regarding copyright ownership.  The ASF licenses this file
-// to you under the Apache License, Version 2.0 (the
-// "License"); you may not use this file except in compliance
-// with the License.  You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-//
-// SPDX-FileType: SOURCE
-// SPDX-FileCopyrightText: 2024 General Motors GTO LLC
+// Copyright (c) 2024 Contributors to the Eclipse Foundation                    
+//                                                                              
+// See the NOTICE file(s) distributed with this work for additional                
+// information regarding copyright ownership.                                   
+//                                                                              
+// Licensed under the Apache License, Version 2.0 (the "License");                 
+// you may not use this file except in compliance with the License.                
+// You may obtain a copy of the License at                                      
+//                                                                              
+//     http://www.apache.org/licenses/LICENSE-2.0                               
+//                                                                              
+// Unless required by applicable law or agreed to in writing, software             
+// distributed under the License is distributed on an "AS IS" BASIS,               
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.        
+// See the License for the specific language governing permissions and            
+// limitations under the License.                                               
+//                                                                              
+// SPDX-FileType: SOURCE                                                        
+// SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation          
 // SPDX-License-Identifier: Apache-2.0
+
 #ifndef UP_CPP_CLIENT_NOTIFIER_H
 #define UP_CPP_CLIENT_NOTIFIER_H
 
+#include <up-core-api/uattributes.pb.h>
 #include <up-core-api/ustatus.pb.h>
+#include <up-core-api/uri.pb.h>
 #include <up-cpp/datamodel/builder/UMessageBuilder.h>
 #include <up-cpp/transport/UTransport.h>
-#include <functional>
 #include <utility>
+#include <memory>
+#include <optional>
+#include <chrono>
+#include <tuple>
 
 namespace uprotocol::client {
 
 /// @brief Interface for uEntities to send a notification to a specified target
 ///
-/// Like all L2 client APIs, the Publisher is a wrapper on top of the L1
+/// Like all L2 client APIs, the Notifier is a wrapper on top of the L1
 /// UTransport API; in this instance, it provides for the notification model.
 struct Notifier {
     /// @brief Constructs a notifier connected to a given transport.
@@ -49,8 +53,9 @@ struct Notifier {
     /// @param priority All pubhished messages will be assigned this priority.
     /// @param ttl How long messages will be valid from the time publish() is
     ///            called.
-    Notifier(std::shared_ptr<UTransport> transport, const v1::UUri& source,
-            const v1::UUri& dest, std::optional<v1::UPriority> priority = {},
+    Notifier(std::shared_ptr<transport::UTransport> transport,
+			const v1::UUri& source, const v1::UUri& dest,
+			std::optional<v1::UPriority> priority = {},
             std::optional<std::chrono::milliseconds> ttl = {});
 
     using ListenHandle = transport::UTransport::ListenHandle;
@@ -105,8 +110,8 @@ struct Notifier {
     ~Notifier() = default;
 
 protected:
-    std::shared_ptr<UTransport> transport_;
-    UMessageBuilder notifyBuilder_;
+    std::shared_ptr<transport::UTransport> transport_;
+	datamodel::builder::UMessageBuilder notifyBuilder_;
 };
 
 }  // namespace uprotocol::client

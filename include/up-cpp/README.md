@@ -24,5 +24,9 @@ messages over a transport protocol, such as Zenoh or SOME/IP.
 
 uEntities using uProtocol for communication will use the APIs in `client/`.
 These provide specific communication models, such as pub/sub, RPC, and
-notifications. Default implementations are provided in terms of the generic
-L1 Transport interface.
+notifications.
+
+These headers are the primary interface for uEntities.
+
+Client classes are implmented entirely on top of the Transport API, and should
+not require customization or re-implementation on a per-transport basis.
