@@ -72,7 +72,7 @@ namespace uprotocol::uri {
          * @return 
          */
         auto setId(const uint32_t &id) -> BuildUEntity & {
-            if (0 == id || entity_.has_id()) {
+            if (entity_.has_id()) {
                 return *this;
             }
             entity_.set_id(id);

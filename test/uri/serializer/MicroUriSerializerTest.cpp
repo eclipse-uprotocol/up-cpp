@@ -310,6 +310,31 @@ TEST(UUri, testSerializeWithInvalidId) {
     }
 }
 
+// Test serialize uri with UEntity ID.
+TEST(UUri, testSerializeWithUEntityId) {
+    {   // non-zero ID
+        auto u_authority = BuildUAuthority().build();
+        auto u_entity = BuildUEntity().setId(2).build();
+        assertTrue(u_entity.has_id());
+        assertEquals(2, u_entity.id());
+        auto u_resource = BuildUResource().setID(3).build();
+        auto u_uri = BuildUUri().setAutority(u_authority).setEntity(u_entity).setResource(u_resource).build();
+        auto uri = MicroUriSerializer::serialize(u_uri);
+        assertFalse(uri.empty());
+    }
+
+    {   // zero ID
+        auto u_authority = BuildUAuthority().build();
+        auto u_entity = BuildUEntity().setId(0).build();
+        assertTrue(u_entity.has_id());
+        assertEquals(0, u_entity.id());
+        auto u_resource = BuildUResource().setID(3).build();
+        auto u_uri = BuildUUri().setAutority(u_authority).setEntity(u_entity).setResource(u_resource).build();
+        auto uri = MicroUriSerializer::serialize(u_uri);
+        assertFalse(uri.empty());
+    }
+}
+
 // Test serialize and deserialize IPv4 UUris.
 TEST(UUri, testSerializeDeserializeIpv4Uri) {
     auto u_authority = BuildUAuthority().setIp("192.168.1.100").build();
