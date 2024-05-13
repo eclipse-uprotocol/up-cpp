@@ -19,8 +19,8 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_NOTIFIER_H
-#define UP_CPP_CLIENT_NOTIFIER_H
+#ifndef UP_CPP_CLIENT_NOTIFICATIONSOURCE_H
+#define UP_CPP_CLIENT_NOTIFICATIONSOURCE_H
 
 #include <uprotocol/v1/uattributes.pb.h>
 #include <uprotocol/v1/uri.pb.h>
@@ -31,53 +31,38 @@
 #include <chrono>
 #include <memory>
 #include <optional>
-#include <tuple>
 #include <utility>
 
 namespace uprotocol::client {
-
-/// @brief Interface for uEntities to send a notification to a specified target
+/// @brief Interface for uEntities to receive notifications.
 ///
-/// Like all L2 client APIs, the Notifier is a wrapper on top of the L1
-/// UTransport API; in this instance, it provides for the notification model.
-struct Notifier {
-	/// @brief Constructs a notifier connected to a given transport.
+/// Like all L2 client APIs, the NotificationSource is a wrapper on top of the
+/// L1 UTransport API; in this instance, it provides for the notification
+/// sending half of the notification model.
+struct NotificationSource {
+	/// @brief Constructs a notification source connected to a given transport.
 	///
 	/// @post An internal UMessageBuilder will be configured based on the
 	///       provided attributes.
 	///
 	/// @param transport Transport to publish messages on.
-	/// @param source URI of this uE. If only the resource is set, the default
-	///               authority and entity from the transport will be
-	///               automatically filled in.
+	/// @param sink URI of this uE. The authority and entity will be replaced
+	///             automatically with those found in the transport's default.
 	/// @param sink URI of the uE notifications will be sent to.
-	/// @param priority All pubhished messages will be assigned this priority.
-	/// @param ttl How long messages will be valid from the time publish() is
+	/// @param priority All sent notifications will be assigned this priority.
+	/// @param ttl How long messages will be valid from the time notify() is
 	///            called.
-	Notifier(std::shared_ptr<transport::UTransport> transport,
+	NotificationSource(std::shared_ptr<transport::UTransport> transport,
 	         const v1::UUri& source, const v1::UUri& sink,
 	         std::optional<v1::UPriority> priority = {},
 	         std::optional<std::chrono::milliseconds> ttl = {});
-
-	using ListenHandle = transport::UTransport::ListenHandle;
-	using ListenCallback = transport::UTransport::ListenCallback;
-
-	/// @brief Register a callback to receive notifications.
-	///
-	/// @param source URI of the uE notifications will be received from.
-	/// @param sink URI of this uE. If only the resource is set, the default
-	///             authority and entity from the transport will be
-	///             automatically filled in.
-	[[nodiscard]] static std::tuple<v1::UStatus, ListenHandle> listen(
-	    const v1::UUri& source, const v1::UUri& sink,
-	    ListenCallback&& callback);
 
 	/// @brief Wrapper to package a payload and send a notification in a single
 	///        step.
 	///
 	/// @param build_args Arguments to forward to UMessageBuilder::build().
 	///                   Note that this can be omitted completely to call
-	///                   build() with no parameters.
+	///                   build() with no parameters (i.e. `.notify()`).
 	///
 	/// @see datamodel::builder::UMessageBuilder::build
 	template <typename... Args>
@@ -103,7 +88,7 @@ struct Notifier {
 		return transport_->send(std::move(message));
 	}
 
-	~Notifier() = default;
+	~NotificationSource() = default;
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
@@ -112,4 +97,4 @@ private:
 
 }  // namespace uprotocol::client
 
-#endif  // UP_CPP_CLIENT_NOTIFIER_H
+#endif  // UP_CPP_CLIENT_NOTIFICATIONSOURCE_H

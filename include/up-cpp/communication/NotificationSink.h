@@ -19,97 +19,65 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_NOTIFIER_H
-#define UP_CPP_CLIENT_NOTIFIER_H
+#ifndef UP_CPP_CLIENT_NOTIFICATION_SINK_H
+#define UP_CPP_CLIENT_NOTIFICATION_SINK_H
 
-#include <uprotocol/v1/uattributes.pb.h>
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
-#include <up-cpp/datamodel/builder/UMessage.h>
 #include <up-cpp/transport/UTransport.h>
 
-#include <chrono>
 #include <memory>
 #include <optional>
-#include <tuple>
 #include <utility>
+#include <variant>
 
 namespace uprotocol::client {
 
-/// @brief Interface for uEntities to send a notification to a specified target
+/// @brief Interface for uEntities to receive notifications.
 ///
-/// Like all L2 client APIs, the Notifier is a wrapper on top of the L1
-/// UTransport API; in this instance, it provides for the notification model.
-struct Notifier {
-	/// @brief Constructs a notifier connected to a given transport.
-	///
-	/// @post An internal UMessageBuilder will be configured based on the
-	///       provided attributes.
-	///
-	/// @param transport Transport to publish messages on.
-	/// @param source URI of this uE. If only the resource is set, the default
-	///               authority and entity from the transport will be
-	///               automatically filled in.
-	/// @param sink URI of the uE notifications will be sent to.
-	/// @param priority All pubhished messages will be assigned this priority.
-	/// @param ttl How long messages will be valid from the time publish() is
-	///            called.
-	Notifier(std::shared_ptr<transport::UTransport> transport,
-	         const v1::UUri& source, const v1::UUri& sink,
-	         std::optional<v1::UPriority> priority = {},
-	         std::optional<std::chrono::milliseconds> ttl = {});
-
-	using ListenHandle = transport::UTransport::ListenHandle;
+/// Like all L2 client APIs, the NotificationSink is a wrapper on top of the L1
+/// UTransport API; in this instance, it provides for the notification
+/// receiving half of the notification model.
+struct NotificationSink {
 	using ListenCallback = transport::UTransport::ListenCallback;
 
-	/// @brief Register a callback to receive notifications.
-	///
-	/// @param source URI of the uE notifications will be received from.
-	/// @param sink URI of this uE. If only the resource is set, the default
-	///             authority and entity from the transport will be
-	///             automatically filled in.
-	[[nodiscard]] static std::tuple<v1::UStatus, ListenHandle> listen(
-	    const v1::UUri& source, const v1::UUri& sink,
-	    ListenCallback&& callback);
+	using StatusOrSink = std::variant<v1::UStatus, std::unique_ptr<NotificationSink>>
 
-	/// @brief Wrapper to package a payload and send a notification in a single
-	///        step.
+	/// @brief Create a notification sink to receive notifications.
 	///
-	/// @param build_args Arguments to forward to UMessageBuilder::build().
-	///                   Note that this can be omitted completely to call
-	///                   build() with no parameters.
+	/// @param sink URI of this uE. The authority and entity will be replaced
+	///             automatically with those found in the transport's default.
+	/// @param callback Called when a notification is received.
+	/// @param source_filter (Optional) URI to compare against notification
+	///                      sources. Only notifications that match will be
+	///                      forwarded tot he callback.
 	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	template <typename... Args>
-	v1::UStatus notify(Args&&... build_args) {
-		auto message = notify_builder_.build(std::forward<Args>(build_args)...);
+	/// @returns
+	///    * NotificationSink if the callback was connected successfully.
+	///    * UStatus containing an error state otherwise.
+	[[nodiscard]] static StatusOrSink create(
+	    const v1::UUri& sink, ListenCallback&& callback,
+		std::optional<v1::UUri>&& source_filter);
 
-		return transport_->send(std::move(message));
-	}
+	~NotificationSink() = default;
 
-	/// @brief Wrapper to package a payload and send a notification in a single
-	///        step.
+protected:
+	/// @brief Constructs a notification listener connected to a given
+	///        transport.
 	///
-	/// @tparam Serializer An object capable of serializing ValueT.
-	/// @tparam ValueT Automatically inferred unserialized payload type.
+	/// @param transport Transport to receive notifications on.
+	/// @param listener Handle for a callback connected and listening for
+	///                 notifications.
 	///
-	/// @param value The payload data to serialize and send.
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	template <typename Serializer, typename ValueT>
-	v1::UStatus notify(const ValueT& value) {
-		auto message = notify_builder_.build<Serializer>(value);
-
-		return transport_->send(std::move(message));
-	}
-
-	~Notifier() = default;
+	/// @throws std::invalid_argument if listener is not connected.
+	NotificationSink(std::shared_ptr<transport::UTransport> transport,
+	         transport::UTransport::ListenHandle&& listener);
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
-	datamodel::builder::UMessageBuilder notify_builder_;
+	transport::UTransport::ListenHandle listener_;
 };
 
 }  // namespace uprotocol::client
 
-#endif  // UP_CPP_CLIENT_NOTIFIER_H
+#endif  // UP_CPP_CLIENT_NOTIFICATION_SINK_H
