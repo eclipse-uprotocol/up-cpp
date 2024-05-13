@@ -19,8 +19,8 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_RPCTARGET_H
-#define UP_CPP_CLIENT_RPCTARGET_H
+#ifndef UP_CPP_CLIENT_RPCSERVER_H
+#define UP_CPP_CLIENT_RPCSERVER_H
 
 #include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/uri.pb.h>
@@ -34,12 +34,12 @@
 
 namespace uprotocol::client {
 
-/// @brief Interface for uEntities to act as a target of RPC requests.
+/// @brief Interface for uEntities to receive and respond to RPC requests.
 ///
-/// Like all L2 client APIs, the RpcTarget is a wrapper on top of the L1
+/// Like all L2 client APIs, the RpcServer is a wrapper on top of the L1
 /// UTransport API; in this instance, it is the request-handling half of the
 /// RPC model.
-struct RpcTarget {
+struct RpcServer {
 	/// @brief Callback function signature for implementing the RPC method.
 	using RpcMethod = transport::UTransport::ListenCallback;
 
@@ -49,7 +49,7 @@ struct RpcTarget {
 	/// @param method_name URI representing the name clients will use to invoke
 	///                    the RPC method.
 	/// @param callback Method that will be called when requests are received.
-	RpcTarget(std::shared_ptr<transport::UTransport> transport,
+	RpcServer(std::shared_ptr<transport::UTransport> transport,
 	          const v1::UUri& method_name, RpcMethod&& callback);
 
 	/// @brief Builder type for messages sent by this client
@@ -112,7 +112,7 @@ struct RpcTarget {
 		return sendResponse(std::move(message));
 	}
 
-	~RpcTarget() = default;
+	~RpcServer() = default;
 
 private:
 	/// @brief Transport instance that will be used for communication
@@ -124,4 +124,4 @@ private:
 
 }  // namespace uprotocol::client
 
-#endif  // UP_CPP_CLIENT_RPCTARGET_H
+#endif  // UP_CPP_CLIENT_RPCSERVER_H

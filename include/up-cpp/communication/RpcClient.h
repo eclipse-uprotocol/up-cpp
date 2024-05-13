@@ -19,8 +19,8 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_RPCINITIATOR_H
-#define UP_CPP_CLIENT_RPCINITIATOR_H
+#ifndef UP_CPP_CLIENT_RPCCLIENT_H
+#define UP_CPP_CLIENT_RPCCLIENT_H
 
 #include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
@@ -33,15 +33,15 @@
 
 namespace uprotocol::client {
 
-/// @brief Interface for uEntities to initiate RPC requests
+/// @brief Interface for uEntities to invoke RPC methods.
 ///
-/// Like all L2 client APIs, the RpcInitiator is a wrapper on top of the L1
+/// Like all L2 client APIs, the RpcClient is a wrapper on top of the L1
 /// UTransport API; in this instance, it is the request-initiating half of the
 /// RPC model.
-class RpcInitiator {
+class RpcClient {
 public:
-	/// @brief Constructs an initiator connected to a given transport
-	explicit RpcInitiator(std::shared_ptr<transport::UTransport> transport);
+	/// @brief Constructs a client connected to a given transport
+	explicit RpcClient(std::shared_ptr<transport::UTransport> transport);
 
 	/// @brief Gets a new UMessageBuilder configured for generating RPC request
 	///        messages targeting a specific RPC method.
@@ -73,7 +73,7 @@ public:
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] std::future<StatusOrMessage> invokeMethod(v1::UMessage&&);
 
-	~RpcInitiator() = default;
+	~RpcClient() = default;
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
@@ -81,4 +81,4 @@ private:
 
 }  // namespace uprotocol::client
 
-#endif  // UP_CPP_CLIENT_RPCINITIATOR_H
+#endif  // UP_CPP_CLIENT_RPCCLIENT_H
