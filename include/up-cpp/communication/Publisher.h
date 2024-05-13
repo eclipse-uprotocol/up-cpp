@@ -33,7 +33,7 @@
 #include <optional>
 #include <utility>
 
-namespace uprotocol::client {
+namespace uprotocol::communication {
 
 /// @brief Interface for uEntities to publish messages out to subscribers
 ///
@@ -92,6 +92,6 @@ private:
 	datamodel::builder::UMessageBuilder publish_builder_;
 };
 
-}  // namespace uprotocol::client
+}  // namespace uprotocol::communication
 
 #endif  // UP_CPP_CLIENT_PUBLISHER_H

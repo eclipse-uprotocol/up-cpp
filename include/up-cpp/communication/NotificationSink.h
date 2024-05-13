@@ -31,7 +31,7 @@
 #include <utility>
 #include <variant>
 
-namespace uprotocol::client {
+namespace uprotocol::communication {
 
 /// @brief Interface for uEntities to receive notifications.
 ///
@@ -78,6 +78,6 @@ private:
 	transport::UTransport::ListenHandle listener_;
 };
 
-}  // namespace uprotocol::client
+}  // namespace uprotocol::communication
 
 #endif  // UP_CPP_CLIENT_NOTIFICATION_SINK_H

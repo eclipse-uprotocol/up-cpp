@@ -34,7 +34,7 @@
 /// Like all L2 client APIs, the functions in Subscriber are a wrapper on top
 /// of the L1 UTransport API; in this instance, they are the subscriber half of
 /// the pub/sub model.
-namespace uprotocol::client::Subscriber {
+namespace uprotocol::communication::Subscriber {
 
 /// @brief Subscribes to a topic.
 ///
@@ -55,6 +55,6 @@ subscribe(std::shared_ptr<transport::UTransport> transport,
           const v1::UUri& topic,
           transport::UTransport::ListenCallback&& callback);
 
-}  // namespace uprotocol::client::Subscriber
+}  // namespace uprotocol::communication::Subscriber
 
 #endif  // UP_CPP_CLIENT_SUBSCRIBER_H

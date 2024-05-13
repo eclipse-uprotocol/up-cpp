@@ -32,7 +32,7 @@
 #include <memory>
 #include <utility>
 
-namespace uprotocol::client {
+namespace uprotocol::communication {
 
 /// @brief Interface for uEntities to receive and respond to RPC requests.
 ///
@@ -122,6 +122,6 @@ private:
 	transport::UTransport::ListenHandle callback_handle_;
 };
 
-}  // namespace uprotocol::client
+}  // namespace uprotocol::communication
 
 #endif  // UP_CPP_CLIENT_RPCSERVER_H

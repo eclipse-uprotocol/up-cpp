@@ -31,7 +31,7 @@
 #include <memory>
 #include <variant>
 
-namespace uprotocol::client {
+namespace uprotocol::communication {
 
 /// @brief Interface for uEntities to invoke RPC methods.
 ///
@@ -79,6 +79,6 @@ private:
 	std::shared_ptr<transport::UTransport> transport_;
 };
 
-}  // namespace uprotocol::client
+}  // namespace uprotocol::communication
 
 #endif  // UP_CPP_CLIENT_RPCCLIENT_H

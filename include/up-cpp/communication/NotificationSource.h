@@ -33,7 +33,7 @@
 #include <optional>
 #include <utility>
 
-namespace uprotocol::client {
+namespace uprotocol::communication {
 /// @brief Interface for uEntities to receive notifications.
 ///
 /// Like all L2 client APIs, the NotificationSource is a wrapper on top of the
@@ -95,6 +95,6 @@ private:
 	datamodel::builder::UMessageBuilder notify_builder_;
 };
 
-}  // namespace uprotocol::client
+}  // namespace uprotocol::communication
 
 #endif  // UP_CPP_CLIENT_NOTIFICATIONSOURCE_H
