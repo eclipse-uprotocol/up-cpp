@@ -20,13 +20,14 @@ folder. This is unofficially "Layer Zero" of uProtocol.
 The abstract API in `transport/` is for sending and receiving uProtocol
 messages over a transport protocol, such as Zenoh or SOME/IP.
 
-## L2: Client
+## L2: Communication
 
-uEntities using uProtocol for communication will use the APIs in `client/`.
-These provide specific communication models, such as pub/sub, RPC, and
-notifications.
+uEntities building on uProtocol will use the APIs in `communication/`.  These
+provide specific communication models, such as pub/sub, RPC, and notifications.
 
 These headers are the primary interface for uEntities.
 
 Client classes are implmented entirely on top of the Transport API, and should
 not require customization or re-implementation on a per-transport basis.
+At construction time, a `shared_ptr<UTransport>` is required for these classes
+to operate.
