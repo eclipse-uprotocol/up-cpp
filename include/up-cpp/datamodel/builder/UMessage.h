@@ -57,13 +57,13 @@ struct UMessageBuilder {
 	/// @brief Pre-populates a message builder with the attributes of a
 	///        "notification" type message.
 	///
-	/// @param origin UUri the message will be sent from.
-	/// @param destination UUri the message will be sent to.
+	/// @param source UUri the message will be sent from.
+	/// @param sink UUri the message will be sent to.
 	///
 	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "notification" message
-	static UMessageBuilder notification(v1::UUri&& origin,
-	                                    v1::UUri&& destination);
+	static UMessageBuilder notification(v1::UUri&& source,
+	                                    v1::UUri&& sink);
 
 	/// @brief Pre-populates a message builder with the attributes of an
 	///        RPC "request" type message.

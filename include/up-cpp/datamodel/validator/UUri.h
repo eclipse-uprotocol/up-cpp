@@ -37,8 +37,7 @@ namespace uprotocol::datamodel::validator::uri {
 ///     * isValidRpcMethod()
 ///     * isValidRpcResponse()
 ///     * isValidPublishTopic()
-///     * isValidNotifySource()
-///     * isValidNotifyDestination()
+///     * isValidNotification()
 [[nodiscard]] bool isValid(const v1::UUri&);
 
 /// @brief Checks if UUri is valid for invoking an RPC method
@@ -47,8 +46,7 @@ namespace uprotocol::datamodel::validator::uri {
 /// resource_id must be in the range [0x0001, 0x7FFF].
 [[nodiscard]] bool isValidRpcMethod(const v1::UUri&);
 
-/// @brief Checks if UUri is a valid destination for responding to an RPC
-///        request.
+/// @brief Checks if UUri is a valid sink for responding to an RPC request.
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be 0.
@@ -66,7 +64,7 @@ namespace uprotocol::datamodel::validator::uri {
 /// must be in the range [0x8000, 0xFFFE].
 [[nodiscard]] bool isValidPublishSubscription(const v1::UUri&);
 
-/// @brief Checks if UUri is valid as notification source or destination
+/// @brief Checks if UUri is valid as notification source or sink
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be in the range [0x8000, 0xFFFE].

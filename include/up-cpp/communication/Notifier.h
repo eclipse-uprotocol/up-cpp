@@ -50,12 +50,12 @@ struct Notifier {
 	/// @param source URI of this uE. If only the resource is set, the default
 	///               authority and entity from the transport will be
 	///               automatically filled in.
-	/// @param dest URI of the uE notifications will be sent to.
+	/// @param sink URI of the uE notifications will be sent to.
 	/// @param priority All pubhished messages will be assigned this priority.
 	/// @param ttl How long messages will be valid from the time publish() is
 	///            called.
 	Notifier(std::shared_ptr<transport::UTransport> transport,
-	         const v1::UUri& source, const v1::UUri& dest,
+	         const v1::UUri& source, const v1::UUri& sink,
 	         std::optional<v1::UPriority> priority = {},
 	         std::optional<std::chrono::milliseconds> ttl = {});
 
@@ -65,11 +65,11 @@ struct Notifier {
 	/// @brief Register a callback to receive notifications.
 	///
 	/// @param source URI of the uE notifications will be received from.
-	/// @param dest URI of this uE. If only the resource is set, the default
+	/// @param sink URI of this uE. If only the resource is set, the default
 	///             authority and entity from the transport will be
 	///             automatically filled in.
 	[[nodiscard]] static std::tuple<v1::UStatus, ListenHandle> listen(
-	    const v1::UUri& source, const v1::UUri& dest,
+	    const v1::UUri& source, const v1::UUri& sink,
 	    ListenCallback&& callback);
 
 	/// @brief Wrapper to package a payload and send a notification in a single
