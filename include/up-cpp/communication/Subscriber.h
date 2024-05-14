@@ -29,32 +29,48 @@
 #include <memory>
 #include <tuple>
 
+namespace uprotocol::communication {
+
 /// @brief Interface for uEntities to subscribe published topics
 ///
 /// Like all L2 client APIs, the functions in Subscriber are a wrapper on top
 /// of the L1 UTransport API; in this instance, they are the subscriber half of
 /// the pub/sub model.
-namespace uprotocol::communication::Subscriber {
+struct Subscriber {
+	using ListenCallback = transport::UTransport::ListenCallback;
 
-/// @brief Subscribes to a topic.
-///
-/// The subscription will remain active so long as the ListenHandle is not
-/// destroyed or reset.
-///
-/// @param transport Transport to register with.
-/// @param topic UUri of the topic to listen on.
-/// @param callback Function to be called when a message is published ot the
-///                 subscribed topic.
-///
-/// @returns * OKSTATUS and a connected ListenHandle if the subscription was
-///            successful.
-///          * FAILSTATUS with the appropriate failure and an unconnected
-///            ListenHandle otherwise.
-[[nodiscard]] std::tuple<v1::UStatus, transport::UTransport::ListenHandle>
-subscribe(std::shared_ptr<transport::UTransport> transport,
-          const v1::UUri& topic,
-          transport::UTransport::ListenCallback&& callback);
+	using StatusOrSubscriber = std::variant<v1::UStatus, std::unique_ptr<Subscriber>>
 
-}  // namespace uprotocol::communication::Subscriber
+	/// @brief Subscribes to a topic.
+	///
+	/// The subscription will remain active so long as the ListenHandle is not
+	/// destroyed or reset.
+	///
+	/// @param transport Transport to register with.
+	/// @param topic UUri of the topic to listen on.
+	/// @param callback Function to be called when a message is published ot the
+	///                 subscribed topic.
+	///
+	/// @returns * OKSTATUS and a connected ListenHandle if the subscription was
+	///            successful.
+	///          * FAILSTATUS with the appropriate failure and an unconnected
+	///            ListenHandle otherwise.
+	[[nodiscard]] StatusOrSubscriber
+		subscribe(std::shared_ptr<transport::UTransport> transport,
+				const v1::UUri& topic,
+				transport::UTransport::ListenCallback&& callback);
+
+protected:
+	Subscriber(std::shared_ptr<transport::UTransport> transport,
+				const v1::UUri& topic,
+				transport::UTransport::ListenCallback&& callback);
+
+private:
+	std::shared_ptr<transport::UTransport> transport_;
+
+	transport::UTransport::ListenHandle subscription_;
+};
+
+}  // namespace uprotocol::communication
 
 #endif  // UP_CPP_CLIENT_SUBSCRIBER_H
