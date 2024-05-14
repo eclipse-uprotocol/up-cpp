@@ -29,6 +29,7 @@
 
 #include <future>
 #include <memory>
+#include <string>
 #include <variant>
 
 namespace uprotocol::communication {
@@ -38,45 +39,52 @@ namespace uprotocol::communication {
 /// Like all L2 client APIs, the RpcClient is a wrapper on top of the L1
 /// UTransport API; in this instance, it is the request-initiating half of the
 /// RPC model.
-class RpcClient {
-public:
+struct RpcClient {
 	/// @brief Constructs a client connected to a given transport
-	explicit RpcClient(std::shared_ptr<transport::UTransport> transport);
-
-	/// @brief Gets a new UMessageBuilder configured for generating RPC request
-	///        messages targeting a specific RPC method.
-	///
-	/// @param target_method The method that will be invoked when the message
-	///                      is built and sent.
-	/// @param ttl Time in milliseconds that an RPC request will remain valid
-	///            starting from when UMessageBuilder::build() is called.
-	///
-	/// @remarks This message builder can be held and reused for recurring
-	///          requests to a particular target.
-	/// @remarks Each call to this method will produce a new builder instance.
-	///
-	/// @returns A request UMessageBuilder
-	[[nodiscard]] datamodel::builder::UMessageBuilder requestBuilder(
-	    v1::UUri&& target_method, std::chrono::milliseconds ttl) const;
+	explicit RpcClient(std::shared_ptr<transport::UTransport> transport,
+			v1::UUri&& method, v1::UPriority, std::chrono::milliseconds ttl,
+			std::optional<uint32_t> permission_level = {},
+			std::optional<std::string> token = {});
 
 	/// @brief Contains either a UStatus or a UMessage
 	using StatusOrMessage = std::variant<v1::UStatus, v1::UMessage>;
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
-	/// @param A request-type message that will be used to invoke invoke the
-	///        RPC method.
+	/// @param build_args Arguments to forward to UMessageBuilder::build().
+	///                   Note that this can be omitted completely to call
+	///                   build() with no parameters.
+	///
+	/// @see datamodel::builder::UMessageBuilder::build
 	///
 	/// @returns A promised future that can resolve to one of:
 	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///            received before the request expired (based on request TTL).
 	///          * A UMessage containing the response from the RPC target.
-	[[nodiscard]] std::future<StatusOrMessage> invokeMethod(v1::UMessage&&);
+	template <typename... Args>
+	[[nodiscard]] std::future<StatusOrMessage> invokeMethod(Args&&... build_args);
+
+	/// @brief Invokes an RPC method by sending a request message.
+	///
+	/// @tparam Serializer An object capable of serializing ValueT.
+	/// @tparam ValueT Automatically inferred unserialized payload type.
+	///
+	/// @param value The payload data to serialize and send.
+	///
+	/// @see datamodel::builder::UMessageBuilder::build
+	///
+	/// @returns A promised future that can resolve to one of:
+	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
+	///            received before the request expired (based on request TTL).
+	///          * A UMessage containing the response from the RPC target.
+	template <typename Serializer, typename ValueT>
+	[[nodiscard]] std::future<StatusOrMessage> invokeMethod(const ValueT&);
 
 	~RpcClient() = default;
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
+	datamodel::builder::UMessageBuilder builder_;
 };
 
 }  // namespace uprotocol::communication

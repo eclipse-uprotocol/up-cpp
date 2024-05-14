@@ -29,6 +29,7 @@
 #include <up-cpp/datamodel/validator/UMessage.h>
 #include <up-cpp/transport/UTransport.h>
 
+#include <chrono>
 #include <memory>
 #include <utility>
 
@@ -41,7 +42,7 @@ namespace uprotocol::communication {
 /// RPC model.
 struct RpcServer {
 	/// @brief Callback function signature for implementing the RPC method.
-	using RpcMethod = transport::UTransport::ListenCallback;
+	using RpcCallback = transport::UTransport::ListenCallback;
 
 	/// @brief Constructs an initiator connected to a given transport.
 	///
@@ -49,36 +50,14 @@ struct RpcServer {
 	/// @param method_name URI representing the name clients will use to invoke
 	///                    the RPC method.
 	/// @param callback Method that will be called when requests are received.
+	/// @param ttl (Optional) Time response will be valid from the moment
+	///            respond() is called. Note that the original request's TTL
+	///            may also still apply.
 	RpcServer(std::shared_ptr<transport::UTransport> transport,
-	          const v1::UUri& method_name, RpcMethod&& callback);
-
-	/// @brief Builder type for messages sent by this client
-	using MessageBuilder = datamodel::builder::UMessageBuilder;
-
-	/// @brief Gets a UMessageBuilder by forwarding parameters to
-	///        UMessageBuilder::response().
-	///
-	/// @remarks Generally, passing the request message this response is being
-	///          sent for is the safest option.
-	///
-	/// @see datamodel::builder::UMessageBuilder::response
-	template <typename... Args>
-	static MessageBuilder responseBuilder(Args&&... args) {
-		return MessageBuilder::response(std::forward<Args>(args)...);
-	}
-
-	/// @brief Sends a response message.
-	///
-	/// Intended to pair with responseBuilder().
-	///
-	/// @throws InvalidUMessage if the message is not a response.
-	v1::UStatus sendResponse(v1::UMessage&&);
+	          const v1::UUri& method_name, RpcCallback&& callback
+		  std::optional<std::chrono::milliseconds> ttl = {});
 
 	/// @brief Wrapper to build and send a response in a single step.
-	///
-	/// @note Does not allow for full customization of response attributes.
-	///       For attribute customization, use responseBuilder() and
-	///       sendResponse() instead.
 	///
 	/// @param request The request message to send a response to.
 	/// @param build_args Arguments to forward to UMessageBuilder::build().
@@ -87,17 +66,16 @@ struct RpcServer {
 	///
 	/// @see datamodel::builder::UMessageBuilder::build
 	template <typename... Args>
-	v1::UStatus respondTo(const v1::UMessage& request, Args&&... build_args) {
-		auto message =
-		    responseBuilder(request).build(std::forward<Args>(build_args)...);
-		return sendResponse(std::move(message));
+	[[nodiscard]] v1::UStatus respond(const v1::UMessage& request, Args&&... build_args) const {
+		using Builder = datamodel::builder::UMessageBuilder;
+		auto builder = Builder::response(request);
+		if (ttl_) {
+			builder.withTtl(*ttl_);
+		}
+		return transport_->send(builder.build(std::forward<Args>(build_args)...));
 	}
 
 	/// @brief Wrapper to build and send a response in a single step.
-	///
-	/// @note Does not allow for full customization of response attributes.
-	///       For attribute customization, use responseBuilder() and
-	///       sendResponse() instead.
 	///
 	/// @tparam Serializer An object capable of serializing ValueT.
 	/// @tparam ValueT Automatically inferred unserialized payload type.
@@ -107,9 +85,13 @@ struct RpcServer {
 	///
 	/// @see datamodel::builder::UMessageBuilder::build
 	template <typename Serializer, typename ValueT>
-	v1::UStatus respondTo(const v1::UMessage& request, const ValueT& value) {
-		auto message = responseBuilder(request).build<Serializer>(value);
-		return sendResponse(std::move(message));
+	[[nodiscard]] v1::UStatus respond(const v1::UMessage& request, const ValueT& value) const {
+		using Builder = datamodel::builder::UMessageBuilder;
+		auto builder = Builder::response(request);
+		if (ttl_) {
+			builder.withTtl(*ttl_);
+		}
+		return transport_->send(builder.build<Serializer>(std::forward<Args>(build_args)...));
 	}
 
 	~RpcServer() = default;
@@ -120,6 +102,9 @@ private:
 
 	/// @brief Handle to the connected callback for the RPC method
 	transport::UTransport::ListenHandle callback_handle_;
+
+	/// @brief TTL to use for responses, if set at construction time
+	std::optional<std::chrono::milliseconds> ttl_;
 };
 
 }  // namespace uprotocol::communication
