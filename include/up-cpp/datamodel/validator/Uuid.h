@@ -59,7 +59,7 @@ bool isV6(v1::UUID);
 /// @returns True if the UUID has a valid uProtocol UUID, false otherwise.
 bool isUProtocol(v1::UUID);
 
-/// @breif Checks if the provided UUID has expired based on the given TTL.
+/// @brief Checks if the provided UUID has expired based on the given TTL.
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns True if the difference between the current system time and
 ///          the the timestamp in the UUID is greater than the TTL.
@@ -68,12 +68,12 @@ bool isExpired(v1::UUID uuid, std::chrono::milliseconds ttl);
 
 /// @name Inspection utilities
 /// @{
-/// @breif Gets the version field from a UUID object
+/// @brief Gets the version field from a UUID object
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns The UUID's version
 uint8_t getVersion(v1::UUID);
 
-/// @breif Gets the variant field from a UUID object
+/// @brief Gets the variant field from a UUID object
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns The UUID's variant
 uint8_t getVariant(v1::UUID);
@@ -97,7 +97,7 @@ std::chrono::milliseconds getElapsedTime(v1::UUID);
 std::chrono::milliseconds getRemainingTime(v1::UUID uuid,
                                            std::chrono::milliseconds ttl);
 
-/// @breif Gets the counter field from a UUID object
+/// @brief Gets the counter field from a UUID object
 /// @remarks Counter provides for ordering of UUIDs generated within the
 ///          same millisecond tick of the system clock.
 /// @throws InvalidUuid if the UUID does not contain valid UUID data

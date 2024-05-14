@@ -68,8 +68,9 @@ struct UMessageBuilder {
 	/// @brief Pre-populates a message builder with the attributes of an
 	///        RPC "request" type message.
 	///
-	/// @param invoke_method UUri where the RPC request will be serviced.
-	/// @param reply_to UUri where responses will be returned to.
+	/// @param method UUri where the RPC request will be serviced.
+	/// @param source UUri where responses will be returned to.
+	/// @param priority Priority of built request messages.
 	/// @param ttl Amount of time from the call to build() that a message
 	///            will still be considered valid. Must be greater than 0
 	///            and fit within a uint32_t.
@@ -77,26 +78,28 @@ struct UMessageBuilder {
 	/// @throws InvalidUUri if URI fails validation.
 	/// @throws std::out_of_range if (ttl <= 0) or (ttl > uint32_t max).
 	/// @returns UMessageBuilder configured to build a "request" message
-	static UMessageBuilder request(v1::UUri&& invoke_method,
-	                               v1::UUri&& reply_to,
+	static UMessageBuilder request(v1::UUri&& method,
+	                               v1::UUri&& source,
+								   v1::UPriority priority,
 	                               std::chrono::milliseconds ttl);
 
 	/// @brief Pre-populates a message builder with the attributes of an
 	///        RPC "response" type message.
 	///
-	/// @note An alternate responseTo(UMessage) interface is also provided
+	/// @note An alternate response(UMessage) interface is also provided
 	///       that will, in many cases, be simpler to use than this
 	///       interface.
 	///
-	/// @param reply_to UUri where the RPC will be delivered.
+	/// @param sink UUri where the RPC will be delivered.
 	/// @param request_id ID from the originating request.
-	/// @param invoked_method UUri where the RPC request was serviced.
+	/// @param priority Priority from the originating request.
+	/// @param method UUri where the RPC request was serviced.
 	///
 	/// @throws InvalidUuid if ID fails validation.
 	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "response" message
-	static UMessageBuilder response(v1::UUri&& reply_to, v1::UUID&& request_id,
-	                                v1::UUri&& invoked_method);
+	static UMessageBuilder response(v1::UUri&& sink, v1::UUID&& request_id,
+	                                v1::UPriority priority, v1::UUri&& method);
 
 	/// @brief Pre-populates a message builder with the attributes of an
 	///        RPC "response" type message based on the initiating request
@@ -114,8 +117,8 @@ struct UMessageBuilder {
 	///
 	/// Allows for a fixed, known ID to be set as the message ID. Normally,
 	/// a unique message ID would be generated each time build() is called,
-	/// but a builder where withMessageId() has been called will always
-	/// produce the ID used in that call.
+	/// but a builder where withId() has been called will always produce the ID
+	/// used in that call.
 	///
 	/// @note In general, use of this method represents a special case. It
 	///       does not need to be used in most scenarios as a unique
@@ -129,7 +132,7 @@ struct UMessageBuilder {
 	///
 	/// @throws InvalidUuid if ID fails validation.
 	/// @returns A reference to this UMessageBuilder
-	UMessageBuilder& withMessageId(const v1::UUID&);
+	UMessageBuilder& withId(const v1::UUID&);
 
 	/// @brief Set the message priority attribute for built messages.
 	///
@@ -257,6 +260,20 @@ struct UMessageBuilder {
 	///
 	/// @return A built message with the provided payload data embedded.
 	[[nodiscard]] v1::UMessage build(const std::vector<uint8_t>& value_bytes,
+	                                 v1::UPayloadFormat format) const;
+
+	/// @brief Creates a UMessage with a provided payload based on the
+	///        builder's current state.
+	///
+	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT, but can
+	///       be used for other payload formats.
+	///
+	/// @param value A string to be used as the value for the message's
+	///              UPayload.
+	/// @param format The data format of the value in value.
+	///
+	/// @return A built message with the provided payload data embedded.
+	[[nodiscard]] v1::UMessage build(const std::string& value,
 	                                 v1::UPayloadFormat format) const;
 
 	/// @brief Creates a UMessage with a provided payload based on the
