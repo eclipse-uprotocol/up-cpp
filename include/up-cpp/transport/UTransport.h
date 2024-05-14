@@ -90,39 +90,28 @@ public:
 	using ListenHandle = typename CallbackConnection::Handle;
 
 	/// @brief Register listener to be called when UMessage is received
-	///        for the given URI.
-	///
-	/// @param uri Resolved UUri for where messages are expected to
-	///            arrived via the underlying transport technology.
-	/// @param listener Callback to be called when a message is received
-	///                 at the given URI. The UMessage will be provided
-	///                 as a parameter when the callback is called.
-	///
-	/// @returns * OKSTATUS and a connected ListenHandle if the listener
-	///            was registered successfully.
-	///          * FAILSTATUS with the appropriate failure and an
-	///            unconnected ListenHandle otherwise.
-	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle> registerListener(
-	    const v1::UUri& uri, ListenCallback&& listener);
-
-	/// @brief Register listener to be called when UMessage is received
 	///        for the given URI, filtered by message source.
 	///
-	/// @param uri Resolved UUri for where messages are expected to
-	///            arrived via the underlying transport technology.
+	/// @remarks The UUris here can contain wildcard matches for the filters.
+	///
+	/// @param sink_filter UUri for where messages are expected to arrive via
+	///                    the underlying transport technology. The callback
+	///                    will be called when a message with a matching sink
+	///                    arrives.
 	/// @param listener Callback to be called when a message is received
 	///                 at the given URI. The UMessage will be provided
 	///                 as a parameter when the callback is called.
-	/// @param source_filter Resolved UUri for where messages are expected to
-	///                      have been sent from.
+	/// @param source_filter (Optional) UUri for where messages are expected to
+	///                      have been sent from. The callback will only be
+	///                      called for messages where the source matches.
 	///
 	/// @returns * OKSTATUS and a connected ListenHandle if the listener
 	///            was registered successfully.
 	///          * FAILSTATUS with the appropriate failure and an
 	///            unconnected ListenHandle otherwise.
 	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle> registerListener(
-	    const v1::UUri& uri, ListenCallback&& listener,
-	    const v1::UUri& source_filter);
+	    const v1::UUri& sink_filter, ListenCallback&& listener,
+	    std::optional<v1::UUri>&& source_filter = {});
 
 	/// @brief Gets the default source Authority and Entity for all clients
 	///        using this transport instance.
@@ -150,31 +139,14 @@ protected:
 	///          version of registerListener() will reset the connection
 	///          handle before returning it to the caller.
 	///
-	/// @param uri Resolved UUri for where messages are expected to
-	///            arrived via the underlying transport technology.
+	/// @param sink_filter UUri for where messages are expected to arrive via
+	///                    the underlying transport technology. The callback
+	///                    will be called when a message with a matching sink
 	/// @param listener shared_ptr to a connected callback object, to be
 	///                 called when a message is received.
-	///
-	/// @returns * OKSTATUS if the listener was registered successfully.
-	///          * FAILSTATUS with the appropriate failure otherwise.
-	[[nodiscard]] virtual v1::UStatus registerListener(
-	    const v1::UUri& uri, CallableConn&& listener) = 0;
-
-	/// @brief Register listener to be called when UMessage is received
-	///        for the given URI.
-	///
-	/// The transport library is required to implement this.
-	///
-	/// @remarks If this doesn't return OKSTATUS, the public wrapping
-	///          version of registerListener() will reset the connection
-	///          handle before returning it to the caller.
-	///
-	/// @param uri Resolved UUri for where messages are expected to
-	///            arrived via the underlying transport technology.
-	/// @param listener shared_ptr to a connected callback object, to be
-	///                 called when a message is received.
-	/// @param source_filter Resolved UUri for where messages are expected to
-	///                      have been sent from.
+	/// @param source_filter (Optional) UUri for where messages are expected to
+	///                      have been sent from. The callback will only be
+	///                      called for messages where the source matches.
 	///
 	/// @returns * OKSTATUS if the listener was registered successfully.
 	///          * FAILSTATUS with the appropriate failure otherwise.
@@ -182,8 +154,8 @@ protected:
 	///                 that scenario requires filtering by request ID not
 	///                 source, and that would be handled at the next layer up.
 	[[nodiscard]] virtual v1::UStatus registerListener(
-	    const v1::UUri& uri, CallableConn&& listener,
-	    const v1::UUri& source_filter) = 0;
+	    const v1::UUri& sink_filter, CallableConn&& listener,
+	    std::optional<v1::UUri>&& source_filter) = 0;
 
 	/// @brief Clean up on listener disconnect.
 	///
