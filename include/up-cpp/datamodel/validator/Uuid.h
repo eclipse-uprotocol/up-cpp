@@ -58,19 +58,19 @@ std::string_view message(Reason);
 ///     } else if (maybe_reason) {
 ///         log(message(*maybe_reason);
 ///     }
-using CheckResult = std::tuple<bool, std::optional<Reason>>;
+using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 
 /// @name Validity checks
 /// @{
 /// @brief Checks if the provided UUID contains valid uP v8 UUID data.
 /// @returns True if the UUID has valid UUID data, false otherwise.
-CheckResult isUuid(v1::UUID);
+ValidationResult isUuid(v1::UUID);
 
 /// @brief Checks if the provided UUID has expired based on the given TTL.
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns True if the difference between the current system time and
 ///          the the timestamp in the UUID is greater than the TTL.
-CheckResult isExpired(v1::UUID uuid, std::chrono::milliseconds ttl);
+ValidationResult isExpired(v1::UUID uuid, std::chrono::milliseconds ttl);
 /// @}
 
 /// @name Inspection utilities

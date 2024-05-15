@@ -71,7 +71,7 @@ std::string_view message(Reason);
 ///     } else if (maybe_reason) {
 ///         log(message(*maybe_reason);
 ///     }
-using CheckResult = std::tuple<bool, std::optional<Reason>>;
+using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 
 /// @brief Checks if UMessage is a valid UMessage of any format.
 ///
@@ -81,7 +81,7 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///   * isValidRpcResponse()
 ///   * isValidPublish()
 ///   * isValidNotification()
-[[nodiscard]] CheckResult isValid(const v1::UMessage&);
+[[nodiscard]] ValidationResult isValid(const v1::UMessage&);
 
 /// @brief Checks if common attributes for all UMessage types are valid
 ///
@@ -89,7 +89,7 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///   * The message ID must be a valid UUID
 ///   * If TTL is specified, the ID must not be expired
 ///   * If Priority is specified, it is within the range of UPriority
-[[nodiscard]] CheckResult areCommonAttributesValid(const v1::UMessage&);
+[[nodiscard]] ValidationResult areCommonAttributesValid(const v1::UMessage&);
 
 /// @brief Checks if UMessage is valid for invoking an RPC method
 ///
@@ -101,7 +101,7 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///   * Message ttl must be set and greater than zero
 ///   * Message must not set commstatus
 ///   * Message must not set reqid
-[[nodiscard]] CheckResult isValidRpcRequest(const v1::UMessage&);
+[[nodiscard]] ValidationResult isValidRpcRequest(const v1::UMessage&);
 
 /// @brief Checks if UMessage is a valid response
 ///
@@ -113,14 +113,14 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///   * Message priority must be UPRIORITY_CS4 or higher
 ///   * Message must not set permission_level
 ///   * Message must not set token
-[[nodiscard]] CheckResult isValidRpcResponse(const v1::UMessage&);
+[[nodiscard]] ValidationResult isValidRpcResponse(const v1::UMessage&);
 
 /// @brief Checks if UMessage is a valid response to specific RPC request
 ///
 /// In addition to all checks in isValidRpcResponse() passing:
 ///   * Message reqid must be the ID from the request message
 ///   * Message priority must be the priority from the request message
-[[nodiscard]] CheckResult isValidRpcResponseFor(const v1::UMessage& request,
+[[nodiscard]] ValidationResult isValidRpcResponseFor(const v1::UMessage& request,
                                          const v1::UMessage& response);
 
 /// @brief Checks if UMessage is valid for publishing to a topic
@@ -133,7 +133,7 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///   * Message must not set reqid
 ///   * Message must not set permission_level
 ///   * Message must not set token
-[[nodiscard]] CheckResult isValidPublish(const v1::UMessage&);
+[[nodiscard]] ValidationResult isValidPublish(const v1::UMessage&);
 
 /// @brief Checks if UMessage is valid for sending a notification
 ///
@@ -145,13 +145,13 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///   * Message must not set reqid
 ///   * Message must not set permission_level
 ///   * Message must not set token
-[[nodiscard]] CheckResult isValidNotification(const v1::UMessage&);
+[[nodiscard]] ValidationResult isValidNotification(const v1::UMessage&);
 
 /// @brief This exception indicates that a UMessage object was provided that
 ///        did not contain valid UMessage data or was the wrong type.
 ///
 /// @remarks Generally used by L2 client interfaces. Not used by checks in this
-///          file that return CheckResult.
+///          file that return ValidationResult.
 struct InvalidUMessage : public std::invalid_argument {
 	// Inherit constructors
 	using std::invalid_argument::invalid_argument;

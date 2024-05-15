@@ -55,7 +55,7 @@ std::string_view message(Reason);
 ///     } else if (maybe_reason) {
 ///         log(message(*maybe_reason);
 ///     }
-using CheckResult = std::tuple<bool, std::optional<Reason>>;
+using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 
 /// @brief Checks if UUri is a valid UUri of any format.
 ///
@@ -68,37 +68,37 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///     * isValidRpcResponse()
 ///     * isValidPublishTopic()
 ///     * isValidNotification()
-[[nodiscard]] CheckResult isValid(const v1::UUri&);
+[[nodiscard]] ValidationResult isValid(const v1::UUri&);
 
 /// @brief Checks if UUri is valid for invoking an RPC method
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be in the range [0x0001, 0x7FFF].
-[[nodiscard]] CheckResult isValidRpcMethod(const v1::UUri&);
+[[nodiscard]] ValidationResult isValidRpcMethod(const v1::UUri&);
 
 /// @brief Checks if UUri is a valid sink for responding to an RPC request.
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be 0.
-[[nodiscard]] CheckResult isValidRpcResponse(const v1::UUri&);
+[[nodiscard]] ValidationResult isValidRpcResponse(const v1::UUri&);
 
 /// @brief Checks if UUri is valid as a published topic
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] CheckResult isValidPublishTopic(const v1::UUri&);
+[[nodiscard]] ValidationResult isValidPublishTopic(const v1::UUri&);
 
 /// @brief Checks if UUri is valid as a subscription to a published topic
 ///
 /// The UUri must not be blank/reserved, and resource_id, if not a wildcard,
 /// must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] CheckResult isValidPublishSubscription(const v1::UUri&);
+[[nodiscard]] ValidationResult isValidPublishSubscription(const v1::UUri&);
 
 /// @brief Checks if UUri is valid as notification source or sink
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] CheckResult isValidNotification(const v1::UUri&);
+[[nodiscard]] ValidationResult isValidNotification(const v1::UUri&);
 
 /// @brief Checks if a URI is empty.
 ///
@@ -109,7 +109,7 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///   * The uE ID is 0
 ///   * The uE major version is 0
 ///   * The resource ID is 0
-[[nodiscard]] CheckResult isEmpty(const v1::UUri& uri);
+[[nodiscard]] ValidationResult isEmpty(const v1::UUri& uri);
 
 /// @brief Checks if a URI contains an *always* reserved value.
 ///
@@ -118,7 +118,7 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///
 /// A UUri is considered reserved if either uE major version is 0 or resource
 /// ID is 0.
-[[nodiscard]] CheckResult isReserved(const v1::UUri& uri);
+[[nodiscard]] ValidationResult isReserved(const v1::UUri& uri);
 
 /// @brief Checks if a UUri is local
 ///
@@ -129,7 +129,7 @@ using CheckResult = std::tuple<bool, std::optional<Reason>>;
 ///        did not contain valid UUri data.
 ///
 /// @remarks Generally used by L2 client interfaces. Not used by checks that
-///          return CheckResult.
+///          return ValidationResult.
 struct InvalidUUri : public std::invalid_argument {
 	// Inherit constructors
 	using std::invalid_argument::invalid_argument;
