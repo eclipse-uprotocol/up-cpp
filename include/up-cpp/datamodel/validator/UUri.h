@@ -27,6 +27,36 @@
 /// @brief Validators for UUri objects.
 namespace uprotocol::datamodel::validator::uri {
 
+enum class Reason {
+	/// @brief The URI is completely empty
+	EMPTY,
+	/// @brief The version is 0 (reserved)
+	RESERVED_VERSION,
+	/// @brief The resource is 0 for non-RPC-response URIs (reserved)
+	RESERVED_RESOURCE,
+	/// @brief The URI contains a wildcard in a position that is not allowed
+	///        for this particular form.
+	DISALLOWED_WILDCARD,
+	/// @brief The resource ID is not in the allowed range for this URI form.
+	BAD_RESOURCE_ID
+};
+
+/// @brief Get a descriptive message for a reason code.
+std::string_view message(Reason);
+
+/// @brief Return type for validity checks.
+///
+/// The recommended usage of these checks and return types looks something
+/// like this:
+///
+///     auto [valid, maybe_reason] = isValidRpcMethod(uri);
+///     if (valid) {
+///         // Do something with the URI
+///     } else if (maybe_reason) {
+///         log(message(*maybe_reason);
+///     }
+using CheckResult = std::tuple<bool, std::optional<Reason>>;
+
 /// @brief Checks if UUri is a valid UUri of any format.
 ///
 /// A UUri is valid if:
@@ -38,37 +68,37 @@ namespace uprotocol::datamodel::validator::uri {
 ///     * isValidRpcResponse()
 ///     * isValidPublishTopic()
 ///     * isValidNotification()
-[[nodiscard]] bool isValid(const v1::UUri&);
+[[nodiscard]] CheckResult isValid(const v1::UUri&);
 
 /// @brief Checks if UUri is valid for invoking an RPC method
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be in the range [0x0001, 0x7FFF].
-[[nodiscard]] bool isValidRpcMethod(const v1::UUri&);
+[[nodiscard]] CheckResult isValidRpcMethod(const v1::UUri&);
 
 /// @brief Checks if UUri is a valid sink for responding to an RPC request.
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be 0.
-[[nodiscard]] bool isValidRpcResponse(const v1::UUri&);
+[[nodiscard]] CheckResult isValidRpcResponse(const v1::UUri&);
 
 /// @brief Checks if UUri is valid as a published topic
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] bool isValidPublishTopic(const v1::UUri&);
+[[nodiscard]] CheckResult isValidPublishTopic(const v1::UUri&);
 
 /// @brief Checks if UUri is valid as a subscription to a published topic
 ///
 /// The UUri must not be blank/reserved, and resource_id, if not a wildcard,
 /// must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] bool isValidPublishSubscription(const v1::UUri&);
+[[nodiscard]] CheckResult isValidPublishSubscription(const v1::UUri&);
 
 /// @brief Checks if UUri is valid as notification source or sink
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] bool isValidNotification(const v1::UUri&);
+[[nodiscard]] CheckResult isValidNotification(const v1::UUri&);
 
 /// @brief Checks if a URI is empty.
 ///
@@ -79,7 +109,7 @@ namespace uprotocol::datamodel::validator::uri {
 ///   * The uE ID is 0
 ///   * The uE major version is 0
 ///   * The resource ID is 0
-[[nodiscard]] bool isEmpty(const v1::UUri& uri);
+[[nodiscard]] CheckResult isEmpty(const v1::UUri& uri);
 
 /// @brief Checks if a URI contains an *always* reserved value.
 ///
@@ -88,7 +118,7 @@ namespace uprotocol::datamodel::validator::uri {
 ///
 /// A UUri is considered reserved if either uE major version is 0 or resource
 /// ID is 0.
-[[nodiscard]] bool isReserved(const v1::UUri& uri);
+[[nodiscard]] CheckResult isReserved(const v1::UUri& uri);
 
 /// @brief Checks if a UUri is local
 ///
@@ -99,7 +129,7 @@ namespace uprotocol::datamodel::validator::uri {
 ///        did not contain valid UUri data.
 ///
 /// @remarks Generally used by L2 client interfaces. Not used by checks that
-///          return bool.
+///          return CheckResult.
 struct InvalidUUri : public std::invalid_argument {
 	// Inherit constructors
 	using std::invalid_argument::invalid_argument;

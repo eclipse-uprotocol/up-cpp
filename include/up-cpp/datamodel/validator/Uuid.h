@@ -27,34 +27,50 @@
 #include <chrono>
 #include <cstdint>
 #include <stdexcept>
+#include <optional>
+#include <tuple>
 
 // @brief Collection of functions for validating and inspecting UUIDs.
 namespace uprotocol::datamodel::validator::uuid {
 
-/// @brief This exception indicates that a UUID object was provided that
-///        did not contain valid UUID data.
-struct InvalidUuid : public std::invalid_argument {
-	// Inherit constructors
-	using std::invalid_argument::invalid_argument;
-
-	InvalidUuid(InvalidUuid&&) noexcept;
-	InvalidUuid& operator=(InvalidUuid&&) noexcept;
-
-	InvalidUuid(const InvalidUuid&);
-	InvalidUuid& operator=(const InvalidUuid&);
+enum class Reason {
+	/// @brief The UUID could not be interpreted as a uP v8 UUID
+	WRONG_VERSION,
+	/// @brief The UUID variant is not a supported variant
+	UNSUPPORTED_VARIANT,
+	/// @brief The time in the UUID is in the future
+	FROM_THE_FUTURE,
+	/// @brief For a given TTL, the UUID has already expired
+	EXPIRED
 };
+
+/// @brief Get a descriptive message for a reason code.
+std::string_view message(Reason);
+
+/// @brief Return type for validity checks.
+///
+/// The recommended usage of these checks and return types looks something
+/// like this:
+///
+///     auto [valid, maybe_reason] = isUuid(uuid);
+///     if (valid) {
+///         // Do something with the UUID
+///     } else if (maybe_reason) {
+///         log(message(*maybe_reason);
+///     }
+using CheckResult = std::tuple<bool, std::optional<Reason>>;
 
 /// @name Validity checks
 /// @{
 /// @brief Checks if the provided UUID contains valid uP v8 UUID data.
 /// @returns True if the UUID has valid UUID data, false otherwise.
-bool isUuid(v1::UUID);
+CheckResult isUuid(v1::UUID);
 
 /// @brief Checks if the provided UUID has expired based on the given TTL.
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns True if the difference between the current system time and
 ///          the the timestamp in the UUID is greater than the TTL.
-bool isExpired(v1::UUID uuid, std::chrono::milliseconds ttl);
+CheckResult isExpired(v1::UUID uuid, std::chrono::milliseconds ttl);
 /// @}
 
 /// @name Inspection utilities
@@ -95,6 +111,19 @@ std::chrono::milliseconds getRemainingTime(v1::UUID uuid,
 /// @returns The UUID's counter
 uint16_t getCounter(v1::UUID uuid);
 /// @}
+
+/// @brief This exception indicates that a UUID object was provided that
+///        did not contain valid UUID data.
+struct InvalidUuid : public std::invalid_argument {
+	// Inherit constructors
+	using std::invalid_argument::invalid_argument;
+
+	InvalidUuid(InvalidUuid&&) noexcept;
+	InvalidUuid& operator=(InvalidUuid&&) noexcept;
+
+	InvalidUuid(const InvalidUuid&);
+	InvalidUuid& operator=(const InvalidUuid&);
+};
 
 }  // namespace uprotocol::datamodel::validator::uuid
 
