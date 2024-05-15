@@ -26,7 +26,7 @@
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
-#include <up-cpp/datamodel/builder/UPayload.h>
+#include <up-cpp/datamodel/builder/Payload.h>
 #include <up-cpp/datamodel/validator/UMessage.h>
 #include <up-cpp/transport/UTransport.h>
 
@@ -45,7 +45,11 @@ namespace uprotocol::communication {
 /// RPC model.
 struct RpcServer {
 	/// @brief Callback function signature for implementing the RPC method.
-	using RpcCallback = std::function<std::optional<datamodel::builder::UPayload>(const v1::UMessage&)>;
+	///
+	/// Callbacks can (optionally) return a Payload builder containing data
+	/// to include in the response message. The payload can only be omitted
+	/// if the payload format was not specified when the RpcServer was created.
+	using RpcCallback = std::function<std::optional<datamodel::builder::Payload>(const v1::UMessage&)>;
 
 	using StatusOrServer = utils::Expected<std::unique_ptr<RpcServer>, v1::UStatus>;
 
@@ -59,6 +63,10 @@ struct RpcServer {
 	/// @param method_name URI representing the name clients will use to invoke
 	///                    the RPC method.
 	/// @param callback Method that will be called when requests are received.
+	/// @param payload_format (Optional) If sending a payload, this sets the
+	///                       format that will be expected when the callback
+	///                       returns. Empty response payloads can only be
+	///                       sent if this was not set.
 	/// @param ttl (Optional) Time response will be valid from the moment
 	///            respond() is called. Note that the original request's TTL
 	///            may also still apply.
@@ -70,6 +78,7 @@ struct RpcServer {
 	static StatusOrServer create(
 			std::shared_ptr<transport::UTransport> transport,
 			const v1::UUri& method_name, RpcCallback&& callback
+			std::optional<v1::UPayloadFormat> payload_format = {},
 			std::optional<std::chrono::milliseconds> ttl = {});
 
 	~RpcServer() = default;

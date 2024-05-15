@@ -22,10 +22,9 @@
 #ifndef UP_CPP_DATAMODEL_BUILDER_UMESSAGE_H
 #define UP_CPP_DATAMODEL_BUILDER_UMESSAGE_H
 
-#include <up-cpp/datamodel/builder/UPayload.h>
+#include <up-cpp/datamodel/builder/Payload.h>
 #include <uprotocol/v1/uattributes.pb.h>
 #include <uprotocol/v1/umessage.pb.h>
-#include <uprotocol/v1/upayload.pb.h>
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/uuid.pb.h>
 
@@ -212,20 +211,51 @@ struct UMessageBuilder {
 	/// @returns A reference to this UMessageBuilder
 	UMessageBuilder& withCommStatus(v1::UCode);
 
+	/// @brief Sets the expected payload format for when build() is called.
+	///
+	/// By default, build() will not enforce a payload format. Once the
+	/// expected format has been set using withPayloadFormat(), the format
+	/// will be checked whenever build() is called. Payloads with unexpected
+	/// formats will cause build() to thrown an exception.
+	///
+	/// @param The payload format to expect when build() is called.
+	///
+	/// @returns A reference to this UMessageBuilder
+	UMessageBuilder& withPayloadFormat(v1::UPayloadFormat);
+
+	/// @brief This exception indicates that build was called and the payload
+	///        format did not match the one set with withPayloadFormat().
+	struct UnexpectedFormat : public std::invalid_argument {
+		// Inherit constructors
+		using std::invalid_argument::invalid_argument;
+
+		UnexpectedFormat(UnexpectedFormat&&) noexcept;
+		UnexpectedFormat& operator=(UnexpectedFormat&&) noexcept;
+
+		UnexpectedFormat(const UnexpectedFormat&);
+		UnexpectedFormat& operator=(const UnexpectedFormat&);
+	};
+
 	/// @brief Creates a UMessage based on the builder's current state.
 	///
-	/// @return A built message with no UPayload populated.
+	/// @throws UnexpectedFormat if withPayloadFormat() has been previously
+	///         called.
+	///
+	/// @return A built message with no payload populated.
 	[[nodiscard]] v1::UMessage build() const;
 
 	/// @brief Creates a UMessage with a provided payload based on the
 	///        builder's current state.
 	///
-	/// @param A UPayload builder containing a payload to embed in the message.
+	/// @param A Payload builder containing a payload to embed in the message.
 	///
 	/// @note The contents of the payload builder will be moved.
 	///
+	/// @throws UnexpectedFormat if withPayloadFormat() has been previously
+	///         called and the format in the payload builder does not match.
+	///
 	/// @return A built message with the provided payload data embedded.
-	[[nodiscard]] v1::UMessage build(builder::UPayload&&) const;
+	[[nodiscard]] v1::UMessage build(builder::Payload&&) const;
 
 private:
 	UMessageBuilder();

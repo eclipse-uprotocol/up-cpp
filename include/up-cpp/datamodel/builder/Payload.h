@@ -19,48 +19,55 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_DATAMODEL_BUILDER_UPAYLOAD_H
-#define UP_CPP_DATAMODEL_BUILDER_UPAYLOAD_H
+#ifndef UP_CPP_DATAMODEL_BUILDER_PAYLOAD_H
+#define UP_CPP_DATAMODEL_BUILDER_PAYLOAD_H
 
-#include <uprotocol/v1/upayload.pb.h>
+#include <uprotocol/v1/uattributes.pb.h>
 
 #include <cstdint>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace uprotocol::datamodel::builder {
 
-/// @brief Interface for composing UPayload objects
+/// @brief Interface for preparing payloads for inclusing in a UMessage
 ///
 /// Allows for implicit conversions at interfaces that require a payload.
-struct UPayload {
-	/// @brief Constructs a UPayload builder with the payload populated by
+struct Payload {
+	/// @brief Protobuf uses std::string to represent the Bytes type from
+	///        messages.
+	using PbBytes = std::string;
+
+	/// @brief A serialized payload as a pairing of bytes and format.
+	using Serialized = std::tuple<PbBytes, v1::UPayloadFormat>;
+
+	/// @brief Constructs a Payload builder with the payload populated by
 	///        a serialized protobuf.
 	///
 	/// @tparam ProtobufT Automatically inferred protobuf message type.
 	///                   Must be derived from google::protobuf::message.
 	/// @param A protobuf message that will be serialized using its
-	///        SerializeToString() method before embedding into the
-	///        v1::UPayload.
+	///        SerializeToString() method.
 	///
 	/// @remarks The UPayloadFormat will automatically be set to
 	///          UPAYLOAD_FORMAT_PROTOBUF
 	template <typename ProtobufT>
-	explicit UPayload(const ProtobufT&);
+	explicit Payload(const ProtobufT&);
 
-	/// @brief Creates a UPayload builder with the payload populated by the
+	/// @brief Creates a Payload builder with the payload populated by the
 	///        result of Serializer::serialize(data).
 	///
 	/// This interface would be invoked something like this:
 	///
-	///     builder::UPayload(ToPayload(), foo);
+	///     builder::Payload(ToPayload(), foo);
 	///
 	/// @note Serializer types should only contain static methods. As such,
 	///       there would be nothing to construct and the temporary s argument
 	///       would compile out.
 	///
 	/// @tparam Serializer An object capable of serializing ValueT. Must
-	///                    provide a `static UPayload serialize(ValueT)`
+	///                    provide a `static Serialized serialize(ValueT)`
 	///                    method. This will be inferred from the parameters.
 	/// @tparam ValueT Automatically inferred unserialized payload value
 	///                type, serializable using the Serializer.
@@ -68,63 +75,83 @@ struct UPayload {
 	/// @param s An instance of Serializer. Note that only the static
 	///          `Serializer::serialize(data)` will be called - the s instance
 	///          will compile out.
-	/// @param data Data to be packed into the UPayload.
+	/// @param data Data to be serialized and stored.
 	template <typename Serializer, typename ValueT>
-	UPayload(Serializer s, const ValueT& data);
+	Payload(Serializer s, const ValueT& data);
 
-	/// @brief Creates a UPayload builder with a provided pre-serialized data.
+	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
 	/// @param value_bytes A byte array containing the serialized payload.
 	/// @param format The data format of the payload in value_bytes.
-	UPayload(const std::vector<uint8_t>& value_bytes,
-	         v1::UPayloadFormat format);
+	Payload(const std::vector<uint8_t>& value_bytes, v1::UPayloadFormat format);
 
-	/// @brief Creates a UPayload builder with a provided pre-serialized data.
+	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
 	/// @param value A string containing the serialized payload.
 	/// @param format The data format of the payload in value_bytes.
 	///
 	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT or
 	///       UPAYLOAD_FORMAT_JSON, but can be used for other payload formats.
-	UPayload(const std::string& value, v1::UPayloadFormat format);
+	Payload(const std::string& value, v1::UPayloadFormat format);
 
-	/// @brief Creates a UPayload builder with a provided pre-serialized data.
+	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
-	/// The contents of value will be moved into the v1::UPayload object.
+	/// The contents of value will be moved into the Payload object.
 	///
 	/// @param value A string containing the serialized payload.
 	/// @param format The data format of the payload in value_bytes.
 	///
 	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT or
 	///       UPAYLOAD_FORMAT_JSON, but can be used for other payload formats.
-	UPayload(std::string&& value, v1::UPayloadFormat format);
+	Payload(std::string&& value, v1::UPayloadFormat format);
 
-	/// @brief Creates a UPayload builder with a pre-made v1::UPayload.
+	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
-	/// The provided v1::UPayload will be moved.
+	/// The contents of value will be moved into the Payload object.
 	///
-	/// @param A pre-packaged v1::UPayload.
-	explicit UPayload(v1::UPayload&&);
+	/// @param A pairing of pre-serialized data and a format.
+	Payload(Serialized&&);
 
-	/// @brief Creates a UPayload builder with a pre-made v1::UPayload.
-	///
-	/// @param A pre-packaged v1::UPayload.
-	explicit UPayload(const v1::UPayload&);
+	/// @brief Move constructor.
+	Payload(Payload&&);
 
-	/// @brief Get the internal v1::UPayload from this builder.
-	constexpr const v1::UPayload& build() const;
+	/// @brief Copy constructor.
+	Payload(const Payload&);
 
-	/// @brief Get an xvalue of the internal v1::UPayload that can be moved
-	///        to another v1::UPayload.
+	Payload& operator=(Payload&&);
+	Payload& operator=(const Payload&);
+
+	/// @brief This exception indicates build() or move() has been called after
+	///        move() has already been called.
+	struct PayloadMoved : public std::runtime_error {
+		// Inherit constructors
+		using std::runtime_error::runtime_error;
+
+		PayloadMoved(PayloadMoved&&) noexcept;
+		PayloadMoved& operator=(PayloadMoved&&) noexcept;
+
+		PayloadMoved(const PayloadMoved&);
+		PayloadMoved& operator=(const PayloadMoved&);
+	};
+
+	/// @brief Get a reference to the internal data from this builder.
 	///
-	/// @post This UPayload builder will no longer be valid. Calling `build()`
-	///       or `movePayload()` after this is undefined behavior.
-	constexpr v1::UPayload&& movePayload() &&;
+	/// @throws PayloadMoved if called after move() has already been called.
+	constexpr const Serialized& build() const;
+
+	/// @brief Get an xvalue of the internal data that can be moved into a
+	///        UMessage.
+	///
+	/// @post This Payload builder will no longer be valid. Calling `build()`
+	///       or `movePayload()` after this will result in an exception.
+	///
+	/// @throws PayloadMoved if called after move() has already been called.
+	constexpr Serialized move() &&;
 
 private:
-	v1::UPayload payload_;
+	Serialized payload_;
 };
 
 }  // namespace uprotocol::datamodel::builder
 
-#endif  // UP_CPP_DATAMODEL_BUILDER_UPAYLOAD_H
+#endif  // UP_CPP_DATAMODEL_BUILDER_PAYLOAD_H

@@ -23,7 +23,7 @@
 #define UP_CPP_CLIENT_NOTIFICATION_SINK_H
 
 #include <uprotocol/v1/uri.pb.h>
-#include <uprotocol/v1/upayload.pb.h>
+#include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/transport/UTransport.h>
 #include <up-cpp/utils/Expected.h>
@@ -40,7 +40,7 @@ namespace uprotocol::communication {
 /// UTransport API; in this instance, it provides for the notification
 /// receiving half of the notification model.
 struct NotificationSink {
-	using ListenCallback = std::function<void(v1::UPayload&&)>;
+	using ListenCallback = transport::UTransport::ListenCallback;
 
 	using StatusOrSink = utils::Expected<std::unique_ptr<NotificationSink>, v1::UStatus>
 

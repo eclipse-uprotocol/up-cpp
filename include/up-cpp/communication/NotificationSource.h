@@ -26,7 +26,7 @@
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
-#include <up-cpp/datamodel/builder/UPayload.h>
+#include <up-cpp/datamodel/builder/Payload.h>
 #include <up-cpp/transport/UTransport.h>
 
 #include <chrono>
@@ -50,19 +50,30 @@ struct NotificationSource {
 	/// @param sink URI of this uE. The authority and entity will be replaced
 	///             automatically with those found in the transport's default.
 	/// @param sink URI of the uE notifications will be sent to.
+	/// @param payload_format (Optional) If sending a payload, this sets the
+	///                       format that will be expected when notify() is
+	///                       called. Empty response payloads can only be sent
+	///                       if this was not set.
 	/// @param priority All sent notifications will be assigned this priority.
 	/// @param ttl How long messages will be valid from the time notify() is
 	///            called.
 	NotificationSource(std::shared_ptr<transport::UTransport> transport,
 	         const v1::UUri& source, const v1::UUri& sink,
+			 std::optional<v1::UPayloadFormat> payload_format = {},
 	         std::optional<v1::UPriority> priority = {},
 	         std::optional<std::chrono::milliseconds> ttl = {});
 
 	/// @brief Send a notification to the selected sink.
 	///
-	/// @param A UPayload builder containing the payload to be sent with the
+	/// @param A Payload builder containing the payload to be sent with the
 	///        notification.
-	v1::UStatus notify(datamodel::builder::UPayload&&);
+	v1::UStatus notify(datamodel::builder::Payload&&);
+
+	/// @brief Send a notification to the selected sink.
+	///
+	/// This can only be called if no payload format was provided at
+	/// construction time.
+	v1::UStatus notify();
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;

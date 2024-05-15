@@ -26,7 +26,7 @@
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
-#include <up-cpp/datamodel/builder/UPayload.h>
+#include <up-cpp/datamodel/builder/Payload.h>
 #include <up-cpp/transport/UTransport.h>
 
 #include <chrono>
@@ -49,17 +49,19 @@ struct Publisher {
 	///
 	/// @param transport Transport to publish messages on.
 	/// @param topic URI representing the topic messages will be published to.
+	/// @param format UPayloadFormat of data that will be published.
 	/// @param priority All published messages will be assigned this priority.
 	/// @param ttl How long published messages will be valid from the time
 	///            publish() is called.
 	Publisher(std::shared_ptr<transport::UTransport> transport,
-	          const v1::UUri& topic, std::optional<v1::UPriority> priority = {},
+	          const v1::UUri& topic, v1::UPayloadFormat format,
+			  std::optional<v1::UPriority> priority = {},
 	          std::optional<std::chrono::milliseconds> ttl = {});
 
 	/// @brief Publish a payload to this Publisher's topic.
 	///
-	/// @param A UPayload builder containing the payload to be published.
-	v1::UStatus publish(datamodel::builder::UPayload&&);
+	/// @param A Payload builder containing the payload to be published.
+	v1::UStatus publish(datamodel::builder::Payload&&);
 
 	~Publisher() = default;
 

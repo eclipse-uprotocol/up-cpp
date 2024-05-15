@@ -22,7 +22,6 @@
 #ifndef UP_CPP_DATAMODEL_SERIALIZER_UUID_H
 #define UP_CPP_DATAMODEL_SERIALIZER_UUID_H
 
-#include <uprotocol/v1/upayload.pb.h>
 #include <uprotocol/v1/uuid.pb.h>
 
 #include <cstdint>
@@ -31,6 +30,9 @@
 
 /// @brief Collection of interfaces for converting uprotocol::v1::UUID objects
 ///        between protobuf and alternative representations.
+///
+/// @remarks No `AsPayload` is provided because v1::UUID is a protobuf message.
+///          As such, it can be automatically serialized with builder::Payload.
 namespace uprotocol::datamodel::serializer::uuid {
 
 /// @brief Converts to and from a human-readable string representation of UUID

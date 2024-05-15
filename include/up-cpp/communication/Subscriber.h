@@ -37,7 +37,7 @@ namespace uprotocol::communication {
 /// of the L1 UTransport API; in this instance, they are the subscriber half of
 /// the pub/sub model.
 struct Subscriber {
-	using ListenCallback = std::function<void(v1::UPayload&&)>;
+	using ListenCallback = transport::UTransport::ListenCallback;
 
 	/// @brief Subscribes to a topic.
 	///
