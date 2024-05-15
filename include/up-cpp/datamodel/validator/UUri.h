@@ -82,23 +82,20 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// resource_id must be 0.
 [[nodiscard]] ValidationResult isValidRpcResponse(const v1::UUri&);
 
-/// @brief Checks if UUri is valid as a published topic
+/// @brief Checks if UUri is valid for publishing to a topic, OR as a source
+///        and sink for sending notifications, OR as a sink for receiving
+///        notifications.
 ///
 /// The UUri must not be blank/reserved, no field can be a wildcard, and
 /// resource_id must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] ValidationResult isValidPublishTopic(const v1::UUri&);
+[[nodiscard]] ValidationResult isValidTopic(const v1::UUri&);
 
-/// @brief Checks if UUri is valid as a subscription to a published topic
+/// @brief Checks if UUri is valid as a subscription to a published topic or
+///        as a source filter when subscribing to a notification.
 ///
 /// The UUri must not be blank/reserved, and resource_id, if not a wildcard,
 /// must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] ValidationResult isValidPublishSubscription(const v1::UUri&);
-
-/// @brief Checks if UUri is valid as notification source or sink
-///
-/// The UUri must not be blank/reserved, no field can be a wildcard, and
-/// resource_id must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] ValidationResult isValidNotification(const v1::UUri&);
+[[nodiscard]] ValidationResult isValidSubscription(const v1::UUri&);
 
 /// @brief Checks if a URI is empty.
 ///
