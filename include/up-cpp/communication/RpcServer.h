@@ -26,11 +26,14 @@
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
+#include <up-cpp/datamodel/builder/UPayload.h>
 #include <up-cpp/datamodel/validator/UMessage.h>
 #include <up-cpp/transport/UTransport.h>
 
 #include <chrono>
+#include <functional>
 #include <memory>
+#include <optional>
 #include <utility>
 
 namespace uprotocol::communication {
@@ -42,7 +45,7 @@ namespace uprotocol::communication {
 /// RPC model.
 struct RpcServer {
 	/// @brief Callback function signature for implementing the RPC method.
-	using RpcCallback = transport::UTransport::ListenCallback;
+	using RpcCallback = std::function<std::optional<datamodel::builder::UPayload>(const v1::UMessage&)>;
 
 	/// @brief Constructs an initiator connected to a given transport.
 	///
@@ -57,51 +60,17 @@ struct RpcServer {
 	          const v1::UUri& method_name, RpcCallback&& callback
 		  std::optional<std::chrono::milliseconds> ttl = {});
 
-	/// @brief Wrapper to build and send a response in a single step.
-	///
-	/// @param request The request message to send a response to.
-	/// @param build_args Arguments to forward to UMessageBuilder::build().
-	///                   Note that this can be omitted completely to call
-	///                   build() with no parameters.
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	template <typename... Args>
-	[[nodiscard]] v1::UStatus respond(const v1::UMessage& request, Args&&... build_args) const {
-		using Builder = datamodel::builder::UMessageBuilder;
-		auto builder = Builder::response(request);
-		if (ttl_) {
-			builder.withTtl(*ttl_);
-		}
-		return transport_->send(builder.build(std::forward<Args>(build_args)...));
-	}
-
-	/// @brief Wrapper to build and send a response in a single step.
-	///
-	/// @tparam Serializer An object capable of serializing ValueT.
-	/// @tparam ValueT Automatically inferred unserialized payload type.
-	///
-	/// @param request The request message to send a response to.
-	/// @param value The payload data to serialize and send.
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	template <typename Serializer, typename ValueT>
-	[[nodiscard]] v1::UStatus respond(const v1::UMessage& request, const ValueT& value) const {
-		using Builder = datamodel::builder::UMessageBuilder;
-		auto builder = Builder::response(request);
-		if (ttl_) {
-			builder.withTtl(*ttl_);
-		}
-		return transport_->send(builder.build<Serializer>(std::forward<Args>(build_args)...));
-	}
-
 	~RpcServer() = default;
 
 private:
 	/// @brief Transport instance that will be used for communication
 	std::shared_ptr<transport::UTransport> transport_;
 
-	/// @brief Handle to the connected callback for the RPC method
+	/// @brief Handle to the connected callback for the RPC method wrapper
 	transport::UTransport::ListenHandle callback_handle_;
+
+	/// @brief RPC callback method
+	RpcCallback callback_;
 
 	/// @brief TTL to use for responses, if set at construction time
 	std::optional<std::chrono::milliseconds> ttl_;
