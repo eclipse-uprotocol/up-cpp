@@ -33,36 +33,7 @@ namespace uprotocol::datamodel::builder {
 
 /// @brief Builder class designed to build UUID v8 objects for uProtocol.
 ///
-/// The UUID is based off the draft-ietf-uuidrev-rfc4122bis and UUIDv7 with
-/// some modifications that are discussed below. The diagram below shows the
-/// specification for the UUID:
-///
-///      0                   1                   2                   3
-///      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-///     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-///     |                         unix_ts_ms                            |
-///     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-///     |           unix_ts_ms          |  ver  |         counter       |
-///     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-///     |var|                          rand_b                           |
-///     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-///     |                           rand_b                              |
-///     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-///
-/// | Field      | RFC2119 |
-/// | -----      | --------|
-/// | unix_ts_ms | 48 bit big-endian unsigned number of Unix epoch timestamp in
-///                milliseconds as per Section 6.1  of RFC |
-/// | ver        | MUST be 8 per Section 4.2 of draft-ietf-uuidrev-rfc4122bis |
-/// | counter    | MUST be a 12 bit counter field that is reset at each
-///                unix_ts_ms tick, and incremented for each UUID generated
-///                within the 1ms precision of unix_ts_ms The counter provides
-///                the ability to generate 4096 events within 1ms however the
-///                precision of the clock is still 1ms accuracy |
-/// | var        | MUST be the The 2 bit variant defined by Section 4.1 of RFC |
-/// | rand_b     | MUST 62 bits random number that is generated at
-/// initialization
-///                time of the uE only and reused otherwise |
+/// @see https://github.com/eclipse-uprotocol/up-spec/blob/main/basics/uuid.adoc
 struct UuidBuilder {
 	/// @brief Get a UuidBuilder in the default, production mode.
 	///

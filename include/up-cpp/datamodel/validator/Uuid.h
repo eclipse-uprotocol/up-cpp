@@ -46,18 +46,9 @@ struct InvalidUuid : public std::invalid_argument {
 
 /// @name Validity checks
 /// @{
-/// @brief Checks if the provided UUID contains valid v6 or v8 UUID data.
+/// @brief Checks if the provided UUID contains valid uP v8 UUID data.
 /// @returns True if the UUID has valid UUID data, false otherwise.
 bool isUuid(v1::UUID);
-
-/// @brief Checks if the provided UUID contains valid v6 UUID data.
-/// @returns True if the UUID has valid UUID v6 data, false otherwise.
-bool isV6(v1::UUID);
-
-/// @brief Checks if the provided UUID contains valid v8 (uProtocol)
-///        UUID data.
-/// @returns True if the UUID has a valid uProtocol UUID, false otherwise.
-bool isUProtocol(v1::UUID);
 
 /// @brief Checks if the provided UUID has expired based on the given TTL.
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
