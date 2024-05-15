@@ -25,9 +25,9 @@
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/transport/UTransport.h>
+#include <up-cpp/utils/Expected.h>
 
 #include <memory>
-#include <tuple>
 
 namespace uprotocol::communication {
 
@@ -37,25 +37,23 @@ namespace uprotocol::communication {
 /// of the L1 UTransport API; in this instance, they are the subscriber half of
 /// the pub/sub model.
 struct Subscriber {
-	using ListenCallback = transport::UTransport::ListenCallback;
-
-	using StatusOrSubscriber = std::variant<v1::UStatus, std::unique_ptr<Subscriber>>
+	using ListenCallback = std::function<void(v1::UPayload&&)>;
 
 	/// @brief Subscribes to a topic.
 	///
-	/// The subscription will remain active so long as the ListenHandle is not
-	/// destroyed or reset.
+	/// The subscription will remain active so long as the Subscriber is held.
+	/// Resetting the unique_ptr for the Subscriber will automatically
+	/// unregister the callback.
 	///
 	/// @param transport Transport to register with.
 	/// @param topic UUri of the topic to listen on.
 	/// @param callback Function to be called when a message is published ot the
 	///                 subscribed topic.
 	///
-	/// @returns * OKSTATUS and a connected ListenHandle if the subscription was
-	///            successful.
-	///          * FAILSTATUS with the appropriate failure and an unconnected
-	///            ListenHandle otherwise.
-	[[nodiscard]] StatusOrSubscriber
+	/// @returns * A unique_ptr to a Subscriber if the callback was
+	///            successfully registered.
+	///          * A UStatus with the appropriate failure code otherwise.
+	[[nodiscard]] utils::Expected<std::unique_ptr<Subscriber>, v1::UStatus>
 		subscribe(std::shared_ptr<transport::UTransport> transport,
 				const v1::UUri& topic,
 				transport::UTransport::ListenCallback&& callback);

@@ -23,13 +23,14 @@
 #define UP_CPP_CLIENT_NOTIFICATION_SINK_H
 
 #include <uprotocol/v1/uri.pb.h>
+#include <uprotocol/v1/upayload.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/transport/UTransport.h>
+#include <up-cpp/utils/Expected.h>
 
 #include <memory>
 #include <optional>
 #include <utility>
-#include <variant>
 
 namespace uprotocol::communication {
 
@@ -39,11 +40,15 @@ namespace uprotocol::communication {
 /// UTransport API; in this instance, it provides for the notification
 /// receiving half of the notification model.
 struct NotificationSink {
-	using ListenCallback = transport::UTransport::ListenCallback;
+	using ListenCallback = std::function<void(v1::UPayload&&)>;
 
-	using StatusOrSink = std::variant<v1::UStatus, std::unique_ptr<NotificationSink>>
+	using StatusOrSink = utils::Expected<std::unique_ptr<NotificationSink>, v1::UStatus>
 
 	/// @brief Create a notification sink to receive notifications.
+	///
+	/// The sink will remain active so long as the NotificationSink is held.
+	/// Resetting the unique_ptr for the NotificationSink will automatically
+	/// unregister the callback.
 	///
 	/// @param sink URI of this uE. The authority and entity will be replaced
 	///             automatically with those found in the transport's default.
@@ -53,7 +58,8 @@ struct NotificationSink {
 	///                      forwarded tot he callback.
 	///
 	/// @returns
-	///    * NotificationSink if the callback was connected successfully.
+	///    * unique_ptr to a NotificationSink if the callback was connected
+	///      successfully.
 	///    * UStatus containing an error state otherwise.
 	[[nodiscard]] static StatusOrSink create(
 	    const v1::UUri& sink, ListenCallback&& callback,
@@ -75,6 +81,7 @@ protected:
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
+
 	transport::UTransport::ListenHandle listener_;
 };
 

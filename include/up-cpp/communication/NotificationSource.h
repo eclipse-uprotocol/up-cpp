@@ -26,6 +26,7 @@
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
+#include <up-cpp/datamodel/builder/UPayload.h>
 #include <up-cpp/transport/UTransport.h>
 
 #include <chrono>
@@ -57,38 +58,11 @@ struct NotificationSource {
 	         std::optional<v1::UPriority> priority = {},
 	         std::optional<std::chrono::milliseconds> ttl = {});
 
-	/// @brief Wrapper to package a payload and send a notification in a single
-	///        step.
+	/// @brief Send a notification to the selected sink.
 	///
-	/// @param build_args Arguments to forward to UMessageBuilder::build().
-	///                   Note that this can be omitted completely to call
-	///                   build() with no parameters (i.e. `.notify()`).
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	template <typename... Args>
-	v1::UStatus notify(Args&&... build_args) {
-		auto message = notify_builder_.build(std::forward<Args>(build_args)...);
-
-		return transport_->send(std::move(message));
-	}
-
-	/// @brief Wrapper to package a payload and send a notification in a single
-	///        step.
-	///
-	/// @tparam Serializer An object capable of serializing ValueT.
-	/// @tparam ValueT Automatically inferred unserialized payload type.
-	///
-	/// @param value The payload data to serialize and send.
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	template <typename Serializer, typename ValueT>
-	v1::UStatus notify(const ValueT& value) {
-		auto message = notify_builder_.build<Serializer>(value);
-
-		return transport_->send(std::move(message));
-	}
-
-	~NotificationSource() = default;
+	/// @param A UPayload builder containing the payload to be sent with the
+	///        notification.
+	v1::UStatus notify(datamodel::builder::UPayload&&);
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;

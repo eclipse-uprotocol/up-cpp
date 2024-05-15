@@ -47,7 +47,13 @@ struct RpcServer {
 	/// @brief Callback function signature for implementing the RPC method.
 	using RpcCallback = std::function<std::optional<datamodel::builder::UPayload>(const v1::UMessage&)>;
 
-	/// @brief Constructs an initiator connected to a given transport.
+	using StatusOrServer = utils::Expected<std::unique_ptr<RpcServer>, v1::UStatus>;
+
+	/// @brief Creates an RPC server.
+	///
+	/// The callback will remain registered so long as the RpcServer is held.
+	/// Resetting the unique_ptr to the RpcServer will automatically disconnect
+	/// the callback.
 	///
 	/// @param transport Transport to offer the RPC method through.
 	/// @param method_name URI representing the name clients will use to invoke
@@ -56,24 +62,45 @@ struct RpcServer {
 	/// @param ttl (Optional) Time response will be valid from the moment
 	///            respond() is called. Note that the original request's TTL
 	///            may also still apply.
-	RpcServer(std::shared_ptr<transport::UTransport> transport,
-	          const v1::UUri& method_name, RpcCallback&& callback
-		  std::optional<std::chrono::milliseconds> ttl = {});
+	///
+	/// @returns
+	///    * unique_ptr to a RpcServer if the callback was connected
+	///      successfully.
+	///    * UStatus containing an error state otherwise.
+	static StatusOrServer create(
+			std::shared_ptr<transport::UTransport> transport,
+			const v1::UUri& method_name, RpcCallback&& callback
+			std::optional<std::chrono::milliseconds> ttl = {});
 
 	~RpcServer() = default;
+
+protected:
+	/// @brief Constructs an RPC server connected to a given transport.
+	///
+	/// @param transport Transport to offer the RPC method through.
+	/// @param method URI representing the name clients will use to invoke
+	///               the RPC method.
+	/// @param callback Method that will be called when requests are received.
+	/// @param ttl (Optional) Time response will be valid from the moment
+	///            respond() is called. Note that the original request's TTL
+	///            may also still apply.
+	RpcServer(std::shared_ptr<transport::UTransport> transport,
+			const v1::UUri& method, RpcCallback&& callback
+			std::optional<std::chrono::milliseconds> ttl = {});
+
 
 private:
 	/// @brief Transport instance that will be used for communication
 	std::shared_ptr<transport::UTransport> transport_;
 
-	/// @brief Handle to the connected callback for the RPC method wrapper
-	transport::UTransport::ListenHandle callback_handle_;
+	/// @brief TTL to use for responses, if set at construction time
+	std::optional<std::chrono::milliseconds> ttl_;
 
 	/// @brief RPC callback method
 	RpcCallback callback_;
 
-	/// @brief TTL to use for responses, if set at construction time
-	std::optional<std::chrono::milliseconds> ttl_;
+	/// @brief Handle to the connected callback for the RPC method wrapper
+	transport::UTransport::ListenHandle callback_handle_;
 };
 
 }  // namespace uprotocol::communication

@@ -25,7 +25,9 @@
 #include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
+#include <up-cpp/datamodel/builder/UPayload.h>
 #include <up-cpp/transport/UTransport.h>
+#include <up-cpp/utils/Expected.h>
 
 #include <future>
 #include <memory>
@@ -46,39 +48,24 @@ struct RpcClient {
 			std::optional<uint32_t> permission_level = {},
 			std::optional<std::string> token = {});
 
-	/// @brief Contains either a UStatus or a UMessage
-	using StatusOrMessage = std::variant<v1::UStatus, v1::UMessage>;
+	/// @brief as found in v1::UAttributes
+	using Commstatus = uint32_t;
+
+	/// @brief Contains either a UPayload (when successful) or a UStatus / Commstatus when an error occurred.
+	using StatusOrPayload = utils::Expected<v1::UPayload, std::variant<v1::UStatus, Commstatus>>;
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
-	/// @param build_args Arguments to forward to UMessageBuilder::build().
-	///                   Note that this can be omitted completely to call
-	///                   build() with no parameters.
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
+	/// @param A UPayload builder containing the payload to be sent with the
+	///        request.
 	///
 	/// @returns A promised future that can resolve to one of:
 	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///            received before the request expired (based on request TTL).
-	///          * A UMessage containing the response from the RPC target.
-	template <typename... Args>
-	[[nodiscard]] std::future<StatusOrMessage> invokeMethod(Args&&... build_args);
-
-	/// @brief Invokes an RPC method by sending a request message.
-	///
-	/// @tparam Serializer An object capable of serializing ValueT.
-	/// @tparam ValueT Automatically inferred unserialized payload type.
-	///
-	/// @param value The payload data to serialize and send.
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	///
-	/// @returns A promised future that can resolve to one of:
-	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
-	///            received before the request expired (based on request TTL).
-	///          * A UMessage containing the response from the RPC target.
-	template <typename Serializer, typename ValueT>
-	[[nodiscard]] std::future<StatusOrMessage> invokeMethod(const ValueT&);
+	///          * A UStatus with the value returned by UTransport::send().
+	///          * A Commstatus as received in the response message (if not OK).
+	///          * A UPayload containing the response from the RPC target.
+	[[nodiscard]] std::future<StatusOrMessage> invokeMethod(datamodel::builder::UPayload&&);
 
 	~RpcClient() = default;
 

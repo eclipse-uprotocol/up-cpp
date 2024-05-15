@@ -26,8 +26,9 @@
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/utils/CallbackConnection.h>
+#include <up-cpp/utils/Expected.h>
 
-#include <tuple>
+#include <optional>
 
 namespace uprotocol::transport {
 
@@ -109,7 +110,7 @@ public:
 	///            was registered successfully.
 	///          * FAILSTATUS with the appropriate failure and an
 	///            unconnected ListenHandle otherwise.
-	[[nodiscard]] std::tuple<v1::UStatus, ListenHandle> registerListener(
+	[[nodiscard]] utils::Expected<ListenHandle, v1::UStatus> registerListener(
 	    const v1::UUri& sink_filter, ListenCallback&& listener,
 	    std::optional<v1::UUri>&& source_filter = {});
 

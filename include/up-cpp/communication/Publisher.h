@@ -26,6 +26,7 @@
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
+#include <up-cpp/datamodel/builder/UPayload.h>
 #include <up-cpp/transport/UTransport.h>
 
 #include <chrono>
@@ -55,35 +56,10 @@ struct Publisher {
 	          const v1::UUri& topic, std::optional<v1::UPriority> priority = {},
 	          std::optional<std::chrono::milliseconds> ttl = {});
 
-	/// @brief Wrapper to build and publish a payload in a single step.
+	/// @brief Publish a payload to this Publisher's topic.
 	///
-	/// @param build_args Arguments to forward to UMessageBuilder::build().
-	///                   Note that this can be omitted completely to call
-	///                   build() with no parameters.
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	template <typename... Args>
-	v1::UStatus publish(Args&&... build_args) {
-		auto message =
-		    publish_builder_.build(std::forward<Args>(build_args)...);
-
-		return transport_->send(std::move(message));
-	}
-
-	/// @brief Wrapper to build and publish a payload in a single step.
-	///
-	/// @tparam Serializer An object capable of serializing ValueT.
-	/// @tparam ValueT Automatically inferred unserialized payload type.
-	///
-	/// @param value The payload data to serialize and send.
-	///
-	/// @see datamodel::builder::UMessageBuilder::build
-	template <typename Serializer, typename ValueT>
-	v1::UStatus publish(const ValueT& value) {
-		auto message = publish_builder_.build<Serializer>(value);
-
-		return transport_->send(std::move(message));
-	}
+	/// @param A UPayload builder containing the payload to be published.
+	v1::UStatus publish(datamodel::builder::UPayload&&);
 
 	~Publisher() = default;
 
