@@ -127,7 +127,7 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 ///
 /// In addition to all common attributes being valid, these checks must pass:
 ///   * Message type must be UMESSAGE_TYPE_PUBLISH
-///   * Message source must pass uri::isValidPublishTopic()
+///   * Message source must pass uri::isValidTopic()
 ///   * Message must not set sink
 ///   * Message must not set commstatus
 ///   * Message must not set reqid
@@ -139,8 +139,8 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 ///
 /// In addition to all common attributes being valid, these checks must pass:
 ///   * Message type must be UMESSAGE_TYPE_PUBLISH
-///   * Message source must pass uri::isValidNotification()
-///   * Message sink must pass uri::isValidNotification()
+///   * Message source must pass uri::isValidTopic()
+///   * Message sink must pass uri::isValidTopic()
 ///   * Message must not set commstatus
 ///   * Message must not set reqid
 ///   * Message must not set permission_level

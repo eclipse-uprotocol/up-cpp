@@ -62,23 +62,26 @@ public:
 	/// @param Default Authority and Entity (as a UUri) for clients using this
 	///        transport instance.
 	///
-	/// @throws uprotocol::datamodel::validator::uuri::InvalidUUri
-	///         if the provided UUri contains a resource, or is missing an
-	///         authority or entity.
+	/// @throws InvalidUUri if the provided UUri is not valid as a default
+	///         source. Validation is done with isValidRpcResponse().
+	///
+	/// @see uprotocol::datamodel::validator::uri::isValidRpcResponse()
+	/// @see uprotocol::datamodel::validator::uri::InvalidUUri
 	explicit UTransport(const v1::UUri&);
 
 	/// @brief Send a message.
 	///
-	/// Must be implemented by the transport client library.
+	/// @param message UMessage to be sent.
 	///
-	/// @param message UMessage to be sent. Contains all the information
-	///                needed to send the message as UAttributes and
-	///                UPayload
+	/// @throws InvalidUMessage if the message doesn't pass the isValid() check.
+	/// 
+	/// @see uprotocol::datamodel::validator::message::isValid()
+	/// @see uprotocol::datamodel::validator::message::InvalidUMessage
 	///
 	/// @returns * OKSTATUS if the payload has been successfully
 	///            sent (ACK'ed)
 	///          * FAILSTATUS with the appropriate failure.
-	[[nodiscard]] virtual v1::UStatus send(const v1::UMessage& message) = 0;
+	[[nodiscard]] v1::UStatus send(const v1::UMessage& message);
 
 	/// @brief Callback function (void(const UMessage&))
 	using ListenCallback = typename CallbackConnection::Callback;
@@ -106,6 +109,11 @@ public:
 	///                      have been sent from. The callback will only be
 	///                      called for messages where the source matches.
 	///
+	/// @throws InvalidUUri if either UUri fails the isValid() check.
+	///
+	/// @see uprotocol::datamodel::validator::uri::isValid()
+	/// @see uprotocol::datamodel::validator::uri::InvalidUUri
+	///
 	/// @returns * OKSTATUS and a connected ListenHandle if the listener
 	///            was registered successfully.
 	///          * FAILSTATUS with the appropriate failure and an
@@ -123,6 +131,20 @@ public:
 	virtual ~UTransport() = default;
 
 protected:
+	/// @brief Send a message.
+	///
+	/// Must be implemented by the transport client library.
+	///
+	/// @param message UMessage to be sent.
+	///
+	/// @throws InvalidUMessage if the message doesn't pass the isValid() check.
+	/// @see uprotocol::datamodel::validator::message::isValid()
+	///
+	/// @returns * OKSTATUS if the payload has been successfully
+	///            sent (ACK'ed)
+	///          * FAILSTATUS with the appropriate failure.
+	[[nodiscard]] virtual v1::UStatus sendImpl(const v1::UMessage& message) = 0;
+
 	/// @brief Represents the callable end of a callback connection.
 	///
 	/// This is a shared_ptr wrapping a callbacks::Connection. The
@@ -154,7 +176,7 @@ protected:
 	/// @TODO(gregmedd) What is this for? Presumably for RPC responses, but
 	///                 that scenario requires filtering by request ID not
 	///                 source, and that would be handled at the next layer up.
-	[[nodiscard]] virtual v1::UStatus registerListener(
+	[[nodiscard]] virtual v1::UStatus registerListenerImpl(
 	    const v1::UUri& sink_filter, CallableConn&& listener,
 	    std::optional<v1::UUri>&& source_filter) = 0;
 
