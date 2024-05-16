@@ -1,0 +1,15 @@
+[requires]
+up-core-api/1.5.8
+spdlog/1.13.0
+
+[test_requires]
+gtest/1.14.0
+
+[options]
+*:shared=True
+
+[generators]
+CMakeDeps
+CMakeToolchain
+VirtualRunEnv
+VirtualBuildEnv
