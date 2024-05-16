@@ -147,6 +147,8 @@ struct UMessageBuilder {
 	///
 	/// @throws std::out_of_range when setting a priority lower than CS4
 	///                           for "request" or "response" messages.
+	/// @throws std::out_of_range if the value is outside of the range of
+	///                           v1::UPriority
 	/// @returns A reference to this UMessageBuilder
 	UMessageBuilder& withPriority(v1::UPriority);
 
@@ -220,6 +222,8 @@ struct UMessageBuilder {
 	///
 	/// @param The payload format to expect when build() is called.
 	///
+	/// @throws std::out_of_range if the value is outside of the range of
+	///                           v1::UPayloadFormat
 	/// @returns A reference to this UMessageBuilder
 	UMessageBuilder& withPayloadFormat(v1::UPayloadFormat);
 

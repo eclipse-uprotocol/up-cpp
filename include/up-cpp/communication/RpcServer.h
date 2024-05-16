@@ -19,8 +19,8 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_RPCSERVER_H
-#define UP_CPP_CLIENT_RPCSERVER_H
+#ifndef UP_CPP_COMMUNICATION_RPCSERVER_H
+#define UP_CPP_COMMUNICATION_RPCSERVER_H
 
 #include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/uri.pb.h>
@@ -77,7 +77,7 @@ struct RpcServer {
 	///    * UStatus containing an error state otherwise.
 	static StatusOrServer create(
 			std::shared_ptr<transport::UTransport> transport,
-			const v1::UUri& method_name, RpcCallback&& callback
+			const v1::UUri& method_name, RpcCallback&& callback,
 			std::optional<v1::UPayloadFormat> payload_format = {},
 			std::optional<std::chrono::milliseconds> ttl = {});
 
@@ -89,13 +89,24 @@ protected:
 	/// @param transport Transport to offer the RPC method through.
 	/// @param method URI representing the name clients will use to invoke
 	///               the RPC method.
-	/// @param callback Method that will be called when requests are received.
+	/// @param payload_format (Optional) If sending a payload, this sets the
+	///                       format that will be expected when the callback
+	///                       returns. Empty response payloads can only be
+	///                       sent if this was not set.
 	/// @param ttl (Optional) Time response will be valid from the moment
 	///            respond() is called. Note that the original request's TTL
 	///            may also still apply.
 	RpcServer(std::shared_ptr<transport::UTransport> transport,
-			const v1::UUri& method, RpcCallback&& callback
+			const v1::UUri& method, std::optional<v1::UPayloadFormat> format = {},
 			std::optional<std::chrono::milliseconds> ttl = {});
+
+	/// @brief Connects the RPC callback method and returns the status from
+	///        UTransport::registerListener.
+	///
+	/// @param callback Method that will be called when requests are received.
+	///
+	/// @returns OK if connected successfully, error status otherwise.
+	[[nodiscard]] v1::UStatus connect(RpcCallback&& callback);
 
 
 private:
@@ -114,4 +125,4 @@ private:
 
 }  // namespace uprotocol::communication
 
-#endif  // UP_CPP_CLIENT_RPCSERVER_H
+#endif  // UP_CPP_COMMUNICATION_RPCSERVER_H

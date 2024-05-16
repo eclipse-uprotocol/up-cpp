@@ -19,8 +19,8 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_NOTIFICATIONSOURCE_H
-#define UP_CPP_CLIENT_NOTIFICATIONSOURCE_H
+#ifndef UP_CPP_COMMUNICATION_NOTIFICATIONSOURCE_H
+#define UP_CPP_COMMUNICATION_NOTIFICATIONSOURCE_H
 
 #include <uprotocol/v1/uattributes.pb.h>
 #include <uprotocol/v1/uri.pb.h>
@@ -82,4 +82,4 @@ private:
 
 }  // namespace uprotocol::communication
 
-#endif  // UP_CPP_CLIENT_NOTIFICATIONSOURCE_H
+#endif  // UP_CPP_COMMUNICATION_NOTIFICATIONSOURCE_H

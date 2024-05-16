@@ -2,9 +2,14 @@
 
 PROJECT_ROOT="$(realpath "$(dirname "$0")/../")"
 
-echo "Running clang-format on all files in '$PROJECT_ROOT'"
-#find "$PROJECT_ROOT" -iname '*.h' -o -iname '*.cpp' | xargs run-clang-tidy -j8 -extra-arg='-std=c++17' -extra-arg='-x c++'
-find "$PROJECT_ROOT" -iname '*.h' -o -iname '*.cpp' | xargs -I{} clang-tidy "{}" -- -I"$PROJECT_ROOT/include" -std=c++17 -x c++
+echo "Running clang-tidy on all files in '$PROJECT_ROOT'"
+shopt -s globstar
 
-# clang-tidy include/up-cpp/uri/tools/IpAddress.h -- -std=c++17 -x c++
-# run-clang-tidy -j8 -extra-arg='-std=c++17' -extra-arg='-x c++'
+pushd -n "$PROJECT_ROOT"
+for f in **/*.h **/*.cpp; do
+	echo
+	echo "Checking file '$f'"
+	clang-tidy "$f" -- -I"include" -std=c++17 -x c++ > "$f.tidy" || vim -o "$f" "$f.tidy"
+	rm "$f.tidy"
+done
+popd -n

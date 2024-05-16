@@ -41,6 +41,8 @@ enum class Reason {
 	ID_EXPIRED,
 	/// @brief The Priority, if set, is not within the allowable range
 	PRIORITY_OUT_OF_RANGE,
+	/// @brief The Payload Format is not within the allowable range
+	PAYLOAD_FORMAT_OUT_OF_RANGE,
 	/// @brief The type set in the message is incorrect for the validated mode
 	WRONG_MESSAGE_TYPE,
 	/// @brief Source URI did not pass validity checks
@@ -89,6 +91,7 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 ///   * The message ID must be a valid UUID
 ///   * If TTL is specified, the ID must not be expired
 ///   * If Priority is specified, it is within the range of UPriority
+///   * Payload Format must be within the range of UPayloadFormat
 [[nodiscard]] ValidationResult areCommonAttributesValid(const v1::UMessage&);
 
 /// @brief Checks if UMessage is valid for invoking an RPC method

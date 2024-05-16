@@ -38,10 +38,15 @@ static_assert(!__has_cpp_attribute(__cpp_lib_expected),
 ///          No further documentation is provided in this file.
 /// @{
 template <typename E>
-struct BadExpectedAccess : public BadExpectedAccess<void>;
+struct BadExpectedAccess;
 
 template <>
-struct BadExpectedAccess<void> : public std::exception;
+struct BadExpectedAccess<void> : public std::exception {
+};
+
+template <typename E>
+struct BadExpectedAccess : public BadExpectedAccess<void> {
+};
 
 /// @brief A stripped-down version of std::expected from C++23.
 template <typename T, typename E>

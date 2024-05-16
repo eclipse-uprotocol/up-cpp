@@ -72,6 +72,9 @@ struct Payload {
 	/// @tparam ValueT Automatically inferred unserialized payload value
 	///                type, serializable using the Serializer.
 	///
+	/// @throws std::out_of_range If the serialized payload format is not valid
+	///                           for v1::UPayloadFormat
+	///
 	/// @param s An instance of Serializer. Note that only the static
 	///          `Serializer::serialize(data)` will be called - the s instance
 	///          will compile out.
@@ -83,12 +86,16 @@ struct Payload {
 	///
 	/// @param value_bytes A byte array containing the serialized payload.
 	/// @param format The data format of the payload in value_bytes.
+	///
+	/// @throws std::out_of_range If format is not valid for v1::UPayloadFormat
 	Payload(const std::vector<uint8_t>& value_bytes, v1::UPayloadFormat format);
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
 	/// @param value A string containing the serialized payload.
 	/// @param format The data format of the payload in value_bytes.
+	///
+	/// @throws std::out_of_range If format is not valid for v1::UPayloadFormat
 	///
 	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT or
 	///       UPAYLOAD_FORMAT_JSON, but can be used for other payload formats.
@@ -101,6 +108,8 @@ struct Payload {
 	/// @param value A string containing the serialized payload.
 	/// @param format The data format of the payload in value_bytes.
 	///
+	/// @throws std::out_of_range If format is not valid for v1::UPayloadFormat
+	///
 	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT or
 	///       UPAYLOAD_FORMAT_JSON, but can be used for other payload formats.
 	Payload(std::string&& value, v1::UPayloadFormat format);
@@ -110,6 +119,9 @@ struct Payload {
 	/// The contents of value will be moved into the Payload object.
 	///
 	/// @param A pairing of pre-serialized data and a format.
+	///
+	/// @throws std::out_of_range If the serialized payload format is not valid
+	///                           for v1::UPayloadFormat
 	Payload(Serialized&&);
 
 	/// @brief Move constructor.

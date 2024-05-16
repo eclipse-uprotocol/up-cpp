@@ -19,8 +19,8 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_NOTIFICATION_SINK_H
-#define UP_CPP_CLIENT_NOTIFICATION_SINK_H
+#ifndef UP_CPP_COMMUNICATION_NOTIFICATIONSINK_H
+#define UP_CPP_COMMUNICATION_NOTIFICATIONSINK_H
 
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/umessage.pb.h>
@@ -42,7 +42,7 @@ namespace uprotocol::communication {
 struct NotificationSink {
 	using ListenCallback = transport::UTransport::ListenCallback;
 
-	using StatusOrSink = utils::Expected<std::unique_ptr<NotificationSink>, v1::UStatus>
+	using StatusOrSink = utils::Expected<std::unique_ptr<NotificationSink>, v1::UStatus>;
 
 	/// @brief Create a notification sink to receive notifications.
 	///
@@ -61,7 +61,7 @@ struct NotificationSink {
 	///    * unique_ptr to a NotificationSink if the callback was connected
 	///      successfully.
 	///    * UStatus containing an error state otherwise.
-	[[nodiscard]] static StatusOrSink create(
+	static StatusOrSink create(
 	    const v1::UUri& sink, ListenCallback&& callback,
 		std::optional<v1::UUri>&& source_filter);
 
@@ -87,4 +87,4 @@ private:
 
 }  // namespace uprotocol::communication
 
-#endif  // UP_CPP_CLIENT_NOTIFICATION_SINK_H
+#endif  // UP_CPP_COMMUNICATION_NOTIFICATIONSINK_H

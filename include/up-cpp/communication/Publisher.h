@@ -19,8 +19,8 @@
 // SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_PUBLISHER_H
-#define UP_CPP_CLIENT_PUBLISHER_H
+#ifndef UP_CPP_COMMUNICATION_PUBLISHER_H
+#define UP_CPP_COMMUNICATION_PUBLISHER_H
 
 #include <uprotocol/v1/uattributes.pb.h>
 #include <uprotocol/v1/uri.pb.h>
@@ -61,7 +61,7 @@ struct Publisher {
 	/// @brief Publish a payload to this Publisher's topic.
 	///
 	/// @param A Payload builder containing the payload to be published.
-	v1::UStatus publish(datamodel::builder::Payload&&);
+	[[nodiscard]] v1::UStatus publish(datamodel::builder::Payload&&) const;
 
 	~Publisher() = default;
 
@@ -72,4 +72,4 @@ private:
 
 }  // namespace uprotocol::communication
 
-#endif  // UP_CPP_CLIENT_PUBLISHER_H
+#endif  // UP_CPP_COMMUNICATION_PUBLISHER_H
