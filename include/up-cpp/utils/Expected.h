@@ -30,7 +30,7 @@ namespace uprotocol::utils {
 // A sentinel keeping watch for when we switch to C++23 and gain access to
 // the real std::expected. Our limited copy should be replaced immediately.
 static_assert(!__has_cpp_attribute(__cpp_lib_expected),
-		"Replace uprotocol::utils::Expected with std::expected");
+              "Replace uprotocol::utils::Expected with std::expected");
 
 /// @name Temporary substitute for std::expected
 /// @remarks See the reference for std::expected:
@@ -41,12 +41,10 @@ template <typename E>
 struct BadExpectedAccess;
 
 template <>
-struct BadExpectedAccess<void> : public std::exception {
-};
+struct BadExpectedAccess<void> : public std::exception {};
 
 template <typename E>
-struct BadExpectedAccess : public BadExpectedAccess<void> {
-};
+struct BadExpectedAccess : public BadExpectedAccess<void> {};
 
 /// @brief A stripped-down version of std::expected from C++23.
 template <typename T, typename E>
@@ -69,7 +67,7 @@ struct Expected {
 
 	Expected& operator=(const E& other);
 	Expected& operator=(E&& other);
-	
+
 	constexpr explicit operator bool() const noexcept;
 	constexpr bool has_value() const noexcept;
 
@@ -86,30 +84,32 @@ struct Expected {
 	constexpr T value_or(T&& default_value) const&;
 	constexpr T value_or(T&& default_value) &&;
 
-	template<typename F>
+	template <typename F>
 	constexpr auto and_then(F&& f) &;
-	template<typename F>
+	template <typename F>
 	constexpr auto and_then(F&& f) const&;
-	template<typename F>
+	template <typename F>
 	constexpr auto and_then(F&& f) &&;
-	template<typename F>
+	template <typename F>
 	constexpr auto and_then(F&& f) const&&;
 
-	template<typename F>
+	template <typename F>
 	constexpr auto or_else(F&& f) &;
-	template<typename F>
+	template <typename F>
 	constexpr auto or_else(F&& f) const&;
-	template<typename F>
+	template <typename F>
 	constexpr auto or_else(F&& f) &&;
-	template<typename F>
+	template <typename F>
 	constexpr auto or_else(F&& f) const&&;
 
 private:
 	static_assert(!std::is_void_v<T>,
-			"We don't allow T==void (unlike std::expected)");
+	              "We don't allow T==void (unlike std::expected)");
 
-	static_assert(std::is_destructible_v<T> && !std::is_array_v<T> && !std::is_reference_v<T>,
-			"Expected requires T to meet the C++ 'destructable' requirement");
+	static_assert(
+	    std::is_destructible_v<T> && !std::is_array_v<T> &&
+	        !std::is_reference_v<T>,
+	    "Expected requires T to meet the C++ 'destructable' requirement");
 };
 /// @}
 

@@ -26,8 +26,8 @@
 
 #include <chrono>
 #include <cstdint>
-#include <stdexcept>
 #include <optional>
+#include <stdexcept>
 #include <tuple>
 
 // @brief Collection of functions for validating and inspecting UUIDs.

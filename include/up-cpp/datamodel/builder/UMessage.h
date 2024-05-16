@@ -62,8 +62,7 @@ struct UMessageBuilder {
 	///
 	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "notification" message
-	static UMessageBuilder notification(v1::UUri&& source,
-	                                    v1::UUri&& sink);
+	static UMessageBuilder notification(v1::UUri&& source, v1::UUri&& sink);
 
 	/// @brief Pre-populates a message builder with the attributes of an
 	///        RPC "request" type message.
@@ -78,9 +77,8 @@ struct UMessageBuilder {
 	/// @throws InvalidUUri if URI fails validation.
 	/// @throws std::out_of_range if (ttl <= 0) or (ttl > uint32_t max).
 	/// @returns UMessageBuilder configured to build a "request" message
-	static UMessageBuilder request(v1::UUri&& method,
-	                               v1::UUri&& source,
-								   v1::UPriority priority,
+	static UMessageBuilder request(v1::UUri&& method, v1::UUri&& source,
+	                               v1::UPriority priority,
 	                               std::chrono::milliseconds ttl);
 
 	/// @brief Pre-populates a message builder with the attributes of an

@@ -22,12 +22,12 @@
 #ifndef UP_CPP_COMMUNICATION_PUBLISHER_H
 #define UP_CPP_COMMUNICATION_PUBLISHER_H
 
+#include <up-cpp/datamodel/builder/Payload.h>
+#include <up-cpp/datamodel/builder/UMessage.h>
+#include <up-cpp/transport/UTransport.h>
 #include <uprotocol/v1/uattributes.pb.h>
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
-#include <up-cpp/datamodel/builder/UMessage.h>
-#include <up-cpp/datamodel/builder/Payload.h>
-#include <up-cpp/transport/UTransport.h>
 
 #include <chrono>
 #include <memory>
@@ -55,7 +55,7 @@ struct Publisher {
 	///            publish() is called.
 	Publisher(std::shared_ptr<transport::UTransport> transport,
 	          const v1::UUri& topic, v1::UPayloadFormat format,
-			  std::optional<v1::UPriority> priority = {},
+	          std::optional<v1::UPriority> priority = {},
 	          std::optional<std::chrono::milliseconds> ttl = {});
 
 	/// @brief Publish a payload to this Publisher's topic.

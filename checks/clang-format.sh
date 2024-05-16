@@ -3,4 +3,13 @@
 PROJECT_ROOT="$(realpath "$(dirname "$0")/../")"
 
 echo "Running clang-format on all files in '$PROJECT_ROOT'"
-find "$PROJECT_ROOT" -iname '*.h' -o -iname '*.cpp' | xargs clang-format --dry-run
+shopt -s globstar
+
+pushd -n "$PROJECT_ROOT"
+for f in **/*.h **/*.cpp; do
+	echo
+	echo "Checking file '$f'"
+	clang-format "$f" > "$f.format" ; meld "$f" "$f.format"
+	rm "$f.format"
+done
+popd -n

@@ -22,10 +22,10 @@
 #ifndef UP_CPP_CLIENT_SUBSCRIBER_H
 #define UP_CPP_CLIENT_SUBSCRIBER_H
 
-#include <uprotocol/v1/uri.pb.h>
-#include <uprotocol/v1/ustatus.pb.h>
 #include <up-cpp/transport/UTransport.h>
 #include <up-cpp/utils/Expected.h>
+#include <uprotocol/v1/uri.pb.h>
+#include <uprotocol/v1/ustatus.pb.h>
 
 #include <memory>
 
@@ -54,14 +54,14 @@ struct Subscriber {
 	///            successfully registered.
 	///          * A UStatus with the appropriate failure code otherwise.
 	[[nodiscard]] utils::Expected<std::unique_ptr<Subscriber>, v1::UStatus>
-		subscribe(std::shared_ptr<transport::UTransport> transport,
-				const v1::UUri& topic,
-				transport::UTransport::ListenCallback&& callback);
+	subscribe(std::shared_ptr<transport::UTransport> transport,
+	          const v1::UUri& topic,
+	          transport::UTransport::ListenCallback&& callback);
 
 protected:
 	Subscriber(std::shared_ptr<transport::UTransport> transport,
-				const v1::UUri& topic,
-				transport::UTransport::ListenCallback&& callback);
+	           const v1::UUri& topic,
+	           transport::UTransport::ListenCallback&& callback);
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;

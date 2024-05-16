@@ -22,11 +22,11 @@
 #ifndef UP_CPP_TRANSPORT_UTRANSPORT_H
 #define UP_CPP_TRANSPORT_UTRANSPORT_H
 
+#include <up-cpp/utils/CallbackConnection.h>
+#include <up-cpp/utils/Expected.h>
 #include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
-#include <up-cpp/utils/CallbackConnection.h>
-#include <up-cpp/utils/Expected.h>
 
 #include <optional>
 
@@ -74,7 +74,7 @@ public:
 	/// @param message UMessage to be sent.
 	///
 	/// @throws InvalidUMessage if the message doesn't pass the isValid() check.
-	/// 
+	///
 	/// @see uprotocol::datamodel::validator::message::isValid()
 	/// @see uprotocol::datamodel::validator::message::InvalidUMessage
 	///

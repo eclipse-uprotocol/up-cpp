@@ -22,12 +22,12 @@
 #ifndef UP_CPP_COMMUNICATION_NOTIFICATIONSOURCE_H
 #define UP_CPP_COMMUNICATION_NOTIFICATIONSOURCE_H
 
+#include <up-cpp/datamodel/builder/Payload.h>
+#include <up-cpp/datamodel/builder/UMessage.h>
+#include <up-cpp/transport/UTransport.h>
 #include <uprotocol/v1/uattributes.pb.h>
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
-#include <up-cpp/datamodel/builder/UMessage.h>
-#include <up-cpp/datamodel/builder/Payload.h>
-#include <up-cpp/transport/UTransport.h>
 
 #include <chrono>
 #include <memory>
@@ -58,10 +58,10 @@ struct NotificationSource {
 	/// @param ttl How long messages will be valid from the time notify() is
 	///            called.
 	NotificationSource(std::shared_ptr<transport::UTransport> transport,
-	         const v1::UUri& source, const v1::UUri& sink,
-			 std::optional<v1::UPayloadFormat> payload_format = {},
-	         std::optional<v1::UPriority> priority = {},
-	         std::optional<std::chrono::milliseconds> ttl = {});
+	                   const v1::UUri& source, const v1::UUri& sink,
+	                   std::optional<v1::UPayloadFormat> payload_format = {},
+	                   std::optional<v1::UPriority> priority = {},
+	                   std::optional<std::chrono::milliseconds> ttl = {});
 
 	/// @brief Send a notification to the selected sink.
 	///

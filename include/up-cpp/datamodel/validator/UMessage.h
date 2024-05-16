@@ -123,8 +123,8 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// In addition to all checks in isValidRpcResponse() passing:
 ///   * Message reqid must be the ID from the request message
 ///   * Message priority must be the priority from the request message
-[[nodiscard]] ValidationResult isValidRpcResponseFor(const v1::UMessage& request,
-                                         const v1::UMessage& response);
+[[nodiscard]] ValidationResult isValidRpcResponseFor(
+    const v1::UMessage& request, const v1::UMessage& response);
 
 /// @brief Checks if UMessage is valid for publishing to a topic
 ///

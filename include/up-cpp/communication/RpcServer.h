@@ -22,13 +22,13 @@
 #ifndef UP_CPP_COMMUNICATION_RPCSERVER_H
 #define UP_CPP_COMMUNICATION_RPCSERVER_H
 
+#include <up-cpp/datamodel/builder/Payload.h>
+#include <up-cpp/datamodel/builder/UMessage.h>
+#include <up-cpp/datamodel/validator/UMessage.h>
+#include <up-cpp/transport/UTransport.h>
 #include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
-#include <up-cpp/datamodel/builder/UMessage.h>
-#include <up-cpp/datamodel/builder/Payload.h>
-#include <up-cpp/datamodel/validator/UMessage.h>
-#include <up-cpp/transport/UTransport.h>
 
 #include <chrono>
 #include <functional>
@@ -49,9 +49,12 @@ struct RpcServer {
 	/// Callbacks can (optionally) return a Payload builder containing data
 	/// to include in the response message. The payload can only be omitted
 	/// if the payload format was not specified when the RpcServer was created.
-	using RpcCallback = std::function<std::optional<datamodel::builder::Payload>(const v1::UMessage&)>;
+	using RpcCallback =
+	    std::function<std::optional<datamodel::builder::Payload>(
+	        const v1::UMessage&)>;
 
-	using StatusOrServer = utils::Expected<std::unique_ptr<RpcServer>, v1::UStatus>;
+	using StatusOrServer =
+	    utils::Expected<std::unique_ptr<RpcServer>, v1::UStatus>;
 
 	/// @brief Creates an RPC server.
 	///
@@ -76,10 +79,10 @@ struct RpcServer {
 	///      successfully.
 	///    * UStatus containing an error state otherwise.
 	static StatusOrServer create(
-			std::shared_ptr<transport::UTransport> transport,
-			const v1::UUri& method_name, RpcCallback&& callback,
-			std::optional<v1::UPayloadFormat> payload_format = {},
-			std::optional<std::chrono::milliseconds> ttl = {});
+	    std::shared_ptr<transport::UTransport> transport,
+	    const v1::UUri& method_name, RpcCallback&& callback,
+	    std::optional<v1::UPayloadFormat> payload_format = {},
+	    std::optional<std::chrono::milliseconds> ttl = {});
 
 	~RpcServer() = default;
 
@@ -97,8 +100,9 @@ protected:
 	///            respond() is called. Note that the original request's TTL
 	///            may also still apply.
 	RpcServer(std::shared_ptr<transport::UTransport> transport,
-			const v1::UUri& method, std::optional<v1::UPayloadFormat> format = {},
-			std::optional<std::chrono::milliseconds> ttl = {});
+	          const v1::UUri& method,
+	          std::optional<v1::UPayloadFormat> format = {},
+	          std::optional<std::chrono::milliseconds> ttl = {});
 
 	/// @brief Connects the RPC callback method and returns the status from
 	///        UTransport::registerListener.
@@ -107,7 +111,6 @@ protected:
 	///
 	/// @returns OK if connected successfully, error status otherwise.
 	[[nodiscard]] v1::UStatus connect(RpcCallback&& callback);
-
 
 private:
 	/// @brief Transport instance that will be used for communication
