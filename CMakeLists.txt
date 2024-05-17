@@ -48,9 +48,10 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(${PROJECT_NAME} 
 	PRIVATE 
 	up-core-api::up-core-api
-	protobuf::protobuf 
+	protobuf::libprotobuf 
 	spdlog::spdlog)
 
+enable_testing()
 add_subdirectory(test)
 
 INSTALL(TARGETS ${PROJECT_NAME})

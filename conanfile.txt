@@ -1,6 +1,8 @@
 [requires]
 up-core-api/1.5.8
 spdlog/1.13.0
+# Should result in using the one from up-core-api
+protobuf/[>3.21.11]
 
 [test_requires]
 gtest/1.14.0
