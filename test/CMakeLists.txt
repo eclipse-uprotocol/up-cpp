@@ -12,6 +12,7 @@
 enable_testing()
 
 find_package(GTest REQUIRED)
+include(GoogleTest)
 
 # Invoked as add_coverage_test("SomeName" sources...)
 function(add_coverage_test Name)
@@ -29,7 +30,7 @@ function(add_coverage_test Name)
         pthread
     )
     target_include_directories(${Name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    add_test(NAME ${Name} COMMAND ${Name})
+    gtest_discover_tests(${Name} XML_OUTPUT_DIR results)
 endfunction()
 
 # NOTE: This is temporarily just a call to add_coverage_test. When coverage
