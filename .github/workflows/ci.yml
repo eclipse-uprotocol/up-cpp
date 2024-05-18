@@ -5,55 +5,171 @@ on:
     branches: [ main ]
   pull_request:
     branches: ["**"]
-  workflow_call:
-  workflow_dispatch:
   
 jobs:
   build:
-    name: Build
+    name: Build up-cpp and dependencies
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Create default Conan profile
+        run: conan profile detect
+
+      - name: Conan cache archive
+        id: conan-cache
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-conan-cache
+          path: conan-cache.tgz
+
+      - name: Restore conan cache from archive
+        if: ${{ steps.conan-cache.outputs.cache-hit == 'true' }}
+        shell: bash
+        run: |
+          conan cache restore conan-cache.tgz
+          rm conan-cache.tgz
+
+      - name: Fetch up-core-api conan recipe
+        uses: actions/checkout@v4
+        with:
+          path: up-conan-recipes
+          repository: gregmedd/up-conan-recipes
+
+      - name: Build up-core-api conan package
+        shell: bash
+        run: |
+          conan create --version 1.5.8 up-conan-recipes/up-core-api/developer
+
+      - name: Fetch up-cpp
+        uses: actions/checkout@v4
+        with:
+          path: up-cpp
+
+      - name: Build up-cpp with tests
+        shell: bash
+        run: |
+          cd up-cpp
+          conan install . --build=missing
+          cd build
+          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
+          cmake --build . -- -j
+
+      - name: Save conan cache to archive
+        shell: bash
+        run: |
+          conan cache save --file ./conan-cache.tgz '*'
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: up-cpp/build
+
+      - name: Upload compile commands
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-commands
+          path: up-cpp/build/compile_commands.json
+
+  test:
+    name: Run up-cpp tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: up-cpp/build
+
+      - name: Run all tests
+        shell: bash
+        run: |
+          cd up-cpp/build
+          chmod +x bin/*
+          ctest
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: test-results
+          path: 'up-cpp/build/test/results/*.xml'
+
+  lint:
+    name: Lint C++ sources
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Get build commands
+        uses: actions/download-artifact@v4
+        with:
+          name: compile-commands
 
       - name: Install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
 
-      - name: Conan version
-        run: echo "${{ steps.conan.outputs.version }}"
-
-
       - name: Create default Conan profile
         run: conan profile detect
 
+      - name: Conan cache archive
+        id: conan-cache
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-conan-cache
+          fail-on-cache-miss: true
+          path: conan-cache.tgz
 
-      - name: Fetch and link up-core-api
+      - name: Restore conan cache from archive
         shell: bash
         run: |
-          git clone -b uprotocol-core-api-1.5.6 https://github.com/eclipse-uprotocol/up-core-api.git
-          git submodule update --init --recursive
+          conan cache restore conan-cache.tgz
 
-      - name: Build && install up-cpp
-        shell: bash
-        run: |
-          mkdir -p build && cd build
-          conan install .. -o build_testing=True
-          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=~/local
-          cmake --build . --target install -- -j
+      - name: Fetch up-cpp
+        uses: actions/checkout@v4
+        with:
+          path: up-cpp
 
-      - name: Run the test
-        shell: bash
-        run: |
-          cd build
-          ctest
+      - name: Run linters on source
+        id: source-linter
+        uses: cpp-linter/cpp-linter-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo-root: up-cpp
+          ignore: 'test'
+          style: 'file' # read .clang-format for configuration
+          tidy-checks: '' # Read .clang-tidy for configuration
+          database: compile_commands.json
+          #extra-args: '-std=c++17 -cxx-isystem/usr/include/c++/12/ -Iinclude ${{ steps.pkgs.outputs.includes }}'
+          #version: 18
 
-      - name: Create up-cpp Conan package
-        shell: bash
+      - name: Run linters on tests
+        id: test-linter
+        uses: cpp-linter/cpp-linter-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo-root: up-cpp
+          ignore: 'src|include'
+          style: 'file' # read .clang-format for configuration
+          tidy-checks: '' # Read .clang-tidy for configuration
+          database: compile_commands.json
+          #extra-args: '-std=c++17 -cxx-isystem/usr/include/c++/12/ -Iinclude -Itest/include ${{ steps.pkgs.outputs.includes }}'
+          #version: 18
+
+      - name: Report lint failure
+        if: steps.source-linter.outputs.checks-failed > 0 || steps.test-linter.outputs.checks-failed > 0
         run: |
-          conan create . --build=missing
-  
-  
+          exit 1
+
   # NOTE: In GitHub repository settings, the "Require status checks to pass
   # before merging" branch protection rule ensures that commits are only merged
   # from branches where specific status checks have passed. These checks are
@@ -62,7 +178,7 @@ jobs:
   ci:
     name: CI status checks
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, test]
     if: always()
     steps:
       - name: Check whether all jobs pass
