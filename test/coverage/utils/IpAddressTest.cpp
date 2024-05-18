@@ -15,25 +15,24 @@
 namespace {
 
 class TestFixture : public testing::Test {
-    protected:
-        // Run once per TEST_F.
-        // Used to set up clean environments per test.
-        void SetUp() override { }
-        void TearDown() override { }
+protected:
+	// Run once per TEST_F.
+	// Used to set up clean environments per test.
+	void SetUp() override {}
+	void TearDown() override {}
 
-        // Run once per execution of the test application.
-        // Used for setup of all tests. Has access to this instance.
-        TestFixture() = default;
-        ~TestFixture() = default;
+	// Run once per execution of the test application.
+	// Used for setup of all tests. Has access to this instance.
+	TestFixture() = default;
+	~TestFixture() = default;
 
-        // Run once per execution of the test application.
-        // Used only for global setup outside of tests.
-        static void SetUpTestSuite() { }
-        static void TearDownTestSuite() { }
+	// Run once per execution of the test application.
+	// Used only for global setup outside of tests.
+	static void SetUpTestSuite() {}
+	static void TearDownTestSuite() {}
 };
 
 // TODO replace
-TEST_F(TestFixture, SomeTestName) {
-}
+TEST_F(TestFixture, SomeTestName) {}
 
-} // namespace
+}  // namespace

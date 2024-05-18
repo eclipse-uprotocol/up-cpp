@@ -13,6 +13,7 @@
 #define UP_CPP_DATAMODEL_VALIDATOR_UURI_H
 
 #include <uprotocol/v1/uri.pb.h>
+
 #include <optional>
 
 /// @brief Validators for UUri objects.

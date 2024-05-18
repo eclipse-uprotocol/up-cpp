@@ -21,7 +21,7 @@
 
 namespace uprotocol::datamodel::builder {
 
-/// @brief Interface for preparing payloads for inclusing in a UMessage
+/// @brief Interface for preparing payloads for inclusion in a UMessage
 ///
 /// Allows for implicit conversions at interfaces that require a payload.
 struct Payload {
@@ -112,15 +112,15 @@ struct Payload {
 	///
 	/// @throws std::out_of_range If the serialized payload format is not valid
 	///                           for v1::UPayloadFormat
-	Payload(Serialized&&);
+	explicit Payload(Serialized&&);
 
 	/// @brief Move constructor.
-	Payload(Payload&&);
+	Payload(Payload&&) noexcept;
 
 	/// @brief Copy constructor.
 	Payload(const Payload&);
 
-	Payload& operator=(Payload&&);
+	Payload& operator=(Payload&&) noexcept;
 	Payload& operator=(const Payload&);
 
 	/// @brief This exception indicates build() or move() has been called after
@@ -139,7 +139,7 @@ struct Payload {
 	/// @brief Get a reference to the internal data from this builder.
 	///
 	/// @throws PayloadMoved if called after move() has already been called.
-	constexpr const Serialized& build() const;
+	[[nodiscard]] constexpr const Serialized& build() const;
 
 	/// @brief Get an xvalue of the internal data that can be moved into a
 	///        UMessage.
@@ -148,7 +148,7 @@ struct Payload {
 	///       or `movePayload()` after this will result in an exception.
 	///
 	/// @throws PayloadMoved if called after move() has already been called.
-	constexpr Serialized move() &&;
+	[[nodiscard]] constexpr Serialized move() &&;
 
 private:
 	Serialized payload_;

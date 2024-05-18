@@ -72,8 +72,12 @@ struct [[nodiscard]] Connection {
 	///
 	/// @returns A tuple of Handle and Callable representing an established
 	///          connection.
+	// clang-format off
+	// note: clang has trouble with changing Callback&& to Callback &&.
+	// Disabling for now until the issue can be diagnosed
 	static ConnectedPair establish(Callback&& cb,
 	                               std::optional<Cleanup>&& cleanup = {});
+	// clang-format on
 
 	/// @brief Check if the connection is still valid.
 	///
@@ -99,9 +103,8 @@ struct [[nodiscard]] Connection {
 	///    * If the connection is valid, the value returned by calling the
 	///      callback is returned.
 	///    * If the connection is not valid, an empty value is returned.
-	template <typename RTT = RT,
-	          typename std::enable_if_t<!std::is_same_v<RTT, void>, bool> =
-	              true>
+	template <typename RTT = RT, typename std::enable_if_t<
+	                                 !std::is_same_v<RTT, void>, bool> = true>
 	std::optional<RTT> operator()(Args... args);
 
 	/// @brief Calls the callback.
@@ -130,7 +133,9 @@ public:  // But actually still private thanks to the PCT
 	// Connection is only ever available wrapped in a std::shared_ptr.
 	// It cannot be moved or copied directly without breaking the
 	// corresponding handle, so those constructors are disabled.
+	// clang-format off
 	Connection(Connection&&) = delete;
+	// clang-format on
 	Connection(const Connection&) = delete;
 	Connection& operator=(const Connection&) = delete;
 
@@ -142,7 +147,9 @@ private:
 	// Unblocks sever() if all callbacks have finished
 	// NOTE: Must be called from inside a block that has checked
 	// for !sever_requested_
+	// clang-format off
 	void notify_if_expired(std::weak_ptr<Callback>&& cb);
+	// clang-format on
 
 	std::atomic<bool> sever_requested_{false};
 	// Note: would use std::atomic<std::weak_ptr<Callback>> if we had C++20
@@ -161,14 +168,18 @@ struct [[nodiscard]] CalleeHandle {
 
 	/// @brief Creates a connected handle. Only usable by Connection
 	CalleeHandle(std::shared_ptr<Conn> conn, std::shared_ptr<Callback> cb,
+	             // clang-format off
 	             std::optional<Cleanup>&& cu,
+	             // clang-format on
 	             typename Conn::PrivateConstructToken);
 
 	/// @brief Handles can be moved
 	///
 	/// @post The old handle will be disconnected and the new handle will be
 	///       connected where the old one previously was.
+	// clang-format off
 	CalleeHandle(CalleeHandle&&) noexcept;
+	// clang-format on
 
 	CalleeHandle(const CalleeHandle&) = delete;
 	CalleeHandle& operator=(const CalleeHandle&) = delete;

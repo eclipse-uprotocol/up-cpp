@@ -9,8 +9,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_RPCCLIENT_H
-#define UP_CPP_CLIENT_RPCCLIENT_H
+#ifndef UP_CPP_COMMUNICATION_RPCCLIENT_H
+#define UP_CPP_COMMUNICATION_RPCCLIENT_H
 
 #include <up-cpp/datamodel/builder/Payload.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
@@ -54,12 +54,12 @@ struct RpcClient {
 	                   std::optional<uint32_t> permission_level = {},
 	                   std::optional<std::string> token = {});
 
-	/// @brief as found in v1::UAttributes
-	using Commstatus = uint32_t;
+	using Commstatus = v1::UCode;
 
 	/// @brief Contains either a UMessage (when successful) or a UStatus /
-	/// Commstatus when an error occurred.
-	using StatusOrMessage =
+	/// Commstatus when an error occurred. Commstatus would be set based
+	/// on the commstatus attributes field in any returned messages.
+	using MessageOrStatus =
 	    utils::Expected<v1::UMessage, std::variant<v1::UStatus, Commstatus>>;
 
 	/// @brief Invokes an RPC method by sending a request message.
@@ -73,7 +73,7 @@ struct RpcClient {
 	///          * A UStatus with the value returned by UTransport::send().
 	///          * A Commstatus as received in the response message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
-	[[nodiscard]] std::future<StatusOrMessage> invokeMethod(
+	[[nodiscard]] std::future<MessageOrStatus> invokeMethod(
 	    datamodel::builder::Payload&&) const;
 
 	/// @brief Invokes an RPC method by sending a request message.
@@ -87,7 +87,7 @@ struct RpcClient {
 	///          * A UStatus with the value returned by UTransport::send().
 	///          * A Commstatus as received in the response message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
-	[[nodiscard]] std::future<StatusOrMessage> invokeMethod() const;
+	[[nodiscard]] std::future<MessageOrStatus> invokeMethod() const;
 
 	~RpcClient() = default;
 
@@ -98,4 +98,4 @@ private:
 
 }  // namespace uprotocol::communication
 
-#endif  // UP_CPP_CLIENT_RPCCLIENT_H
+#endif  // UP_CPP_COMMUNICATION_RPCCLIENT_H

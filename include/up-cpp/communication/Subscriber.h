@@ -9,8 +9,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_SUBSCRIBER_H
-#define UP_CPP_CLIENT_SUBSCRIBER_H
+#ifndef UP_CPP_COMMUNICATION_SUBSCRIBER_H
+#define UP_CPP_COMMUNICATION_SUBSCRIBER_H
 
 #include <up-cpp/transport/UTransport.h>
 #include <up-cpp/utils/Expected.h>
@@ -61,4 +61,4 @@ private:
 
 }  // namespace uprotocol::communication
 
-#endif  // UP_CPP_CLIENT_SUBSCRIBER_H
+#endif  // UP_CPP_COMMUNICATION_SUBSCRIBER_H

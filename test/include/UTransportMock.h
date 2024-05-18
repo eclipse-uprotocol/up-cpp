@@ -14,4 +14,4 @@
 
 #include <gmock/gmock.h>
 
-#endif // UP_CPP_TEST_UTRANSPORTMOCK_H
+#endif  // UP_CPP_TEST_UTRANSPORTMOCK_H

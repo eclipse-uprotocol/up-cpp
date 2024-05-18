@@ -32,7 +32,7 @@ namespace uprotocol::communication {
 struct NotificationSink {
 	using ListenCallback = transport::UTransport::ListenCallback;
 
-	using StatusOrSink =
+	using SinkOrStatus =
 	    utils::Expected<std::unique_ptr<NotificationSink>, v1::UStatus>;
 
 	/// @brief Create a notification sink to receive notifications.
@@ -52,7 +52,8 @@ struct NotificationSink {
 	///    * unique_ptr to a NotificationSink if the callback was connected
 	///      successfully.
 	///    * UStatus containing an error state otherwise.
-	static StatusOrSink create(const v1::UUri& sink, ListenCallback&& callback,
+	static SinkOrStatus create(std::shared_ptr<transport::UTransport> transport,
+	                           const v1::UUri& sink, ListenCallback&& callback,
 	                           std::optional<v1::UUri>&& source_filter);
 
 	~NotificationSink() = default;

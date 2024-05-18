@@ -43,7 +43,7 @@ struct RpcServer {
 	    std::function<std::optional<datamodel::builder::Payload>(
 	        const v1::UMessage&)>;
 
-	using StatusOrServer =
+	using ServerOrStatus =
 	    utils::Expected<std::unique_ptr<RpcServer>, v1::UStatus>;
 
 	/// @brief Creates an RPC server.
@@ -68,7 +68,7 @@ struct RpcServer {
 	///    * unique_ptr to a RpcServer if the callback was connected
 	///      successfully.
 	///    * UStatus containing an error state otherwise.
-	static StatusOrServer create(
+	static ServerOrStatus create(
 	    std::shared_ptr<transport::UTransport> transport,
 	    const v1::UUri& method_name, RpcCallback&& callback,
 	    std::optional<v1::UPayloadFormat> payload_format = {},

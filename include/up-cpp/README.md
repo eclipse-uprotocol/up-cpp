@@ -22,8 +22,9 @@ messages over a transport protocol, such as Zenoh or SOME/IP.
 
 ## L2: Communication
 
-uEntities building on uProtocol will use the APIs in `communication/`.  These
-provide specific communication models, such as pub/sub, RPC, and notifications.
+uEntities building on uProtocol will typically use the APIs in `communication/`. 
+These provide specific communication models, such as pub/sub, RPC, and
+notifications.
 
 These headers are the primary interface for uEntities.
 

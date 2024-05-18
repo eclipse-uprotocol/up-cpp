@@ -16,8 +16,11 @@ TabWidth: 4
 IndentWidth: 4
 AccessModifierOffset: -4
 
-# Tabs is not set-in-stone at the moment. There are *arguments* that tabs are
-# better for accessibility (allows customization to meet individual needs _and_
-# represents single character on alternate display devices), but first-hand
-# accounts / discussions of preferences are not easily found at the moment.
+# There are *arguments* that tabs are better for accessibility (allows
+# customization to meet individual needs _and_ represents single character on
+# alternate display devices), but first-hand accounts / discussions of
+# preferences are not easily found at the moment.
+#
+# Regardless, tabs are used for the time being to allow greater flexibility
+# in configuration for the broader community.
 UseTab: ForIndentation

@@ -100,28 +100,6 @@ struct UMessageBuilder {
 	/// @returns UMessageBuilder configured to build a "response" message
 	static UMessageBuilder response(const v1::UMessage& request);
 
-	/// @brief Specify an ID to use for the message in place of the
-	///        auto-generated ID.
-	///
-	/// Allows for a fixed, known ID to be set as the message ID. Normally,
-	/// a unique message ID would be generated each time build() is called,
-	/// but a builder where withId() has been called will always produce the ID
-	/// used in that call.
-	///
-	/// @note In general, use of this method represents a special case. It
-	///       does not need to be used in most scenarios as a unique
-	///       message ID will be generated automatically for every built
-	///       message.
-	///
-	/// @post This UMessageBuilder will only generate messages with their
-	///       ID set to the value passed to this method.
-	///
-	/// @param The UUID to use for built messages.
-	///
-	/// @throws InvalidUuid if ID fails validation.
-	/// @returns A reference to this UMessageBuilder
-	UMessageBuilder& withId(const v1::UUID&);
-
 	/// @brief Set the message priority attribute for built messages.
 	///
 	/// If not called, the default value as specified in
