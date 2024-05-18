@@ -12,6 +12,7 @@
 #ifndef UP_CPP_UTILS_IPADDRESS_H
 #define UP_CPP_UTILS_IPADDRESS_H
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <type_traits>
