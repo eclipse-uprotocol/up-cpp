@@ -191,7 +191,7 @@ private:
       * @return 
       */
     [[nodiscard]] [[maybe_unused]] inline auto isMicroForm(const uprotocol::v1::UEntity &entity) -> bool {
-        return entity.has_id() && entity.id() > 0;
+        return entity.has_id();
     }
     
     /**

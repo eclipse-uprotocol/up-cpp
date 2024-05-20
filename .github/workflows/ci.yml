@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'releases/**' ]
   pull_request:
     branches: ["**"]
   workflow_call:
@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p build && cd build
-          conan install .. -o build_testing=True
+          conan install .. --build=missing -o build_testing=True
           cmake -S .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=~/local
           cmake --build . --target install -- -j
 
