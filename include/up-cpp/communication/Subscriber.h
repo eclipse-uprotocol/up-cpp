@@ -49,9 +49,12 @@ struct Subscriber {
 	          transport::UTransport::ListenCallback&& callback);
 
 protected:
+	/// @brief Constructor
+	///
+	/// @param transport Transport this subscriber is connected to.
+	/// @param subscription Handle to the callback registered with UTransport.
 	Subscriber(std::shared_ptr<transport::UTransport> transport,
-	           const v1::UUri& topic,
-	           transport::UTransport::ListenCallback&& callback);
+	           transport::UTransport::ListenHandle&& subscription);
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
