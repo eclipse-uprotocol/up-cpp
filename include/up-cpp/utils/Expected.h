@@ -12,7 +12,7 @@
 #ifndef UP_CPP_UTILS_EXPECTED_H
 #define UP_CPP_UTILS_EXPECTED_H
 
-#include <exception>
+#include <stdexcept>
 #include <type_traits>
 
 namespace uprotocol::utils {
@@ -22,77 +22,82 @@ namespace uprotocol::utils {
 static_assert(!__has_cpp_attribute(__cpp_lib_expected),
               "Replace uprotocol::utils::Expected with std::expected");
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+// The following implementation is based on a the Expect the Unexpected youtube video
+// by Andrei Alexandrescu from CppCon2018.
+//
+// This implementation is currently missing methods that use reference qualifiers.
+// Reference qualifiers on methods was supposed to be introduced in C++11, but its doesn't seem
+// to be working in actual g++ 11.4.1-3 in docker nor earlier versions.8 Could be the issue is
+// specific to non-const versus const. The loss of this part of the implementation means
+// swapping is not being done, and useless copies are being done. This should be reexamined if
+// there are use cases where the expected value ends up being a large object.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////
+
 /// @name Temporary substitute for std::expected
 /// @remarks See the reference for std::expected:
 ///          https://en.cppreference.com/w/cpp/utility/expected
 ///          No further documentation is provided in this file.
 /// @{
-template <typename E>
-struct BadExpectedAccess;
+struct BadExpectedAccess : public std::runtime_error
+{
+    BadExpectedAccess() : std::runtime_error("generic BadExpectedAccess") {}
+    BadExpectedAccess(const char* arg) : std::runtime_error(arg) {}
+};
 
-template <>
-struct BadExpectedAccess<void> : public std::exception {};
 
-template <typename E>
-struct BadExpectedAccess : public BadExpectedAccess<void> {};
+/// @brief Required tagging type for cases where expected and unexpected type are identical.
+template <typename T>
+class Unexpected {
+    T   t;
+public:
+    Unexpected(const T& arg) { t = arg; }
+    const T& value() const { return t; }
+};
+
 
 /// @brief A stripped-down version of std::expected from C++23.
 template <typename T, typename E>
 struct Expected {
-	using value_type = T;
-	using error_type = E;
+public:
+    constexpr Expected() { new(&yay) T(); }
+    constexpr Expected(const T& rhs) { new(&yay) T(rhs); }
+    constexpr Expected(const Unexpected<E>& rhs) : ok(false) { new(&nay) E(rhs.value()); }
+    template <class U = T>
+    constexpr explicit Expected(U&& rhs) { new(&yay) T(std::forward<U>(rhs)); }
 
-	constexpr Expected();
-	constexpr Expected(const Expected& other);
-	constexpr Expected(Expected&& other) noexcept;
+    constexpr Expected(const Expected& rhs) : ok(rhs.ok) {
+        if (ok) new(&yay) T(rhs.yay);
+        else new(&nay) E(rhs.nay);
+    }
 
-	constexpr explicit Expected(T&& v);
-	constexpr explicit Expected(E&& e);
+    constexpr bool has_value() const noexcept { return ok; }
 
-	Expected& operator=(const Expected& other);
-	Expected& operator=(Expected&& other);
+    constexpr explicit operator bool() const noexcept { return ok; }
 
-	Expected& operator=(const T& other);
-	Expected& operator=(T&& other);
+    template <class U>
+    constexpr T value_or(U&& v) const& noexcept { return ok ? yay : v; }
 
-	Expected& operator=(const E& other);
-	Expected& operator=(E&& other);
+    constexpr T value() const
+    { if (!ok) throw BadExpectedAccess("Attempt to access value() when unexpected."); return yay; }
 
-	constexpr explicit operator bool() const noexcept;
-	constexpr bool has_value() const noexcept;
+    constexpr const E& error() const
+    { if (ok) throw BadExpectedAccess("Attempt to access error() when not unexpected."); return nay; }
 
-	constexpr T& value() &;
-	constexpr const T& value() const&;
-	constexpr T&& value() &&;
-	constexpr const T&& value() const&&;
+    constexpr T& operator*()
+    { if (!ok) throw BadExpectedAccess("Attempt to non-const dereference expected value when unexpected."); return yay; }
 
-	constexpr const E& error() const& noexcept;
-	constexpr E& error() & noexcept;
-	constexpr const E&& error() const&& noexcept;
-	constexpr E&& error() && noexcept;
+    constexpr const T& operator*() const
+    { if (!ok) throw BadExpectedAccess("Attempt to const dereference expected value when unexpected."); return yay; }
 
-	constexpr T value_or(T&& default_value) const&;
-	constexpr T value_or(T&& default_value) &&;
-
-	template <typename F>
-	constexpr auto and_then(F&& f) &;
-	template <typename F>
-	constexpr auto and_then(F&& f) const&;
-	template <typename F>
-	constexpr auto and_then(F&& f) &&;
-	template <typename F>
-	constexpr auto and_then(F&& f) const&&;
-
-	template <typename F>
-	constexpr auto or_else(F&& f) &;
-	template <typename F>
-	constexpr auto or_else(F&& f) const&;
-	template <typename F>
-	constexpr auto or_else(F&& f) &&;
-	template <typename F>
-	constexpr auto or_else(F&& f) const&&;
+    constexpr T* operator->()
+    { if (!ok) throw BadExpectedAccess("Attempt to dereference expected pointer when unexpected."); return &**this; }
 
 private:
+    union { T yay; E nay; };
+    bool ok = true;
+	
 	static_assert(!std::is_void_v<T>,
 	              "We don't allow T==void (unlike std::expected)");
 
