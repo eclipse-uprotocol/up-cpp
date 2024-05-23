@@ -10,54 +10,50 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <gtest/gtest.h>
-#include <cmath>
 #include <up-cpp/utils/Expected.h>
+
+#include <cmath>
 
 namespace {
 
+using uprotocol::utils::BadExpectedAccess;
 using uprotocol::utils::Expected;
 using uprotocol::utils::Unexpected;
-using uprotocol::utils::BadExpectedAccess;
 
-enum class parse_error
-{
-    invalid_input,
-    overflow
-};
+enum class parse_error { invalid_input, overflow };
 
 struct CompositeExpect {
-    double x;
-    double y;
+	double x;
+	double y;
 };
 
-auto parse_number(std::string_view str) -> Expected<double, parse_error>
-{
-    const char* begin = str.data();
-    char* end;
-    double retval = std::strtod(begin, &end);
+auto parse_number(std::string_view str) -> Expected<double, parse_error> {
+	const char* begin = str.data();
+	char* end;
+	double retval = std::strtod(begin, &end);
 
-    if (begin == end)
-        return Unexpected(parse_error::invalid_input);
-    else if (std::isinf(retval))
-        return Unexpected(parse_error::overflow);
+	if (begin == end)
+		return Unexpected(parse_error::invalid_input);
+	else if (std::isinf(retval))
+		return Unexpected(parse_error::overflow);
 
-    str.remove_prefix(end - begin);
-    return retval;
+	str.remove_prefix(end - begin);
+	return retval;
 }
 
-auto parse_number_with_composite(std::string_view str) -> Expected<CompositeExpect, parse_error>
-{
-    const char* begin = str.data();
-    char* end;
-    double retval = std::strtod(begin, &end);
+auto parse_number_with_composite(std::string_view str)
+    -> Expected<CompositeExpect, parse_error> {
+	const char* begin = str.data();
+	char* end;
+	double retval = std::strtod(begin, &end);
 
-    if (begin == end)
-        return Unexpected(parse_error::invalid_input);
-    else if (std::isinf(retval))
-        return Unexpected(parse_error::overflow);
+	if (begin == end)
+		return Unexpected(parse_error::invalid_input);
+	else if (std::isinf(retval))
+		return Unexpected(parse_error::overflow);
 
-    str.remove_prefix(end - begin);
-    return CompositeExpect{retval, -retval};
+	str.remove_prefix(end - begin);
+	return CompositeExpect{retval, -retval};
 }
 
 class TestFixture : public testing::Test {
@@ -78,123 +74,126 @@ protected:
 	static void TearDownTestSuite() {}
 };
 
-TEST_F(TestFixture, ExpectScalar)
-{
-    auto exp = parse_number("44");
-    EXPECT_EQ(true, bool(exp));
-    EXPECT_EQ(true, exp.has_value());
-    EXPECT_EQ(44, exp.value());
-    EXPECT_EQ(44, *exp);
+TEST_F(TestFixture, ExpectScalar) {
+	auto exp = parse_number("44");
+	EXPECT_EQ(true, bool(exp));
+	EXPECT_EQ(true, exp.has_value());
+	EXPECT_EQ(44, exp.value());
+	EXPECT_EQ(44, *exp);
 }
 
-TEST_F(TestFixture, ExpectComposite)
-{
-    auto exp = parse_number_with_composite("44");
-    EXPECT_EQ(true, bool(exp));
-    EXPECT_EQ(true, exp.has_value());
-    EXPECT_EQ(44, exp.value().x);
-    EXPECT_EQ(-44, exp.value().y);
-    EXPECT_EQ(44, exp->x);
-    EXPECT_EQ(-44, exp->y);
+TEST_F(TestFixture, ExpectComposite) {
+	auto exp = parse_number_with_composite("44");
+	EXPECT_EQ(true, bool(exp));
+	EXPECT_EQ(true, exp.has_value());
+	EXPECT_EQ(44, exp.value().x);
+	EXPECT_EQ(-44, exp.value().y);
+	EXPECT_EQ(44, exp->x);
+	EXPECT_EQ(-44, exp->y);
 }
 
-TEST_F(TestFixture, Unexpect)
-{
-    auto exp = parse_number("inf");
-    EXPECT_EQ(false, bool(exp));
-    EXPECT_EQ(false, exp.has_value());
+TEST_F(TestFixture, Unexpect) {
+	auto exp = parse_number("inf");
+	EXPECT_EQ(false, bool(exp));
+	EXPECT_EQ(false, exp.has_value());
 }
 
-
-TEST_F(TestFixture, ExpectScalar_value_or)
-{
-    EXPECT_EQ(44, parse_number("44").value_or(55));
+TEST_F(TestFixture, ExpectScalar_value_or) {
+	EXPECT_EQ(44, parse_number("44").value_or(55));
 }
 
-TEST_F(TestFixture, UnexpectScalar_value_or)
-{
-    using namespace std;
-    EXPECT_EQ(55, parse_number("xxx").value_or(55));
+TEST_F(TestFixture, UnexpectScalar_value_or) {
+	using namespace std;
+	EXPECT_EQ(55, parse_number("xxx").value_or(55));
 }
 
-TEST_F(TestFixture, Exception_error_when_expected)
-{
-	EXPECT_THROW({
-		try {
-			const auto num = parse_number("5");
-			auto err = num.error(); // should throw
-		}
-		catch (const BadExpectedAccess& ex) {
-			EXPECT_STREQ("Attempt to access error() when not unexpected.", ex.what());
-			throw;
-		}
-	}, BadExpectedAccess);
+TEST_F(TestFixture, Exception_error_when_expected) {
+	EXPECT_THROW(
+	    {
+		    try {
+			    const auto num = parse_number("5");
+			    auto err = num.error();  // should throw
+		    } catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ("Attempt to access error() when not unexpected.",
+			                 ex.what());
+			    throw;
+		    }
+	    },
+	    BadExpectedAccess);
 }
 
-TEST_F(TestFixture, Exception_value_when_unexpected)
-{
-	EXPECT_THROW({
-		try {
-			const auto num = parse_number("inf");
-			auto val = num.value(); // should throw
-		}
-		catch (const BadExpectedAccess& ex) {
-			EXPECT_STREQ("Attempt to access value() when unexpected.", ex.what());
-			throw;
-		}
-	}, BadExpectedAccess);
+TEST_F(TestFixture, Exception_value_when_unexpected) {
+	EXPECT_THROW(
+	    {
+		    try {
+			    const auto num = parse_number("inf");
+			    auto val = num.value();  // should throw
+		    } catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ("Attempt to access value() when unexpected.",
+			                 ex.what());
+			    throw;
+		    }
+	    },
+	    BadExpectedAccess);
 }
 
-TEST_F(TestFixture, Exception_const_value_dref_when_unexpected)
-{
-	EXPECT_THROW({
-		try {
-			const auto num = parse_number("inf");
-			auto val = *num; // should throw
-		}
-		catch (const BadExpectedAccess& ex) {
-			EXPECT_STREQ("Attempt to const dereference expected value when unexpected.", ex.what());
-			throw;
-		}
-	}, BadExpectedAccess);
+TEST_F(TestFixture, Exception_const_value_dref_when_unexpected) {
+	EXPECT_THROW(
+	    {
+		    try {
+			    const auto num = parse_number("inf");
+			    auto val = *num;  // should throw
+		    } catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ(
+			        "Attempt to const dereference expected value when "
+			        "unexpected.",
+			        ex.what());
+			    throw;
+		    }
+	    },
+	    BadExpectedAccess);
 }
 
-TEST_F(TestFixture, Exception_nonconst_value_dref_when_unexpected)
-{
-	EXPECT_THROW({
-		try {
-			auto num = parse_number("inf");
-			auto val = *num; // should throw
-		}
-		catch (const BadExpectedAccess& ex) {
-			EXPECT_STREQ("Attempt to non-const dereference expected value when unexpected.", ex.what());
-			throw;
-		}
-	}, BadExpectedAccess);
+TEST_F(TestFixture, Exception_nonconst_value_dref_when_unexpected) {
+	EXPECT_THROW(
+	    {
+		    try {
+			    auto num = parse_number("inf");
+			    auto val = *num;  // should throw
+		    } catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ(
+			        "Attempt to non-const dereference expected value when "
+			        "unexpected.",
+			        ex.what());
+			    throw;
+		    }
+	    },
+	    BadExpectedAccess);
 }
 
-TEST_F(TestFixture, Exception_pointer_dref_when_unexpected)
-{
-	EXPECT_THROW({
-		try {
-			auto num = parse_number_with_composite("inf");
-			auto val = num->x; // should throw
-		}
-		catch (const BadExpectedAccess& ex) {
-			EXPECT_STREQ("Attempt to dereference expected pointer when unexpected.", ex.what());
-			throw;
-		}
-	}, BadExpectedAccess);
+TEST_F(TestFixture, Exception_pointer_dref_when_unexpected) {
+	EXPECT_THROW(
+	    {
+		    try {
+			    auto num = parse_number_with_composite("inf");
+			    auto val = num->x;  // should throw
+		    } catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ(
+			        "Attempt to dereference expected pointer when unexpected.",
+			        ex.what());
+			    throw;
+		    }
+	    },
+	    BadExpectedAccess);
 }
 
 }  // namespace
 
 #ifdef OUT_OF_TREE
 
-int main(int argc, char *argv[])
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+int main(int argc, char* argv[]) {
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }
 
 #endif
