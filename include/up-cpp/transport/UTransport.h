@@ -53,9 +53,9 @@ public:
 	///        transport instance.
 	///
 	/// @throws InvalidUUri if the provided UUri is not valid as a default
-	///         source. Validation is done with isValidRpcResponse().
+	///         source. Validation is done with isValidDefaultSource().
 	///
-	/// @see uprotocol::datamodel::validator::uri::isValidRpcResponse()
+	/// @see uprotocol::datamodel::validator::uri::isValidDefaultSource()
 	/// @see uprotocol::datamodel::validator::uri::InvalidUUri
 	explicit UTransport(const v1::UUri&);
 
@@ -127,9 +127,6 @@ protected:
 	///
 	/// @param message UMessage to be sent.
 	///
-	/// @throws InvalidUMessage if the message doesn't pass the isValid() check.
-	/// @see uprotocol::datamodel::validator::message::isValid()
-	///
 	/// @returns * OKSTATUS if the payload has been successfully
 	///            sent (ACK'ed)
 	///          * FAILSTATUS with the appropriate failure.
@@ -163,9 +160,6 @@ protected:
 	///
 	/// @returns * OKSTATUS if the listener was registered successfully.
 	///          * FAILSTATUS with the appropriate failure otherwise.
-	/// @TODO(gregmedd) What is this for? Presumably for RPC responses, but
-	///                 that scenario requires filtering by request ID not
-	///                 source, and that would be handled at the next layer up.
 	[[nodiscard]] virtual v1::UStatus registerListenerImpl(
 	    const v1::UUri& sink_filter, CallableConn&& listener,
 	    std::optional<v1::UUri>&& source_filter) = 0;
