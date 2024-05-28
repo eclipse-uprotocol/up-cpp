@@ -74,6 +74,13 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// resource_id must be 0.
 [[nodiscard]] ValidationResult isValidRpcResponse(const v1::UUri&);
 
+/// @brief Checks if UUri is valid as a default source on a UTransport.
+///
+/// @note This just calls isValidRpcResponse() because the requirements are the
+///       same in both cases. It is provided as a separate function here for
+///       improved readability where it is called.
+[[nodiscard]] ValidationResult isValidDefaultSource(const v1::UUri&);
+
 /// @brief Checks if UUri is valid for publishing to a topic, OR as a source
 ///        and sink for sending notifications, OR as a sink for receiving
 ///        notifications.
