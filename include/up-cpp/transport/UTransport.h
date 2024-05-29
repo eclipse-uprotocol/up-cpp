@@ -109,7 +109,8 @@ public:
 	///          * FAILSTATUS with the appropriate failure and an
 	///            unconnected ListenHandle otherwise.
 	[[nodiscard]] utils::Expected<ListenHandle, v1::UStatus> registerListener(
-	    const v1::UUri& sink_filter, ListenCallback&& listener,
+	    const v1::UUri& sink_filter,
+		ListenCallback&& listener,
 	    std::optional<v1::UUri>&& source_filter = {});
 
 	/// @brief Gets the default source Authority and Entity for all clients
@@ -161,7 +162,8 @@ protected:
 	/// @returns * OKSTATUS if the listener was registered successfully.
 	///          * FAILSTATUS with the appropriate failure otherwise.
 	[[nodiscard]] virtual v1::UStatus registerListenerImpl(
-	    const v1::UUri& sink_filter, CallableConn&& listener,
+	    const v1::UUri& sink_filter,
+		CallableConn&& listener,
 	    std::optional<v1::UUri>&& source_filter) = 0;
 
 	/// @brief Clean up on listener disconnect.
