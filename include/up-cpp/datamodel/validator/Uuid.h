@@ -108,11 +108,15 @@ struct InvalidUuid : public std::invalid_argument {
 	// Inherit constructors
 	using std::invalid_argument::invalid_argument;
 
-	InvalidUuid(InvalidUuid&&) noexcept;
-	InvalidUuid& operator=(InvalidUuid&&) noexcept;
+	// Adding a constructor for std::string_view
+	explicit InvalidUuid(std::string_view message)
+	    : std::invalid_argument(std::string(message)) {}
 
-	InvalidUuid(const InvalidUuid&);
-	InvalidUuid& operator=(const InvalidUuid&);
+	InvalidUuid(InvalidUuid&&) noexcept = default;
+	InvalidUuid& operator=(InvalidUuid&&) noexcept = default;
+
+	InvalidUuid(const InvalidUuid&) = default;
+	InvalidUuid& operator=(const InvalidUuid&) = default;
 };
 
 }  // namespace uprotocol::datamodel::validator::uuid
