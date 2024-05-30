@@ -11,6 +11,8 @@
 
 #include <gtest/gtest.h>
 #include <up-cpp/utils/Expected.h>
+#include <vector>
+#include <variant>
 
 #include <cmath>
 
@@ -56,6 +58,14 @@ auto parse_number_with_composite(std::string_view str)
 	return CompositeExpect{retval, -retval};
 }
 
+using MoveableThing  = std::vector<double>;
+
+auto make_moveable_thing(bool good)
+	-> Expected<MoveableThing, parse_error>
+{
+	if (good) return std::move(MoveableThing{1.0, 2.0, 3.0});
+	return Unexpected(parse_error::overflow);
+}
 class TestFixture : public testing::Test {
 protected:
 	// Run once per TEST_F.
@@ -91,6 +101,24 @@ TEST_F(TestFixture, ExpectComposite) {
 	EXPECT_EQ(44, exp->x);
 	EXPECT_EQ(-44, exp->y);
 }
+
+TEST_F(TestFixture, ExpectMoveableThing) {
+	auto exp = make_moveable_thing(true);
+	EXPECT_EQ(true, bool(exp));
+	EXPECT_EQ(true, exp.has_value());
+	auto v = exp.value();
+	EXPECT_EQ(1.0, v[0]);
+	EXPECT_EQ(2.0, v[1]);
+	EXPECT_EQ(3.0, v[2]);
+}
+
+TEST_F(TestFixture, UnexpectMoveableThing) {
+	auto exp = make_moveable_thing(false);
+	EXPECT_EQ(false, bool(exp));
+	EXPECT_EQ(false, exp.has_value());
+	auto e = exp.error();
+}
+
 
 TEST_F(TestFixture, Unexpect) {
 	auto exp = parse_number("inf");
