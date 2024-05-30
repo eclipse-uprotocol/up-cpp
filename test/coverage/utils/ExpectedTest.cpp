@@ -66,6 +66,19 @@ auto make_moveable_thing(bool good)
 	if (good) return std::move(MoveableThing{1.0, 2.0, 3.0});
 	return Unexpected(parse_error::overflow);
 }
+
+using MoveableVariantThing  = std::variant<int, double>;
+
+auto make_moveable_variant_thing(bool good)
+	-> Expected<MoveableVariantThing, parse_error>
+{
+	if (good) {
+		std::variant<int, double> v = int(5);
+		return std::move(v);
+	}
+	return Unexpected(parse_error::overflow);
+}
+
 class TestFixture : public testing::Test {
 protected:
 	// Run once per TEST_F.
@@ -119,6 +132,22 @@ TEST_F(TestFixture, UnexpectMoveableThing) {
 	auto e = exp.error();
 }
 
+TEST_F(TestFixture, ExpectMoveableVariantThing) {
+	auto exp = make_moveable_variant_thing(true);
+	EXPECT_EQ(true, bool(exp));
+	EXPECT_EQ(true, exp.has_value());
+	auto v = exp.value();
+	// EXPECT_EQ(1.0, v[0]);
+	// EXPECT_EQ(2.0, v[1]);
+	// EXPECT_EQ(3.0, v[2]);
+}
+
+TEST_F(TestFixture, UnexpectMoveableVariantThing) {
+	auto exp = make_moveable_variant_thing(false);
+	EXPECT_EQ(false, bool(exp));
+	EXPECT_EQ(false, exp.has_value());
+	auto e = exp.error();
+}
 
 TEST_F(TestFixture, Unexpect) {
 	auto exp = parse_number("inf");
