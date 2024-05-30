@@ -14,6 +14,7 @@
 
 #include <stdexcept>
 #include <type_traits>
+#include <variant>
 
 namespace uprotocol::utils {
 
@@ -60,76 +61,68 @@ public:
 /// @brief A stripped-down version of std::expected from C++23.
 template <typename T, typename E>
 struct Expected {
+	std::variant<T, E> storage;
 public:
-	constexpr Expected() { new (&yay) T(); }
-	constexpr Expected(const T& rhs) { new (&yay) T(rhs); }
-	constexpr Expected(const Unexpected<E>& rhs) : ok(false) {
-		new (&nay) E(rhs.value());
+	constexpr Expected() { storage = T(); }
+	constexpr Expected(const T& rhs) { storage = rhs; }
+	constexpr Expected(const Unexpected<E>& rhs) {
+		storage = rhs.value();
 	}
 	template <class U = T>
 	constexpr explicit Expected(U&& rhs) {
-		new (&yay) T(std::forward<U>(rhs));
+		storage = std::forward<U>(rhs);
 	}
 
-	constexpr Expected(const Expected& rhs) : ok(rhs.ok) {
-		if (ok)
-			new (&yay) T(rhs.yay);
-		else
-			new (&nay) E(rhs.nay);
+	constexpr Expected(const Expected& rhs) {
+		storage = rhs;
 	}
 
-	constexpr bool has_value() const noexcept { return ok; }
+	constexpr bool has_value() const noexcept { return std::holds_alternative<T>(storage); }
 
-	constexpr explicit operator bool() const noexcept { return ok; }
+	constexpr explicit operator bool() const noexcept { return std::holds_alternative<T>(storage); }
 
 	template <class U>
 	constexpr T value_or(U&& v) const& noexcept {
-		return ok ? yay : v;
+		return has_value() ? std::get<T>(storage) : v;
 	}
 
 	constexpr T value() const {
-		if (!ok)
+		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to access value() when unexpected.");
-		return yay;
+		return std::get<T>(storage);
 	}
 
 	constexpr const E& error() const {
-		if (ok)
+		if (has_value())
 			throw BadExpectedAccess(
 			    "Attempt to access error() when not unexpected.");
-		return nay;
+		return std::get<E>(storage);
 	}
 
 	constexpr T& operator*() {
-		if (!ok)
+		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to non-const dereference expected value when "
 			    "unexpected.");
-		return yay;
+		return std::get<T>(storage);
 	}
 
 	constexpr const T& operator*() const {
-		if (!ok)
+		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to const dereference expected value when unexpected.");
-		return yay;
+		return std::get<T>(storage);
 	}
 
 	constexpr T* operator->() {
-		if (!ok)
+		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to dereference expected pointer when unexpected.");
 		return &**this;
 	}
 
 private:
-	union {
-		T yay;
-		E nay;
-	};
-	bool ok = true;
-
 	static_assert(!std::is_void_v<T>,
 	              "We don't allow T==void (unlike std::expected)");
 
