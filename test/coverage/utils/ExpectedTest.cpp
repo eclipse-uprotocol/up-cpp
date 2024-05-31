@@ -25,9 +25,19 @@ using uprotocol::utils::Unexpected;
 enum class parse_error { invalid_input, overflow };
 
 struct CompositeExpect {
+	static bool destructHappend;
 	double x;
 	double y;
+	std::string s;
+
+	~CompositeExpect()
+	{
+		destructHappend = true;
+		std::cout << "~CompositeExpect" << std::endl;
+	}
 };
+
+bool CompositeExpect::destructHappend = false;
 
 auto parse_number(std::string_view str) -> Expected<double, parse_error> {
 	const char* begin = str.data();
@@ -55,7 +65,7 @@ auto parse_number_with_composite(std::string_view str)
 		return Unexpected(parse_error::overflow);
 
 	str.remove_prefix(end - begin);
-	return CompositeExpect{retval, -retval};
+	return CompositeExpect{retval, -retval, "some string"};
 }
 
 using MoveableThing  = std::vector<double>;
@@ -67,19 +77,7 @@ auto make_moveable_thing(bool good)
 	return Unexpected(parse_error::overflow);
 }
 
-using MoveableVariantThing  = std::variant<int, double>;
-
-auto make_moveable_variant_thing(bool good)
-	-> Expected<MoveableVariantThing, parse_error>
-{
-	if (good) {
-		std::variant<int, double> v = int(5);
-		return std::move(v);
-	}
-	return Unexpected(parse_error::overflow);
-}
-
-class TestFixture : public testing::Test {
+class ExpectedTest : public testing::Test {
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
@@ -88,8 +86,8 @@ protected:
 
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
-	TestFixture() = default;
-	~TestFixture() = default;
+	ExpectedTest() = default;
+	~ExpectedTest() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
@@ -97,7 +95,7 @@ protected:
 	static void TearDownTestSuite() {}
 };
 
-TEST_F(TestFixture, ExpectScalar) {
+TEST_F(ExpectedTest, ExpectScalar) {
 	auto exp = parse_number("44");
 	EXPECT_EQ(true, bool(exp));
 	EXPECT_EQ(true, exp.has_value());
@@ -105,7 +103,7 @@ TEST_F(TestFixture, ExpectScalar) {
 	EXPECT_EQ(44, *exp);
 }
 
-TEST_F(TestFixture, ExpectComposite) {
+TEST_F(ExpectedTest, ExpectComposite) {
 	auto exp = parse_number_with_composite("44");
 	EXPECT_EQ(true, bool(exp));
 	EXPECT_EQ(true, exp.has_value());
@@ -115,7 +113,7 @@ TEST_F(TestFixture, ExpectComposite) {
 	EXPECT_EQ(-44, exp->y);
 }
 
-TEST_F(TestFixture, ExpectMoveableThing) {
+TEST_F(ExpectedTest, ExpectMoveableThing) {
 	auto exp = make_moveable_thing(true);
 	EXPECT_EQ(true, bool(exp));
 	EXPECT_EQ(true, exp.has_value());
@@ -125,46 +123,30 @@ TEST_F(TestFixture, ExpectMoveableThing) {
 	EXPECT_EQ(3.0, v[2]);
 }
 
-TEST_F(TestFixture, UnexpectMoveableThing) {
+TEST_F(ExpectedTest, UnexpectMoveableThing) {
 	auto exp = make_moveable_thing(false);
 	EXPECT_EQ(false, bool(exp));
 	EXPECT_EQ(false, exp.has_value());
 	auto e = exp.error();
 }
 
-TEST_F(TestFixture, ExpectMoveableVariantThing) {
-	auto exp = make_moveable_variant_thing(true);
-	EXPECT_EQ(true, bool(exp));
-	EXPECT_EQ(true, exp.has_value());
-	auto v = exp.value();
-	// EXPECT_EQ(1.0, v[0]);
-	// EXPECT_EQ(2.0, v[1]);
-	// EXPECT_EQ(3.0, v[2]);
-}
 
-TEST_F(TestFixture, UnexpectMoveableVariantThing) {
-	auto exp = make_moveable_variant_thing(false);
-	EXPECT_EQ(false, bool(exp));
-	EXPECT_EQ(false, exp.has_value());
-	auto e = exp.error();
-}
-
-TEST_F(TestFixture, Unexpect) {
+TEST_F(ExpectedTest, Unexpect) {
 	auto exp = parse_number("inf");
 	EXPECT_EQ(false, bool(exp));
 	EXPECT_EQ(false, exp.has_value());
 }
 
-TEST_F(TestFixture, ExpectScalar_value_or) {
+TEST_F(ExpectedTest, ExpectScalar_value_or) {
 	EXPECT_EQ(44, parse_number("44").value_or(55));
 }
 
-TEST_F(TestFixture, UnexpectScalar_value_or) {
+TEST_F(ExpectedTest, UnexpectScalar_value_or) {
 	using namespace std;
 	EXPECT_EQ(55, parse_number("xxx").value_or(55));
 }
 
-TEST_F(TestFixture, Exception_error_when_expected) {
+TEST_F(ExpectedTest, Exception_error_when_expected) {
 	EXPECT_THROW(
 	    {
 		    try {
@@ -179,7 +161,7 @@ TEST_F(TestFixture, Exception_error_when_expected) {
 	    BadExpectedAccess);
 }
 
-TEST_F(TestFixture, Exception_value_when_unexpected) {
+TEST_F(ExpectedTest, Exception_value_when_unexpected) {
 	EXPECT_THROW(
 	    {
 		    try {
@@ -194,7 +176,7 @@ TEST_F(TestFixture, Exception_value_when_unexpected) {
 	    BadExpectedAccess);
 }
 
-TEST_F(TestFixture, Exception_const_value_dref_when_unexpected) {
+TEST_F(ExpectedTest, Exception_const_value_dref_when_unexpected) {
 	EXPECT_THROW(
 	    {
 		    try {
@@ -211,7 +193,7 @@ TEST_F(TestFixture, Exception_const_value_dref_when_unexpected) {
 	    BadExpectedAccess);
 }
 
-TEST_F(TestFixture, Exception_nonconst_value_dref_when_unexpected) {
+TEST_F(ExpectedTest, Exception_nonconst_value_dref_when_unexpected) {
 	EXPECT_THROW(
 	    {
 		    try {
@@ -228,7 +210,7 @@ TEST_F(TestFixture, Exception_nonconst_value_dref_when_unexpected) {
 	    BadExpectedAccess);
 }
 
-TEST_F(TestFixture, Exception_pointer_dref_when_unexpected) {
+TEST_F(ExpectedTest, Exception_pointer_dref_when_unexpected) {
 	EXPECT_THROW(
 	    {
 		    try {
