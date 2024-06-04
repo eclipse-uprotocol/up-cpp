@@ -73,13 +73,14 @@ TEST_F(TestUUriValidator, Valid) {
 	res = isValid(uuri);
 	EXPECT_TRUE(std::get<bool>(res));
 	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
-	
+
 	uuri.set_resource_id(0xFFFF);
 	EXPECT_TRUE(uses_wildcards(uuri));
 
 	res = isValid(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::DISALLOWED_WILDCARD);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::DISALLOWED_WILDCARD);
 }
 
 TEST_F(TestUUriValidator, Wildcards) {
@@ -90,7 +91,7 @@ TEST_F(TestUUriValidator, Wildcards) {
 	uuri.set_resource_id(1);
 
 	EXPECT_FALSE(uses_wildcards(uuri));
-	
+
 	uuri.set_authority_name("hello*");
 	EXPECT_TRUE(uses_wildcards(uuri));
 	uuri.set_authority_name(AUTHORITY_NAME);
@@ -135,12 +136,14 @@ TEST_F(TestUUriValidator, ValidRpcMethod) {
 	uuri.set_resource_id(0xFFFF);
 	res = isValidRpcMethod(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::DISALLOWED_WILDCARD);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::DISALLOWED_WILDCARD);
 
 	uuri.set_resource_id(0x8000);
 	res = isValidRpcMethod(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::BAD_RESOURCE_ID);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::BAD_RESOURCE_ID);
 }
 
 TEST_F(TestUUriValidator, ValidRpcResponse) {
@@ -168,12 +171,14 @@ TEST_F(TestUUriValidator, ValidRpcResponse) {
 	uuri.set_resource_id(0xFFFF);
 	res = isValidRpcResponse(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::DISALLOWED_WILDCARD);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::DISALLOWED_WILDCARD);
 
 	uuri.set_resource_id(0x0001);
 	res = isValidRpcResponse(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::BAD_RESOURCE_ID);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::BAD_RESOURCE_ID);
 }
 
 TEST_F(TestUUriValidator, ValidPublishTopic) {
@@ -201,12 +206,14 @@ TEST_F(TestUUriValidator, ValidPublishTopic) {
 	uuri.set_resource_id(0xFFFF);
 	res = isValidPublishTopic(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::DISALLOWED_WILDCARD);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::DISALLOWED_WILDCARD);
 
 	uuri.set_resource_id(1);
 	res = isValidPublishTopic(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::BAD_RESOURCE_ID);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::BAD_RESOURCE_ID);
 }
 
 TEST_F(TestUUriValidator, ValidNotification) {
@@ -234,12 +241,14 @@ TEST_F(TestUUriValidator, ValidNotification) {
 	uuri.set_resource_id(0xFFFF);
 	res = isValidNotification(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::DISALLOWED_WILDCARD);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::DISALLOWED_WILDCARD);
 
 	uuri.set_resource_id(1);
 	res = isValidNotification(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::BAD_RESOURCE_ID);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::BAD_RESOURCE_ID);
 }
 
 TEST_F(TestUUriValidator, ValidSubscription) {
@@ -263,7 +272,8 @@ TEST_F(TestUUriValidator, ValidSubscription) {
 	uuri.set_resource_id(1);
 	res = isValidSubscription(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::BAD_RESOURCE_ID);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::BAD_RESOURCE_ID);
 }
 
 TEST_F(TestUUriValidator, Empty) {
@@ -291,19 +301,22 @@ TEST_F(TestUUriValidator, Empty) {
 	uuri.set_ue_id(1);
 	res = isEmpty(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::RESERVED_RESOURCE);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::RESERVED_RESOURCE);
 	uuri.set_ue_id(0);
 
 	uuri.set_ue_version_major(1);
 	res = isEmpty(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::RESERVED_VERSION);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::RESERVED_VERSION);
 	uuri.set_ue_version_major(0);
 
 	uuri.set_resource_id(1);
 	res = isEmpty(uuri);
 	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::BAD_RESOURCE_ID);
+	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
+	            Reason::BAD_RESOURCE_ID);
 }
 
 }  // namespace
