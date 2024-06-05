@@ -49,73 +49,117 @@ struct BadExpectedAccess : public std::runtime_error {
 
 /// @brief Required tagging type for cases where expected and unexpected type
 /// are identical.
-template <typename T>
-class Unexpected {
-	T t;
+template <typename E>
+struct Unexpected {
+	E storage;
 
-public:
-	Unexpected(const T& arg) { t = arg; }
-	const T& value() const { return t; }
+	constexpr Unexpected(const Unexpected&) = default;
+	constexpr Unexpected(Unexpected&&) = default;
+
+	constexpr explicit Unexpected(const E& rhs) : storage(rhs) {}
+	constexpr explicit Unexpected(E&& rhs) : storage(std::move(rhs)) {}
+
+	template <class... Args>
+	constexpr explicit Unexpected(std::in_place_t, Args&&... args)
+	    : storage(args...) {}
+
+	// template <class U, class... Args>
+	// constexpr explicit Unexpected(std::in_place_t, std::initializer_list<U>
+	// il, Args&&... args)
+
+	constexpr const E& error() const& noexcept { return std::move(storage); }
+
+	// this one is checked
+	constexpr E& error() & noexcept { return storage; }
+
+	constexpr const E&& error() const&& noexcept { return std::move(storage); }
+
+	constexpr E&& error() && noexcept { return std::move(storage); }
 };
 
 /// @brief A stripped-down version of std::expected from C++23.
-template <typename T, typename E>
+template <typename E, typename U>
 struct Expected {
-	std::variant<T, E> storage;
+	std::variant<E, Unexpected<U>> storage;
+
 public:
-	constexpr Expected() { storage = T(); }
-	constexpr Expected(const T& rhs) { storage = rhs; }
-	constexpr Expected(const Unexpected<E>& rhs) {
-		storage = rhs.value();
-	}
-	template <class U = T>
-	constexpr explicit Expected(U&& rhs) {
-		storage = std::forward<U>(rhs);
+	constexpr Expected() { storage = E(); }
+	constexpr Expected(E&& rhs) : storage(std::move(rhs)) {}
+	constexpr Expected(Unexpected<U>&& rhs) : storage(std::move(rhs)) {}
+
+	constexpr Expected(const Unexpected<U>& rhs) {
+		std::get<Unexpected<U>>(storage).storage = std::move(rhs);
 	}
 
-	constexpr Expected(const Expected& rhs) {
-		storage = rhs;
+	template <class X = E>
+	constexpr explicit Expected(X&& rhs) {
+		std::get<E>(storage) = std::forward<X>(rhs);
 	}
 
-	constexpr bool has_value() const noexcept { return std::holds_alternative<T>(storage); }
-
-	constexpr explicit operator bool() const noexcept { return std::holds_alternative<T>(storage); }
-
-	template <class U>
-	constexpr T value_or(U&& v) const& noexcept {
-		return has_value() ? std::get<T>(storage) : v;
+	template <class X = U>
+	constexpr explicit Expected(Unexpected<X>&& rhs) {
+		std::get<E>(storage) = rhs.error();
 	}
 
-	constexpr T value() const {
+	constexpr Expected(const Expected& rhs) { storage = rhs.storage; }
+
+	constexpr bool has_value() const noexcept {
+		return std::holds_alternative<E>(storage);
+	}
+
+	constexpr explicit operator bool() const noexcept {
+		return std::holds_alternative<E>(storage);
+	}
+
+	template <class X>
+	constexpr E value_or(X&& v) const& noexcept {
+		return has_value() ? std::get<E>(storage) : v;
+	}
+
+	constexpr const E& value() const& {
 		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to access value() when unexpected.");
-		return std::get<T>(storage);
+		return std::move(std::get<E>(storage));
 	}
 
-	constexpr const E& error() const {
+	constexpr E value() && {
+		if (!has_value())
+			throw BadExpectedAccess(
+			    "Attempt to access value() when unexpected.");
+		return std::move(std::get<E>(storage));
+	}
+
+	constexpr const U& error() const& {
 		if (has_value())
 			throw BadExpectedAccess(
 			    "Attempt to access error() when not unexpected.");
-		return std::get<E>(storage);
+		return std::move(std::get<Unexpected<U>>(storage).error());
 	}
 
-	constexpr T& operator*() {
+	constexpr U error() && {
+		if (has_value())
+			throw BadExpectedAccess(
+			    "Attempt to access error() when not unexpected.");
+		return std::move(std::get<Unexpected<U>>(storage)).error();
+	}
+
+	constexpr E& operator*() {
 		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to non-const dereference expected value when "
 			    "unexpected.");
-		return std::get<T>(storage);
+		return std::get<E>(storage);
 	}
 
-	constexpr const T& operator*() const {
+	constexpr const E& operator*() const {
 		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to const dereference expected value when unexpected.");
-		return std::get<T>(storage);
+		return std::get<E>(storage);
 	}
 
-	constexpr T* operator->() {
+	constexpr E* operator->() {
 		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to dereference expected pointer when unexpected.");
@@ -123,14 +167,15 @@ public:
 	}
 
 private:
-	static_assert(!std::is_void_v<T>,
-	              "We don't allow T==void (unlike std::expected)");
+	static_assert(!std::is_void_v<E>,
+	              "We don't allow E==void (unlike std::expected)");
 
 	static_assert(
-	    std::is_destructible_v<T> && !std::is_array_v<T> &&
-	        !std::is_reference_v<T>,
-	    "Expected requires T to meet the C++ 'destructable' requirement");
+	    std::is_destructible_v<E> && !std::is_array_v<E> &&
+	        !std::is_reference_v<E>,
+	    "Expected requires E to meet the C++ 'destructable' requirement");
 };
+
 /// @}
 
 }  // namespace uprotocol::utils

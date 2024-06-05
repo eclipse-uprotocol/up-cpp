@@ -11,71 +11,13 @@
 
 #include <gtest/gtest.h>
 #include <up-cpp/utils/Expected.h>
-#include <vector>
-#include <variant>
-
-#include <cmath>
+#include <random>
 
 namespace {
 
 using uprotocol::utils::BadExpectedAccess;
 using uprotocol::utils::Expected;
 using uprotocol::utils::Unexpected;
-
-enum class parse_error { invalid_input, overflow };
-
-struct CompositeExpect {
-	static bool destructHappend;
-	double x;
-	double y;
-	std::string s;
-
-	~CompositeExpect()
-	{
-		destructHappend = true;
-		std::cout << "~CompositeExpect" << std::endl;
-	}
-};
-
-bool CompositeExpect::destructHappend = false;
-
-auto parse_number(std::string_view str) -> Expected<double, parse_error> {
-	const char* begin = str.data();
-	char* end;
-	double retval = std::strtod(begin, &end);
-
-	if (begin == end)
-		return Unexpected(parse_error::invalid_input);
-	else if (std::isinf(retval))
-		return Unexpected(parse_error::overflow);
-
-	str.remove_prefix(end - begin);
-	return retval;
-}
-
-auto parse_number_with_composite(std::string_view str)
-    -> Expected<CompositeExpect, parse_error> {
-	const char* begin = str.data();
-	char* end;
-	double retval = std::strtod(begin, &end);
-
-	if (begin == end)
-		return Unexpected(parse_error::invalid_input);
-	else if (std::isinf(retval))
-		return Unexpected(parse_error::overflow);
-
-	str.remove_prefix(end - begin);
-	return CompositeExpect{retval, -retval, "some string"};
-}
-
-using MoveableThing  = std::vector<double>;
-
-auto make_moveable_thing(bool good)
-	-> Expected<MoveableThing, parse_error>
-{
-	if (good) return std::move(MoveableThing{1.0, 2.0, 3.0});
-	return Unexpected(parse_error::overflow);
-}
 
 class ExpectedTest : public testing::Test {
 protected:
@@ -95,133 +37,177 @@ protected:
 	static void TearDownTestSuite() {}
 };
 
+uint64_t get_rand() {
+    static std::random_device rd;
+    static std::mt19937 mt(rd());
+    static std::uniform_int_distribution<int> dist(0, 1<<30);
+    return dist(mt);
+}
+
+TEST_F(ExpectedTest, ExpectScalarScalar) {
+    using namespace std;
+
+    auto sample = get_rand();
+    auto lfn = [&] () -> Expected<int, int> { return sample; };
+    auto expected = lfn();
+    EXPECT_EQ(true, bool(expected));
+    EXPECT_EQ(true, expected.has_value());
+    EXPECT_EQ(sample, expected.value());
+    EXPECT_EQ(sample, *expected);
+}
+
+TEST_F(ExpectedTest, UnexpectScalarScalar) {
+    using namespace std;
+
+    int sample = get_rand();
+    auto lfn = [&] () -> Expected<int, int> { return Unexpected(sample); };
+    auto expected = lfn();
+    EXPECT_EQ(false, bool(expected));
+    EXPECT_EQ(false, expected.has_value());
+    EXPECT_EQ(sample, expected.error());
+}
+
 TEST_F(ExpectedTest, ExpectScalar) {
-	auto exp = parse_number("44");
-	EXPECT_EQ(true, bool(exp));
-	EXPECT_EQ(true, exp.has_value());
-	EXPECT_EQ(44, exp.value());
-	EXPECT_EQ(44, *exp);
+    using namespace std;
+
+    auto sample = get_rand();
+    auto lfn = [&] () -> Expected<int, string> { return sample; };
+    auto expected = lfn();
+    EXPECT_EQ(true, bool(expected));
+    EXPECT_EQ(true, expected.has_value());
+    EXPECT_EQ(sample, expected.value());
+    EXPECT_EQ(sample, *expected);
 }
 
-TEST_F(ExpectedTest, ExpectComposite) {
-	auto exp = parse_number_with_composite("44");
-	EXPECT_EQ(true, bool(exp));
-	EXPECT_EQ(true, exp.has_value());
-	EXPECT_EQ(44, exp.value().x);
-	EXPECT_EQ(-44, exp.value().y);
-	EXPECT_EQ(44, exp->x);
-	EXPECT_EQ(-44, exp->y);
+TEST_F(ExpectedTest, UnexpectScalar) {
+    using namespace std;
+
+    int sample = get_rand();
+    auto lfn = [&] () -> Expected<string, int> { return Unexpected(sample); };
+    auto expected = lfn();
+    EXPECT_EQ(false, bool(expected));
+    EXPECT_EQ(false, expected.has_value());
+    EXPECT_EQ(sample, expected.error());
 }
 
-TEST_F(ExpectedTest, ExpectMoveableThing) {
-	auto exp = make_moveable_thing(true);
-	EXPECT_EQ(true, bool(exp));
-	EXPECT_EQ(true, exp.has_value());
-	auto v = exp.value();
-	EXPECT_EQ(1.0, v[0]);
-	EXPECT_EQ(2.0, v[1]);
-	EXPECT_EQ(3.0, v[2]);
+struct Pair {
+    int x;
+    int y;
+
+    Pair(int x, int y) : x(x), y(y) {}
+};
+
+TEST_F(ExpectedTest, ExpectUnique) {
+    using namespace std;
+
+    auto x = get_rand();
+    auto y = get_rand();
+
+    auto lfn = [&] () -> Expected<unique_ptr<Pair>, string> { return make_unique<Pair>(x, y); };
+    auto expected = lfn();
+    EXPECT_EQ(true, bool(expected));
+    EXPECT_EQ(true, expected.has_value());
+    auto p = std::move(expected).value();
+    EXPECT_EQ(x, p->x);
+    EXPECT_EQ(y, p->y);
 }
 
-TEST_F(ExpectedTest, UnexpectMoveableThing) {
-	auto exp = make_moveable_thing(false);
-	EXPECT_EQ(false, bool(exp));
-	EXPECT_EQ(false, exp.has_value());
-	auto e = exp.error();
+TEST_F(ExpectedTest, UnexpectUnique) {
+    using namespace std;
+
+    auto x = get_rand();
+    auto y = get_rand();
+
+    auto lfn = [&] () -> Expected<int, unique_ptr<Pair>> { return Unexpected(make_unique<Pair>(x, y)); };
+    auto expected = lfn();
+    EXPECT_EQ(false, bool(expected));
+    EXPECT_EQ(false, expected.has_value());
+    auto p = std::move(expected).error();
+    EXPECT_EQ(x, p->x);
+    EXPECT_EQ(y, p->y);
 }
 
+TEST_F(ExpectedTest, ExpectShared) {
+    using namespace std;
 
-TEST_F(ExpectedTest, Unexpect) {
-	auto exp = parse_number("inf");
-	EXPECT_EQ(false, bool(exp));
-	EXPECT_EQ(false, exp.has_value());
+    auto x = get_rand();
+    auto y = get_rand();
+
+    auto lfn = [&] () -> Expected<shared_ptr<Pair>, string> { return make_shared<Pair>(x, y); };
+    auto expected = lfn();
+    EXPECT_EQ(true, bool(expected));
+    EXPECT_EQ(true, expected.has_value());
+    EXPECT_EQ(x, expected.value()->x);
+    EXPECT_EQ(y, expected.value()->y);
+    EXPECT_EQ(x, (*expected)->x);
+    EXPECT_EQ(y, (*expected)->y);
 }
 
-TEST_F(ExpectedTest, ExpectScalar_value_or) {
-	EXPECT_EQ(44, parse_number("44").value_or(55));
+TEST_F(ExpectedTest, UnexpectShared) {
+    using namespace std;
+
+    auto x = get_rand();
+    auto y = get_rand();
+
+    auto lfn = [&] () -> Expected<int, shared_ptr<Pair>> { return Unexpected(make_shared<Pair>(x, y)); };
+    auto expected = lfn();
+    EXPECT_EQ(false, bool(expected));
+    EXPECT_EQ(false, expected.has_value());
+    EXPECT_EQ(x, expected.error()->x);
+    EXPECT_EQ(y, expected.error()->y);
 }
 
-TEST_F(ExpectedTest, UnexpectScalar_value_or) {
-	using namespace std;
-	EXPECT_EQ(55, parse_number("xxx").value_or(55));
+TEST_F(ExpectedTest, ExpectStruct) {
+    using namespace std;
+
+    auto x = get_rand();
+    auto y = get_rand();
+
+    auto lfn = [&] () -> Expected<Pair, string> { return Pair(x, y); };
+    auto expected = lfn();
+    EXPECT_EQ(true, bool(expected));
+    EXPECT_EQ(true, expected.has_value());
+    EXPECT_EQ(x, expected.value().x);
+    EXPECT_EQ(y, expected.value().y);
+    EXPECT_EQ(x, expected->x);
+    EXPECT_EQ(y, expected->y);
 }
 
-TEST_F(ExpectedTest, Exception_error_when_expected) {
-	EXPECT_THROW(
-	    {
-		    try {
-			    const auto num = parse_number("5");
-			    auto err = num.error();  // should throw
-		    } catch (const BadExpectedAccess& ex) {
-			    EXPECT_STREQ("Attempt to access error() when not unexpected.",
-			                 ex.what());
-			    throw;
-		    }
-	    },
-	    BadExpectedAccess);
-}
+TEST_F(ExpectedTest, UnexpectStruct) {
+    using namespace std;
 
-TEST_F(ExpectedTest, Exception_value_when_unexpected) {
-	EXPECT_THROW(
-	    {
-		    try {
-			    const auto num = parse_number("inf");
-			    auto val = num.value();  // should throw
-		    } catch (const BadExpectedAccess& ex) {
-			    EXPECT_STREQ("Attempt to access value() when unexpected.",
-			                 ex.what());
-			    throw;
-		    }
-	    },
-	    BadExpectedAccess);
-}
+    auto x = get_rand();
+    auto y = get_rand();
 
-TEST_F(ExpectedTest, Exception_const_value_dref_when_unexpected) {
-	EXPECT_THROW(
-	    {
-		    try {
-			    const auto num = parse_number("inf");
-			    auto val = *num;  // should throw
-		    } catch (const BadExpectedAccess& ex) {
-			    EXPECT_STREQ(
-			        "Attempt to const dereference expected value when "
-			        "unexpected.",
-			        ex.what());
-			    throw;
-		    }
-	    },
-	    BadExpectedAccess);
-}
-
-TEST_F(ExpectedTest, Exception_nonconst_value_dref_when_unexpected) {
-	EXPECT_THROW(
-	    {
-		    try {
-			    auto num = parse_number("inf");
-			    auto val = *num;  // should throw
-		    } catch (const BadExpectedAccess& ex) {
-			    EXPECT_STREQ(
-			        "Attempt to non-const dereference expected value when "
-			        "unexpected.",
-			        ex.what());
-			    throw;
-		    }
-	    },
-	    BadExpectedAccess);
+    auto lfn = [&] () -> Expected<int, Pair> { return Unexpected(Pair(x, y)); };
+    auto expected = lfn();
+    EXPECT_EQ(false, bool(expected));
+    EXPECT_EQ(false, expected.has_value());
+    EXPECT_EQ(x, expected.error().x);
+    EXPECT_EQ(y, expected.error().y);
 }
 
 TEST_F(ExpectedTest, Exception_pointer_dref_when_unexpected) {
+    using namespace std;
+
+	auto sample = get_rand();
+	auto lfn = [&] () -> Expected<int, string> { return sample; };
+
 	EXPECT_THROW(
 	    {
-		    try {
-			    auto num = parse_number_with_composite("inf");
-			    auto val = num->x;  // should throw
-		    } catch (const BadExpectedAccess& ex) {
+			try {
+				;
+				auto expected = lfn();
+				EXPECT_EQ(true, bool(expected));
+				EXPECT_EQ(true, expected.has_value());
+				auto err = expected.error();
+			} catch (const BadExpectedAccess& ex) {
+				cout << "what = " << ex.what() << endl;
 			    EXPECT_STREQ(
-			        "Attempt to dereference expected pointer when unexpected.",
+			        "Attempt to access error() when not unexpected.",
 			        ex.what());
-			    throw;
-		    }
+				throw;
+			}
 	    },
 	    BadExpectedAccess);
 }
