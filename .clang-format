@@ -11,6 +11,7 @@ DerivePointerAlignment: 'false'
 ExperimentalAutoDetectBinPacking: 'false'
 FixNamespaceComments: 'true'
 PointerAlignment: Left
+ColumnLimit: 100
 
 TabWidth: 4
 IndentWidth: 4
