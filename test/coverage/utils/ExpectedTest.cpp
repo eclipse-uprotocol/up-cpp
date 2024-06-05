@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 #include <up-cpp/utils/Expected.h>
+
 #include <random>
 
 namespace {
@@ -38,266 +39,282 @@ protected:
 };
 
 uint64_t get_rand() {
-    static std::random_device rd;
-    static std::mt19937 mt(rd());
-    static std::uniform_int_distribution<int> dist(0, 1<<30);
-    return dist(mt);
+	static std::random_device rd;
+	static std::mt19937 mt(rd());
+	static std::uniform_int_distribution<int> dist(0, 1 << 30);
+	return dist(mt);
 }
 
 TEST_F(ExpectedTest, ExpectScalarScalar) {
-    using namespace std;
+	using namespace std;
 
-    auto sample = get_rand();
-    auto lfn = [&] () -> Expected<int, int> { return sample; };
-    auto expected = lfn();
-    EXPECT_EQ(true, bool(expected));
-    EXPECT_EQ(true, expected.has_value());
-    EXPECT_EQ(sample, expected.value());
-    EXPECT_EQ(sample, *expected);
+	auto sample = get_rand();
+	auto lfn = [&]() -> Expected<int, int> { return sample; };
+	auto expected = lfn();
+	EXPECT_EQ(true, bool(expected));
+	EXPECT_EQ(true, expected.has_value());
+	EXPECT_EQ(sample, expected.value());
+	EXPECT_EQ(sample, *expected);
 }
 
 TEST_F(ExpectedTest, UnexpectScalarScalar) {
-    using namespace std;
+	using namespace std;
 
-    int sample = get_rand();
-    auto lfn = [&] () -> Expected<int, int> { return Unexpected(sample); };
-    auto expected = lfn();
-    EXPECT_EQ(false, bool(expected));
-    EXPECT_EQ(false, expected.has_value());
-    EXPECT_EQ(sample, expected.error());
+	int sample = get_rand();
+	auto lfn = [&]() -> Expected<int, int> { return Unexpected(sample); };
+	auto expected = lfn();
+	EXPECT_EQ(false, bool(expected));
+	EXPECT_EQ(false, expected.has_value());
+	EXPECT_EQ(sample, expected.error());
 }
 
 TEST_F(ExpectedTest, ExpectScalar) {
-    using namespace std;
+	using namespace std;
 
-    auto sample = get_rand();
-    auto lfn = [&] () -> Expected<int, string> { return sample; };
-    auto expected = lfn();
-    EXPECT_EQ(true, bool(expected));
-    EXPECT_EQ(true, expected.has_value());
-    EXPECT_EQ(sample, expected.value());
-    EXPECT_EQ(sample, *expected);
+	auto sample = get_rand();
+	auto lfn = [&]() -> Expected<int, string> { return sample; };
+	auto expected = lfn();
+	EXPECT_EQ(true, bool(expected));
+	EXPECT_EQ(true, expected.has_value());
+	EXPECT_EQ(sample, expected.value());
+	EXPECT_EQ(sample, *expected);
 }
 
 TEST_F(ExpectedTest, UnexpectScalar) {
-    using namespace std;
+	using namespace std;
 
-    int sample = get_rand();
-    auto lfn = [&] () -> Expected<string, int> { return Unexpected(sample); };
-    auto expected = lfn();
-    EXPECT_EQ(false, bool(expected));
-    EXPECT_EQ(false, expected.has_value());
-    EXPECT_EQ(sample, expected.error());
+	int sample = get_rand();
+	auto lfn = [&]() -> Expected<string, int> { return Unexpected(sample); };
+	auto expected = lfn();
+	EXPECT_EQ(false, bool(expected));
+	EXPECT_EQ(false, expected.has_value());
+	EXPECT_EQ(sample, expected.error());
 }
 
 struct Pair {
-    int x;
-    int y;
+	int x;
+	int y;
 
-    Pair(int x, int y) : x(x), y(y) {}
+	Pair(int x, int y) : x(x), y(y) {}
 };
 
 TEST_F(ExpectedTest, ExpectUnique) {
-    using namespace std;
+	using namespace std;
 
-    auto x = get_rand();
-    auto y = get_rand();
+	auto x = get_rand();
+	auto y = get_rand();
 
-    auto lfn = [&] () -> Expected<unique_ptr<Pair>, string> { return make_unique<Pair>(x, y); };
-    auto expected = lfn();
-    EXPECT_EQ(true, bool(expected));
-    EXPECT_EQ(true, expected.has_value());
-    auto p = std::move(expected).value();
-    EXPECT_EQ(x, p->x);
-    EXPECT_EQ(y, p->y);
+	auto lfn = [&]() -> Expected<unique_ptr<Pair>, string> {
+		return make_unique<Pair>(x, y);
+	};
+	auto expected = lfn();
+	EXPECT_EQ(true, bool(expected));
+	EXPECT_EQ(true, expected.has_value());
+	auto p = std::move(expected).value();
+	EXPECT_EQ(x, p->x);
+	EXPECT_EQ(y, p->y);
 }
 
 TEST_F(ExpectedTest, UnexpectUnique) {
-    using namespace std;
+	using namespace std;
 
-    auto x = get_rand();
-    auto y = get_rand();
+	auto x = get_rand();
+	auto y = get_rand();
 
-    auto lfn = [&] () -> Expected<int, unique_ptr<Pair>> { return Unexpected(make_unique<Pair>(x, y)); };
-    auto expected = lfn();
-    EXPECT_EQ(false, bool(expected));
-    EXPECT_EQ(false, expected.has_value());
-    auto p = std::move(expected).error();
-    EXPECT_EQ(x, p->x);
-    EXPECT_EQ(y, p->y);
+	auto lfn = [&]() -> Expected<int, unique_ptr<Pair>> {
+		return Unexpected(make_unique<Pair>(x, y));
+	};
+	auto expected = lfn();
+	EXPECT_EQ(false, bool(expected));
+	EXPECT_EQ(false, expected.has_value());
+	auto p = std::move(expected).error();
+	EXPECT_EQ(x, p->x);
+	EXPECT_EQ(y, p->y);
 }
 
 TEST_F(ExpectedTest, ExpectShared) {
-    using namespace std;
+	using namespace std;
 
-    auto x = get_rand();
-    auto y = get_rand();
+	auto x = get_rand();
+	auto y = get_rand();
 
-    auto lfn = [&] () -> Expected<shared_ptr<Pair>, string> { return make_shared<Pair>(x, y); };
-    auto expected = lfn();
-    EXPECT_EQ(true, bool(expected));
-    EXPECT_EQ(true, expected.has_value());
-    EXPECT_EQ(x, expected.value()->x);
-    EXPECT_EQ(y, expected.value()->y);
-    EXPECT_EQ(x, (*expected)->x);
-    EXPECT_EQ(y, (*expected)->y);
+	auto lfn = [&]() -> Expected<shared_ptr<Pair>, string> {
+		return make_shared<Pair>(x, y);
+	};
+	auto expected = lfn();
+	EXPECT_EQ(true, bool(expected));
+	EXPECT_EQ(true, expected.has_value());
+	EXPECT_EQ(x, expected.value()->x);
+	EXPECT_EQ(y, expected.value()->y);
+	EXPECT_EQ(x, (*expected)->x);
+	EXPECT_EQ(y, (*expected)->y);
 }
 
 TEST_F(ExpectedTest, UnexpectShared) {
-    using namespace std;
+	using namespace std;
 
-    auto x = get_rand();
-    auto y = get_rand();
+	auto x = get_rand();
+	auto y = get_rand();
 
-    auto lfn = [&] () -> Expected<int, shared_ptr<Pair>> { return Unexpected(make_shared<Pair>(x, y)); };
-    auto expected = lfn();
-    EXPECT_EQ(false, bool(expected));
-    EXPECT_EQ(false, expected.has_value());
-    EXPECT_EQ(x, expected.error()->x);
-    EXPECT_EQ(y, expected.error()->y);
+	auto lfn = [&]() -> Expected<int, shared_ptr<Pair>> {
+		return Unexpected(make_shared<Pair>(x, y));
+	};
+	auto expected = lfn();
+	EXPECT_EQ(false, bool(expected));
+	EXPECT_EQ(false, expected.has_value());
+	EXPECT_EQ(x, expected.error()->x);
+	EXPECT_EQ(y, expected.error()->y);
 }
 
 TEST_F(ExpectedTest, ExpectStruct) {
-    using namespace std;
+	using namespace std;
 
-    auto x = get_rand();
-    auto y = get_rand();
+	auto x = get_rand();
+	auto y = get_rand();
 
-    auto lfn = [&] () -> Expected<Pair, string> { return Pair(x, y); };
-    auto expected = lfn();
-    EXPECT_EQ(true, bool(expected));
-    EXPECT_EQ(true, expected.has_value());
-    EXPECT_EQ(x, expected.value().x);
-    EXPECT_EQ(y, expected.value().y);
-    EXPECT_EQ(x, expected->x);
-    EXPECT_EQ(y, expected->y);
+	auto lfn = [&]() -> Expected<Pair, string> { return Pair(x, y); };
+	auto expected = lfn();
+	EXPECT_EQ(true, bool(expected));
+	EXPECT_EQ(true, expected.has_value());
+	EXPECT_EQ(x, expected.value().x);
+	EXPECT_EQ(y, expected.value().y);
+	EXPECT_EQ(x, expected->x);
+	EXPECT_EQ(y, expected->y);
 }
 
 TEST_F(ExpectedTest, UnexpectStruct) {
-    using namespace std;
+	using namespace std;
 
-    auto x = get_rand();
-    auto y = get_rand();
+	auto x = get_rand();
+	auto y = get_rand();
 
-    auto lfn = [&] () -> Expected<int, Pair> { return Unexpected(Pair(x, y)); };
-    auto expected = lfn();
-    EXPECT_EQ(false, bool(expected));
-    EXPECT_EQ(false, expected.has_value());
-    EXPECT_EQ(x, expected.error().x);
-    EXPECT_EQ(y, expected.error().y);
+	auto lfn = [&]() -> Expected<int, Pair> { return Unexpected(Pair(x, y)); };
+	auto expected = lfn();
+	EXPECT_EQ(false, bool(expected));
+	EXPECT_EQ(false, expected.has_value());
+	EXPECT_EQ(x, expected.error().x);
+	EXPECT_EQ(y, expected.error().y);
 }
 
 TEST_F(ExpectedTest, Exception_value_checked_when_is_error) {
-    using namespace std;
+	using namespace std;
 
-	auto lfn = [&] () -> Expected<int, string> { return Unexpected(string("hello")); };
+	auto lfn = [&]() -> Expected<int, string> {
+		return Unexpected(string("hello"));
+	};
 
 	EXPECT_THROW(
 	    {
-			try {
-				;
-				auto expected = lfn();
-				EXPECT_EQ(false, bool(expected));
-				EXPECT_EQ(false, expected.has_value());
-				auto value = expected.value();
-			} catch (const BadExpectedAccess& ex) {
-			    EXPECT_STREQ(
-			        "Attempt to access value() when unexpected.",
-			        ex.what());
-				throw;
-			}
+		    try {
+			    ;
+			    auto expected = lfn();
+			    EXPECT_EQ(false, bool(expected));
+			    EXPECT_EQ(false, expected.has_value());
+			    auto value = expected.value();
+		    } catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ("Attempt to access value() when unexpected.",
+			                 ex.what());
+			    throw;
+		    }
 	    },
 	    BadExpectedAccess);
 }
 
 TEST_F(ExpectedTest, Exception_error_checked_when_not_error) {
-    using namespace std;
+	using namespace std;
 
-	auto lfn = [&] () -> Expected<int, string> { return 5; };
+	auto lfn = [&]() -> Expected<int, string> { return 5; };
 
 	EXPECT_THROW(
 	    {
-			try {
-				;
-				auto expected = lfn();
-				EXPECT_EQ(true, bool(expected));
-				EXPECT_EQ(true, expected.has_value());
-				auto err = expected.error();
-			} catch (const BadExpectedAccess& ex) {
-			    EXPECT_STREQ(
-			        "Attempt to access error() when not unexpected.",
-			        ex.what());
-				throw;
-			}
+		    try {
+			    ;
+			    auto expected = lfn();
+			    EXPECT_EQ(true, bool(expected));
+			    EXPECT_EQ(true, expected.has_value());
+			    auto err = expected.error();
+		    } catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ("Attempt to access error() when not unexpected.",
+			                 ex.what());
+			    throw;
+		    }
 	    },
 	    BadExpectedAccess);
 }
 
 TEST_F(ExpectedTest, Exception_deref_value_when_unexpected) {
-    using namespace std;
+	using namespace std;
 
-	auto lfn = [&] () -> Expected<Pair, string> { return Unexpected(string("hello")); };
+	auto lfn = [&]() -> Expected<Pair, string> {
+		return Unexpected(string("hello"));
+	};
 
 	EXPECT_THROW(
 	    {
-			try {
-				;
-				auto expected = lfn();
-				EXPECT_EQ(false, bool(expected));
-				EXPECT_EQ(false, expected.has_value());
-				auto x = *expected;
-			} catch (const BadExpectedAccess& ex) {
+		    try {
+			    ;
+			    auto expected = lfn();
+			    EXPECT_EQ(false, bool(expected));
+			    EXPECT_EQ(false, expected.has_value());
+			    auto x = *expected;
+		    } catch (const BadExpectedAccess& ex) {
 			    EXPECT_STREQ(
-			        "Attempt to non-const dereference expected value when unexpected.",
+			        "Attempt to non-const dereference expected value when "
+			        "unexpected.",
 			        ex.what());
-				throw;
-			}
+			    throw;
+		    }
 	    },
 	    BadExpectedAccess);
 }
 
 TEST_F(ExpectedTest, Exception_const_deref_value_when_unexpected) {
-    using namespace std;
+	using namespace std;
 
-	auto lfn = [&] () -> Expected<const Pair, string> { return Unexpected(string("hello")); };
+	auto lfn = [&]() -> Expected<const Pair, string> {
+		return Unexpected(string("hello"));
+	};
 
 	EXPECT_THROW(
 	    {
-			try {
-				;
-				auto expected = lfn();
-				EXPECT_EQ(false, bool(expected));
-				EXPECT_EQ(false, expected.has_value());
-				const auto x = *expected;
-			} catch (const BadExpectedAccess& ex) {
+		    try {
+			    ;
+			    auto expected = lfn();
+			    EXPECT_EQ(false, bool(expected));
+			    EXPECT_EQ(false, expected.has_value());
+			    const auto x = *expected;
+		    } catch (const BadExpectedAccess& ex) {
 			    EXPECT_STREQ(
-			        "Attempt to non-const dereference expected value when unexpected.",
+			        "Attempt to non-const dereference expected value when "
+			        "unexpected.",
 			        ex.what());
-				throw;
-			}
+			    throw;
+		    }
 	    },
 	    BadExpectedAccess);
 }
 
 TEST_F(ExpectedTest, Exception_deref_ptr_when_unexpected) {
-    using namespace std;
+	using namespace std;
 
-	auto lfn = [&] () -> Expected<Pair, string> { return Unexpected(string("hello")); };
+	auto lfn = [&]() -> Expected<Pair, string> {
+		return Unexpected(string("hello"));
+	};
 
 	EXPECT_THROW(
 	    {
-			try {
-				;
-				auto expected = lfn();
-				EXPECT_EQ(false, bool(expected));
-				EXPECT_EQ(false, expected.has_value());
-				auto x = expected->x;
-			} catch (const BadExpectedAccess& ex) {
+		    try {
+			    ;
+			    auto expected = lfn();
+			    EXPECT_EQ(false, bool(expected));
+			    EXPECT_EQ(false, expected.has_value());
+			    auto x = expected->x;
+		    } catch (const BadExpectedAccess& ex) {
 			    EXPECT_STREQ(
 			        "Attempt to dereference expected pointer when unexpected.",
 			        ex.what());
-				throw;
-			}
+			    throw;
+		    }
 	    },
 	    BadExpectedAccess);
 }

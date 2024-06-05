@@ -163,7 +163,7 @@ public:
 		if (!has_value())
 			throw BadExpectedAccess(
 			    "Attempt to dereference expected pointer when unexpected.");
-		return &**this;
+		return &std::get<E>(storage);
 	}
 
 private:
