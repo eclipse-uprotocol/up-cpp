@@ -196,6 +196,69 @@ TEST_F(ExpectedTest, UnexpectStruct) {
 	EXPECT_EQ(y, expected.error().y);
 }
 
+struct PairDestruct {
+	int x;
+	int y;
+	static int cd_count;
+
+	PairDestruct(int x, int y) : x(x), y(y)
+	{
+		cd_count++;
+	}
+
+	PairDestruct(const PairDestruct& arg) : x(arg.x), y(arg.y)
+	{
+		cd_count++;
+	}
+
+	~PairDestruct()
+	{
+		cd_count--;
+	}
+};
+
+int PairDestruct::cd_count = 0;
+
+TEST_F(ExpectedTest, ExpectStructDestruct) {
+	PairDestruct::cd_count = 0;
+	{
+		using namespace std;
+
+		auto x = get_rand();
+		auto y = get_rand();
+
+		auto lfn = [&]() -> Expected<PairDestruct, string> { return PairDestruct(x, y); };
+		auto expected = lfn();
+		EXPECT_EQ(1, PairDestruct::cd_count);
+		EXPECT_EQ(true, bool(expected));
+		EXPECT_EQ(true, expected.has_value());
+		EXPECT_EQ(x, expected.value().x);
+		EXPECT_EQ(y, expected.value().y);
+		EXPECT_EQ(x, expected->x);
+		EXPECT_EQ(y, expected->y);
+	}
+	EXPECT_EQ(0, PairDestruct::cd_count);
+}
+
+TEST_F(ExpectedTest, UnexpectStructDestruct) {
+	PairDestruct::cd_count = 0;
+	{
+		using namespace std;
+
+		auto x = get_rand();
+		auto y = get_rand();
+
+		auto lfn = [&]() -> Expected<int, PairDestruct> { return Unexpected(PairDestruct(x, y)); };
+		auto expected = lfn();
+		EXPECT_EQ(1, PairDestruct::cd_count);
+		EXPECT_EQ(false, bool(expected));
+		EXPECT_EQ(false, expected.has_value());
+		EXPECT_EQ(x, expected.error().x);
+		EXPECT_EQ(y, expected.error().y);
+	}
+	EXPECT_EQ(0, PairDestruct::cd_count);
+}
+
 TEST_F(ExpectedTest, Exception_value_checked_when_is_error) {
 	using namespace std;
 
