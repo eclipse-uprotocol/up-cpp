@@ -15,23 +15,20 @@ jobs:
       - name: Install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
-
-      - name: Create default Conan profile
-        run: conan profile detect
-
-      - name: Conan cache archive
-        id: conan-cache
-        uses: actions/cache@v4
         with:
-          key: ${{ runner.os }}-conan-cache
-          path: conan-cache.tgz
+          version: 2.3.2
 
-      - name: Restore conan cache from archive
-        if: ${{ steps.conan-cache.outputs.cache-hit == 'true' }}
+      - name: Fetch up-cpp
+        uses: actions/checkout@v4
+        with:
+          path: up-cpp
+
+      - name: Install conan CI profile
         shell: bash
         run: |
-          conan cache restore conan-cache.tgz
-          rm conan-cache.tgz
+          conan profile detect
+          cp up-cpp/.github/workflows/ci_conan_profile "$(conan profile path default)"
+          conan profile show
 
       - name: Fetch up-core-api conan recipe
         uses: actions/checkout@v4
@@ -43,11 +40,6 @@ jobs:
         shell: bash
         run: |
           conan create --version 1.5.8 up-conan-recipes/up-core-api/developer
-
-      - name: Fetch up-cpp
-        uses: actions/checkout@v4
-        with:
-          path: up-cpp
 
       - name: Build up-cpp with tests
         shell: bash
@@ -74,6 +66,12 @@ jobs:
         with:
           name: compile-commands
           path: up-cpp/build/compile_commands.json
+
+      - name: Upload conan cache for linting
+        uses: actions/upload-artifact@v4
+        with:
+          name: conan-cache
+          path: ./conan-cache.tgz
 
   test:
     name: Run up-cpp tests
@@ -115,17 +113,16 @@ jobs:
       - name: Install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
+        with:
+          version: 2.3.2
 
       - name: Create default Conan profile
         run: conan profile detect
 
-      - name: Conan cache archive
-        id: conan-cache
-        uses: actions/cache@v4
+      - name: Get conan cache
+        uses: actions/download-artifact@v4
         with:
-          key: ${{ runner.os }}-conan-cache
-          fail-on-cache-miss: true
-          path: conan-cache.tgz
+          name: conan-cache
 
       - name: Restore conan cache from archive
         shell: bash
@@ -148,8 +145,6 @@ jobs:
           style: 'file' # read .clang-format for configuration
           tidy-checks: '' # Read .clang-tidy for configuration
           database: compile_commands.json
-          #extra-args: '-std=c++17 -cxx-isystem/usr/include/c++/12/ -Iinclude ${{ steps.pkgs.outputs.includes }}'
-          #version: 18
 
       - name: Run linters on tests
         id: test-linter
@@ -162,8 +157,6 @@ jobs:
           style: 'file' # read .clang-format for configuration
           tidy-checks: '' # Read .clang-tidy for configuration
           database: compile_commands.json
-          #extra-args: '-std=c++17 -cxx-isystem/usr/include/c++/12/ -Iinclude -Itest/include ${{ steps.pkgs.outputs.includes }}'
-          #version: 18
 
       - name: Report lint failure
         if: steps.source-linter.outputs.checks-failed > 0 || steps.test-linter.outputs.checks-failed > 0
