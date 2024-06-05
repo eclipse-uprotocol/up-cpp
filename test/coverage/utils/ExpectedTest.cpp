@@ -187,11 +187,33 @@ TEST_F(ExpectedTest, UnexpectStruct) {
     EXPECT_EQ(y, expected.error().y);
 }
 
-TEST_F(ExpectedTest, Exception_pointer_dref_when_unexpected) {
+TEST_F(ExpectedTest, Exception_value_checked_when_is_error) {
     using namespace std;
 
-	auto sample = get_rand();
-	auto lfn = [&] () -> Expected<int, string> { return sample; };
+	auto lfn = [&] () -> Expected<int, string> { return Unexpected(string("hello")); };
+
+	EXPECT_THROW(
+	    {
+			try {
+				;
+				auto expected = lfn();
+				EXPECT_EQ(false, bool(expected));
+				EXPECT_EQ(false, expected.has_value());
+				auto value = expected.value();
+			} catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ(
+			        "Attempt to access value() when unexpected.",
+			        ex.what());
+				throw;
+			}
+	    },
+	    BadExpectedAccess);
+}
+
+TEST_F(ExpectedTest, Exception_error_checked_when_not_error) {
+    using namespace std;
+
+	auto lfn = [&] () -> Expected<int, string> { return 5; };
 
 	EXPECT_THROW(
 	    {
@@ -202,9 +224,77 @@ TEST_F(ExpectedTest, Exception_pointer_dref_when_unexpected) {
 				EXPECT_EQ(true, expected.has_value());
 				auto err = expected.error();
 			} catch (const BadExpectedAccess& ex) {
-				cout << "what = " << ex.what() << endl;
 			    EXPECT_STREQ(
 			        "Attempt to access error() when not unexpected.",
+			        ex.what());
+				throw;
+			}
+	    },
+	    BadExpectedAccess);
+}
+
+TEST_F(ExpectedTest, Exception_deref_value_when_unexpected) {
+    using namespace std;
+
+	auto lfn = [&] () -> Expected<Pair, string> { return Unexpected(string("hello")); };
+
+	EXPECT_THROW(
+	    {
+			try {
+				;
+				auto expected = lfn();
+				EXPECT_EQ(false, bool(expected));
+				EXPECT_EQ(false, expected.has_value());
+				auto x = *expected;
+			} catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ(
+			        "Attempt to non-const dereference expected value when unexpected.",
+			        ex.what());
+				throw;
+			}
+	    },
+	    BadExpectedAccess);
+}
+
+TEST_F(ExpectedTest, Exception_const_deref_value_when_unexpected) {
+    using namespace std;
+
+	auto lfn = [&] () -> Expected<const Pair, string> { return Unexpected(string("hello")); };
+
+	EXPECT_THROW(
+	    {
+			try {
+				;
+				auto expected = lfn();
+				EXPECT_EQ(false, bool(expected));
+				EXPECT_EQ(false, expected.has_value());
+				const auto x = *expected;
+			} catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ(
+			        "Attempt to non-const dereference expected value when unexpected.",
+			        ex.what());
+				throw;
+			}
+	    },
+	    BadExpectedAccess);
+}
+
+TEST_F(ExpectedTest, Exception_deref_ptr_when_unexpected) {
+    using namespace std;
+
+	auto lfn = [&] () -> Expected<Pair, string> { return Unexpected(string("hello")); };
+
+	EXPECT_THROW(
+	    {
+			try {
+				;
+				auto expected = lfn();
+				EXPECT_EQ(false, bool(expected));
+				EXPECT_EQ(false, expected.has_value());
+				auto x = expected->x;
+			} catch (const BadExpectedAccess& ex) {
+			    EXPECT_STREQ(
+			        "Attempt to dereference expected pointer when unexpected.",
 			        ex.what());
 				throw;
 			}
