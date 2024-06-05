@@ -23,8 +23,8 @@ namespace uprotocol::datamodel::serializer::uri {
 /// @brief Converts to and from a human-readable string representation of UUri
 ///        according to the UUri spec.
 struct AsString {
-	[[nodiscard]] std::string serialize(const v1::UUri&);
-	[[nodiscard]] v1::UUri deserialize(const std::string&);
+	[[nodiscard]] static std::string serialize(const v1::UUri&);
+	[[nodiscard]] static v1::UUri deserialize(const std::string&);
 };
 
 }  // namespace uprotocol::datamodel::serializer::uri
