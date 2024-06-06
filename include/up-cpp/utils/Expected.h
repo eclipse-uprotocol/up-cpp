@@ -23,20 +23,6 @@ namespace uprotocol::utils {
 static_assert(!__has_cpp_attribute(__cpp_lib_expected),
               "Replace uprotocol::utils::Expected with std::expected");
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-// The following implementation is based on a the Expect the Unexpected youtube
-// video by Andrei Alexandrescu from CppCon2018.
-//
-// This implementation is currently missing methods that use reference
-// qualifiers. Reference qualifiers on methods was supposed to be introduced in
-// C++11, but its doesn't seem to be working in actual g++ 11.4.1-3 in docker
-// nor earlier versions.8 Could be the issue is specific to non-const versus
-// const. The loss of this part of the implementation means swapping is not
-// being done, and useless copies are being done. This should be reexamined if
-// there are use cases where the expected value ends up being a large object.
-//
-//////////////////////////////////////////////////////////////////////////////////////////////
-
 /// @name Temporary substitute for std::expected
 /// @remarks See the reference for std::expected:
 ///          https://en.cppreference.com/w/cpp/utility/expected
