@@ -110,7 +110,7 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 ///   * The uE ID is 0
 ///   * The uE major version is 0
 ///   * The resource ID is 0
-[[nodiscard]] ValidationResult isEmpty(const v1::UUri& uri);
+[[nodiscard]] ValidationResult isEmpty(const v1::UUri&);
 
 /// @brief Checks if a UUri is local
 ///

@@ -12,11 +12,11 @@
 #include <gtest/gtest.h>
 #include <up-cpp/datamodel/validator/UUri.h>
 
-#define AUTHORITY_NAME "test"
-
 namespace {
 
 using namespace uprotocol::datamodel::validator::uri;
+
+constexpr const char* AUTHORITY_NAME = "test";
 
 class TestUUriValidator : public testing::Test {
 protected:
@@ -37,286 +37,451 @@ protected:
 };
 
 TEST_F(TestUUriValidator, Valid) {
-	uprotocol::v1::UUri uuri;
-	uuri.set_authority_name(AUTHORITY_NAME);
-	uuri.set_ue_id(0x00010001);
-	uuri.set_ue_version_major(1);
-	uuri.set_resource_id(1);
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(1);
+		return uuri;
+	};
 
-	uuri.set_authority_name("");
-	auto res = isValid(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::EMPTY);
-	uuri.set_authority_name(AUTHORITY_NAME);
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("");
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
+	}
 
-	uuri.set_resource_id(0);
-	res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0);
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason);
+	}
 
-	uuri.set_resource_id(1);
-	res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(1);
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	uuri.set_resource_id(0x7FFF);
-	res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0x7FFF);
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	uuri.set_resource_id(0x8000);
-	res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0x8000);
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	uuri.set_resource_id(0xFFFE);
-	res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFE);
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	uuri.set_resource_id(0xFFFF);
-	EXPECT_TRUE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFF);
+		EXPECT_TRUE(uses_wildcards(uuri));
 
-	res = isValid(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::DISALLOWED_WILDCARD);
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
+	}
 }
 
 TEST_F(TestUUriValidator, Wildcards) {
-	uprotocol::v1::UUri uuri;
-	uuri.set_authority_name(AUTHORITY_NAME);
-	uuri.set_ue_id(0x00010001);
-	uuri.set_ue_version_major(1);
-	uuri.set_resource_id(1);
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(1);
+		return uuri;
+	};
 
-	EXPECT_FALSE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		EXPECT_FALSE(uses_wildcards(uuri));
+	}
 
-	uuri.set_authority_name("hello*");
-	EXPECT_TRUE(uses_wildcards(uuri));
-	uuri.set_authority_name(AUTHORITY_NAME);
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("hello*");
+		EXPECT_TRUE(uses_wildcards(uuri));
+	}
 
-	uuri.set_ue_id(0x0001FFFF);
-	EXPECT_TRUE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		uuri.set_ue_id(0x0001FFFF);
+		EXPECT_TRUE(uses_wildcards(uuri));
+	}
 
-	uuri.set_ue_id(0x00000001);
-	EXPECT_TRUE(uses_wildcards(uuri));
-	uuri.set_ue_id(0x00010001);
+	{
+		auto uuri = getUuri();
+		uuri.set_ue_id(0x00000001);
+		EXPECT_TRUE(uses_wildcards(uuri));
+	}
 
-	uuri.set_ue_version_major(0xFF);
-	EXPECT_TRUE(uses_wildcards(uuri));
-	uuri.set_ue_version_major(1);
+	{
+		auto uuri = getUuri();
+		uuri.set_ue_version_major(0xFF);
+		EXPECT_TRUE(uses_wildcards(uuri));
+	}
 
-	uuri.set_resource_id(0xFFFF);
-	EXPECT_TRUE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFF);
+		EXPECT_TRUE(uses_wildcards(uuri));
+	}
 }
 
 TEST_F(TestUUriValidator, ValidRpcMethod) {
-	uprotocol::v1::UUri uuri;
-	uuri.set_authority_name(AUTHORITY_NAME);
-	uuri.set_ue_id(0x00010001);
-	uuri.set_ue_version_major(1);
-	uuri.set_resource_id(1);
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(1);
+		return uuri;
+	};
 
-	auto res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	res = isValidRpcMethod(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
-	EXPECT_FALSE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValidRpcMethod(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(uses_wildcards(uuri));
+	}
 
-	uuri.set_authority_name("");
-	res = isValidRpcMethod(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::EMPTY);
-	uuri.set_authority_name(AUTHORITY_NAME);
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("");
+		auto [valid, reason] = isValidRpcMethod(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
+	}
 
-	uuri.set_resource_id(0xFFFF);
-	res = isValidRpcMethod(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::DISALLOWED_WILDCARD);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFF);
+		auto [valid, reason] = isValidRpcMethod(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
+	}
 
-	uuri.set_resource_id(0x8000);
-	res = isValidRpcMethod(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::BAD_RESOURCE_ID);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0x8000);
+		auto [valid, reason] = isValidRpcMethod(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
 }
 
 TEST_F(TestUUriValidator, ValidRpcResponse) {
-	uprotocol::v1::UUri uuri;
-	uuri.set_authority_name(AUTHORITY_NAME);
-	uuri.set_ue_id(0x00010001);
-	uuri.set_ue_version_major(1);
-	uuri.set_resource_id(0);
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(0);
+		return uuri;
+	};
 
-	auto res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	res = isValidRpcResponse(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
-	EXPECT_FALSE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValidRpcResponse(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(uses_wildcards(uuri));
+	}
 
-	uuri.set_authority_name("");
-	res = isValidRpcResponse(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::EMPTY);
-	uuri.set_authority_name(AUTHORITY_NAME);
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("");
+		auto [valid, reason] = isValidRpcResponse(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
+	}
 
-	uuri.set_resource_id(0xFFFF);
-	res = isValidRpcResponse(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::DISALLOWED_WILDCARD);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFF);
+		auto [valid, reason] = isValidRpcResponse(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
+	}
 
-	uuri.set_resource_id(0x0001);
-	res = isValidRpcResponse(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::BAD_RESOURCE_ID);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(1);
+		auto [valid, reason] = isValidRpcResponse(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
 }
 
 TEST_F(TestUUriValidator, ValidPublishTopic) {
-	uprotocol::v1::UUri uuri;
-	uuri.set_authority_name(AUTHORITY_NAME);
-	uuri.set_ue_id(0x00010001);
-	uuri.set_ue_version_major(1);
-	uuri.set_resource_id(0x8000);
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(0x8000);
+		return uuri;
+	};
 
-	auto res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	res = isValidPublishTopic(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
-	EXPECT_FALSE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValidPublishTopic(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(uses_wildcards(uuri));
+	}
 
-	uuri.set_authority_name("");
-	res = isValidPublishTopic(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::EMPTY);
-	uuri.set_authority_name(AUTHORITY_NAME);
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("");
+		auto [valid, reason] = isValidPublishTopic(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
+	}
 
-	uuri.set_resource_id(0xFFFF);
-	res = isValidPublishTopic(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::DISALLOWED_WILDCARD);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFF);
+		auto [valid, reason] = isValidPublishTopic(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
+	}
 
-	uuri.set_resource_id(1);
-	res = isValidPublishTopic(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::BAD_RESOURCE_ID);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(1);
+		auto [valid, reason] = isValidPublishTopic(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
+
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0x10000);
+		auto [valid, reason] = isValidPublishTopic(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
 }
 
 TEST_F(TestUUriValidator, ValidNotification) {
-	uprotocol::v1::UUri uuri;
-	uuri.set_authority_name(AUTHORITY_NAME);
-	uuri.set_ue_id(0x00010001);
-	uuri.set_ue_version_major(1);
-	uuri.set_resource_id(0x8000);
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(0x8000);
+		return uuri;
+	};
 
-	auto res = isValid(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	res = isValidNotification(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
-	EXPECT_FALSE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValidNotification(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(uses_wildcards(uuri));
+	}
 
-	uuri.set_authority_name("");
-	res = isValidNotification(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::EMPTY);
-	uuri.set_authority_name(AUTHORITY_NAME);
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("");
+		auto [valid, reason] = isValidNotification(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
+	}
 
-	uuri.set_resource_id(0xFFFF);
-	res = isValidNotification(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::DISALLOWED_WILDCARD);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFF);
+		auto [valid, reason] = isValidNotification(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
+	}
 
-	uuri.set_resource_id(1);
-	res = isValidNotification(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::BAD_RESOURCE_ID);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(1);
+		auto [valid, reason] = isValidNotification(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
+
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0x10000);
+		auto [valid, reason] = isValidNotification(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
+
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0);
+		auto [valid, reason] = isValidNotification(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 }
 
 TEST_F(TestUUriValidator, ValidSubscription) {
-	uprotocol::v1::UUri uuri;
-	uuri.set_authority_name(AUTHORITY_NAME);
-	uuri.set_ue_id(0x00010001);
-	uuri.set_ue_version_major(1);
-	uuri.set_resource_id(0x8000);
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(0x8000);
+		return uuri;
+	};
 
-	auto res = isValidSubscription(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
-	EXPECT_FALSE(uses_wildcards(uuri));
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValidSubscription(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(uses_wildcards(uuri));
+	}
 
-	uuri.set_authority_name("");
-	res = isValidSubscription(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::EMPTY);
-	uuri.set_authority_name(AUTHORITY_NAME);
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("");
+		auto [valid, reason] = isValidSubscription(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
+	}
 
-	uuri.set_resource_id(1);
-	res = isValidSubscription(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::BAD_RESOURCE_ID);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(1);
+		auto [valid, reason] = isValidSubscription(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
+
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0x10000);
+		auto [valid, reason] = isValidSubscription(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
+
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFF);
+		auto [valid, reason] = isValidSubscription(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 }
 
 TEST_F(TestUUriValidator, Empty) {
-	uprotocol::v1::UUri uuri;
-	uuri.set_authority_name("");
-	uuri.set_ue_id(0);
-	uuri.set_ue_version_major(0);
-	uuri.set_resource_id(0);
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name("");
+		uuri.set_ue_id(0);
+		uuri.set_ue_version_major(0);
+		uuri.set_resource_id(0);
+		return uuri;
+	};
 
-	auto res = isEmpty(uuri);
-	EXPECT_TRUE(std::get<bool>(res));
-	EXPECT_FALSE(std::get<std::optional<Reason>>(res).has_value());
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isEmpty(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
 
-	uuri.set_authority_name("     bad    ");
-	res = isEmpty(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::EMPTY);
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("     bad    ");
+		auto [valid, reason] = isEmpty(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
+	}
 
-	uuri.set_authority_name(AUTHORITY_NAME);
-	res = isEmpty(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) == Reason::EMPTY);
-	uuri.set_authority_name("");
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name(AUTHORITY_NAME);
+		auto [valid, reason] = isEmpty(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
+	}
 
-	uuri.set_ue_id(1);
-	res = isEmpty(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::RESERVED_RESOURCE);
-	uuri.set_ue_id(0);
+	{
+		auto uuri = getUuri();
+		uuri.set_ue_id(1);
+		auto [valid, reason] = isEmpty(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::RESERVED_RESOURCE);
+	}
 
-	uuri.set_ue_version_major(1);
-	res = isEmpty(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::RESERVED_VERSION);
-	uuri.set_ue_version_major(0);
+	{
+		auto uuri = getUuri();
+		uuri.set_ue_version_major(1);
+		auto [valid, reason] = isEmpty(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::RESERVED_VERSION);
+	}
 
-	uuri.set_resource_id(1);
-	res = isEmpty(uuri);
-	EXPECT_FALSE(std::get<bool>(res));
-	EXPECT_TRUE(std::get<std::optional<Reason>>(res) ==
-	            Reason::BAD_RESOURCE_ID);
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(1);
+		auto [valid, reason] = isEmpty(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
 }
 
 }  // namespace

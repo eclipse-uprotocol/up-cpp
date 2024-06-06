@@ -54,18 +54,28 @@ bool uses_wildcards(const v1::UUri& uuri) {
 }
 
 ValidationResult isValid(const v1::UUri& uuri) {
-	auto [valid, reason] = isValidRpcMethod(uuri);
-	if (!valid) {
-		auto [valid, reason] = isValidRpcResponse(uuri);
-		if (!valid) {
-			auto [valid, reason] = isValidPublishTopic(uuri);
-			if (!valid) {
-				return isValidNotification(uuri);
-			}
+	{
+		auto [valid, reason] = isValidRpcMethod(uuri);
+		if (valid) {
+			return {true, std::nullopt};
 		}
 	}
 
-	return {true, std::nullopt};
+	{
+		auto [valid, reason] = isValidRpcResponse(uuri);
+		if (valid) {
+			return {true, std::nullopt};
+		}
+	}
+
+	{
+		auto [valid, reason] = isValidPublishTopic(uuri);
+		if (valid) {
+			return {true, std::nullopt};
+		}
+	}
+
+	return isValidNotification(uuri);
 }
 
 ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
@@ -79,8 +89,7 @@ ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
 	}
 
 	// check resource ID [0x0001, 0x7FFF]
-	uint16_t resource_id = uuri.resource_id() & 0xFFFF;
-	if (resource_id == 0 || resource_id > 0x7FFF) {
+	if (uuri.resource_id() == 0 || uuri.resource_id() > 0x7FFF) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
@@ -117,7 +126,7 @@ ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
-	if ((uuri.resource_id() & 0xFFFF) < 0x8000) {
+	if ((uuri.resource_id() < 0x8000) || (uuri.resource_id() > 0xFFFF)) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
@@ -134,7 +143,11 @@ ValidationResult isValidNotification(const v1::UUri& uuri) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
-	if ((uuri.resource_id() & 0xFFFF) < 0x8000) {
+	if ((uuri.resource_id() < 0x8000) && (uuri.resource_id() != 0)) {
+		return {false, Reason::BAD_RESOURCE_ID};
+	}
+
+	if (uuri.resource_id() > 0xFFFF) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
@@ -146,15 +159,16 @@ ValidationResult isValidSubscription(const v1::UUri& uuri) {
 		return {false, Reason::EMPTY};
 	}
 
-	if ((uuri.resource_id() & 0xFFFF) < 0x8000) {
+	if (uuri.resource_id() < 0x8000 || uuri.resource_id() > 0xFFFF) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
-	return isValidPublishTopic(uuri);
+	return {true, std::nullopt};
 }
 
 ValidationResult isEmpty(const v1::UUri& uuri) {
-	if (uuri.authority_name().find_first_not_of(" ") != std::string::npos) {
+	if (!std::all_of(uuri.authority_name().begin(), uuri.authority_name().end(),
+	                 isspace)) {
 		return {false, Reason::EMPTY};
 	}
 
