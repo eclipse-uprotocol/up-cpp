@@ -62,10 +62,29 @@ struct RpcClient {
 	using MessageOrStatus =
 	    utils::Expected<v1::UMessage, std::variant<v1::UStatus, Commstatus>>;
 
+	/// @brief Callback function signature used in the callback form of invokeMethod
+	using Callback = std::function<void(MessageOrStatus)>;
+
 	/// @brief Invokes an RPC method by sending a request message.
 	///
 	/// @param A Payload builder containing the payload to be sent with the
 	///        request.
+	/// @param A callback that will be called with the result.
+	///
+	/// @post The provided callback will be called with one of:
+	///       * A UStatus with a DEADLINE_EXCEEDED code if no response was
+	///         received before the request expired (based on request TTL).
+	///       * A UStatus with the value returned by UTransport::send().
+	///       * A Commstatus as received in the response message (if not OK).
+	///       * A UMessage containing the response from the RPC target.
+	void invokeMethod(datamodel::builder::Payload&&, Callback&&);
+
+	/// @brief Invokes an RPC method by sending a request message.
+	///
+	/// @param A Payload builder containing the payload to be sent with the
+	///        request.
+	///
+	/// @remarks This is a wrapper around the callback form of invokeMethod.
 	///
 	/// @returns A promised future that can resolve to one of:
 	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
@@ -74,12 +93,29 @@ struct RpcClient {
 	///          * A Commstatus as received in the response message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] std::future<MessageOrStatus> invokeMethod(
-	    datamodel::builder::Payload&&) const;
+	    datamodel::builder::Payload&&);
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
 	/// Request is sent with an empty payload. Can only be called if no payload
 	/// format was provided at construction time.
+	///
+	/// @param A callback that will be called with the result.
+	///
+	/// @post The provided callback will be called with one of:
+	///       * A UStatus with a DEADLINE_EXCEEDED code if no response was
+	///         received before the request expired (based on request TTL).
+	///       * A UStatus with the value returned by UTransport::send().
+	///       * A Commstatus as received in the response message (if not OK).
+	///       * A UMessage containing the response from the RPC target.
+	void invokeMethod(Callback&&);
+
+	/// @brief Invokes an RPC method by sending a request message.
+	///
+	/// Request is sent with an empty payload. Can only be called if no payload
+	/// format was provided at construction time.
+	///
+	/// @remarks This is a wrapper around the callback form of invokeMethod.
 	///
 	/// @returns A promised future that can resolve to one of:
 	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
@@ -87,7 +123,7 @@ struct RpcClient {
 	///          * A UStatus with the value returned by UTransport::send().
 	///          * A Commstatus as received in the response message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
-	[[nodiscard]] std::future<MessageOrStatus> invokeMethod() const;
+	[[nodiscard]] std::future<MessageOrStatus> invokeMethod();
 
 	~RpcClient() = default;
 
