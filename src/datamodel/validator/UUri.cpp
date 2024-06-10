@@ -79,10 +79,6 @@ ValidationResult isValid(const v1::UUri& uuri) {
 }
 
 ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
-	if (uuri.authority_name().empty()) {
-		return {false, Reason::EMPTY};
-	}
-
 	// disallow wildcards
 	if (uses_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
@@ -97,10 +93,6 @@ ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
 }
 
 ValidationResult isValidRpcResponse(const v1::UUri& uuri) {
-	if (uuri.authority_name().empty()) {
-		return {false, Reason::EMPTY};
-	}
-
 	// disallow wildcards
 	if (uses_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
@@ -113,14 +105,14 @@ ValidationResult isValidRpcResponse(const v1::UUri& uuri) {
 }
 
 ValidationResult isValidDefaultSource(const v1::UUri& uuri) {
-	return isValidRpcResponse(uuri);
-}
-
-ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 	if (uuri.authority_name().empty()) {
 		return {false, Reason::EMPTY};
 	}
 
+	return isValidRpcResponse(uuri);
+}
+
+ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 	// disallow wildcards
 	if (uses_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
@@ -134,10 +126,6 @@ ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 }
 
 ValidationResult isValidNotification(const v1::UUri& uuri) {
-	if (uuri.authority_name().empty()) {
-		return {false, Reason::EMPTY};
-	}
-
 	// disallow wildcards
 	if (uses_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
@@ -155,10 +143,6 @@ ValidationResult isValidNotification(const v1::UUri& uuri) {
 }
 
 ValidationResult isValidSubscription(const v1::UUri& uuri) {
-	if (uuri.authority_name().empty()) {
-		return {false, Reason::EMPTY};
-	}
-
 	if (uuri.resource_id() < 0x8000 || uuri.resource_id() > 0xFFFF) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
