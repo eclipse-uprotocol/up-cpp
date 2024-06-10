@@ -50,8 +50,8 @@ TEST_F(TestUUriValidator, Valid) {
 		auto uuri = getUuri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValid(uuri);
-		EXPECT_FALSE(valid);
-		EXPECT_TRUE(reason == Reason::EMPTY);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
@@ -180,8 +180,8 @@ TEST_F(TestUUriValidator, ValidRpcMethod) {
 		auto uuri = getUuri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidRpcMethod(uuri);
-		EXPECT_FALSE(valid);
-		EXPECT_TRUE(reason == Reason::EMPTY);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
@@ -230,8 +230,8 @@ TEST_F(TestUUriValidator, ValidRpcResponse) {
 		auto uuri = getUuri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidRpcResponse(uuri);
-		EXPECT_FALSE(valid);
-		EXPECT_TRUE(reason == Reason::EMPTY);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
@@ -280,8 +280,8 @@ TEST_F(TestUUriValidator, ValidPublishTopic) {
 		auto uuri = getUuri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidPublishTopic(uuri);
-		EXPECT_FALSE(valid);
-		EXPECT_TRUE(reason == Reason::EMPTY);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
@@ -338,8 +338,8 @@ TEST_F(TestUUriValidator, ValidNotification) {
 		auto uuri = getUuri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidNotification(uuri);
-		EXPECT_FALSE(valid);
-		EXPECT_TRUE(reason == Reason::EMPTY);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
@@ -397,8 +397,8 @@ TEST_F(TestUUriValidator, ValidSubscription) {
 		auto uuri = getUuri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidSubscription(uuri);
-		EXPECT_FALSE(valid);
-		EXPECT_TRUE(reason == Reason::EMPTY);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
@@ -423,6 +423,25 @@ TEST_F(TestUUriValidator, ValidSubscription) {
 		auto [valid, reason] = isValidSubscription(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+	}
+}
+
+TEST_F(TestUUriValidator, ValidDefaultSource) {
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(0x8000);
+		return uuri;
+	};
+
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("");
+		auto [valid, reason] = isValidDefaultSource(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::EMPTY);
 	}
 }
 
