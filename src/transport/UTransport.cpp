@@ -60,10 +60,12 @@ UTransport::registerListener(const v1::UUri& sink_filter,
 		}
 	}
 
-	auto [handle, callable] =
-	    CallbackConnection::establish(std::move(listener));
+	auto [handle, callable] = CallbackConnection::establish(
+	    std::move(listener), [this](auto conn) { cleanupListener(conn); });
+
 	v1::UStatus status = registerListenerImpl(sink_filter, std::move(callable),
 	                                          std::move(source_filter));
+
 	if (status.code() == v1::UCode::OK) {
 		return utils::Expected<ListenHandle, v1::UStatus>(std::move(handle));
 	} else {
