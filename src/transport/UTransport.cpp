@@ -13,6 +13,7 @@
 
 #include "up-cpp/datamodel/validator/UMessage.h"
 #include "up-cpp/datamodel/validator/UUri.h"
+#include "up-cpp/utils/Expected.h"
 
 namespace uprotocol::transport {
 
@@ -67,9 +68,9 @@ UTransport::registerListener(const v1::UUri& sink_filter,
 	                                          std::move(source_filter));
 
 	if (status.code() == v1::UCode::OK) {
-		return utils::Expected<ListenHandle, v1::UStatus>(std::move(handle));
+		return std::move(handle);
 	} else {
-		return utils::Expected<ListenHandle, v1::UStatus>(std::move(status));
+		return uprotocol::utils::Unexpected(std::move(status));
 	}
 }
 
