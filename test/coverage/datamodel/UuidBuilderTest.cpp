@@ -12,9 +12,12 @@
 #include <gtest/gtest.h>
 
 #include "up-cpp/datamodel/builder/Uuid.h"
+#include "up-cpp/datamodel/constants/UuidConstants.h"
+
 namespace {
 
 using namespace uprotocol::datamodel::builder;
+using namespace uprotocol::datamodel;
 
 class TestUuidBuilder : public testing::Test {
 protected:
@@ -55,7 +58,8 @@ TEST(UuidBuilderTest, WithTimeSource) {
 	    [fixed_time]() { return fixed_time; });
 	auto uuid = builder.build();
 
-	EXPECT_EQ(uuid.msb() >> 16, fixed_time_ms.time_since_epoch().count());
+	EXPECT_EQ(uuid.msb() >> UUID_TIMESTAMP_SHIFT,
+	          fixed_time_ms.time_since_epoch().count());
 }
 
 // Test RandomSource
@@ -65,8 +69,7 @@ TEST(UuidBuilderTest, WithRandomSource) {
 	    [fixed_random]() { return fixed_random; });
 	auto uuid = builder.build();
 
-	EXPECT_EQ(uuid.lsb() & 0x3FFFFFFFFFFFFFFF,
-	          fixed_random & 0x3FFFFFFFFFFFFFFF);
+	EXPECT_EQ(uuid.lsb() & UUID_RANDOM_MASK, fixed_random & UUID_RANDOM_MASK);
 }
 
 // Test independent state
@@ -104,12 +107,12 @@ TEST(UuidBuilderTest, WithIndependentState) {
 
 	// Check that the counters are incrementing within each builder
 	for (int i = 1; i < numUuids; ++i) {
-		uint16_t counter1_prev = uuids1[i - 1].msb() & 0x0000000000000FFF;
-		uint16_t counter1_curr = uuids1[i].msb() & 0x0000000000000FFF;
+		uint16_t counter1_prev = uuids1[i - 1].msb() & UUID_COUNTER_MASK;
+		uint16_t counter1_curr = uuids1[i].msb() & UUID_COUNTER_MASK;
 		EXPECT_EQ(counter1_curr, (counter1_prev + 1) % 4096);
 
-		uint16_t counter2_prev = uuids2[i - 1].msb() & 0x0000000000000FFF;
-		uint16_t counter2_curr = uuids2[i].msb() & 0x0000000000000FFF;
+		uint16_t counter2_prev = uuids2[i - 1].msb() & UUID_COUNTER_MASK;
+		uint16_t counter2_curr = uuids2[i].msb() & UUID_COUNTER_MASK;
 		EXPECT_EQ(counter2_curr, (counter2_prev + 1) % 4096);
 	}
 }
@@ -131,8 +134,10 @@ TEST_F(TestUuidBuilder, CheckVersionAndVariant) {
 	auto builder = UuidBuilder::getBuilder();
 	auto uuid = builder.build();
 
-	EXPECT_EQ((uuid.msb() >> 12) & 0xF, 8);
-	EXPECT_EQ((uuid.lsb() >> 62) & 0x3, 2);
+	EXPECT_EQ((uuid.msb() >> UUID_VERSION_SHIFT) & UUID_VERSION_MASK,
+	          UUID_VERSION_8);
+	EXPECT_EQ((uuid.lsb() >> UUID_VARIANT_SHIFT) & UUID_VARIANT_MASK,
+	          UUID_VARIANT_RFC4122);
 }
 
 // Test counter increments
@@ -141,8 +146,8 @@ TEST_F(TestUuidBuilder, CounterIncrements) {
 	auto uuid1 = builder.build();
 	auto uuid2 = builder.build();
 
-	uint16_t counter1 = uuid1.msb() & 0xFFF;
-	uint16_t counter2 = uuid2.msb() & 0xFFF;
+	uint16_t counter1 = uuid1.msb() & UUID_COUNTER_MASK;
+	uint16_t counter2 = uuid2.msb() & UUID_COUNTER_MASK;
 
 	EXPECT_EQ(counter2, counter1 + 1);
 }
@@ -155,7 +160,7 @@ TEST(UuidBuilderTest, CounterResetAtTimestampTick) {
 	auto uuid1 = builder.build();
 
 	// Extract the counter value from the UUID
-	uint16_t counter1 = (uuid1.msb() & 0x0000000000000FFF);
+	uint16_t counter1 = (uuid1.msb() & UUID_COUNTER_MASK);
 
 	// Check counter value is within the expected range
 	EXPECT_GE(counter1, 0);
@@ -170,7 +175,7 @@ TEST(UuidBuilderTest, CounterResetAtTimestampTick) {
 	auto uuid2 = builder.build();
 
 	// Extract the counter value from the new UUID
-	uint16_t counter2 = (uuid2.msb() & 0x0000000000000FFF);
+	uint16_t counter2 = (uuid2.msb() & UUID_COUNTER_MASK);
 
 	// Check if the counter has reset to 0
 	EXPECT_EQ(counter2, 0);
@@ -182,13 +187,13 @@ TEST(UuidBuilderTest, CounterIncrementWithinTimestampTick) {
 	auto uuid1 = builder.build();
 
 	// Extract the counter value from the UUID
-	uint16_t counter1 = (uuid1.msb() & 0x0000000000000FFF);
+	uint16_t counter1 = (uuid1.msb() & UUID_COUNTER_MASK);
 
 	// Generate another UUID within the same timestamp tick
 	auto uuid2 = builder.build();
 
 	// Extract the counter value from the new UUID
-	uint16_t counter2 = (uuid2.msb() & 0x0000000000000FFF);
+	uint16_t counter2 = (uuid2.msb() & UUID_COUNTER_MASK);
 
 	// Check if the counter has incremented by 1
 	EXPECT_EQ(counter2, counter1 + 1);
@@ -212,7 +217,7 @@ TEST(UuidBuilderTest, CounterFreezeAtMaxValue) {
 	auto uuid = builder.build();
 
 	// Extract the counter value from the UUID
-	uint16_t counter = (uuid.msb() & 0x0000000000000FFF);
+	uint16_t counter = (uuid.msb() & UUID_COUNTER_MASK);
 
 	// Check if the counter is frozen at its maximum value
 	EXPECT_EQ(counter, 4095);
@@ -232,7 +237,7 @@ TEST_F(TestUuidBuilder, CounterMaxValue) {
 	}
 	auto uuid = builder.build();
 
-	EXPECT_EQ(uuid.msb() & 0xFFF, 4095);  // Counter max value
+	EXPECT_EQ(uuid.msb() & UUID_COUNTER_MASK, 4095);  // Counter max value
 }
 
 // Test custom time and random source with builder
@@ -254,8 +259,8 @@ TEST(UuidBuilderTest, CustomTimeAndRandomSource) {
 	auto uuid = builder.build();
 
 	// Extract the timestamp and random value from the generated UUID
-	uint64_t timestamp = uuid.msb() >> 16;
-	uint64_t random_value = uuid.lsb() & 0x3FFFFFFFFFFFFFFF;
+	uint64_t timestamp = uuid.msb() >> UUID_TIMESTAMP_SHIFT;
+	uint64_t random_value = uuid.lsb() & UUID_RANDOM_MASK;
 
 	// Convert the fixed timestamp to milliseconds
 	auto fixed_time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(

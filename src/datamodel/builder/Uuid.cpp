@@ -14,6 +14,8 @@
 #include <random>
 #include <stdexcept>
 
+#include "up-cpp/datamodel/constants/UuidConstants.h"
+
 namespace uprotocol::datamodel::builder {
 
 struct UuidBuilder::UuidSharedState {
@@ -72,8 +74,9 @@ v1::UUID UuidBuilder::build() {
 	}
 
 	uint64_t msb = static_cast<uint64_t>(unix_ts_ms.time_since_epoch().count())
-	               << 16;
-	msb |= static_cast<uint64_t>(8) << 12;  // Set the version to 8
+	               << UUID_TIMESTAMP_SHIFT;
+	msb |= static_cast<uint64_t>(8)
+	       << UUID_VERSION_SHIFT;  // Set the version to 8
 
 	if (shared_state_->counter == 4095) {
 		// Counter has reached maximum value, freeze it
@@ -88,12 +91,13 @@ v1::UUID UuidBuilder::build() {
 		                            ? random_source_()
 		                            : std::uniform_int_distribution<uint64_t>{}(
 		                                  shared_state_->random_engine) &
-		                                  0x3FFFFFFFFFFFFFFF;
+		                                  UUID_RANDOM_MASK;
 		shared_state_->rand_b_initialized = true;
 	}
 	lsb = shared_state_->rand_b;
 
-	lsb |= 0x8000000000000000;  // Set the variant to 10b
+	// set the Variant to 10b
+	lsb |= static_cast<uint64_t>(UUID_VARIANT_RFC4122) << UUID_VARIANT_SHIFT;
 
 	uuid.set_msb(msb);
 	uuid.set_lsb(lsb);
