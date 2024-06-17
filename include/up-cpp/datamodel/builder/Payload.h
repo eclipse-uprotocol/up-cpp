@@ -32,6 +32,9 @@ struct Payload {
 	/// @brief A serialized payload as a pairing of bytes and format.
 	using Serialized = std::tuple<PbBytes, v1::UPayloadFormat>;
 
+	/// @brief The two types of data that can be stored in a Serialized payload.
+	enum PayloadType { Data, Format };
+
 	/// @brief Constructs a Payload builder with the payload populated by
 	///        a serialized protobuf.
 	///
@@ -43,7 +46,13 @@ struct Payload {
 	/// @remarks The UPayloadFormat will automatically be set to
 	///          UPAYLOAD_FORMAT_PROTOBUF
 	template <typename ProtobufT>
-	explicit Payload(const ProtobufT&);
+	explicit Payload(const ProtobufT& message) {
+		std::string serialized;
+		message.SerializeToString(&serialized);
+		payload_ =
+		    std::make_tuple(std::move(serialized),
+		                    v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
+	}
 
 	/// @brief Creates a Payload builder with the payload populated by the
 	///        result of Serializer::serialize(data).
@@ -70,7 +79,14 @@ struct Payload {
 	///          will compile out.
 	/// @param data Data to be serialized and stored.
 	template <typename Serializer, typename ValueT>
-	Payload(Serializer s, const ValueT& data);
+	Payload(Serializer s, const ValueT& data) {
+		auto serializedData = Serializer::serialize(data);
+		if (!UPayloadFormat_IsValid(
+		        std::get<PayloadType::Format>(serializedData))) {
+			throw std::out_of_range("Invalid Serializer payload format");
+		}
+		payload_ = std::move(serializedData);
+	}
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
@@ -78,7 +94,8 @@ struct Payload {
 	/// @param format The data format of the payload in value_bytes.
 	///
 	/// @throws std::out_of_range If format is not valid for v1::UPayloadFormat
-	Payload(const std::vector<uint8_t>& value_bytes, v1::UPayloadFormat format);
+	Payload(const std::vector<uint8_t>& value_bytes,
+	        const v1::UPayloadFormat format);
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
@@ -89,7 +106,7 @@ struct Payload {
 	///
 	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT or
 	///       UPAYLOAD_FORMAT_JSON, but can be used for other payload formats.
-	Payload(const std::string& value, v1::UPayloadFormat format);
+	Payload(const std::string& value, const v1::UPayloadFormat format);
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
@@ -102,7 +119,7 @@ struct Payload {
 	///
 	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT or
 	///       UPAYLOAD_FORMAT_JSON, but can be used for other payload formats.
-	Payload(std::string&& value, v1::UPayloadFormat format);
+	Payload(std::string&& value, const v1::UPayloadFormat format);
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
@@ -138,20 +155,24 @@ struct Payload {
 
 	/// @brief Get a reference to the internal data from this builder.
 	///
-	/// @throws PayloadMoved if called after move() has already been called.
-	[[nodiscard]] constexpr const Serialized& build() const;
+	/// @throws PayloadMoved if called after buildMove() has already been
+	/// called.
+	[[nodiscard]] const Serialized& buildCopy() const;
 
 	/// @brief Get an xvalue of the internal data that can be moved into a
 	///        UMessage.
 	///
-	/// @post This Payload builder will no longer be valid. Calling `build()`
+	/// @post This Payload builder will no longer be valid. Calling
+	/// `buildCopy()`
 	///       or `movePayload()` after this will result in an exception.
 	///
-	/// @throws PayloadMoved if called after move() has already been called.
-	[[nodiscard]] constexpr Serialized move() &&;
+	/// @throws PayloadMoved if called after buildMove() has already been
+	/// called.
+	[[nodiscard]] Serialized buildMove() &&;
 
 private:
 	Serialized payload_;
+	bool moved_{false};
 };
 
 }  // namespace uprotocol::datamodel::builder
