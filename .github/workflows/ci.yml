@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: up-conan-recipes
-          repository: gregmedd/up-conan-recipes
+          repository: eclipse-uprotocol/up-conan-recipes
 
       - name: Build up-core-api conan package
         shell: bash
