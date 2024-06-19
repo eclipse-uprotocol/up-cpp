@@ -131,9 +131,9 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// @brief Checks if UMessage is valid for sending a notification
 ///
 /// In addition to all common attributes being valid, these checks must pass:
-///   * Message type must be UMESSAGE_TYPE_PUBLISH
-///   * Message source must pass uri::isValidTopic()
-///   * Message sink must pass uri::isValidTopic()
+///   * Message type must be UMESSAGE_TYPE_NOTIFICATION
+///   * Message source must pass uri::isValidNotification()
+///   * Message sink must pass uri::isValidNotification()
 ///   * Message must not set commstatus
 ///   * Message must not set reqid
 ///   * Message must not set permission_level
