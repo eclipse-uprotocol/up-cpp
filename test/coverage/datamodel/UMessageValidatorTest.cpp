@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <gtest/gtest.h>
+#include <up-cpp/datamodel/builder/Uuid.h>
 #include <up-cpp/datamodel/validator/UMessage.h>
 #include <up-cpp/datamodel/validator/UUri.h>
 
@@ -51,26 +52,20 @@ protected:
 
 	UUri source_;
 	UUri sink_;
+	// Note: this is used when intentionally setting an unexpected request ID
 	UUID reqId_;
 };
 
-UAttributes fakeRequest(UUri&& source, UUri&& sink) {
-	UUID id;
+UAttributes fakeRequest(const UUri& source, const UUri& sink) {
 	UAttributes attributes;
 
-	uint64_t timestamp =
-	    std::chrono::duration_cast<std::chrono::milliseconds>(
-	        std::chrono::system_clock::now().time_since_epoch())
-	        .count();
-
-	id.set_msb((timestamp << 16) | (8ULL << 12) |
-	           (0x123ULL));  // version 8 ; counter = 0x123
-	id.set_lsb((2ULL << 62) | (0xFFFFFFFFFFFFULL));  // variant 10
+	static auto uuid_builder =
+	    uprotocol::datamodel::builder::UuidBuilder::getBuilder();
 
 	attributes.set_type(UMESSAGE_TYPE_REQUEST);
-	attributes.set_allocated_id(new UUID(id));
-	attributes.set_allocated_source(new UUri(source));
-	attributes.set_allocated_sink(new UUri(sink));
+	*attributes.mutable_id() = uuid_builder.build();
+	*attributes.mutable_source() = source;
+	*attributes.mutable_sink() = sink;
 	attributes.set_priority(UPRIORITY_CS4);
 	attributes.set_payload_format(UPAYLOAD_FORMAT_PROTOBUF);
 	attributes.set_ttl(1000);
@@ -78,69 +73,48 @@ UAttributes fakeRequest(UUri&& source, UUri&& sink) {
 	return attributes;
 }
 
-UAttributes fakeResponse(UUri&& sink, UUri&& source) {
-	UUID id;
+UAttributes fakeResponse(const UUri& sink, const UUri& source) {
 	UAttributes attributes;
 
-	uint64_t timestamp =
-	    std::chrono::duration_cast<std::chrono::milliseconds>(
-	        std::chrono::system_clock::now().time_since_epoch())
-	        .count();
-
-	id.set_msb((timestamp << 16) | (8ULL << 12) |
-	           (0x123ULL));  // version 8 ; counter = 0x123
-	id.set_lsb((2ULL << 62) | (0xFFFFFFFFFFFFULL));  // variant 10
+	static auto uuid_builder =
+	    uprotocol::datamodel::builder::UuidBuilder::getBuilder();
 
 	attributes.set_type(UMESSAGE_TYPE_RESPONSE);
-	attributes.set_allocated_id(new UUID(id));
-	attributes.set_allocated_source(new UUri(source));
-	attributes.set_allocated_sink(new UUri(sink));
+	*attributes.mutable_id() = uuid_builder.build();
+	*attributes.mutable_source() = source;
+	*attributes.mutable_sink() = sink;
 	attributes.set_priority(UPRIORITY_CS4);
 	attributes.set_payload_format(UPAYLOAD_FORMAT_PROTOBUF);
-	attributes.set_allocated_reqid(new UUID(id));
+	*attributes.mutable_reqid() = uuid_builder.build();
 
 	return attributes;
 }
 
-UAttributes fakePublish(UUri&& source) {
-	UUID id;
+UAttributes fakePublish(const UUri& source) {
 	UAttributes attributes;
 
-	uint64_t timestamp =
-	    std::chrono::duration_cast<std::chrono::milliseconds>(
-	        std::chrono::system_clock::now().time_since_epoch())
-	        .count();
-
-	id.set_msb((timestamp << 16) | (8ULL << 12) |
-	           (0x123ULL));  // version 8 ; counter = 0x123
-	id.set_lsb((2ULL << 62) | (0xFFFFFFFFFFFFULL));  // variant 10
+	static auto uuid_builder =
+	    uprotocol::datamodel::builder::UuidBuilder::getBuilder();
 
 	attributes.set_type(UMESSAGE_TYPE_PUBLISH);
-	attributes.set_allocated_id(new UUID(id));
-	attributes.set_allocated_source(new UUri(source));
+	*attributes.mutable_id() = uuid_builder.build();
+	*attributes.mutable_source() = source;
 	attributes.set_payload_format(UPAYLOAD_FORMAT_PROTOBUF);
 	attributes.set_ttl(1000);
 
 	return attributes;
 }
 
-UAttributes fakeNotification(UUri&& source, UUri&& sink) {
-	UUID id;
+UAttributes fakeNotification(const UUri& source, const UUri& sink) {
 	UAttributes attributes;
 
-	uint64_t timestamp =
-	    std::chrono::duration_cast<std::chrono::milliseconds>(
-	        std::chrono::system_clock::now().time_since_epoch())
-	        .count();
-
-	id.set_msb((timestamp << 16) | (8ULL << 12) |
-	           (0x123ULL));  // version 8 ; counter = 0x123
-	id.set_lsb((2ULL << 62) | (0xFFFFFFFFFFFFULL));  // variant 10
+	static auto uuid_builder =
+	    uprotocol::datamodel::builder::UuidBuilder::getBuilder();
 
 	attributes.set_type(UMESSAGE_TYPE_NOTIFICATION);
-	attributes.set_allocated_id(new UUID(id));
-	attributes.set_allocated_source(new UUri(source));
-	attributes.set_allocated_sink(new UUri(sink));
+	*attributes.mutable_id() = uuid_builder.build();
+	*attributes.mutable_source() = source;
+	*attributes.mutable_sink() = sink;
 	attributes.set_payload_format(UPAYLOAD_FORMAT_PROTOBUF);
 
 	return attributes;
@@ -148,7 +122,7 @@ UAttributes fakeNotification(UUri&& source, UUri&& sink) {
 
 UMessage build(UAttributes& attributes) {
 	UMessage umessage;
-	umessage.set_allocated_attributes(new UAttributes(attributes));
+	*umessage.mutable_attributes() = attributes;
 	return umessage;
 }
 
@@ -185,9 +159,9 @@ void testCommonAttributes(UAttributes& attributesIn) {
 	{
 		// invalid id
 		auto attributes = UAttributes(attributesIn);
-		UUID* local_id = new UUID(attributes.id());
-		local_id->set_lsb(0);
-		attributes.set_allocated_id(local_id);
+		UUID local_id(attributes.id());
+		local_id.set_lsb(0);
+		*attributes.mutable_id() = local_id;
 		auto umessage = build(attributes);
 		auto [valid, reason] = areCommonAttributesValid(umessage);
 		EXPECT_FALSE(valid);
@@ -231,13 +205,13 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// test common attributes for any message
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		testCommonAttributes(attributes);
 	}
 
 	{
 		// valid
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
 		EXPECT_TRUE(valid);
@@ -246,7 +220,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// set wrong type
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		attributes.set_type(UMESSAGE_TYPE_RESPONSE);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
@@ -256,7 +230,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// missing source
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		attributes.clear_source();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
@@ -266,7 +240,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// missing sink
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		attributes.clear_sink();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
@@ -278,7 +252,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 		// invalid source
 		UUri source = source_;
 		source.set_resource_id(1);  // should be zero
-		auto attributes = fakeRequest(std::move(source), std::move(sink_));
+		auto attributes = fakeRequest(source, sink_);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
 		EXPECT_FALSE(valid);
@@ -289,7 +263,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 		// invalid sink
 		UUri sink = sink_;
 		sink.set_resource_id(0);  // should NOT be zero
-		auto attributes = fakeRequest(std::move(source_), std::move(sink));
+		auto attributes = fakeRequest(source_, sink);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
 		EXPECT_FALSE(valid);
@@ -298,7 +272,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// wrong priority
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		attributes.set_priority(UPRIORITY_CS3);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
@@ -308,7 +282,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// Missing TTL
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		attributes.clear_ttl();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
@@ -318,7 +292,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// Invalid TTL (zero)
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		attributes.set_ttl(0);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
@@ -328,7 +302,7 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// incorrectly set commstatus
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
+		auto attributes = fakeRequest(source_, sink_);
 		attributes.set_commstatus(OK);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
@@ -338,8 +312,8 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 
 	{
 		// incorrectly set reqid
-		auto attributes = fakeRequest(std::move(source_), std::move(sink_));
-		attributes.set_allocated_reqid(new UUID(reqId_));
+		auto attributes = fakeRequest(source_, sink_);
+		*attributes.mutable_reqid() = reqId_;
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcRequest(umessage);
 		EXPECT_FALSE(valid);
@@ -353,22 +327,27 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 
 	{
 		// test common attributes for any message
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		testCommonAttributes(attributes);
 	}
 
 	{
 		// valid
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+		// Only for debugging a test - should only happen if test is already
+		// failing and will always fail so that the reason message can be seen
+		if (reason) {
+			EXPECT_EQ("", message(*reason));
+		}
 	}
 
 	{
 		// set wrong type
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.set_type(UMESSAGE_TYPE_REQUEST);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
@@ -378,7 +357,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 
 	{
 		// missing source
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.clear_source();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
@@ -388,7 +367,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 
 	{
 		// missing sink
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.clear_sink();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
@@ -400,7 +379,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 		// invalid source
 		UUri source = source_;
 		source.set_resource_id(1);  // should be zero
-		auto attributes = fakeResponse(std::move(source), std::move(sink_));
+		auto attributes = fakeResponse(source, sink_);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
 		EXPECT_FALSE(valid);
@@ -411,7 +390,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 		// invalid sink
 		UUri sink = sink_;
 		sink.set_resource_id(0);  // should NOT be zero
-		auto attributes = fakeResponse(std::move(source_), std::move(sink));
+		auto attributes = fakeResponse(source_, sink);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
 		EXPECT_FALSE(valid);
@@ -421,7 +400,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 	{
 		// missing reqid
 		UUri sink = sink_;
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.clear_reqid();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
@@ -434,8 +413,8 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 		UUID local_id;
 		local_id.set_lsb(0);
 		local_id.set_msb(0);
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
-		attributes.set_allocated_reqid(new UUID(local_id));
+		auto attributes = fakeResponse(source_, sink_);
+		*attributes.mutable_reqid() = local_id;
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
 		EXPECT_FALSE(valid);
@@ -444,7 +423,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 
 	{
 		// no ttl set
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.clear_ttl();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
@@ -454,7 +433,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 
 	{
 		// expired ttl
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.set_ttl(1);
 		usleep(20000);  // sleep (id should be expired by now)
 		auto umessage = build(attributes);
@@ -465,7 +444,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 
 	{
 		// invalid priority
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.set_priority(UPRIORITY_CS3);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
@@ -475,7 +454,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 
 	{
 		// set permission level (shouldn't be set)
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.set_permission_level(7);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
@@ -485,7 +464,7 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) {
 
 	{
 		// set token (shouldn't be set)
-		auto attributes = fakeResponse(std::move(source_), std::move(sink_));
+		auto attributes = fakeResponse(source_, sink_);
 		attributes.set_token("token");
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidRpcResponse(umessage);
@@ -499,19 +478,24 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) {
 
 	{
 		// valid
-		auto req_attr = fakeRequest(std::move(source_), std::move(sink_));
-		auto res_attr = fakeResponse(std::move(source_), std::move(sink_));
+		auto req_attr = fakeRequest(source_, sink_);
+		auto res_attr = fakeResponse(source_, sink_);
+		*res_attr.mutable_reqid() = req_attr.id();
 		auto request = build(req_attr);
 		auto response = build(res_attr);
 		auto [valid, reason] = isValidRpcResponseFor(request, response);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+		// Only for debugging test - shows reason when test is already failing
+		if (reason) {
+			EXPECT_EQ("", message(*reason));
+		}
 	}
 
 	{
 		// missing reqId
-		auto req_attr = fakeRequest(std::move(source_), std::move(sink_));
-		auto res_attr = fakeResponse(std::move(source_), std::move(sink_));
+		auto req_attr = fakeRequest(source_, sink_);
+		auto res_attr = fakeResponse(source_, sink_);
 		res_attr.clear_reqid();
 		auto request = build(req_attr);
 		auto response = build(res_attr);
@@ -522,12 +506,9 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) {
 
 	{
 		// invalid reqId (does NOT match the request's id)
-		UUID local_id;
-		local_id.set_lsb(0);
-		local_id.set_msb(0);
-		auto req_attr = fakeRequest(std::move(source_), std::move(sink_));
-		auto res_attr = fakeResponse(std::move(source_), std::move(sink_));
-		res_attr.set_allocated_reqid(new UUID(local_id));
+		auto req_attr = fakeRequest(source_, sink_);
+		auto res_attr = fakeResponse(source_, sink_);
+		*res_attr.mutable_reqid() = res_attr.id();
 		auto request = build(req_attr);
 		auto response = build(res_attr);
 		auto [valid, reason] = isValidRpcResponseFor(request, response);
@@ -536,15 +517,44 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) {
 	}
 
 	{
+		// URI Mismatch - the response's sink doesn't match the request source
+		auto req_attr = fakeRequest(source_, sink_);
+		auto res_attr = fakeResponse(source_, sink_);
+		res_attr.mutable_sink()->set_ue_version_major(
+		    res_attr.sink().ue_version_major() + 1);
+		auto request = build(req_attr);
+		auto response = build(res_attr);
+		auto [valid, reason] = isValidRpcResponseFor(request, response);
+		EXPECT_FALSE(valid);
+		EXPECT_EQ(reason, Reason::URI_MISMATCH);
+	}
+
+	{
+		// URI Mismatch - the response's source doesn't match the request sink
+		auto req_attr = fakeRequest(source_, sink_);
+		auto res_attr = fakeResponse(source_, sink_);
+		res_attr.mutable_source()->set_ue_version_major(
+		    res_attr.source().ue_version_major() + 1);
+		auto request = build(req_attr);
+		auto response = build(res_attr);
+		auto [valid, reason] = isValidRpcResponseFor(request, response);
+		EXPECT_FALSE(valid);
+		EXPECT_EQ(reason, Reason::URI_MISMATCH);
+	}
+
+	{
 		// mismatch the priority
-		auto req_attr = fakeRequest(std::move(source_), std::move(sink_));
-		auto res_attr = fakeResponse(std::move(source_), std::move(sink_));
+		auto req_attr = fakeRequest(source_, sink_);
+		auto res_attr = fakeResponse(source_, sink_);
 		res_attr.set_priority(UPRIORITY_CS6);
+		*res_attr.mutable_reqid() = req_attr.id();
 		auto request = build(req_attr);
 		auto response = build(res_attr);
 		auto [valid, reason] = isValidRpcResponseFor(request, response);
 		EXPECT_FALSE(valid);
 		EXPECT_EQ(reason, Reason::PRIORITY_MISMATCH);
+		// Test debugging
+		EXPECT_EQ(message(*reason), message(Reason::PRIORITY_MISMATCH));
 	}
 }
 
@@ -553,13 +563,13 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 	{
 		// test common attributes for any message
-		auto attributes = fakePublish(std::move(source_));
+		auto attributes = fakePublish(source_);
 		testCommonAttributes(attributes);
 	}
 
 	{
 		// valid
-		auto attributes = fakePublish(std::move(source_));
+		auto attributes = fakePublish(source_);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
 		EXPECT_TRUE(valid);
@@ -568,7 +578,7 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 	{
 		// wrong type
-		auto attributes = fakePublish(std::move(source_));
+		auto attributes = fakePublish(source_);
 		attributes.set_type(UMESSAGE_TYPE_REQUEST);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
@@ -578,7 +588,7 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 	{
 		// missing source
-		auto attributes = fakePublish(std::move(source_));
+		auto attributes = fakePublish(source_);
 		attributes.clear_source();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
@@ -590,7 +600,7 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 		// invalid source
 		UUri source = source_;
 		source.set_resource_id(0x7FFF);  // should greater than 0x8000
-		auto attributes = fakePublish(std::move(source));
+		auto attributes = fakePublish(source);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
 		EXPECT_FALSE(valid);
@@ -599,8 +609,8 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 	{
 		// set a sink (unexpected)
-		auto attributes = fakePublish(std::move(source_));
-		attributes.set_allocated_sink(new UUri(sink_));
+		auto attributes = fakePublish(source_);
+		*attributes.mutable_sink() = sink_;
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
 		EXPECT_FALSE(valid);
@@ -609,7 +619,7 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 	{
 		// set commstat (unexpected)
-		auto attributes = fakePublish(std::move(source_));
+		auto attributes = fakePublish(source_);
 		attributes.set_commstatus(OK);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
@@ -619,8 +629,8 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 	{
 		// set reqid (unexpected)
-		auto attributes = fakePublish(std::move(source_));
-		attributes.set_allocated_reqid(new UUID(reqId_));
+		auto attributes = fakePublish(source_);
+		*attributes.mutable_reqid() = reqId_;
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
 		EXPECT_FALSE(valid);
@@ -629,7 +639,7 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 	{
 		// set permission level (unexpected)
-		auto attributes = fakePublish(std::move(source_));
+		auto attributes = fakePublish(source_);
 		attributes.set_permission_level(7);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
@@ -639,7 +649,7 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 	{
 		// set token (unexpected)
-		auto attributes = fakePublish(std::move(source_));
+		auto attributes = fakePublish(source_);
 		attributes.set_token("token");
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidPublish(umessage);
@@ -654,15 +664,13 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 
 	{
 		// test common attributes for any message
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
+		auto attributes = fakeNotification(source_, sink_);
 		testCommonAttributes(attributes);
 	}
 
 	{
 		// valid
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
+		auto attributes = fakeNotification(source_, sink_);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
 		EXPECT_TRUE(valid);
@@ -671,8 +679,7 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 
 	{
 		// incorrect type
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
+		auto attributes = fakeNotification(source_, sink_);
 		attributes.set_type(UMESSAGE_TYPE_REQUEST);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
@@ -682,8 +689,7 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 
 	{
 		// missing source
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
+		auto attributes = fakeNotification(source_, sink_);
 		attributes.clear_source();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
@@ -693,8 +699,7 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 
 	{
 		// missing sink
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
+		auto attributes = fakeNotification(source_, sink_);
 		attributes.clear_sink();
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
@@ -706,8 +711,7 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 		// invalid source
 		UUri local_source = source_;
 		local_source.set_resource_id(0x7FFF);  // should be greater than 0x8000
-		auto attributes =
-		    fakeNotification(std::move(local_source), std::move(sink_));
+		auto attributes = fakeNotification(local_source, sink_);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
 		EXPECT_FALSE(valid);
@@ -718,8 +722,7 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 		// invalid sink
 		UUri local_sink = sink_;
 		local_sink.set_resource_id(0x7FFF);  // should be greater than 0x8000
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(local_sink));
+		auto attributes = fakeNotification(source_, local_sink);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
 		EXPECT_FALSE(valid);
@@ -728,8 +731,7 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 
 	{
 		// set commstatus (unexpected)
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
+		auto attributes = fakeNotification(source_, sink_);
 		attributes.set_commstatus(OK);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
@@ -739,9 +741,8 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 
 	{
 		// set reqid (unexpected)
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
-		attributes.set_allocated_reqid(new UUID(reqId_));
+		auto attributes = fakeNotification(source_, sink_);
+		*attributes.mutable_reqid() = reqId_;
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
 		EXPECT_FALSE(valid);
@@ -750,8 +751,7 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 
 	{
 		// set permission level (unexpected)
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
+		auto attributes = fakeNotification(source_, sink_);
 		attributes.set_permission_level(7);
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
@@ -761,8 +761,7 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 
 	{
 		// set token (unexpected)
-		auto attributes =
-		    fakeNotification(std::move(source_), std::move(sink_));
+		auto attributes = fakeNotification(source_, sink_);
 		attributes.set_token("token");
 		auto umessage = build(attributes);
 		auto [valid, reason] = isValidNotification(umessage);
