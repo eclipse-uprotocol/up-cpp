@@ -26,7 +26,7 @@ std::string_view message(Reason reason) {
 		case Reason::BAD_ID:
 			return "The ID does not pass UUID validity checks";
 		case Reason::ID_EXPIRED:
-			return "The TTL, if present, indicates the ID has expired";
+			return "The ID has expired (TTL has passed)";
 		case Reason::PRIORITY_OUT_OF_RANGE:
 			return "The Priority, if set, is not within the allowable range";
 		case Reason::PAYLOAD_FORMAT_OUT_OF_RANGE:
@@ -47,6 +47,9 @@ std::string_view message(Reason reason) {
 		case Reason::PRIORITY_MISMATCH:
 			return "The Priority did not match the Priority of the request "
 			       "message";
+		case Reason::URI_MISMATCH:
+			return "The source/sink URIs for the request/response pair have "
+			       "not been swapped";
 		default:
 			return "Unknown reason.";
 	}
@@ -56,21 +59,21 @@ ValidationResult isValid(const v1::UMessage& umessage) {
 	{
 		auto [valid, reason] = isValidRpcRequest(umessage);
 		if (valid) {
-			return {true, std::nullopt};
+			return {true, {}};
 		}
 	}
 
 	{
 		auto [valid, reason] = isValidRpcResponse(umessage);
 		if (valid) {
-			return {true, std::nullopt};
+			return {true, {}};
 		}
 	}
 
 	{
 		auto [valid, reason] = isValidPublish(umessage);
 		if (valid) {
-			return {true, std::nullopt};
+			return {true, {}};
 		}
 	}
 
@@ -100,7 +103,7 @@ ValidationResult areCommonAttributesValid(const v1::UMessage& umessage) {
 		return {false, Reason::PAYLOAD_FORMAT_OUT_OF_RANGE};
 	}
 
-	return {true, std::nullopt};
+	return {true, {}};
 }
 
 ValidationResult isValidRpcRequest(const v1::UMessage& umessage) {
@@ -155,7 +158,7 @@ ValidationResult isValidRpcRequest(const v1::UMessage& umessage) {
 		return {false, Reason::DISALLOWED_FIELD_SET};
 	}
 
-	return {true, std::nullopt};
+	return {true, {}};
 }
 
 ValidationResult isValidRpcResponse(const v1::UMessage& umessage) {
@@ -225,7 +228,7 @@ ValidationResult isValidRpcResponse(const v1::UMessage& umessage) {
 		return {false, Reason::DISALLOWED_FIELD_SET};
 	}
 
-	return {true, std::nullopt};
+	return {true, {}};
 }
 
 ValidationResult isValidRpcResponseFor(const v1::UMessage& request,
@@ -235,8 +238,14 @@ ValidationResult isValidRpcResponseFor(const v1::UMessage& request,
 		return {false, reason};
 	}
 
-	if (!response.attributes().has_reqid()) {
-		return {false, Reason::REQID_MISMATCH};
+	if (!google::protobuf::util::MessageDifferencer::Equals(
+	        response.attributes().source(), request.attributes().sink())) {
+		return {false, Reason::URI_MISMATCH};
+	}
+
+	if (!google::protobuf::util::MessageDifferencer::Equals(
+	        response.attributes().sink(), request.attributes().source())) {
+		return {false, Reason::URI_MISMATCH};
 	}
 
 	if (!google::protobuf::util::MessageDifferencer::Equals(
@@ -248,7 +257,7 @@ ValidationResult isValidRpcResponseFor(const v1::UMessage& request,
 		return {false, Reason::PRIORITY_MISMATCH};
 	}
 
-	return {true, std::nullopt};
+	return {true, {}};
 }
 
 ValidationResult isValidPublish(const v1::UMessage& umessage) {
@@ -294,7 +303,7 @@ ValidationResult isValidPublish(const v1::UMessage& umessage) {
 		return {false, Reason::DISALLOWED_FIELD_SET};
 	}
 
-	return {true, std::nullopt};
+	return {true, {}};
 }
 
 ValidationResult isValidNotification(const v1::UMessage& umessage) {
@@ -348,7 +357,7 @@ ValidationResult isValidNotification(const v1::UMessage& umessage) {
 		return {false, Reason::DISALLOWED_FIELD_SET};
 	}
 
-	return {true, std::nullopt};
+	return {true, {}};
 }
 
 }  // namespace uprotocol::datamodel::validator::message
