@@ -44,7 +44,7 @@ struct Publisher {
 	/// @param ttl How long published messages will be valid from the time
 	///            publish() is called.
 	Publisher(std::shared_ptr<transport::UTransport> transport,
-	          const v1::UUri& topic, v1::UPayloadFormat format,
+	          v1::UUri& topic, v1::UPayloadFormat format,
 	          std::optional<v1::UPriority> priority = {},
 	          std::optional<std::chrono::milliseconds> ttl = {});
 
@@ -57,7 +57,7 @@ struct Publisher {
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
-	datamodel::builder::UMessageBuilder publish_builder_;
+	std::shared_ptr<datamodel::builder::UMessageBuilder> publish_builder_;
 };
 
 }  // namespace uprotocol::communication
