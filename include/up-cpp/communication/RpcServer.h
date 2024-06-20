@@ -79,40 +79,17 @@ struct RpcServer {
 protected:
 	/// @brief Constructs an RPC server connected to a given transport.
 	///
-	/// @param transport Transport to offer the RPC method through.
-	/// @param method URI representing the name clients will use to invoke
-	///               the RPC method.
-	/// @param payload_format (Optional) If sending a payload, this sets the
-	///                       format that will be expected when the callback
-	///                       returns. Empty response payloads can only be
-	///                       sent if this was not set.
-	/// @param ttl (Optional) Time response will be valid from the moment
-	///            respond() is called. Note that the original request's TTL
-	///            may also still apply.
-	RpcServer(std::shared_ptr<transport::UTransport> transport,
-	          const v1::UUri& method,
-	          std::optional<v1::UPayloadFormat> format = {},
-	          std::optional<std::chrono::milliseconds> ttl = {});
-
-	/// @brief Connects the RPC callback method and returns the status from
-	///        UTransport::registerListener.
-	///
-	/// @param callback Method that will be called when requests are received.
-	///
-	/// @returns OK if connected successfully, error status otherwise.
-	[[nodiscard]] v1::UStatus connect(RpcCallback&& callback);
+	/// @param Connected callback handle for the RPC method wrapper as created
+	///        by calling UTransport::registerListener() within the create()
+	///        method.
+	RpcServer(transport::UTransport::ListenHandle);
 
 private:
-	/// @brief Transport instance that will be used for communication
-	std::shared_ptr<transport::UTransport> transport_;
-
-	/// @brief TTL to use for responses, if set at construction time
-	std::optional<std::chrono::milliseconds> ttl_;
-
-	/// @brief RPC callback method
-	RpcCallback callback_;
-
 	/// @brief Handle to the connected callback for the RPC method wrapper
+	///
+	/// @remarks The callback lambda represented by this handle will capture
+	///          all of the parameters needed to form responses found in the
+	///          create() method.
 	transport::UTransport::ListenHandle callback_handle_;
 };
 
