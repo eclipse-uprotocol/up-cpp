@@ -19,6 +19,7 @@ find_package(up-core-api REQUIRED)
 # TODO NEEDED?
 #add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
+
 # This is the root CMakeLists.txt file; We can set project wide settings here
 # TODO: Is this needed?
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
@@ -33,6 +34,7 @@ file(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_library(${PROJECT_NAME} ${SRC_FILES})
 add_library(up-cpp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fprofile-arcs -ftest-coverage")
 
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
@@ -45,11 +47,13 @@ target_include_directories(${PROJECT_NAME}
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+
 target_link_libraries(${PROJECT_NAME} 
 	PRIVATE 
 	up-core-api::up-core-api
 	protobuf::libprotobuf 
-	spdlog::spdlog)
+	spdlog::spdlog
+	gcov)
 
 enable_testing()
 add_subdirectory(test)
