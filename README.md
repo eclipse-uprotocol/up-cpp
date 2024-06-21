@@ -15,14 +15,18 @@ implementation, such as [up-transport-zenoh-cpp][zenoh-transport-repo].
 
 ### Requirements:
 - Compiler: GCC/G++ 11 or Clang 13
-- Conan : 1.59 or latest 2.X
+- pip : To install others
+- Conan(pip) : 1.59 or > 2.4.2
+- Cmake(apt) : > 3.22
+- Ninja(pip) : Latest
+- Gcovr(pip) : For UT code coverage if desired
 
 #### Conan packages
 
 Using the recipes found in [up-conan-recipes][conan-recipe-repo], build these
 Conan packages:
 
-1. [up-core-api][spec-repo] - `conan create --version 1.5.8 --build=missing up-core-api/developer`
+1. [up-core-api][spec-repo]: `conan create --version 1.5.8 --build=missing up-core-api/developer`
 
 **NOTE:** all `conan` commands in this document use  Conan 2.x syntax. Please
 adjust accordingly when using Conan 1.x.
@@ -30,7 +34,7 @@ adjust accordingly when using Conan 1.x.
 ## How to Use the Library
 
 To add up-cpp to your conan build dependencies, place following in your
-conanfile.txt:
+conanfile.txt (https://docs.conan.io/2/reference/conanfile_txt.html):
 
 ```
 [requires]
@@ -56,6 +60,8 @@ up-cpp, If you are making a project that uses up-cpp, follow the steps in the
 
 ### With Conan for dependencies
 
+Clone the up-cpp repo to a folder named: up-cpp
+
 ```
 cd up-cpp
 conan install .
@@ -65,6 +71,7 @@ cmake --build . -- -j
 ```
 
 Once the build completes, tests can be run with `ctest`.
+Once the tests complete, the Unit Test Coverage report can be generated from the base up-cpp folder with: ./Coverage.sh
 
 ### With dependencies installed as system libraries
 
