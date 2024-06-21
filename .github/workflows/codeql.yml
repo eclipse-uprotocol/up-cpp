@@ -1,0 +1,88 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '22 5 * * 5'
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: c-cpp
+          build-mode: manual
+    steps:
+    - if: matrix.build-mode == 'manual'
+      name: Install Conan
+      id: conan
+      uses: turtlebrowser/get-conan@main
+      with:
+        version: 2.3.2
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: up-cpp
+    
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+
+    - if: matrix.build-mode == 'manual'
+      name: Install conan CI profile
+      shell: bash
+      run: |
+        conan profile detect
+        cp up-cpp/.github/workflows/ci_conan_profile "$(conan profile path default)"
+        conan profile show
+
+    - if: matrix.build-mode == 'manual'
+      name: Fetch up-core-api conan recipe
+      uses: actions/checkout@v4
+      with:
+        path: up-conan-recipes
+        repository: eclipse-uprotocol/up-conan-recipes
+
+    - if: matrix.build-mode == 'manual'
+      name: Build up-core-api conan package
+      shell: bash
+      run: |
+        conan create --version 1.5.8 up-conan-recipes/up-core-api/developer
+
+    - if: matrix.build-mode == 'manual'
+      name: Build up-cpp with tests
+      shell: bash
+      run: |
+        cd up-cpp
+        conan install . --build=missing
+        cd build
+        cmake -S .. -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
+        cmake --build . -- -j
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+        checkout_path: up-cpp
