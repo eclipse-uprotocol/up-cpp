@@ -15,6 +15,7 @@
 #include <up-cpp/datamodel/builder/Payload.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
 #include <up-cpp/datamodel/validator/UMessage.h>
+#include <up-cpp/datamodel/validator/UUri.h>
 #include <up-cpp/transport/UTransport.h>
 #include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/uri.pb.h>
@@ -100,7 +101,8 @@ protected:
 	/// @param callback Method that will be called when requests are received.
 	///
 	/// @returns OK if connected successfully, error status otherwise.
-	[[nodiscard]] v1::UStatus connect(RpcCallback&& callback);
+	[[nodiscard]] v1::UStatus connect(const v1::UUri& method,
+	                                  RpcCallback&& callback);
 
 private:
 	/// @brief Transport instance that will be used for communication
@@ -114,6 +116,9 @@ private:
 
 	/// @brief Handle to the connected callback for the RPC method wrapper
 	transport::UTransport::ListenHandle callback_handle_;
+
+	/// @brief Format of the payload that will be expected in responses
+	std::optional<v1::UPayloadFormat> expected_payload_format_;
 };
 
 }  // namespace uprotocol::communication
