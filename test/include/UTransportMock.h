@@ -61,6 +61,11 @@ public:
 
 	~UTransportMock() { mock_info.deinit_passed = true; }
 
+	static UTransportMockInfo& singleton()
+	{
+		return mock_info;
+	}
+
 private:
 	[[nodiscard]] v1::UStatus sendImpl(const v1::UMessage& message) override {
 		v1::UStatus retval;
@@ -84,6 +89,9 @@ private:
 		mock_info.cleanupListener = listener;
 	}
 };
+
+// uprotocol::test::UTransportMockInfo __attribute__((weak)) UTransportMock::mock_info = uprotocol::test::UTransportMockInfo();
+uprotocol::test::UTransportMockInfo UTransportMock::mock_info = uprotocol::test::UTransportMockInfo();
 
 };  // namespace uprotocol::test
 

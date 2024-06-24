@@ -72,12 +72,7 @@ uprotocol::v1::UUID* make_uuid() {
 	return id;
 }
 
-namespace uprotocol::test {
-uprotocol::test::UTransportMockInfo UTransportMock::mock_info =
-    uprotocol::test::UTransportMockInfo();
-};
-
-auto& mock_info = uprotocol::test::UTransportMock::mock_info;
+auto& mock_info = uprotocol::test::UTransportMock::singleton();
 
 namespace {
 
