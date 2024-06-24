@@ -54,13 +54,18 @@ struct RpcClient {
 	                   std::optional<uint32_t> permission_level = {},
 	                   std::optional<std::string> token = {});
 
+	/// @brief A status code that can be returned in the response message's
+	///        attributes.
 	using Commstatus = v1::UCode;
 
+	/// @brief Represents the combined status possibilities for transport and
+	///        uProtocol network communications.
+	using Status = std::variant<v1::UStatus, Commstatus>;
+
 	/// @brief Contains either a UMessage (when successful) or a UStatus /
-	/// Commstatus when an error occurred. Commstatus would be set based
-	/// on the commstatus attributes field in any returned messages.
-	using MessageOrStatus =
-	    utils::Expected<v1::UMessage, std::variant<v1::UStatus, Commstatus>>;
+	///        Commstatus when an error occurred. Commstatus would be set based
+	///        on the commstatus attributes field in any returned messages.
+	using MessageOrStatus = utils::Expected<v1::UMessage, Status>;
 
 	/// @brief Callback function signature used in the callback form of
 	///        invokeMethod
@@ -126,11 +131,25 @@ struct RpcClient {
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] std::future<MessageOrStatus> invokeMethod();
 
-	~RpcClient() = default;
+	/// @brief Default move constructor (defined in RpcClient.cpp)
+	RpcClient(RpcClient&&);
+
+	/// @brief Default destructor (defined in RpcClient.cpp)
+	~RpcClient();
 
 private:
+	/// @brief Internal implementation of invokeMethod that handles all the
+	///        shared logic for the public invokeMethod() methods.
+	void invokeMethod(v1::UMessage&&, Callback&&);
+
+	/// @brief Handle to a shared worker that monitors for and cancels expired
+	///        requests.
+	struct ExpireService;
+
 	std::shared_ptr<transport::UTransport> transport_;
+	std::chrono::milliseconds ttl_;
 	datamodel::builder::UMessageBuilder builder_;
+	std::unique_ptr<ExpireService> expire_service_;
 };
 
 }  // namespace uprotocol::communication
