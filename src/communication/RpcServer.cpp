@@ -82,10 +82,12 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 			    auto response =
 			        datamodel::builder::UMessageBuilder::response(message)
 			            .withCommStatus(v1::UCode::INVALID_ARGUMENT)
-			            .withToken(std::string(
-			                Validator::message::message(reason.value())))
-			            .build();
-			    transport_->send(response);
+			            .build({std::string(Validator::message::message(
+			                        reason.value())),
+			                    v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT});
+
+			    // Ignoring status code for transport send
+			    auto _ = transport_->send(response);
 			    return;
 		    }
 
@@ -106,13 +108,14 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 		    if (!payloadData.has_value()) {
 			    // builder.build() verifies if payload format is required
 			    auto response = builder.build();
-			    transport_->send(response);
+			    // Ignoring status code for transport send
+			    auto _ = transport_->send(response);
 		    } else {
 			    // builder.build(payloadData) verifies if payload format matches
 			    // the expected
 			    auto response = builder.build(std::move(payloadData.value()));
-			    ;
-			    transport_->send(response);
+			    // Ignoring status code for transport send
+			    auto _ = transport_->send(response);
 		    }
 	    });
 
