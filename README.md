@@ -66,12 +66,25 @@ Clone the up-cpp repo to a folder named: up-cpp
 cd up-cpp
 conan install .
 cd build
-cmake ../ -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+cmake ../ -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake 
 cmake --build . -- -j
 ```
 
 Once the build completes, tests can be run with `ctest`.
 Once the tests complete, the Unit Test Coverage report can be generated from the base up-cpp folder with: ./Coverage.sh
+
+
+### Generate UT  Coverage
+
+To get code coverage, perform the steps above, but use the following cmake line insead
+```
+cmake ../ -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Coverage
+```
+To run the coverage report, run this script from the up-cpp folder:
+```
+./coverage.sh
+```
+
 
 ### With dependencies installed as system libraries
 
