@@ -46,7 +46,9 @@ enum class Reason {
 	/// @brief The Request ID did not match the ID of the request message
 	REQID_MISMATCH,
 	/// @brief The Priority did not match the Priority of the request message
-	PRIORITY_MISMATCH
+	PRIORITY_MISMATCH,
+	/// @brief The source and sink from a request must be swapped in a response
+	URI_MISMATCH
 };
 
 /// @brief Get a descriptive message for a reason code.
