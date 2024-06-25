@@ -78,7 +78,7 @@ See: [up-conan-recipes][conan-recipe-repo]
 
 Give a ⭐️ if this project helped you!
 
-[zenoh-transport-repo]: https://github.com/eclipse-uprotocol/up-client-zenoh-cpp
+[zenoh-transport-repo]: https://github.com/eclipse-uprotocol/up-transport-zenoh-cpp
 [conan-recipe-repo]: https://github.com/eclipse-uprotocol/up-conan-recipes
 [spec-repo]: https://github.com/eclipse-uprotocol/up-spec
 [conan-abi-docs]: https://docs.conan.io/en/1.60/howtos/manage_gcc_abi.html
