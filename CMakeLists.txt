@@ -16,6 +16,30 @@ find_package(protobuf REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(up-core-api REQUIRED)
 
+message("* Adding build types...")
+list(APPEND CMAKE_CONFIGURATION_TYPES Release Coverage)
+list(REMOVE_DUPLICATES CMAKE_CONFIGURATION_TYPES)
+set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
+	"Add the code coverage configuration."
+	FORCE)
+message("  Available build types are now: ${CMAKE_CONFIGURATION_TYPES}")
+
+#Handle case where no build type is given (assume "Release")
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE Release
+        CACHE STRING "No Build type given, using default: Release"
+        FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+message("* Current build type is: ${CMAKE_BUILD_TYPE}")
+
+# Settings for Gcc for all builds
+SET(GCC_BUILD_FLAGS "-g -Wall")
+
+# Modify settings based on build type
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fprofile-arcs -ftest-coverage")
+endif()
+	
 # TODO NEEDED?
 #add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
@@ -34,7 +58,6 @@ file(GLOB_RECURSE SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_library(${PROJECT_NAME} ${SRC_FILES})
 add_library(up-cpp::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fprofile-arcs -ftest-coverage")
 
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
