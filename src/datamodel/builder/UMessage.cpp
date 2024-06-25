@@ -19,7 +19,7 @@ namespace UriValidator = validator::uri;
 namespace UUidValidator = validator::uuid;
 
 UMessageBuilder UMessageBuilder::publish(v1::UUri&& topic) {
-	auto [uriOk, reason] = UriValidator::isValid(topic);
+	auto [uriOk, reason] = UriValidator::isValidPublishTopic(topic);
 	if (!uriOk) {
 		throw UriValidator::InvalidUUri(
 		    "Source URI is not a valid URI |  " +
@@ -34,7 +34,7 @@ UMessageBuilder UMessageBuilder::publish(v1::UUri&& topic) {
 
 UMessageBuilder UMessageBuilder::notification(v1::UUri&& source,
                                               v1::UUri&& sink) {
-	auto [srcOk, srcReason] = UriValidator::isValid(source);
+	auto [srcOk, srcReason] = UriValidator::isValidNotification(source);
 	if (!srcOk) {
 		throw UriValidator::InvalidUUri(
 		    "Source URI is not a valid URI |  " +
@@ -56,7 +56,7 @@ UMessageBuilder UMessageBuilder::notification(v1::UUri&& source,
 UMessageBuilder UMessageBuilder::request(v1::UUri&& method, v1::UUri&& source,
                                          v1::UPriority priority,
                                          std::chrono::milliseconds ttl) {
-	auto [methodOk, methodReason] = UriValidator::isValid(method);
+	auto [methodOk, methodReason] = UriValidator::isValidRpcMethod(method);
 	if (!methodOk) {
 		throw UriValidator::InvalidUUri(
 		    "Method URI is not a valid URI |  " +
@@ -83,7 +83,7 @@ UMessageBuilder UMessageBuilder::response(v1::UUri&& sink,
                                           v1::UUID&& request_id,
                                           v1::UPriority priority,
                                           v1::UUri&& method) {
-	auto [methodOk, methodReason] = UriValidator::isValid(method);
+	auto [methodOk, methodReason] = UriValidator::isValidRpcMethod(method);
 	if (!methodOk) {
 		throw UriValidator::InvalidUUri(
 		    "Method URI is not a valid URI |  " +
@@ -111,7 +111,7 @@ UMessageBuilder UMessageBuilder::response(v1::UUri&& sink,
 
 UMessageBuilder UMessageBuilder::response(const v1::UMessage& request) {
 	v1::UUri sink = request.attributes().source();
-	v1::UUID reqId = request.attributes().reqid();
+	v1::UUID reqId = request.attributes().id();
 	v1::UPriority priority = request.attributes().priority();
 	v1::UUri method = request.attributes().sink();
 

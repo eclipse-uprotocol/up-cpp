@@ -32,7 +32,7 @@ protected:
 	UMessageBuilder createFakeRequest() {
 		UPriority priority = UPriority::UPRIORITY_CS4;
 		std::chrono::milliseconds ttl(5000);
-		UUri method = sink_;
+		UUri method = method_;
 		UUri source = source_;
 
 		return UMessageBuilder::request(std::move(method), std::move(source),
@@ -41,7 +41,7 @@ protected:
 
 	UMessageBuilder createFakeResponse() {
 		UUri sink = sink_;
-		UUri method = source_;
+		UUri method = method_;
 		UUID request_id = reqId_;
 
 		UPriority priority = UPriority::UPRIORITY_CS4;
@@ -70,11 +70,15 @@ protected:
 		source_.set_ue_version_major(0xF8);
 		source_.set_resource_id(0x8101);
 
-		std::string sinkAuthority = "10.0.0.2";
-		sink_.set_authority_name(sinkAuthority);
+		sink_.set_authority_name("10.0.0.2");
 		sink_.set_ue_id(0x00011102);
 		sink_.set_ue_version_major(0xF9);
 		sink_.set_resource_id(0x8102);
+
+		method_.set_authority_name("10.0.0.3");
+		method_.set_ue_id(0x00011103);
+		method_.set_ue_version_major(0xFA);
+		method_.set_resource_id(0x0101);
 
 		reqId_.set_msb((8ULL << 12) | (0x123ULL));
 		reqId_.set_lsb((2ULL << 62) | (0xFFFFFFFFFFFFULL));
@@ -83,11 +87,13 @@ protected:
 
 	static UUri source_;
 	static UUri sink_;
+	static UUri method_;
 	static UUID reqId_;
 };
 
 UUri TestUMessageBuilder::source_;
 UUri TestUMessageBuilder::sink_;
+UUri TestUMessageBuilder::method_;
 UUID TestUMessageBuilder::reqId_;
 
 /// @brief  Test the publish function of the UMessageBuilder
@@ -145,14 +151,15 @@ TEST_F(TestUMessageBuilder, NotificationInvalidSinkUriThrows) {
 TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) {
 	UPriority priority = UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(5000);
-	UUri method = sink_;
+	UUri method = method_;
 	UUri source = source_;
 	EXPECT_NO_THROW({
 		auto builder = UMessageBuilder::request(
 		    std::move(method), std::move(source), priority, ttl);
 		UAttributes attr = builder.attributes();
 		EXPECT_EQ(attr.type(), UMessageType::UMESSAGE_TYPE_REQUEST);
-		EXPECT_EQ(AsString::serialize(attr.sink()), AsString::serialize(sink_));
+		EXPECT_EQ(AsString::serialize(attr.sink()),
+		          AsString::serialize(method_));
 		EXPECT_EQ(AsString::serialize(attr.source()),
 		          AsString::serialize(source_));
 		EXPECT_EQ(attr.priority(), priority);
@@ -175,7 +182,7 @@ TEST_F(TestUMessageBuilder, RequestInvalidMethodUriThrows) {
 
 TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {
 	UUri source;
-	UUri method = sink_;
+	UUri method = method_;
 	UPriority priority = UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(5000);
 	EXPECT_THROW(
@@ -187,7 +194,7 @@ TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {
 }
 
 TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {
-	UUri method = sink_;
+	UUri method = method_;
 	UUri source = source_;
 	UPriority priority = UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(-1);  // Invalid TTL
@@ -202,7 +209,7 @@ TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {
 /// @brief  Test the response function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, ResponseValidParametersSuccess) {
 	UUri sink = sink_;
-	UUri method = source_;
+	UUri method = method_;
 	UUID request_id = reqId_;
 
 	UPriority priority = UPriority::UPRIORITY_CS4;
@@ -214,7 +221,7 @@ TEST_F(TestUMessageBuilder, ResponseValidParametersSuccess) {
 		EXPECT_EQ(attr.type(), UMessageType::UMESSAGE_TYPE_RESPONSE);
 		EXPECT_EQ(AsString::serialize(attr.sink()), AsString::serialize(sink_));
 		EXPECT_EQ(AsString::serialize(attr.source()),
-		          AsString::serialize(source_));
+		          AsString::serialize(method_));
 		// EXPECT_EQ(attr.reqid(), reqId_);
 		EXPECT_EQ(attr.priority(), priority);
 	});
@@ -235,7 +242,7 @@ TEST_F(TestUMessageBuilder, ResponseInvalidMethodUriThrows) {
 
 TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) {
 	UUri sink;
-	UUri method = source_;
+	UUri method = method_;
 	UUID request_id = reqId_;
 	UPriority priority = UPriority::UPRIORITY_CS4;
 	EXPECT_THROW(
@@ -248,7 +255,7 @@ TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) {
 
 TEST_F(TestUMessageBuilder, ResponseInvalidRequestIdThrows) {
 	UUri sink = sink_;
-	UUri method = source_;
+	UUri method = method_;
 	UUID request_id;
 	UPriority priority = UPriority::UPRIORITY_CS4;
 	EXPECT_THROW(
