@@ -27,7 +27,10 @@ namespace uprotocol::communication {
 /// of the L1 UTransport API; in this instance, they are the subscriber half of
 /// the pub/sub model.
 struct Subscriber {
+	using SubscriberOrStatus =
+	    utils::Expected<std::unique_ptr<Subscriber>, v1::UStatus>;
 	using ListenCallback = transport::UTransport::ListenCallback;
+	using ListenHandle = transport::UTransport::ListenHandle;
 
 	/// @brief Subscribes to a topic.
 	///
@@ -43,10 +46,9 @@ struct Subscriber {
 	/// @returns * A unique_ptr to a Subscriber if the callback was
 	///            successfully registered.
 	///          * A UStatus with the appropriate failure code otherwise.
-	[[nodiscard]] utils::Expected<std::unique_ptr<Subscriber>, v1::UStatus>
-	subscribe(std::shared_ptr<transport::UTransport> transport,
-	          const v1::UUri& topic,
-	          transport::UTransport::ListenCallback&& callback);
+	[[nodiscard]] static SubscriberOrStatus subscribe(
+	    std::shared_ptr<transport::UTransport> transport, const v1::UUri& topic,
+	    ListenCallback&& callback);
 
 protected:
 	/// @brief Constructor
@@ -54,12 +56,16 @@ protected:
 	/// @param transport Transport this subscriber is connected to.
 	/// @param subscription Handle to the callback registered with UTransport.
 	Subscriber(std::shared_ptr<transport::UTransport> transport,
-	           transport::UTransport::ListenHandle&& subscription);
+	           ListenHandle&& subscription);
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
-
-	transport::UTransport::ListenHandle subscription_;
+	ListenHandle subscription_;
+	// Allow the protected constructor for this class to be used in make_unique
+	// inside of subscribe()
+	friend std::unique_ptr<Subscriber> std::make_unique<
+	    Subscriber, std::shared_ptr<transport::UTransport>, ListenHandle>(
+	    std::shared_ptr<uprotocol::transport::UTransport>&&, ListenHandle&&);
 };
 
 }  // namespace uprotocol::communication

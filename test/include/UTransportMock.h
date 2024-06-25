@@ -20,7 +20,9 @@ namespace uprotocol::test {
 class UTransportMock : public uprotocol::transport::UTransport {
 public:
 	explicit UTransportMock(const v1::UUri& uuri)
-	    : uprotocol::transport::UTransport(uuri), send_count_(0) {}
+	    : uprotocol::transport::UTransport(uuri), send_count_(0) {
+		registerListener_status_.set_code(v1::UCode::OK);
+	}
 
 	void mockMessage(const uprotocol::v1::UMessage& msg) {
 		ASSERT_TRUE(listener_ &&
@@ -30,6 +32,7 @@ public:
 
 	size_t send_count_;
 	uprotocol::v1::UStatus send_status_;
+	uprotocol::v1::UStatus registerListener_status_;
 	std::optional<uprotocol::utils::callbacks::CallerHandle<
 	    void, uprotocol::v1::UMessage const&>>
 	    listener_;
@@ -54,9 +57,7 @@ private:
 		listener_ = listener;
 		source_filter_ = source_filter;
 		sink_filter_ = sink_filter;
-		v1::UStatus retval;
-		retval.set_code(v1::UCode::OK);
-		return retval;
+		return registerListener_status_;
 	}
 
 	void cleanupListener(CallableConn listener) override {
