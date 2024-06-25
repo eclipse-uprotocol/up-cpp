@@ -15,11 +15,11 @@ implementation, such as [up-transport-zenoh-cpp][zenoh-transport-repo].
 
 ### Requirements:
 - Compiler: GCC/G++ 11 or Clang 13
-- pip : To install others
-- Conan(pip) : > 2.4.2
-- Cmake(apt) : > 3.22
-- Ninja(pip) : Latest
-- Gcovr(pip) : For UT code coverage if desired
+- Cmake: > 3.22
+- pip : For the following
+- Conan : > 2.4.2
+- Ninja : Latest
+- Gcovr : For UT code coverage if desired
 
 #### Conan packages
 
