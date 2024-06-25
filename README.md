@@ -34,7 +34,7 @@ adjust accordingly when using Conan 1.x.
 ## How to Use the Library
 
 To add up-cpp to your conan build dependencies, place following in your
-conanfile.txt (https://docs.conan.io/2/reference/conanfile_txt.html):
+[conanfile.txt][conan-txt-reference]:
 
 ```
 [requires]
@@ -102,3 +102,4 @@ Give a ⭐️ if this project helped you!
 [conan-recipe-repo]: https://github.com/gregmedd/up-conan-recipes
 [spec-repo]: https://github.com/eclipse-uprotocol/up-spec
 [conan-abi-docs]: https://docs.conan.io/en/1.60/howtos/manage_gcc_abi.html
+[conan-txt-reference]: https://docs.conan.io/2/reference/conanfile_txt.html
