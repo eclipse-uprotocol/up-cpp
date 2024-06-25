@@ -19,8 +19,11 @@
 #include <uprotocol/v1/uuid.pb.h>
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
+
+#include "up-cpp/datamodel/builder/Uuid.h"
 
 namespace uprotocol::datamodel::builder {
 
@@ -159,7 +162,7 @@ struct UMessageBuilder {
 	/// @throws std::domain_error when called on a message with any type
 	///                           other than "request".
 	/// @returns A reference to this UMessageBuilder
-	UMessageBuilder& withPermissionLevel(int32_t);
+	UMessageBuilder& withPermissionLevel(uint32_t);
 
 	/// @brief Sets the response's commstatus field indicating an error
 	///        occurred with the request or in generating the response.
@@ -175,7 +178,9 @@ struct UMessageBuilder {
 	///        message will send no commstatus.
 	///
 	/// @throws std::domain_error when called on a message with any type
-	///                           other than "response".
+	///         other than "response".
+	/// @throws std::out_of_range if the value is outside of the range of
+	/// v1::UCode
 	/// @returns A reference to this UMessageBuilder
 	UMessageBuilder& withCommStatus(v1::UCode);
 
@@ -227,8 +232,29 @@ struct UMessageBuilder {
 	/// @return A built message with the provided payload data embedded.
 	[[nodiscard]] v1::UMessage build(builder::Payload&&) const;
 
+	/// @brief Access the attributes of the message being built.
+	/// @return A reference to the attributes of the message being built.
+	[[nodiscard]] const v1::UAttributes& attributes() const {
+		return attributes_;
+	}
+
 private:
-	UMessageBuilder();
+	/// @brief Constructs a UMessageBuilder with the provided attributes.
+	///
+	/// @param msgType
+	/// @param source
+	/// @param sink
+	/// @param request_id
+	UMessageBuilder(v1::UMessageType msgType, v1::UUri&& source,
+	                std::optional<v1::UUri>&& sink = {},
+	                std::optional<v1::UUID>&& request_id = {});
+
+	void setPayloadFormat(v1::UPayloadFormat);
+
+	/// @brief The attributes of the message being built
+	v1::UAttributes attributes_;
+	std::optional<v1::UPayloadFormat> expectedPayloadFormat_;
+	mutable UuidBuilder uuidBuilder_;
 };
 
 }  // namespace uprotocol::datamodel::builder
