@@ -220,7 +220,7 @@ TEST_F(ExpectedTest, ExceptionValueCheckedWhenIsError) {
 		    try {
 			    EXPECT_FALSE(bool(expected));
 			    EXPECT_FALSE(expected.has_value());
-			    auto value = expected.value();
+			    std::ignore = expected.value();
 		    } catch (const BadExpectedAccess& ex) {
 			    EXPECT_STREQ("Attempt to access value() when unexpected.",
 			                 ex.what());
@@ -255,7 +255,7 @@ TEST_F(ExpectedTest, ExceptionDerefValueWhenUnexpected) {
 		    try {
 			    EXPECT_FALSE(bool(expected));
 			    EXPECT_FALSE(expected.has_value());
-			    const auto x = *expected;
+			    std::ignore = *expected;
 		    } catch (const BadExpectedAccess& ex) {
 			    EXPECT_STREQ(
 			        "Attempt to dereference expected value when unexpected.",
@@ -274,7 +274,7 @@ TEST_F(ExpectedTest, ExceptionDerefPtrWhenUnexpected) {
 		    try {
 			    EXPECT_FALSE(bool(expected));
 			    EXPECT_FALSE(expected.has_value());
-			    auto x = expected->x;
+			    std::ignore = expected->x;
 		    } catch (const BadExpectedAccess& ex) {
 			    EXPECT_STREQ(
 			        "Attempt to dereference expected pointer when unexpected.",

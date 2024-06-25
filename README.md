@@ -66,7 +66,7 @@ Clone the up-cpp repo to a folder named: up-cpp
 cd up-cpp
 conan install .
 cd build
-cmake ../ -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake 
+cmake ../ -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release 
 cmake --build . -- -j
 ```
 

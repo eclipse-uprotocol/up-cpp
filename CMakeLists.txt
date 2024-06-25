@@ -24,25 +24,20 @@ set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
 	FORCE)
 message("  Available build types are now: ${CMAKE_CONFIGURATION_TYPES}")
 
-#Handle case where no build type is given (assume "Release")
-IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE Release
-        CACHE STRING "No Build type given, using default: Release"
-        FORCE)
-ENDIF(NOT CMAKE_BUILD_TYPE)
 message("* Current build type is: ${CMAKE_BUILD_TYPE}")
 
 # Settings for Gcc for all builds
-SET(GCC_BUILD_FLAGS "-g -Wall")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
 
 # Modify settings based on build type
 if(CMAKE_BUILD_TYPE STREQUAL Coverage)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fprofile-arcs -ftest-coverage")
+    set(CMAKE_BUILD_TYPE Release)
 endif()
+message("* Current Compiler Flags: ${CMAKE_CXX_FLAGS}")
 	
 # TODO NEEDED?
 #add_definitions(-DSPDLOG_FMT_EXTERNAL)
-
 
 # This is the root CMakeLists.txt file; We can set project wide settings here
 # TODO: Is this needed?
