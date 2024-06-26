@@ -31,9 +31,6 @@ std::string_view message(Reason reason) {
 			return "The Priority, if set, is not within the allowable range";
 		case Reason::PAYLOAD_FORMAT_OUT_OF_RANGE:
 			return "The Payload Format is not within the allowable range";
-		case Reason::WRONG_MESSAGE_TYPE:
-			return "The type set in the message is incorrect for the validated "
-			       "mode";
 		case Reason::BAD_SOURCE_URI:
 			return "Source URI did not pass validity checks";
 		case Reason::BAD_SINK_URI:
@@ -50,34 +47,37 @@ std::string_view message(Reason reason) {
 		case Reason::URI_MISMATCH:
 			return "The source/sink URIs for the request/response pair have "
 			       "not been swapped";
+		case Reason::UNSPECIFIED_MESSAGE_TYPE:
+			return "The message type was set to UNSPECIFIED";
+		case Reason::INVALID_MESSAGE_TYPE:
+			return "The message type provided is not within the valid range";
+		case Reason::WRONG_MESSAGE_TYPE:
+			return "The type set in the message is incorrect for the validated "
+			       "mode";
 		default:
 			return "Unknown reason.";
 	}
 }
 
 ValidationResult isValid(const v1::UMessage& umessage) {
-	{
-		auto [valid, reason] = isValidRpcRequest(umessage);
-		if (valid) {
-			return {true, {}};
-		}
+	switch (umessage.attributes().type()) {
+		case v1::UMessageType::UMESSAGE_TYPE_REQUEST:
+			return isValidRpcRequest(umessage);
+
+		case v1::UMessageType::UMESSAGE_TYPE_RESPONSE:
+			return isValidRpcResponse(umessage);
+
+		case v1::UMessageType::UMESSAGE_TYPE_PUBLISH:
+			return isValidPublish(umessage);
+
+		case v1::UMessageType::UMESSAGE_TYPE_NOTIFICATION:
+			return isValidNotification(umessage);
+
+		case v1::UMessageType::UMESSAGE_TYPE_UNSPECIFIED:
+			return {false, Reason::UNSPECIFIED_MESSAGE_TYPE};
 	}
 
-	{
-		auto [valid, reason] = isValidRpcResponse(umessage);
-		if (valid) {
-			return {true, {}};
-		}
-	}
-
-	{
-		auto [valid, reason] = isValidPublish(umessage);
-		if (valid) {
-			return {true, {}};
-		}
-	}
-
-	return isValidNotification(umessage);
+	return std::make_tuple(false, Reason::INVALID_MESSAGE_TYPE);
 }
 
 ValidationResult areCommonAttributesValid(const v1::UMessage& umessage) {

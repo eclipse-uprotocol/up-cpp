@@ -33,8 +33,6 @@ enum class Reason {
 	PRIORITY_OUT_OF_RANGE,
 	/// @brief The Payload Format is not within the allowable range
 	PAYLOAD_FORMAT_OUT_OF_RANGE,
-	/// @brief The type set in the message is incorrect for the validated mode
-	WRONG_MESSAGE_TYPE,
 	/// @brief Source URI did not pass validity checks
 	BAD_SOURCE_URI,
 	/// @brief Sink URI did not pass validity checks
@@ -48,7 +46,13 @@ enum class Reason {
 	/// @brief The Priority did not match the Priority of the request message
 	PRIORITY_MISMATCH,
 	/// @brief The source and sink from a request must be swapped in a response
-	URI_MISMATCH
+	URI_MISMATCH,
+	/// @brief The message type was set to UNSPECIFIED (isValid() only)
+	UNSPECIFIED_MESSAGE_TYPE,
+	/// @brief The message type is outside the allowable range (isValid() only)
+	INVALID_MESSAGE_TYPE,
+	/// @brief The type set in the message is incorrect for the validated mode
+	WRONG_MESSAGE_TYPE
 };
 
 /// @brief Get a descriptive message for a reason code.

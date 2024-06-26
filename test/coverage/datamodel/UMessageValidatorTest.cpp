@@ -770,4 +770,124 @@ TEST_F(TestUMessageValidator, ValidNotification) {
 	}
 }
 
+TEST_F(TestUMessageValidator, IsValid) {
+	{
+		// valid request
+		auto source = source_;
+		auto sink = sink_;
+		source.set_resource_id(0);
+
+		auto attributes = fakeRequest(source, sink);
+		auto umessage = build(attributes);
+		{
+			auto [valid, reason] = isValid(umessage);
+			EXPECT_TRUE(valid);
+			EXPECT_FALSE(reason.has_value());
+		}
+
+		// Check with UNSPECIFIED type
+		auto original_type = attributes.type();
+		attributes.set_type(
+		    uprotocol::v1::UMessageType::UMESSAGE_TYPE_UNSPECIFIED);
+		umessage = build(attributes);
+		{
+			auto [valid, reason] = isValid(umessage);
+			EXPECT_FALSE(valid);
+			EXPECT_TRUE(reason.has_value());
+			EXPECT_EQ(reason, Reason::UNSPECIFIED_MESSAGE_TYPE);
+		}
+
+		// Check with an invalid type
+		auto max_type = static_cast<int>(uprotocol::v1::UMessageType_MAX);
+		attributes.set_type(
+		    static_cast<uprotocol::v1::UMessageType>(max_type + 1));
+		umessage = build(attributes);
+		{
+			auto [valid, reason] = isValid(umessage);
+			EXPECT_FALSE(valid);
+			EXPECT_TRUE(reason.has_value());
+			EXPECT_EQ(reason, Reason::INVALID_MESSAGE_TYPE);
+		}
+
+		// Restore the message type to finish out the test
+		attributes.set_type(original_type);
+
+		// Make the request invalid by making one change
+		attributes.set_ttl(0);
+		umessage = build(attributes);
+		{
+			auto [valid, reason] = isValid(umessage);
+			EXPECT_FALSE(valid);
+			EXPECT_TRUE(reason.has_value());
+			EXPECT_EQ(reason, Reason::INVALID_TTL);
+		}
+	}
+
+	{
+		// valid response
+		auto source = source_;
+		auto sink = sink_;
+		source.set_resource_id(0);
+
+		auto attributes = fakeResponse(source, sink);
+		auto umessage = build(attributes);
+		auto [valid, reason] = isValid(umessage);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+
+		// Make the request invalid by making one change
+		attributes = fakeResponse(sink, source);
+		umessage = build(attributes);
+
+		auto [valid2, reason2] = isValid(umessage);
+		EXPECT_FALSE(valid2);
+		EXPECT_TRUE(reason2.has_value());
+		EXPECT_EQ(reason2, Reason::BAD_SOURCE_URI);
+	}
+
+	{
+		// valid publish
+		auto source = source_;
+		source.set_resource_id(0x8000);
+
+		auto attributes = fakePublish(source);
+		auto umessage = build(attributes);
+		auto [valid, reason] = isValid(umessage);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+
+		// Make the request invalid by making one change
+		attributes.set_priority(static_cast<uprotocol::v1::UPriority>(0xFFFF));
+		umessage = build(attributes);
+
+		auto [valid2, reason2] = isValid(umessage);
+		EXPECT_FALSE(valid2);
+		EXPECT_TRUE(reason2.has_value());
+		EXPECT_EQ(reason2, Reason::PRIORITY_OUT_OF_RANGE);
+	}
+
+	{
+		// valid notification
+		auto source = source_;
+		auto sink = sink_;
+		source.set_resource_id(0x8001);
+		sink.set_resource_id(0xFFFE);
+
+		auto attributes = fakeNotification(source, sink);
+		auto umessage = build(attributes);
+		auto [valid, reason] = isValid(umessage);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+
+		// Make the request invalid by making one change
+		*(attributes.mutable_reqid()) = attributes.id();
+		umessage = build(attributes);
+
+		auto [valid2, reason2] = isValid(umessage);
+		EXPECT_FALSE(valid2);
+		EXPECT_TRUE(reason2.has_value());
+		EXPECT_EQ(reason2, Reason::DISALLOWED_FIELD_SET);
+	}
+}
+
 }  // namespace
