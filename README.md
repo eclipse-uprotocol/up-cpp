@@ -15,11 +15,7 @@ implementation, such as [up-transport-zenoh-cpp][zenoh-transport-repo].
 
 ### Requirements:
 - Compiler: GCC/G++ 11 or Clang 13
-- Cmake: > 3.22
-- pip : For the following
-- Conan : > 2.4.2
-- Ninja : Latest
-- Gcovr : For UT code coverage if desired
+- Conan : 1.59 or latest 2.x
 
 #### Conan packages
 
@@ -66,21 +62,19 @@ Clone the up-cpp repo to a folder named: up-cpp
 cd up-cpp
 conan install .
 cd build
-cmake ../ -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release 
+cmake ../ -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
 cmake --build . -- -j
 ```
 
 Once the build completes, tests can be run with `ctest`.
-Once the tests complete, the Unit Test Coverage report can be generated from the base up-cpp folder with: ./Coverage.sh
-
 
 ### Generate UT  Coverage
 
-To get code coverage, perform the steps above, but use the following cmake line insead
+To get code coverage, perform the steps above, but use the following cmake line instead
 ```
 cmake ../ -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Coverage
 ```
-To run the coverage report, run this script from the up-cpp folder:
+Once the tests complete, the Unit Test Coverage report can be generated from the base up-cpp folder with: ./Coverage.sh
 ```
 ./coverage.sh
 ```

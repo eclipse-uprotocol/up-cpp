@@ -27,7 +27,7 @@ message("  Available build types are now: ${CMAKE_CONFIGURATION_TYPES}")
 message("* Current build type is: ${CMAKE_BUILD_TYPE}")
 
 # Settings for Gcc for all builds
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 # Modify settings based on build type
 if(CMAKE_BUILD_TYPE STREQUAL Coverage)
@@ -40,7 +40,7 @@ message("* Current Compiler Flags: ${CMAKE_CXX_FLAGS}")
 #add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
 # This is the root CMakeLists.txt file; We can set project wide settings here
-# TODO: Is this needed ? 
+# TODO: Is this needed? 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	set(CMAKE_CXX_STANDARD 17)
 	# place libraries in a lib directory and executables in a bin directory,
@@ -64,7 +64,6 @@ target_include_directories(${PROJECT_NAME}
 	${spdlog_INCLUDE_DIR})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
-
 
 target_link_libraries(${PROJECT_NAME} 
 	PRIVATE 
