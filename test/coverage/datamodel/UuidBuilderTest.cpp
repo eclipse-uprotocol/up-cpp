@@ -135,7 +135,7 @@ TEST_F(TestUuidBuilder, CheckVersionAndVariant) {
 	auto uuid = builder.build();
 
 	EXPECT_EQ((uuid.msb() >> UUID_VERSION_SHIFT) & UUID_VERSION_MASK,
-	          UUID_VERSION_8);
+	          UUID_VERSION_7);
 	EXPECT_EQ((uuid.lsb() >> UUID_VARIANT_SHIFT) & UUID_VARIANT_MASK,
 	          UUID_VARIANT_RFC4122);
 }

@@ -11,14 +11,17 @@
 
 #include <gtest/gtest.h>
 #include <up-cpp/datamodel/validator/Uuid.h>
-#include <uprotocol/v1/uuid.pb.h>
 
 #include <chrono>
 
-using namespace uprotocol::datamodel;
-using namespace std::chrono_literals;
+#include "up-cpp/datamodel/constants/UuidConstants.h"
 
 namespace {
+
+using namespace uprotocol::datamodel;
+using namespace std::chrono_literals;
+using namespace uprotocol::v1;
+using namespace uprotocol::datamodel::validator::uuid;
 
 class TestUuidValidator : public testing::Test {
 protected:
@@ -39,54 +42,52 @@ protected:
 };
 
 // Helper fn for a fake UUID
-uprotocol::v1::UUID createFakeUuid(uint64_t msb, uint64_t lsb) {
+UUID createFakeUuid(uint64_t timestamp = 0) {
 	uprotocol::v1::UUID uuid;
-	uuid.set_msb(msb);
-	uuid.set_lsb(lsb);
+	// Create UUID with:
+	//     timestamp = 0
+	//     version 7
+	//     counter = 0x123
+	//     variant 0b10 (0x2)
+	//     random value = 0xFFFFFFFFFFFF
+	uuid.set_msb((timestamp << UUID_TIMESTAMP_SHIFT) |
+	             (UUID_VERSION_7 << UUID_VERSION_SHIFT) | (0x123ULL));
+	uuid.set_lsb((UUID_VARIANT_RFC4122 << UUID_VARIANT_SHIFT) |
+	             (0xFFFFFFFFFFFFULL));
 	return uuid;
 }
 
-// Test valid UUID v8
+// Test valid UUID v7
 TEST_F(TestUuidValidator, ValidUuid) {
-	// Create a valid UUID with version 8 and correct variant (10)
-	uint64_t msb = (8ULL << 12) | (0x123ULL);  // Version 8, counter = 0x123
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
-
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto [valid, reason] = validator::uuid::isUuid(uuid);
+	// Create a valid UUID with version 7 and correct variant (10)
+	auto uuid = createFakeUuid();
+	auto [valid, reason] = isUuid(uuid);
 	EXPECT_TRUE(valid);
 	EXPECT_FALSE(reason.has_value());
 }
 
 // Test UUID with wrong version
 TEST_F(TestUuidValidator, WrongVersion) {
-	// Creating a UUID with wrong version (!8)
-	uint64_t msb = (7ULL << 12) | (0x123ULL);  // Version 7, counter = 0x123
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
+	// Creating a UUID with wrong version (!7)
+	auto uuid = createFakeUuid();
+	uuid.set_msb((8ULL << UUID_VERSION_SHIFT) | (0x123ULL));  // version 8
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto [valid, reason] = validator::uuid::isUuid(uuid);
+	auto [valid, reason] = isUuid(uuid);
 	EXPECT_FALSE(valid);
-	EXPECT_EQ(reason.value(), validator::uuid::Reason::WRONG_VERSION);
-	EXPECT_THROW(validator::uuid::getVersion(uuid),
-	             validator::uuid::InvalidUuid);
+	EXPECT_EQ(reason.value(), Reason::WRONG_VERSION);
+	EXPECT_THROW(getVersion(uuid), InvalidUuid);
 }
 
 // Test UUID with unsupported variant
 TEST_F(TestUuidValidator, UnsupportedVariant) {
 	// Creating UUID with unsupported variant.(!10)
-	uint64_t msb = (8ULL << 12) | (0x123ULL);  // Version 8, counter = 0x123
-	uint64_t lsb = (3ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 11
+	auto uuid = createFakeUuid();
+	uuid.set_lsb(uuid.lsb() | (3ULL << UUID_VARIANT_SHIFT));  // variant 11
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto [valid, reason] = validator::uuid::isUuid(uuid);
+	auto [valid, reason] = isUuid(uuid);
 	EXPECT_FALSE(valid);
-	EXPECT_EQ(reason.value(), validator::uuid::Reason::UNSUPPORTED_VARIANT);
-	EXPECT_THROW(validator::uuid::getVariant(uuid),
-	             validator::uuid::InvalidUuid);
+	EXPECT_EQ(reason.value(), Reason::UNSUPPORTED_VARIANT);
+	EXPECT_THROW(getVariant(uuid), InvalidUuid);
 }
 
 // Test UUID from the future
@@ -94,22 +95,16 @@ TEST_F(TestUuidValidator, UnsupportedVariant) {
 TEST_F(TestUuidValidator, FromTheFuture) {
 	// Creating UUID with a timestamp in the future
 	auto future_time = std::chrono::system_clock::now() + 100s;
-
 	uint64_t future_timestamp =
 	    std::chrono::duration_cast<std::chrono::milliseconds>(
 	        future_time.time_since_epoch())
 	        .count();
-	uint64_t msb = (8ULL << 12) | (future_timestamp << 16) |
-	               (0x123ULL);  // Version 8, future timestamp
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto [valid, reason] = validator::uuid::isUuid(uuid);
+	auto uuid = createFakeUuid(future_timestamp);
+	auto [valid, reason] = isUuid(uuid);
 	EXPECT_FALSE(valid);
-	EXPECT_EQ(reason.value(), validator::uuid::Reason::FROM_THE_FUTURE);
-	EXPECT_THROW(validator::uuid::getRemainingTime(uuid, 60s),
-	             validator::uuid::InvalidUuid);
+	EXPECT_EQ(reason.value(), Reason::FROM_THE_FUTURE);
+	EXPECT_THROW(getRemainingTime(uuid, 60s), InvalidUuid);
 }
 
 // Test expired UUID
@@ -120,16 +115,11 @@ TEST_F(TestUuidValidator, ExpiredUuid) {
 	    std::chrono::duration_cast<std::chrono::milliseconds>(
 	        past_time.time_since_epoch())
 	        .count();
-	uint64_t msb = (8ULL << 12) | (past_timestamp << 16) |
-	               (0x123ULL);  // Version 8, past timestamp
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto [valid, reason] =
-	    validator::uuid::isExpired(uuid, 60s);  // 60 seconds TTL
+	auto uuid = createFakeUuid(past_timestamp);
+	auto [valid, reason] = isExpired(uuid, 60s);  // 60 seconds TTL
 	EXPECT_TRUE(valid);
-	EXPECT_EQ(reason.value(), validator::uuid::Reason::EXPIRED);
+	EXPECT_EQ(reason.value(), Reason::EXPIRED);
 }
 
 // Test non-expired UUID
@@ -140,37 +130,23 @@ TEST_F(TestUuidValidator, NonExpiredUuid) {
 	    std::chrono::duration_cast<std::chrono::milliseconds>(
 	        recent_time.time_since_epoch())
 	        .count();
-	uint64_t msb = (8ULL << 12) | (recent_timestamp << 16) |
-	               (0x123ULL);  // Version 8, recent timestamp
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto [valid, reason] =
-	    validator::uuid::isExpired(uuid, 60s);  // 60 seconds TTL
-
+	auto uuid = createFakeUuid(recent_timestamp);
+	auto [valid, reason] = isExpired(uuid, 60s);  // 60 seconds TTL
 	EXPECT_FALSE(valid);
 	EXPECT_FALSE(reason.has_value());
 }
 
 // Test retrieving version
 TEST_F(TestUuidValidator, RetrieveVersion) {
-	uint64_t msb = (8ULL << 12) | (0x123ULL);  // Version 8, counter = 0x123
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
-
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	EXPECT_EQ(validator::uuid::getVersion(uuid), 8);
+	auto uuid = createFakeUuid();
+	EXPECT_EQ(getVersion(uuid), UUID_VERSION_7);
 }
 
 // Test retrieving variant
 TEST_F(TestUuidValidator, RetrieveVariant) {
-	uint64_t msb = (8ULL << 12) | (0x123ULL);  // Version 8, counter = 0x123
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
-
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	EXPECT_EQ(validator::uuid::getVariant(uuid), 2);
+	auto uuid = createFakeUuid();
+	EXPECT_EQ(getVariant(uuid), UUID_VARIANT_RFC4122);
 }
 
 TEST_F(TestUuidValidator, RetrieveTimestamp) {
@@ -179,16 +155,10 @@ TEST_F(TestUuidValidator, RetrieveTimestamp) {
 	    std::chrono::time_point_cast<std::chrono::milliseconds>(time_now);
 	uint64_t timestamp = time_now_ms.time_since_epoch().count();
 
-	uint64_t msb =
-	    (8ULL << 12) | (timestamp << 16) | (0x123ULL);  // Version 8, timestamp
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
-
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto uuid_time = validator::uuid::getTime(uuid);
+	auto uuid = createFakeUuid(timestamp);
+	auto uuid_time = getTime(uuid);
 	auto uuid_ms =
 	    std::chrono::time_point_cast<std::chrono::milliseconds>(uuid_time);
-
 	EXPECT_EQ(uuid_ms, time_now_ms);
 }
 
@@ -198,12 +168,9 @@ TEST_F(TestUuidValidator, RetrieveElapsedTime) {
 	uint64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
 	                         past_time.time_since_epoch())
 	                         .count();
-	uint64_t msb = (8ULL << 12) | (timestamp << 16) | (0x123ULL);
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto elapsed_time = validator::uuid::getElapsedTime(uuid);
+	auto uuid = createFakeUuid(timestamp);
+	auto elapsed_time = getElapsedTime(uuid);
 	auto expected_elapsed_time =
 	    std::chrono::duration_cast<std::chrono::milliseconds>(
 	        std::chrono::system_clock::now() - past_time);
@@ -222,14 +189,10 @@ TEST_F(TestUuidValidator, RetrieveRemainingTime) {
 	uint64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
 	                         past_time.time_since_epoch())
 	                         .count();
-	uint64_t msb =
-	    (8ULL << 12) | (timestamp << 16) | (0x123ULL);  // Version 8, timestamp
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);  // Variant 10
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
+	auto uuid = createFakeUuid(timestamp);
 	auto ttl = 60s;
-	auto remaining_time = validator::uuid::getRemainingTime(uuid, ttl);
+	auto remaining_time = getRemainingTime(uuid, ttl);
 	auto expected_remaining_time =
 	    ttl - std::chrono::duration_cast<std::chrono::milliseconds>(
 	              std::chrono::system_clock::now() - past_time);
@@ -249,12 +212,9 @@ TEST_F(TestUuidValidator, ExpiredUuidRemainingTime) {
 	    std::chrono::duration_cast<std::chrono::milliseconds>(
 	        past_time.time_since_epoch())
 	        .count();
-	uint64_t msb = (8ULL << 12) | (past_timestamp << 16) | (0x123ULL);
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	auto remaining_time = validator::uuid::getRemainingTime(uuid, 60s);
+	auto uuid = createFakeUuid(past_timestamp);
+	auto remaining_time = getRemainingTime(uuid, 60s);
 	EXPECT_EQ(remaining_time, 0ms);
 }
 
@@ -265,13 +225,9 @@ TEST_F(TestUuidValidator, InvalidUuidElapsedTime) {
 	    std::chrono::duration_cast<std::chrono::milliseconds>(
 	        future_time.time_since_epoch())
 	        .count();
-	uint64_t msb = (8ULL << 12) | (future_timestamp << 16) | (0x123ULL);
-	uint64_t lsb = (2ULL << 62) | (0xFFFFFFFFFFFFULL);
 
-	uprotocol::v1::UUID uuid = createFakeUuid(msb, lsb);
-
-	EXPECT_THROW(validator::uuid::getElapsedTime(uuid),
-	             validator::uuid::InvalidUuid);
+	auto uuid = createFakeUuid(future_timestamp);
+	EXPECT_THROW(getElapsedTime(uuid), InvalidUuid);
 }
 
 }  // namespace

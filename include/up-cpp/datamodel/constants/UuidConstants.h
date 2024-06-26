@@ -25,8 +25,8 @@ constexpr uint64_t UUID_COUNTER_MASK = 0xFFF;
 constexpr uint64_t UUID_RANDOM_MASK = 0x3FFFFFFFFFFFFFFF;
 
 // Constants for UUID version and variant
-constexpr uint8_t UUID_VERSION_8 = 8;
-constexpr uint8_t UUID_VARIANT_RFC4122 = 2;
+constexpr uint64_t UUID_VERSION_7 = 7;
+constexpr uint64_t UUID_VARIANT_RFC4122 = 2;
 
 // Other constants
 constexpr uint32_t UUID_BYTE_SIZE = 16;

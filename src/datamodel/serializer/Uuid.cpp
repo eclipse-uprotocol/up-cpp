@@ -17,22 +17,10 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "up-cpp/datamodel/constants/UuidConstants.h"
+
 namespace {
-constexpr uint64_t TIMESTAMP_MASK = 0xFFFFFFFFFFFF;
-constexpr uint64_t TIMESTAMP_SHIFT = 16;
-constexpr uint64_t VERSION_MASK = 0xF;
-constexpr uint64_t VERSION_SHIFT = 12;
-constexpr uint64_t COUNTER_MASK = 0xFFF;
-constexpr uint64_t VARIANT_MASK = 0x3;
-constexpr uint64_t VARIANT_SHIFT = 62;
-constexpr uint64_t RANDOM_MASK = 0x3FFFFFFFFFFFFFFF;
 constexpr uint64_t RANDOM_SHIFT = 48;
-constexpr size_t UUID_BYTE_SIZE = 16;
-constexpr size_t UUID_PART_SIZE = 4;
-constexpr uint32_t HEX_BASE = 16;
-constexpr uint64_t MASK_32_BITS = 0xFFFFFFFF;
-constexpr uint64_t MASK_16_BITS = 0xFFFF;
-constexpr uint64_t MASK_14_BITS = 0x3FFF;
 constexpr size_t MSB_HIGH_ = 0;
 constexpr size_t MSB_LOW__ = 4;
 constexpr size_t LSB_HIGH_ = 8;
@@ -42,12 +30,13 @@ constexpr size_t LSB_LOW__ = 12;
 namespace uprotocol::datamodel::serializer::uuid {
 
 std::string AsString::serialize(const uprotocol::v1::UUID uuid) {
-	// Extracting the parts of the UUIDv8
-	uint64_t unix_ts_ms = (uuid.msb() >> TIMESTAMP_SHIFT) & TIMESTAMP_MASK;
-	uint8_t ver = (uuid.msb() >> VERSION_SHIFT) & VERSION_MASK;
-	uint16_t counter = uuid.msb() & COUNTER_MASK;
-	uint8_t var = (uuid.lsb() >> VARIANT_SHIFT) & VARIANT_MASK;
-	uint64_t rand_b = uuid.lsb() & RANDOM_MASK;
+	// Extracting the parts of the UUIDv7
+	uint64_t unix_ts_ms =
+	    (uuid.msb() >> UUID_TIMESTAMP_SHIFT) & UUID_TIMESTAMP_MASK;
+	uint8_t ver = (uuid.msb() >> UUID_VERSION_SHIFT) & UUID_VERSION_MASK;
+	uint16_t counter = uuid.msb() & UUID_COUNTER_MASK;
+	uint8_t var = (uuid.lsb() >> UUID_VARIANT_SHIFT) & UUID_VARIANT_MASK;
+	uint64_t rand_b = uuid.lsb() & UUID_RANDOM_MASK;
 
 	// Formatting the UUIDv8 in the traditional format
 	std::stringstream ss;
@@ -55,22 +44,24 @@ std::string AsString::serialize(const uprotocol::v1::UUID uuid) {
 	   << ((unix_ts_ms >> 16) & MASK_32_BITS)  // First 32 bits of timestamp
 	   << "-" << std::setw(4)
 	   << ((unix_ts_ms)&MASK_16_BITS)  // Next 16 bits of timestamp i.e. last 16
-	                                   // bit of ts
+	                                   // bits of ts
 	   << "-" << std::setw(4)
-	   << (((ver & VERSION_MASK) << 12) |
-	       (counter & COUNTER_MASK))  // Last 16 bits of timestamp and version
+	   << (((ver & UUID_VERSION_MASK) << UUID_VERSION_SHIFT) |
+	       (counter &
+	        UUID_COUNTER_MASK))  // Last 16 bits of timestamp and version
 	   << "-" << std::setw(4)
-	   << (((var & VARIANT_MASK) << 14) |
+	   << (((var & UUID_VARIANT_MASK) << 14) |
 	       ((rand_b >> RANDOM_SHIFT) & MASK_14_BITS))  // Variant and randb
-	   << "-" << std::setw(12) << (rand_b & TIMESTAMP_MASK);  // Random number
+	   << "-" << std::setw(12)
+	   << (rand_b & UUID_TIMESTAMP_MASK);  // Random number
 
 	return std::move(ss).str();
 }
 
 uprotocol::v1::UUID AsString::deserialize(const std::string& str) {
 	// Check if the UUID string is in the correct format
-	// Format  : 12345678-1234-1234-1234-123456789012
-	// Index   : 01234567890123456789012345678901234
+	// Format  : 12345678-1234-1234-1234-123456789ABC
+	// Index   : 012345678901234567890123456789012345
 	// Layout  : ***msb**-lsb*-vcnt-varr-***RAND*****
 	// msb - timestamp most significant bits (32 bits)
 	// lsb - timestamp least significant bits (16 bits)
@@ -99,11 +90,11 @@ uprotocol::v1::UUID AsString::deserialize(const std::string& str) {
 		unix_ts_ms |= std::stoull(str.substr(9, 4), nullptr, HEX_BASE);
 
 		uint16_t ver_counter = std::stoul(str.substr(14, 4), nullptr, HEX_BASE);
-		ver = (ver_counter >> 12) & VERSION_MASK;
-		counter = ver_counter & COUNTER_MASK;
+		ver = (ver_counter >> 12) & UUID_VERSION_MASK;
+		counter = ver_counter & UUID_COUNTER_MASK;
 
 		uint16_t var_randb = std::stoul(str.substr(19, 4), nullptr, HEX_BASE);
-		var = (var_randb >> 14) & VARIANT_MASK;
+		var = (var_randb >> 14) & UUID_VARIANT_MASK;
 		rand_b = static_cast<uint64_t>(var_randb & MASK_14_BITS)
 		         << RANDOM_SHIFT;
 		rand_b |= std::stoull(str.substr(24), nullptr, HEX_BASE);
@@ -112,9 +103,9 @@ uprotocol::v1::UUID AsString::deserialize(const std::string& str) {
 	}
 
 	// Reconstruct the UUID
-	uuid.set_msb((unix_ts_ms << TIMESTAMP_SHIFT) | (ver << VERSION_SHIFT) |
-	             counter);
-	uuid.set_lsb((static_cast<uint64_t>(var) << VARIANT_SHIFT) | rand_b);
+	uuid.set_msb((unix_ts_ms << UUID_TIMESTAMP_SHIFT) |
+	             (ver << UUID_VERSION_SHIFT) | counter);
+	uuid.set_lsb((static_cast<uint64_t>(var) << UUID_VARIANT_SHIFT) | rand_b);
 
 	return uuid;
 }

@@ -75,8 +75,7 @@ v1::UUID UuidBuilder::build() {
 
 	uint64_t msb = static_cast<uint64_t>(unix_ts_ms.time_since_epoch().count())
 	               << UUID_TIMESTAMP_SHIFT;
-	msb |= static_cast<uint64_t>(8)
-	       << UUID_VERSION_SHIFT;  // Set the version to 8
+	msb |= static_cast<uint64_t>(UUID_VERSION_7) << UUID_VERSION_SHIFT;
 
 	if (shared_state_->counter == 4095) {
 		// Counter has reached maximum value, freeze it
