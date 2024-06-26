@@ -40,7 +40,7 @@ message("* Current Compiler Flags: ${CMAKE_CXX_FLAGS}")
 #add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
 # This is the root CMakeLists.txt file; We can set project wide settings here
-# TODO: Is this needed?
+# TODO: Is this needed ? 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	set(CMAKE_CXX_STANDARD 17)
 	# place libraries in a lib directory and executables in a bin directory,
