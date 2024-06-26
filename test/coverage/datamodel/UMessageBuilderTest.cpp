@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
+#include <up-cpp/datamodel/builder/Uuid.h>
 #include <up-cpp/datamodel/serializer/UUri.h>
 #include <up-cpp/datamodel/validator/UUri.h>
 #include <up-cpp/datamodel/validator/Uuid.h>
@@ -80,8 +81,7 @@ protected:
 		method_.set_ue_version_major(0xFA);
 		method_.set_resource_id(0x0101);
 
-		reqId_.set_msb((8ULL << 12) | (0x123ULL));
-		reqId_.set_lsb((2ULL << 62) | (0xFFFFFFFFFFFFULL));
+		reqId_ = UuidBuilder::getBuilder().build();
 	}
 	static void TearDownTestSuite() {}
 
