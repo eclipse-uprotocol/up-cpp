@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -47,7 +48,7 @@ jobs:
           cd up-cpp
           conan install . --build=missing
           cd build
-          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
+          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Coverage -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
           cmake --build . -- -j
 
       - name: Save conan cache to archive
@@ -85,12 +86,28 @@ jobs:
           name: build-artifacts
           path: up-cpp/build
 
+      - name: Install gcovr
+        run: sudo apt-get install -y gcovr
+
       - name: Run all tests
         shell: bash
         run: |
           cd up-cpp/build
           chmod +x bin/*
           ctest
+      
+      - name: Verify coverage files
+        shell: bash
+        run: |
+          echo "Checking for .gcda files..."
+          find . -name "*.gcda" -exec echo {} \;
+
+      - name: Generate HTML test coverage report
+        shell: bash
+        run: |
+          mkdir -p Coverage
+          cd up-cpp/build
+          gcovr -r .. --html --html-details -o Coverage/index.html -e '.*test.*'
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -98,6 +115,13 @@ jobs:
         with:
           name: test-results
           path: 'up-cpp/build/test/results/*.xml'
+
+      - name: Upload test coverage report
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: coverage-report
+          path: 'up-cpp/build/Coverage'
 
   lint:
     name: Lint C++ sources
@@ -163,11 +187,6 @@ jobs:
         run: |
           exit 1
 
-  # NOTE: In GitHub repository settings, the "Require status checks to pass
-  # before merging" branch protection rule ensures that commits are only merged
-  # from branches where specific status checks have passed. These checks are
-  # specified manually as a list of workflow job names. Thus we use this extra
-  # job to signal whether all CI checks have passed.
   ci:
     name: CI status checks
     runs-on: ubuntu-latest
