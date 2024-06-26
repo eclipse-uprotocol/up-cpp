@@ -91,9 +91,22 @@ protected:
 	///            respond() is called. Note that the original request's TTL
 	///            may also still apply.
 	RpcServer(std::shared_ptr<transport::UTransport> transport,
-	          const v1::UUri& method,
 	          std::optional<v1::UPayloadFormat> format = {},
 	          std::optional<std::chrono::milliseconds> ttl = {});
+
+	/// @brief Allows std::make_unique to directly access RpcServer's private
+	/// constructor.
+	///
+	/// @param transport The transport layer abstraction for the RPC server.
+	/// @param payload_format (Optional) Specifies the payload format, if any.
+	/// @param ttl (Optional) Specifies the time-to-live (TTL) value, if any.
+	friend std::unique_ptr<RpcServer>
+	std::make_unique<RpcServer, std::shared_ptr<transport::UTransport>,
+	                 std::optional<v1::UPayloadFormat>,
+	                 std::optional<std::chrono::milliseconds>>(
+	    std::shared_ptr<uprotocol::transport::UTransport>&&,
+	    std::optional<uprotocol::v1::UPayloadFormat>&&,
+	    std::optional<std::chrono::milliseconds>&&);
 
 	/// @brief Connects the RPC callback method and returns the status from
 	///        UTransport::registerListener.
@@ -114,11 +127,11 @@ private:
 	/// @brief RPC callback method
 	RpcCallback callback_;
 
-	/// @brief Handle to the connected callback for the RPC method wrapper
-	transport::UTransport::ListenHandle callback_handle_;
-
 	/// @brief Format of the payload that will be expected in responses
 	std::optional<v1::UPayloadFormat> expected_payload_format_;
+
+	/// @brief Handle to the connected callback for the RPC method wrapper
+	transport::UTransport::ListenHandle callback_handle_;
 };
 
 }  // namespace uprotocol::communication

@@ -19,12 +19,6 @@
 
 #include "UTransportMock.h"
 
-namespace uprotocol::test {
-uprotocol::test::UTransportMockInfo UTransportMock::mock_info =
-    uprotocol::test::UTransportMockInfo();
-};
-
-auto& mock_info = uprotocol::test::UTransportMock::mock_info;
 namespace {
 
 using MsgDiff = google::protobuf::util::MessageDifferencer;
@@ -70,10 +64,8 @@ protected:
 	uprotocol::v1::UPayloadFormat format;
 
 	void SetUp() override {
-		mock_info.reset();
-
+		// Set up default values for the test
 		ttl_ = std::chrono::milliseconds(1000);
-
 		format = uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 
 		// Set up a transport URI
@@ -105,9 +97,6 @@ protected:
 	void TearDown() override {
 		method_uri_.reset();
 		request_uri_.reset();
-
-		mockTransport_.reset();
-		EXPECT_TRUE(mock_info.deinit_passed);
 	}
 
 	// Run once per execution of the test application.
@@ -191,11 +180,13 @@ TEST_F(TestRpcServer, ConstructorWithPayloadFormatAndTTL) {
 	ASSERT_NE(serverPtr, nullptr);
 }
 
-// Test to verify RpcServer construction fails with invalid parameters
-TEST_F(TestRpcServer, ConstructorWithInvalidParams) {
+// Test to verify RpcServer construction fails with invalid URI
+TEST_F(TestRpcServer, ConstructorWithInvalidURI) {
 	// Create an invalid URI object to simulate invalid input parameters
 	uprotocol::v1::UUri invalid_uri;
 
+	// Expecte error message
+	const std::string error_message = "Invalid rpc URI";
 	// Define a callback function to be used with the RpcServer, even though
 	// it's expected to fail
 	uprotocol::communication::RpcServer::RpcCallback callback =
@@ -212,6 +203,34 @@ TEST_F(TestRpcServer, ConstructorWithInvalidParams) {
 	// Verify that the error code matches the expected error code for invalid
 	// arguments
 	EXPECT_EQ(serverOrStatus.error().code(), expectedCode);
+	EXPECT_EQ(serverOrStatus.error().message(), error_message);
+}
+
+// Test to verify RpcServer construction fails with invalid PaylodFormat
+TEST_F(TestRpcServer, ConstructorWithInvalidPaylodFormat) {
+	// Create an invalid PaylodFormat to simulate invalid input parameters
+	auto invalid_format = static_cast<uprotocol::v1::UPayloadFormat>(9999);
+
+	// Expecte error message
+	const std::string error_message = "Invalid payload format";
+
+	// Define a callback function to be used with the RpcServer, even though
+	// it's expected to fail
+	uprotocol::communication::RpcServer::RpcCallback callback =
+	    RpcCallbackNoReturn;
+
+	// Attempt to create an RpcServer instance with the invalid PaylodFormat and
+	// verify creation fails
+	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	    mockTransport_, *method_uri_, std::move(callback), invalid_format);
+
+	// Define the expected error code for this operation
+	uprotocol::v1::UCode expectedCode = uprotocol::v1::UCode::OUT_OF_RANGE;
+
+	// Verify that the error code matches the expected error code for invalid
+	// arguments
+	EXPECT_EQ(serverOrStatus.error().code(), expectedCode);
+	EXPECT_EQ(serverOrStatus.error().message(), error_message);
 }
 
 // Test case to verify successful connection with a valid handle
@@ -235,13 +254,13 @@ TEST_F(TestRpcServer, ConnectwithValidHandle) {
 	EXPECT_NE(handle, nullptr);
 
 	// Verify that the register listener uri mataches with input method uri
-	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mock_info.sink_filter));
+	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mockTransport_->sink_filter_));
 }
 
 // Test case to verify RPC request handling with return payload and TTL
 TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 	// Expected response by RPC method
-	std::string expected_response = "RPC Response";
+	std::string expected_response_payload = "RPC Response";
 
 	// Create a callback to be called when request is received
 	uprotocol::communication::RpcServer::RpcCallback callback =
@@ -255,7 +274,7 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 	auto& handle = serverOrStatus.value();
 	EXPECT_NE(handle, nullptr);
 
-	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mock_info.sink_filter));
+	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mockTransport_->sink_filter_));
 
 	// Create request umessage
 	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
@@ -266,32 +285,35 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 
 	// Ignore the return value
 	auto _ = mockTransport_->send(msg);
-	EXPECT_TRUE(mock_info.send_count == 1);
-	EXPECT_TRUE(mock_info.listener);
-	mock_info.mock_message(msg);
-	EXPECT_TRUE(mock_info.send_count == 2);
+	EXPECT_TRUE(mockTransport_->send_count_ == 1);
+	EXPECT_TRUE(mockTransport_->listener_);
+	mockTransport_->mockMessage(msg);
+	EXPECT_TRUE(mockTransport_->send_count_ == 2);
 
 	// Compare expected reposen message with actual response message
 	auto expected_response_msg =
 	    uprotocol::datamodel::builder::UMessageBuilder::response(msg)
 	        .withTtl(ttl_)
 	        .withPayloadFormat(format)
-	        .build({expected_response, format});
+	        .build({expected_response_payload, format});
 
-	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().source(),
-	                            mock_info.message.attributes().source()));
+	EXPECT_TRUE(
+	    MsgDiff::Equals(expected_response_msg.attributes().source(),
+	                    mockTransport_->message_.attributes().source()));
 	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().sink(),
-	                            mock_info.message.attributes().sink()));
+	                            mockTransport_->message_.attributes().sink()));
 	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().reqid(),
-	                            mock_info.message.attributes().reqid()));
+	                            mockTransport_->message_.attributes().reqid()));
 
 	EXPECT_EQ(static_cast<uint>(expected_response_msg.attributes().type()),
-	          static_cast<uint>(mock_info.message.attributes().type()));
+	          static_cast<uint>(mockTransport_->message_.attributes().type()));
 	EXPECT_EQ(static_cast<uint>(expected_response_msg.attributes().ttl()),
-	          static_cast<uint>(mock_info.message.attributes().ttl()));
-	EXPECT_EQ(static_cast<uint>(expected_response_msg.attributes().priority()),
-	          static_cast<uint>(mock_info.message.attributes().priority()));
-	EXPECT_EQ(mock_info.message.payload().data(), expected_response);
+	          static_cast<uint>(mockTransport_->message_.attributes().ttl()));
+	EXPECT_EQ(
+	    static_cast<uint>(expected_response_msg.attributes().priority()),
+	    static_cast<uint>(mockTransport_->message_.attributes().priority()));
+	EXPECT_EQ(mockTransport_->message_.payload().data(),
+	          expected_response_payload);
 }
 
 // Test case to verify RPC request handling without return payload
@@ -308,7 +330,7 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 	auto& handle = serverOrStatus.value();
 	EXPECT_NE(handle, nullptr);
 
-	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mock_info.sink_filter));
+	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mockTransport_->sink_filter_));
 
 	// Create request umessage
 	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
@@ -319,27 +341,29 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 
 	// Ignore the return value
 	auto _ = mockTransport_->send(msg);
-	EXPECT_TRUE(mock_info.send_count == 1);
-	EXPECT_TRUE(mock_info.listener);
-	mock_info.mock_message(msg);
-	EXPECT_TRUE(mock_info.send_count == 2);
+	EXPECT_TRUE(mockTransport_->send_count_ == 1);
+	EXPECT_TRUE(mockTransport_->listener_);
+	mockTransport_->mockMessage(msg);
+	EXPECT_TRUE(mockTransport_->send_count_ == 2);
 
 	// Compare expected reposen message with actual response message
 	auto expected_response_msg =
 	    uprotocol::datamodel::builder::UMessageBuilder::response(msg).build();
 
-	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().source(),
-	                            mock_info.message.attributes().source()));
+	EXPECT_TRUE(
+	    MsgDiff::Equals(expected_response_msg.attributes().source(),
+	                    mockTransport_->message_.attributes().source()));
 	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().sink(),
-	                            mock_info.message.attributes().sink()));
+	                            mockTransport_->message_.attributes().sink()));
 	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().reqid(),
-	                            mock_info.message.attributes().reqid()));
+	                            mockTransport_->message_.attributes().reqid()));
 
 	EXPECT_EQ(static_cast<uint>(expected_response_msg.attributes().type()),
-	          static_cast<uint>(mock_info.message.attributes().type()));
-	EXPECT_EQ(static_cast<uint>(expected_response_msg.attributes().priority()),
-	          static_cast<uint>(mock_info.message.attributes().priority()));
-	EXPECT_FALSE(mock_info.message.has_payload());
+	          static_cast<uint>(mockTransport_->message_.attributes().type()));
+	EXPECT_EQ(
+	    static_cast<uint>(expected_response_msg.attributes().priority()),
+	    static_cast<uint>(mockTransport_->message_.attributes().priority()));
+	EXPECT_FALSE(mockTransport_->message_.has_payload());
 }
 
 // Test case to verify RPC request handling with invalid request
@@ -356,6 +380,9 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
 	auto& handle = serverOrStatus.value();
 	EXPECT_NE(handle, nullptr);
 
+	// Set valid response resource id for request uri
+	request_uri_->set_resource_id(0x3);
+
 	// Create UUID for request id
 	auto reqid =
 	    uprotocol::datamodel::builder::UuidBuilder::getBuilder().build();
@@ -367,11 +394,13 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
 
 	auto msg = builder.build();
 
-	EXPECT_TRUE(mock_info.listener);
-	mock_info.mock_message(msg);
-	EXPECT_TRUE(mock_info.send_count == 1);
-	EXPECT_TRUE(mock_info.message.attributes().commstatus() ==
-	            uprotocol::v1::UCode::INVALID_ARGUMENT);
+	// Set invalid resource id for sink uri to make the request invalid
+	msg.mutable_attributes()->mutable_sink()->set_resource_id(0);
+
+	// Check results when invalid request is received
+	EXPECT_TRUE(mockTransport_->listener_);
+	mockTransport_->mockMessage(msg);
+	EXPECT_TRUE(mockTransport_->send_count_ == 0);
 }
 
 // Test case to verify RPC sever resets the listener when the server is
@@ -399,10 +428,10 @@ TEST_F(TestRpcServer, RestRPCServerHandle) {
 
 	// Ignore the return value
 	auto _ = mockTransport_->send(msg);
-	EXPECT_TRUE(mock_info.send_count == 1);
-	mock_info.mock_message(msg);
+	EXPECT_TRUE(mockTransport_->send_count_ == 1);
+	mockTransport_->mockMessage(msg);
 	// Check if the listener is reset
-	EXPECT_FALSE(mock_info.send_count == 2);
+	EXPECT_FALSE(mockTransport_->send_count_ == 2);
 }
 
 }  // namespace

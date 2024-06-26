@@ -16,56 +16,51 @@ namespace uprotocol::communication {
 namespace Validator = datamodel::validator;
 
 RpcServer::RpcServer(std::shared_ptr<transport::UTransport> transport,
-                     const v1::UUri& method,
                      std::optional<v1::UPayloadFormat> format,
                      std::optional<std::chrono::milliseconds> ttl)
-    : transport_(std::move(transport)), ttl_(ttl) {
-	auto [valid, reason] = Validator::uri::isValidRpcMethod(method);
-	if (!valid) {
-		throw Validator::uri::InvalidUUri(
-		    "Method URI is not a valid URI |  " +
-		    std::string(Validator::uri::message(reason.value())));
-	}
-
-	if (format.has_value()) {
-		if (!UPayloadFormat_IsValid(format.value())) {
-			throw std::out_of_range("Invalid payload format");
-		} else {
-			expected_payload_format_ = std::move(format);
-		}
-	}
-}
+    : transport_(std::move(transport)),
+      expected_payload_format_(std::move(format)),
+      ttl_(ttl) {}
 
 RpcServer::ServerOrStatus RpcServer::create(
     std::shared_ptr<transport::UTransport> transport,
     const v1::UUri& method_name, RpcCallback&& callback,
     std::optional<v1::UPayloadFormat> payload_format,
     std::optional<std::chrono::milliseconds> ttl) {
-	std::unique_ptr<RpcServer> server;
-	try {
-		server.reset(new RpcServer(std::move(transport), method_name,
-		                           std::move(payload_format), ttl));
-	} catch (const Validator::uri::InvalidUUri& e) {
+	// Validate the method name using a URI validator.
+	auto [valid, reason] = Validator::uri::isValidRpcMethod(method_name);
+	if (!valid) {
+		// If the method name is invalid, return an error status.
 		v1::UStatus status;
 		status.set_code(v1::UCode::INVALID_ARGUMENT);
-		status.set_message(e.what());
-		return uprotocol::utils::Unexpected(status);
-	} catch (const std::out_of_range& e) {
-		v1::UStatus status;
-		status.set_code(v1::UCode::OUT_OF_RANGE);
-		status.set_message(e.what());
-		return uprotocol::utils::Unexpected(status);
-	} catch (const std::exception& e) {
-		v1::UStatus status;
-		status.set_code(v1::UCode::UNKNOWN);
-		status.set_message(e.what());
+		status.set_message("Invalid rpc URI");
 		return uprotocol::utils::Unexpected(status);
 	}
 
+	// Validate the payload format, if provided.
+	if (payload_format.has_value()) {
+		if (!UPayloadFormat_IsValid(payload_format.value())) {
+			// If the payload format is invalid, return an error status.
+			v1::UStatus status;
+			status.set_code(v1::UCode::OUT_OF_RANGE);
+			status.set_message("Invalid payload format");
+			return uprotocol::utils::Unexpected(status);
+		}
+	}
+
+	// Create the RpcServer instance with the provided parameters.
+	auto server = std::make_unique<RpcServer>(
+	    std::forward<std::shared_ptr<transport::UTransport>>(transport),
+	    std::forward<std::optional<v1::UPayloadFormat>>(payload_format),
+	    std::forward<std::optional<std::chrono::milliseconds>>(ttl));
+
+	// Attempt to connect the server with the provided method name and callback.
 	auto status = server->connect(method_name, std::move(callback));
 	if (status.code() == v1::UCode::OK) {
+		// If connection is successful, return the server instance.
 		return server;
 	} else {
+		// If connection fails, return the error status.
 		return uprotocol::utils::Unexpected(std::move(status));
 	}
 }
@@ -73,27 +68,23 @@ RpcServer::ServerOrStatus RpcServer::create(
 v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 	callback_ = std::move(callback);
 	auto result = transport_->registerListener(
-	    /*sink_filter=*/{method},
-	    /*listener=*/[this](const v1::UMessage& message) {
-		    // Extract payload data and format from the callback
+	    // sink_filter=
+	    method,
+	    // listener=
+	    [this](const v1::UMessage& request) {
+		    // Validate the request message using a RPC message validator.
 		    auto [valid, reason] =
-		        Validator::message::isValidRpcRequest(message);
+		        Validator::message::isValidRpcRequest(request);
 		    if (!valid) {
-			    auto response =
-			        datamodel::builder::UMessageBuilder::response(message)
-			            .withCommStatus(v1::UCode::INVALID_ARGUMENT)
-			            .build({std::string(Validator::message::message(
-			                        reason.value())),
-			                    v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT});
-
-			    // Ignoring status code for transport send
-			    auto _ = transport_->send(response);
 			    return;
 		    }
 
-		    auto payloadData = callback_(message);
+		    // Create a response message builder using the request message.
 		    auto builder =
-		        datamodel::builder::UMessageBuilder::response(message);
+		        datamodel::builder::UMessageBuilder::response(request);
+
+		    // Call the RPC callback method with the request message.
+		    auto payloadData = callback_(request);
 
 		    if (ttl_.has_value()) {
 			    builder.withTtl(ttl_.value());
@@ -109,13 +100,13 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 			    // builder.build() verifies if payload format is required
 			    auto response = builder.build();
 			    // Ignoring status code for transport send
-			    auto _ = transport_->send(response);
+			    std::ignore = transport_->send(response);
 		    } else {
-			    // builder.build(payloadData) verifies if payload format matches
-			    // the expected
-			    auto response = builder.build(std::move(payloadData.value()));
+			    // builder.build(payloadData) verifies if payload format
+			    // matches the expected
+			    auto response = builder.build(std::move(payloadData).value());
 			    // Ignoring status code for transport send
-			    auto _ = transport_->send(response);
+			    std::ignore = transport_->send(response);
 		    }
 	    });
 
