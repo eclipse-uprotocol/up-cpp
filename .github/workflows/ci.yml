@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: up-conan-recipes
-          repository: gregmedd/up-conan-recipes
+          repository: eclipse-uprotocol/up-conan-recipes
 
       - name: Build up-core-api conan package
         shell: bash
@@ -98,6 +98,103 @@ jobs:
         with:
           name: test-results
           path: 'up-cpp/build/test/results/*.xml'
+
+# NOTE: Run dynamic analysis in unit tests
+  valgrind:
+    name: Run up-cpp tests with Valgrind
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: up-cpp/build
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Run Valgrind Memcheck
+        continue-on-error: true
+        run: |
+          cd up-cpp/build
+          chmod +x bin/*
+          echo "Running Memcheck..."
+          exclude_tests=$(cat valgrind_exclude_tests.txt | tr '\n' '|' | sed 's/|$//')
+          echo "Excluding tests: $exclude_tests"
+          set +e
+          valgrind --leak-check=full \
+                   --show-leak-kinds=all \
+                   --track-origins=yes \
+                   --trace-children=yes \
+                   --verbose \
+                   --log-file=valgrind-memcheck.log \
+                   --gen-suppressions=all \
+                   ctest -E "$exclude_tests"
+
+          exit_code=$?
+          set -e
+
+          if [ $exit_code -ne 0 ]; then
+            touch memcheck_failed_output.log
+            echo "Some tests failed. Capturing the logs..."
+            cat Testing/Temporary/LastTest.log | tee -a memcheck_failed_output.log
+          else
+            echo "No tests failed."
+            touch memcheck_failed_output.log
+          fi
+
+      - name: Run Valgrind ThreadCheck
+        continue-on-error: true
+        run: |
+          cd up-cpp/build
+          echo "Running ThreadCheck..."
+          valgrind --tool=drd \
+                   --trace-children=yes \
+                   --log-file=valgrind-threadcheck.log \
+                   ctest
+          echo "ThreadCheck log:"
+          cat valgrind-threadcheck.log
+        
+      - name: Run Valgrind Helgrind
+        continue-on-error: true
+        run: |
+          cd up-cpp/build
+          echo "Running Helgrind..."
+          valgrind --tool=helgrind \
+                   --trace-children=yes \
+                   --log-file=valgrind-helgrind.log \
+                   ctest
+          echo "Helgrind log:"
+          cat valgrind-helgrind.log
+
+      - name: Run Valgrind DHAT
+        continue-on-error: true
+        run: |
+          cd up-cpp/build
+          echo "Running DHAT (Data Address Translation)..."
+          valgrind --tool=dhat \
+                   --trace-children=yes \
+                   --log-file=valgrind-dhat.log \
+                   ctest
+          echo "DHAT log:"
+          cat valgrind-dhat.log
+
+      - name: Upload Valgrind log
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: valgrind-log
+          path: |
+            up-cpp/build/memcheck_failed_output.log
+            up-cpp/build/valgrind-memcheck-detailed.log
+            up-cpp/build/valgrind-memcheck.log
+            up-cpp/build/valgrind-threadcheck.log
+            up-cpp/build/valgrind-helgrind.log
+            up-cpp/build/valgrind-dhat.log
 
   lint:
     name: Lint C++ sources

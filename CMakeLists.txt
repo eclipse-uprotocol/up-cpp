@@ -51,6 +51,10 @@ target_link_libraries(${PROJECT_NAME}
 	protobuf::libprotobuf 
 	spdlog::spdlog)
 
+configure_file(${CMAKE_SOURCE_DIR}/valgrind_exclude_tests.txt
+			${CMAKE_BINARY_DIR}/valgrind_exclude_tests.txt
+			COPYONLY)
+
 enable_testing()
 add_subdirectory(test)
 
