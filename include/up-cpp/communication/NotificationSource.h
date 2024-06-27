@@ -48,7 +48,7 @@ struct NotificationSource {
 	/// @param ttl How long messages will be valid from the time notify() is
 	///            called.
 	NotificationSource(std::shared_ptr<transport::UTransport> transport,
-	                   const v1::UUri& source, const v1::UUri& sink,
+	                   v1::UUri&& source, v1::UUri&& sink,
 	                   std::optional<v1::UPayloadFormat> payload_format = {},
 	                   std::optional<v1::UPriority> priority = {},
 	                   std::optional<std::chrono::milliseconds> ttl = {});
@@ -57,13 +57,13 @@ struct NotificationSource {
 	///
 	/// @param A Payload builder containing the payload to be sent with the
 	///        notification.
-	v1::UStatus notify(datamodel::builder::Payload&&);
+	v1::UStatus notify(datamodel::builder::Payload&&) const;
 
 	/// @brief Send a notification to the selected sink.
 	///
 	/// This can only be called if no payload format was provided at
 	/// construction time.
-	v1::UStatus notify();
+	v1::UStatus notify() const;
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
