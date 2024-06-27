@@ -93,13 +93,6 @@ std::chrono::milliseconds getElapsedTime(v1::UUID);
 /// @returns Remaining time (ttl - getElapsedTime(uuid)) in milliseconds
 std::chrono::milliseconds getRemainingTime(v1::UUID uuid,
                                            std::chrono::milliseconds ttl);
-
-/// @brief Gets the counter field from a UUID object
-/// @remarks Counter provides for ordering of UUIDs generated within the
-///          same millisecond tick of the system clock.
-/// @throws InvalidUuid if the UUID does not contain valid UUID data
-/// @returns The UUID's counter
-uint16_t getCounter(v1::UUID uuid);
 /// @}
 
 /// @brief This exception indicates that a UUID object was provided that

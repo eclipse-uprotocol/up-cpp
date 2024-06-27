@@ -65,7 +65,7 @@ ValidationResult isUuid(const uprotocol::v1::UUID uuid) {
 	}
 
 	uint8_t variant = internalGetVariant(uuid);
-	if (variant != UUID_VARIANT_RFC4122) {  // Variant should be 10 in binary
+	if (variant != UUID_VARIANT_RFC4122) {
 		return {false, Reason::UNSUPPORTED_VARIANT};
 	}
 
@@ -136,14 +136,6 @@ std::chrono::milliseconds getRemainingTime(const uprotocol::v1::UUID uuid,
                                            std::chrono::milliseconds ttl) {
 	auto elapsed_time = getElapsedTime(uuid);
 	return std::max(ttl - elapsed_time, 0ms);
-}
-
-uint16_t getCounter(const uprotocol::v1::UUID uuid) {
-	auto [valid, reason] = isUuid(uuid);
-	if (!valid) {
-		throw InvalidUuid(message(reason.value()));
-	}
-	return (uuid.msb() & UUID_COUNTER_MASK);
 }
 
 }  // namespace uprotocol::datamodel::validator::uuid
