@@ -31,9 +31,9 @@ namespace uprotocol::communication {
 /// receiving half of the notification model.
 struct NotificationSink {
 	using ListenCallback = transport::UTransport::ListenCallback;
-
 	using SinkOrStatus =
 	    utils::Expected<std::unique_ptr<NotificationSink>, v1::UStatus>;
+	using ListenHandle = transport::UTransport::ListenHandle;
 
 	/// @brief Create a notification sink to receive notifications.
 	///
@@ -68,12 +68,17 @@ protected:
 	///
 	/// @throws std::invalid_argument if listener is not connected.
 	NotificationSink(std::shared_ptr<transport::UTransport> transport,
-	                 transport::UTransport::ListenHandle&& listener);
+	                 ListenHandle&& listener);
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
+	ListenHandle listener_;
 
-	transport::UTransport::ListenHandle listener_;
+	// Allow the protected constructor for this class to be used in make_unique
+	// inside of subscribe()
+	friend std::unique_ptr<NotificationSink> std::make_unique<
+	    NotificationSink, std::shared_ptr<transport::UTransport>, ListenHandle>(
+	    std::shared_ptr<uprotocol::transport::UTransport>&&, ListenHandle&&);
 };
 
 }  // namespace uprotocol::communication
