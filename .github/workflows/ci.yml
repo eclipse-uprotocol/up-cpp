@@ -99,6 +99,282 @@ jobs:
           name: test-results
           path: 'up-cpp/build/test/results/*.xml'
 
+# NOTE: Run dynamic analysis in unit tests
+  memcheck:
+    name: Run Valgrind Memcheck
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: up-cpp/build
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Run Valgrind Memcheck
+        continue-on-error: true
+        run: |
+          cd up-cpp/build
+          chmod +x bin/*
+          mkdir -p valgrind_logs
+          : > valgrind_logs/valgrind_memcheck_summary.log
+          declare -A EXCLUDE_TESTS
+          while IFS= read -r line; do
+            test_binary=$(echo $line | cut -d'.' -f1)
+            test_suite=$(echo $line | cut -d'.' -f2)
+            test_name=$(echo $line | cut -d'.' -f3)
+            if [[ -z "${EXCLUDE_TESTS["$test_binary"]}" ]]; then
+              EXCLUDE_TESTS["$test_binary"]="-"
+            else
+              EXCLUDE_TESTS["$test_binary"]+=":"
+            fi
+            EXCLUDE_TESTS["$test_binary"]+="$test_suite.$test_name"
+          done < valgrind_exclude_test_memcheck.txt
+
+          for test_binary in bin/*Test; do
+            test_binary_name=$(basename $test_binary)
+            echo "Running Valgrind on $test_binary_name"
+            if [[ -n "${EXCLUDE_TESTS[$test_binary_name]}" ]]; then
+              exclude_pattern="${EXCLUDE_TESTS[$test_binary_name]}"
+              valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="valgrind_logs/$test_binary_name.log" ./$test_binary --gtest_filter="$exclude_pattern" || true
+            else
+              valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="valgrind_logs/$test_binary_name.log" ./$test_binary || true
+            fi
+
+            cat "valgrind_logs/$test_binary_name.log" >> valgrind_logs/valgrind_complete_memcheck_log.log
+
+            if grep -q "ERROR SUMMARY: [^0]" "valgrind_logs/$test_binary_name.log"; then
+              echo "Valgrind errors found in $test_binary_name:"
+              grep -A1 "ERROR SUMMARY:" "valgrind_logs/$test_binary_name.log" >> valgrind_logs/valgrind_memcheck_summary.log
+              echo "Valgrind log for $test_binary_name:"
+              cat "valgrind_logs/$test_binary_name.log"
+              echo "------------------------"
+            fi
+          done
+
+          echo "Valgrind Memcheck Summary:"
+          cat valgrind_logs/valgrind_memcheck_summary.log
+
+      - name: Upload Valgrind Memcheck logs
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: valgrind-memcheck-log
+          path: up-cpp/build/valgrind_logs/valgrind_complete_memcheck_log.log
+
+  threadcheck:
+    name: Run Valgrind ThreadCheck
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: up-cpp/build
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Run Valgrind ThreadCheck
+        continue-on-error: true
+        run: |
+          cd up-cpp/build
+          chmod +x bin/*
+          mkdir -p valgrind_logs
+          : > valgrind_logs/valgrind_threadcheck_summary.log
+          : > valgrind_logs/valgrind_complete_threadcheck_log.log
+          declare -A EXCLUDE_TESTS
+          while IFS= read -r line; do
+            test_binary=$(echo $line | cut -d'.' -f1)
+            test_suite=$(echo $line | cut -d'.' -f2)
+            test_name=$(echo $line | cut -d'.' -f3)
+            if [[ -z "${EXCLUDE_TESTS["$test_binary"]}" ]]; then
+              EXCLUDE_TESTS["$test_binary"]="-"
+            else
+              EXCLUDE_TESTS["$test_binary"]+=":"
+            fi
+            EXCLUDE_TESTS["$test_binary"]+="$test_suite.$test_name"
+          done < valgrind_exclude_test_threadcheck.txt
+
+          for test_binary in bin/*Test; do
+            test_binary_name=$(basename $test_binary)
+            echo "Running Valgrind ThreadCheck on $test_binary_name"
+            if [[ -n "${EXCLUDE_TESTS[$test_binary_name]}" ]]; then
+              exclude_pattern="${EXCLUDE_TESTS[$test_binary_name]}"
+              valgrind --tool=drd --log-file="valgrind_logs/$test_binary_name_threadcheck.log" ./$test_binary --gtest_filter="$exclude_pattern" || true
+            else
+              valgrind --tool=drd --log-file="valgrind_logs/$test_binary_name_threadcheck.log" ./$test_binary || true
+            fi
+
+            cat "valgrind_logs/$test_binary_name_threadcheck.log" >> valgrind_logs/valgrind_complete_threadcheck_log.log
+
+            if grep -q "ERROR SUMMARY: [^0]" "valgrind_logs/$test_binary_name_threadcheck.log"; then
+              echo "Valgrind ThreadCheck errors found in $test_binary_name:"
+              grep -A1 "ERROR SUMMARY:" "valgrind_logs/$test_binary_name_threadcheck.log" >> valgrind_logs/valgrind_threadcheck_summary.log
+              echo "Valgrind ThreadCheck log for $test_binary_name:"
+              cat "valgrind_logs/$test_binary_name_threadcheck.log"
+              echo "------------------------"
+            fi
+          done
+
+          echo "Valgrind ThreadCheck Summary:"
+          cat valgrind_logs/valgrind_threadcheck_summary.log
+
+      - name: Upload Valgrind ThreadCheck logs
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: valgrind-threadcheck-log
+          path: up-cpp/build/valgrind_logs/valgrind_complete_threadcheck_log.log
+
+  helgrind:
+    name: Run Valgrind Helgrind
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: up-cpp/build
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Run Valgrind Helgrind
+        continue-on-error: true
+        run: |
+          cd up-cpp/build
+          chmod +x bin/*
+          mkdir -p valgrind_logs
+          : > valgrind_logs/valgrind_helgrind_summary.log
+          : > valgrind_logs/valgrind_complete_helgrind_log.log
+          declare -A EXCLUDE_TESTS
+          while IFS= read -r line; do
+            test_binary=$(echo $line | cut -d'.' -f1)
+            test_suite=$(echo $line | cut -d'.' -f2)
+            test_name=$(echo $line | cut -d'.' -f3)
+            if [[ -z "${EXCLUDE_TESTS["$test_binary"]}" ]]; then
+              EXCLUDE_TESTS["$test_binary"]="-"
+            else
+              EXCLUDE_TESTS["$test_binary"]+=":"
+            fi
+            EXCLUDE_TESTS["$test_binary"]+="$test_suite.$test_name"
+          done < valgrind_exclude_test_helgrind.txt
+
+          for test_binary in bin/*Test; do
+            test_binary_name=$(basename $test_binary)
+            echo "Running Valgrind Helgrind on $test_binary_name"
+            if [[ -n "${EXCLUDE_TESTS[$test_binary_name]}" ]]; then
+              exclude_pattern="${EXCLUDE_TESTS[$test_binary_name]}"
+              valgrind --tool=helgrind --log-file="valgrind_logs/$test_binary_name_helgrind.log" ./$test_binary --gtest_filter="$exclude_pattern" || true
+            else
+              valgrind --tool=helgrind --log-file="valgrind_logs/$test_binary_name_helgrind.log" ./$test_binary || true
+            fi
+
+            cat "valgrind_logs/$test_binary_name_helgrind.log" >> valgrind_logs/valgrind_complete_helgrind_log.log
+
+            if grep -q "ERROR SUMMARY: [^0]" "valgrind_logs/$test_binary_name_helgrind.log"; then
+              echo "Valgrind Helgrind errors found in $test_binary_name:"
+              grep -A1 "ERROR SUMMARY:" "valgrind_logs/$test_binary_name_helgrind.log" >> valgrind_logs/valgrind_helgrind_summary.log
+              echo "Valgrind Helgrind log for $test_binary_name:"
+              cat "valgrind_logs/$test_binary_name_helgrind.log"
+              echo "------------------------"
+            fi
+          done
+
+          echo "Valgrind Helgrind Summary:"
+          cat valgrind_logs/valgrind_helgrind_summary.log
+
+      - name: Upload Valgrind Helgrind logs
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: valgrind-helgrind-log
+          path: up-cpp/build/valgrind_logs/valgrind_complete_helgrind_log.log
+
+  dhat:
+    name: Run Valgrind DHAT
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Get build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: up-cpp/build
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Run Valgrind DHAT
+        continue-on-error: true
+        run: |
+          cd up-cpp/build
+          chmod +x bin/*
+          mkdir -p valgrind_logs
+          : > valgrind_logs/valgrind_dhat_summary.log
+          : > valgrind_logs/valgrind_complete_dhat_log.log
+          declare -A EXCLUDE_TESTS
+          while IFS= read -r line; do
+            test_binary=$(echo $line | cut -d'.' -f1)
+            test_suite=$(echo $line | cut -d'.' -f2)
+            test_name=$(echo $line | cut -d'.' -f3)
+            if [[ -z "${EXCLUDE_TESTS["$test_binary"]}" ]]; then
+              EXCLUDE_TESTS["$test_binary"]="-"
+            else
+              EXCLUDE_TESTS["$test_binary"]+=":"
+            fi
+            EXCLUDE_TESTS["$test_binary"]+="$test_suite.$test_name"
+          done < valgrind_exclude_test_dhat.txt
+
+          for test_binary in bin/*Test; do
+            test_binary_name=$(basename $test_binary)
+            echo "Running Valgrind DHAT on $test_binary_name"
+            if [[ -n "${EXCLUDE_TESTS[$test_binary_name]}" ]]; then
+              exclude_pattern="${EXCLUDE_TESTS[$test_binary_name]}"
+              valgrind --tool=dhat --log-file="valgrind_logs/$test_binary_name_dhat.log" ./$test_binary --gtest_filter="$exclude_pattern" || true
+            else
+              valgrind --tool=dhat --log-file="valgrind_logs/$test_binary_name_dhat.log" ./$test_binary || true
+            fi
+
+            cat "valgrind_logs/$test_binary_name_dhat.log" >> valgrind_logs/valgrind_complete_dhat_log.log
+
+            if grep -q "ERROR SUMMARY: [^0]" "valgrind_logs/$test_binary_name_dhat.log"; then
+              echo "Valgrind DHAT errors found in $test_binary_name:"
+              grep -A1 "ERROR SUMMARY:" "valgrind_logs/$test_binary_name_dhat.log" >> valgrind_logs/valgrind_dhat_summary.log
+              echo "Valgrind DHAT log for $test_binary_name:"
+              cat "valgrind_logs/$test_binary_name_dhat.log"
+              echo "------------------------"
+            fi
+          done
+
+          echo "Valgrind DHAT Summary:"
+          cat valgrind_logs/valgrind_dhat_summary.log
+
+      - name: Upload Valgrind DHAT logs
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: valgrind-dhat-log
+          path: up-cpp/build/valgrind_logs/valgrind_complete_dhat_log.log
+
   lint:
     name: Lint C++ sources
     runs-on: ubuntu-latest
@@ -171,7 +447,7 @@ jobs:
   ci:
     name: CI status checks
     runs-on: ubuntu-latest
-    needs: [build, test]
+    needs: [build, test, memcheck, threadcheck, helgrind, dhat]
     if: always()
     steps:
       - name: Check whether all jobs pass
