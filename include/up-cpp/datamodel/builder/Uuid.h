@@ -100,7 +100,7 @@ struct UuidBuilder {
 	v1::UUID build();
 
 private:
-	UuidBuilder();
+	UuidBuilder(bool testing);
 
 	const bool testing_{false};
 	std::function<std::chrono::system_clock::time_point()> time_source_;

@@ -33,8 +33,6 @@ enum class Reason {
 	PRIORITY_OUT_OF_RANGE,
 	/// @brief The Payload Format is not within the allowable range
 	PAYLOAD_FORMAT_OUT_OF_RANGE,
-	/// @brief The type set in the message is incorrect for the validated mode
-	WRONG_MESSAGE_TYPE,
 	/// @brief Source URI did not pass validity checks
 	BAD_SOURCE_URI,
 	/// @brief Sink URI did not pass validity checks
@@ -46,7 +44,15 @@ enum class Reason {
 	/// @brief The Request ID did not match the ID of the request message
 	REQID_MISMATCH,
 	/// @brief The Priority did not match the Priority of the request message
-	PRIORITY_MISMATCH
+	PRIORITY_MISMATCH,
+	/// @brief The source and sink from a request must be swapped in a response
+	URI_MISMATCH,
+	/// @brief The message type was set to UNSPECIFIED (isValid() only)
+	UNSPECIFIED_MESSAGE_TYPE,
+	/// @brief The message type is outside the allowable range (isValid() only)
+	INVALID_MESSAGE_TYPE,
+	/// @brief The type set in the message is incorrect for the validated mode
+	WRONG_MESSAGE_TYPE
 };
 
 /// @brief Get a descriptive message for a reason code.
@@ -131,9 +137,9 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// @brief Checks if UMessage is valid for sending a notification
 ///
 /// In addition to all common attributes being valid, these checks must pass:
-///   * Message type must be UMESSAGE_TYPE_PUBLISH
-///   * Message source must pass uri::isValidTopic()
-///   * Message sink must pass uri::isValidTopic()
+///   * Message type must be UMESSAGE_TYPE_NOTIFICATION
+///   * Message source must pass uri::isValidNotification()
+///   * Message sink must pass uri::isValidNotification()
 ///   * Message must not set commstatus
 ///   * Message must not set reqid
 ///   * Message must not set permission_level

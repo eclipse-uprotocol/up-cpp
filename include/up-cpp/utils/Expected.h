@@ -12,8 +12,10 @@
 #ifndef UP_CPP_UTILS_EXPECTED_H
 #define UP_CPP_UTILS_EXPECTED_H
 
-#include <exception>
+#include <stdexcept>
 #include <type_traits>
+#include <utility>
+#include <variant>
 
 namespace uprotocol::utils {
 
@@ -27,72 +29,100 @@ static_assert(!__has_cpp_attribute(__cpp_lib_expected),
 ///          https://en.cppreference.com/w/cpp/utility/expected
 ///          No further documentation is provided in this file.
 /// @{
-template <typename E>
-struct BadExpectedAccess;
+struct BadExpectedAccess : public std::runtime_error {
+	template <typename... Args>
+	BadExpectedAccess(Args&&... args)
+	    : std::runtime_error(std::forward<Args>(args)...) {}
+};
 
-template <>
-struct BadExpectedAccess<void> : public std::exception {};
-
+/// @brief Required tagging type for cases where expected and unexpected type
+/// are identical.
 template <typename E>
-struct BadExpectedAccess : public BadExpectedAccess<void> {};
+class Unexpected {
+public:
+	constexpr Unexpected(const Unexpected&) = default;
+	constexpr Unexpected(Unexpected&&) = default;
+
+	constexpr explicit Unexpected(const E& rhs) : storage_(rhs) {}
+	constexpr explicit Unexpected(E&& rhs) : storage_(std::move(rhs)) {}
+
+	constexpr const E& error() const& noexcept { return storage_; }
+	constexpr E&& error() && noexcept { return std::move(storage_); }
+
+private:
+	E storage_;
+};
 
 /// @brief A stripped-down version of std::expected from C++23.
 template <typename T, typename E>
-struct Expected {
-	using value_type = T;
-	using error_type = E;
+class Expected {
+public:
+	template <typename... Args>
+	constexpr Expected(Args&&... args)
+	    : storage_(std::forward<Args>(args)...) {}
 
-	constexpr Expected();
-	constexpr Expected(const Expected& other);
-	constexpr Expected(Expected&& other) noexcept;
+	constexpr Expected(const Expected&) = default;
+	constexpr Expected(Expected&&) = default;
 
-	constexpr explicit Expected(T&& v);
-	constexpr explicit Expected(E&& e);
+	constexpr bool has_value() const noexcept {
+		return std::holds_alternative<T>(storage_);
+	}
 
-	Expected& operator=(const Expected& other);
-	Expected& operator=(Expected&& other);
+	constexpr explicit operator bool() const noexcept {
+		return std::holds_alternative<T>(storage_);
+	}
 
-	Expected& operator=(const T& other);
-	Expected& operator=(T&& other);
+	template <class X>
+	constexpr T value_or(X&& v) const& noexcept {
+		return has_value() ? std::get<T>(storage_)
+		                   : static_cast<T>(std::forward<X>(v));
+	}
 
-	Expected& operator=(const E& other);
-	Expected& operator=(E&& other);
+	constexpr const T& value() const& {
+		if (!has_value())
+			throw BadExpectedAccess(
+			    "Attempt to access value() when unexpected.");
+		return std::get<T>(storage_);
+	}
 
-	constexpr explicit operator bool() const noexcept;
-	constexpr bool has_value() const noexcept;
+	constexpr T value() && {
+		if (!has_value())
+			throw BadExpectedAccess(
+			    "Attempt to access value() when unexpected.");
+		return std::move(std::get<T>(storage_));
+	}
 
-	constexpr T& value() &;
-	constexpr const T& value() const&;
-	constexpr T&& value() &&;
-	constexpr const T&& value() const&&;
+	constexpr const E& error() const& {
+		if (has_value())
+			throw BadExpectedAccess(
+			    "Attempt to access error() when not unexpected.");
+		return std::get<Unexpected<E>>(storage_).error();
+	}
 
-	constexpr const E& error() const& noexcept;
-	constexpr E& error() & noexcept;
-	constexpr const E&& error() const&& noexcept;
-	constexpr E&& error() && noexcept;
+	constexpr E error() && {
+		if (has_value())
+			throw BadExpectedAccess(
+			    "Attempt to access error() when not unexpected.");
+		return std::move(std::get<Unexpected<E>>(storage_)).error();
+	}
 
-	constexpr T value_or(T&& default_value) const&;
-	constexpr T value_or(T&& default_value) &&;
+	constexpr const T& operator*() const {
+		if (!has_value())
+			throw BadExpectedAccess(
+			    "Attempt to dereference expected value when unexpected.");
+		return std::get<T>(storage_);
+	}
 
-	template <typename F>
-	constexpr auto and_then(F&& f) &;
-	template <typename F>
-	constexpr auto and_then(F&& f) const&;
-	template <typename F>
-	constexpr auto and_then(F&& f) &&;
-	template <typename F>
-	constexpr auto and_then(F&& f) const&&;
-
-	template <typename F>
-	constexpr auto or_else(F&& f) &;
-	template <typename F>
-	constexpr auto or_else(F&& f) const&;
-	template <typename F>
-	constexpr auto or_else(F&& f) &&;
-	template <typename F>
-	constexpr auto or_else(F&& f) const&&;
+	constexpr const T* operator->() const {
+		if (!has_value())
+			throw BadExpectedAccess(
+			    "Attempt to dereference expected pointer when unexpected.");
+		return &std::get<T>(storage_);
+	}
 
 private:
+	std::variant<T, Unexpected<E>> storage_;
+
 	static_assert(!std::is_void_v<T>,
 	              "We don't allow T==void (unlike std::expected)");
 
@@ -101,6 +131,7 @@ private:
 	        !std::is_reference_v<T>,
 	    "Expected requires T to meet the C++ 'destructable' requirement");
 };
+
 /// @}
 
 }  // namespace uprotocol::utils

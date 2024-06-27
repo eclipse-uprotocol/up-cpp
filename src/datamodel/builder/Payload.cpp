@@ -10,3 +10,101 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "up-cpp/datamodel/builder/Payload.h"
+namespace uprotocol::datamodel::builder {
+
+// Byte vector constructor
+Payload::Payload(const std::vector<uint8_t>& value_bytes,
+                 const v1::UPayloadFormat format) {
+	if (!UPayloadFormat_IsValid(format)) {
+		throw std::out_of_range("Invalid Byte vector payload format");
+	}
+	std::string serialized(value_bytes.begin(), value_bytes.end());
+	payload_ = std::make_tuple(std::move(serialized), format);
+}
+
+// String constructor
+Payload::Payload(const std::string& value, const v1::UPayloadFormat format) {
+	if (!UPayloadFormat_IsValid(format)) {
+		throw std::out_of_range("Invalid String payload format");
+	}
+	payload_ = std::make_tuple(std::move(value), format);
+}
+
+// Move string constructor
+Payload::Payload(std::string&& value, const v1::UPayloadFormat format) {
+	if (!UPayloadFormat_IsValid(format)) {
+		throw std::out_of_range("Invalid RValue String payload format");
+	}
+	payload_ = std::make_tuple(std::move(value), format);
+}
+
+// Move Serialized constructor
+Payload::Payload(Serialized&& serialized) {
+	if (!UPayloadFormat_IsValid(std::get<PayloadType::Format>(serialized))) {
+		throw std::out_of_range("Invalid RValue Serialized payload format");
+	}
+	payload_ = std::move(serialized);
+}
+
+// Move constructor
+Payload::Payload(Payload&& other) noexcept
+    : payload_(std::move(other.payload_)), moved_(std::move(other.moved_)) {}
+
+// Copy constructor
+Payload::Payload(const Payload& other)
+    : payload_(other.payload_), moved_(other.moved_) {}
+
+// Move assignment operator
+Payload& Payload::operator=(Payload&& other) noexcept {
+	payload_ = std::move(other.payload_);
+	moved_ = std::move(other.moved_);
+	return *this;
+}
+
+// Copy assignment operator
+Payload& Payload::operator=(const Payload& other) {
+	payload_ = other.payload_;
+	moved_ = other.moved_;
+	return *this;
+}
+
+Payload::PayloadMoved::PayloadMoved(PayloadMoved&& other) noexcept
+    : std::runtime_error(std::move(other)) {}
+
+// PayloadMoved move assignment operator
+Payload::PayloadMoved& Payload::PayloadMoved::operator=(
+    PayloadMoved&& other) noexcept {
+	std::runtime_error::operator=(std::move(other));
+	return *this;
+}
+
+// PayloadMoved copy constructor
+Payload::PayloadMoved::PayloadMoved(const PayloadMoved& other)
+    : std::runtime_error(other) {}
+
+// PayloadMoved copy assignment operator
+Payload::PayloadMoved& Payload::PayloadMoved::operator=(
+    const PayloadMoved& other) {
+	std::runtime_error::operator=(other);
+	return *this;
+}
+
+// buildCopy method
+[[nodiscard]] const Payload::Serialized& Payload::buildCopy() const {
+	if (moved_) {
+		throw PayloadMoved("Payload has been already moved");
+	}
+	return payload_;
+}
+
+// buildMove method
+[[nodiscard]] Payload::Serialized Payload::buildMove() && {
+	// Check if payload_ is in the "moved" state
+	if (moved_) {
+		throw PayloadMoved("Payload has been already moved");
+	}
+	// Set payload_ to the "moved" state
+	moved_ = true;
+	return std::move(payload_);
+}
+}  // namespace uprotocol::datamodel::builder

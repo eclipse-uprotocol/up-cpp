@@ -123,14 +123,13 @@ jobs:
           cd up-cpp/build
           chmod +x bin/*
           echo "Running Memcheck..."
-          exclude_tests=$(cat valgrind_exclude_tests.txt | tr '\n' '|' | sed 's/|$//')
+          exclude_tests=$(cat valgrind_exclude_test_memcheck.txt | tr '\n' '|' | sed 's/|$//')
           echo "Excluding tests: $exclude_tests"
           set +e
           valgrind --leak-check=full \
                    --show-leak-kinds=all \
                    --track-origins=yes \
                    --trace-children=yes \
-                   --verbose \
                    --log-file=valgrind-memcheck.log \
                    --gen-suppressions=all \
                    ctest -E "$exclude_tests"
