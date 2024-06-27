@@ -14,10 +14,13 @@ enable_testing()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-# Copy valgrind_exclude_tests.txt to the binary directory
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/sanitizers/valgrind_exclude_test_memcheck.txt
-               ${CMAKE_BINARY_DIR}/valgrind_exclude_test_memcheck.txt
-               COPYONLY)
+# Copy exclude files to the binary directory
+file(COPY 
+    ${CMAKE_CURRENT_SOURCE_DIR}/sanitizers/valgrind_exclude_test_memcheck.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/sanitizers/valgrind_exclude_test_threadcheck.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/sanitizers/valgrind_exclude_test_helgrind.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/sanitizers/valgrind_exclude_test_dhat.txt
+    DESTINATION ${CMAKE_BINARY_DIR})
 
 # Invoked as add_coverage_test("SomeName" sources...)
 function(add_coverage_test Name)
