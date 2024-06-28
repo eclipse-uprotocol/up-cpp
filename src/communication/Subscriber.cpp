@@ -11,13 +11,22 @@
 
 #include "up-cpp/communication/Subscriber.h"
 
+#include "up-cpp/datamodel/validator/UUri.h"
+
 namespace uprotocol::communication {
+namespace UriValidator = uprotocol::datamodel::validator::uri;
 
 [[nodiscard]] Subscriber::SubscriberOrStatus Subscriber::subscribe(
     std::shared_ptr<transport::UTransport> transport, const v1::UUri& topic,
     ListenCallback&& callback) {
 	if (!transport) {
 		throw std::invalid_argument("transport cannot be null");
+	}
+	auto [srcOk, srcReason] = UriValidator::isValidSubscription(topic);
+	if (!srcOk) {
+		throw UriValidator::InvalidUUri(
+		    "URI is not a valid URI |  " +
+		    std::string(UriValidator::message(*srcReason)));
 	}
 	auto handle = transport->registerListener(topic, std::move(callback));
 	if (!handle) {
