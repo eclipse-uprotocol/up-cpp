@@ -10,3 +10,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "up-cpp/communication/Subscriber.h"
+
+namespace uprotocol::communication {
+
+[[nodiscard]] Subscriber::SubscriberOrStatus Subscriber::subscribe(
+    std::shared_ptr<transport::UTransport> transport, const v1::UUri& topic,
+    ListenCallback&& callback) {
+	if (!transport) {
+		throw std::invalid_argument("transport cannot be null");
+	}
+	auto handle = transport->registerListener(topic, std::move(callback));
+	if (!handle) {
+		return uprotocol::utils::Unexpected(handle.error());
+	}
+	return std::make_unique<Subscriber>(
+	    std::forward<std::shared_ptr<transport::UTransport>>(transport),
+	    std::forward<ListenHandle&&>(std::move(handle).value()));
+}
+
+Subscriber::Subscriber(std::shared_ptr<transport::UTransport> transport,
+                       ListenHandle&& subscription)
+    : transport_(transport), subscription_(std::move(subscription)) {
+	// Constructor body. Any additional setup can go here.
+}
+
+}  // namespace uprotocol::communication

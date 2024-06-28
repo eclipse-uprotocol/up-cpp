@@ -9,32 +9,149 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest.h>
 #include <up-cpp/communication/Subscriber.h>
 
+#include <random>
+#include <string>
+
 #include "UTransportMock.h"
+#include "up-cpp/datamodel/validator/UUri.h"
 
 namespace {
+using MsgDiff = google::protobuf::util::MessageDifferencer;
+using namespace uprotocol::communication;
+using namespace uprotocol::test;
 
-class TestFixture : public testing::Test {
+class SubscriberTest : public testing::Test {
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
-	void SetUp() override {}
+	void SetUp() override { buildValidTopicURI(); }
 	void TearDown() override {}
 
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
-	TestFixture() = default;
-	~TestFixture() = default;
+	SubscriberTest() = default;
+	~SubscriberTest() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
+	void buildValidTopicURI(const std::string& authority = "192.168.1.10") {
+		testTopicUUri_.set_authority_name(authority);
+		testTopicUUri_.set_ue_id(0x18000);
+		testTopicUUri_.set_ue_version_major(0x1);
+		testTopicUUri_.set_resource_id(0x0);
+	}
+
+	uprotocol::v1::UUri testTopicUUri_;
+	size_t capture_count_ = 0;
+	uprotocol::v1::UMessage capture_msg_;
+
+public:
+	void handleCallbackMessage(const uprotocol::v1::UMessage& message);
 };
 
-// TODO replace
-TEST_F(TestFixture, SomeTestName) {}
+std::string get_random_string(size_t length) {
+	auto randchar = []() -> char {
+		const char charset[] =
+		    "0123456789"
+		    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		    "abcdefghijklmnopqrstuvwxyz";
+		const size_t max_index = (sizeof(charset) - 1);
+		return charset[rand() % max_index];
+	};
+	std::string str(length, 0);
+	std::generate_n(str.begin(), length, randchar);
+	return str;
+}
+
+void SubscriberTest::handleCallbackMessage(
+    const uprotocol::v1::UMessage& message) {
+	capture_msg_ = message;
+	capture_count_++;
+}
+
+// Positive test case to subscribe to a topic
+TEST_F(SubscriberTest, SubscribeSuccess) {
+	auto transport =
+	    std::make_shared<uprotocol::test::UTransportMock>(testTopicUUri_);
+
+	auto callback = [this](auto arg1) {
+		return this->handleCallbackMessage(arg1);
+	};
+
+	auto result =
+	    Subscriber::subscribe(transport, testTopicUUri_, std::move(callback));
+
+	EXPECT_TRUE(transport->listener_);
+	EXPECT_TRUE(result.has_value());
+	auto handle = std::move(result).value();
+	EXPECT_TRUE(handle);
+	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->sink_filter_));
+
+	const size_t max_count = 100;
+	for (auto i = 0; i < max_count; i++) {
+		uprotocol::v1::UMessage msg;
+		auto attr = std::make_shared<uprotocol::v1::UAttributes>();
+		*msg.mutable_attributes() = *attr;
+		msg.set_payload(get_random_string(1400));
+		transport->mockMessage(msg);
+		EXPECT_EQ(i + 1, capture_count_);
+		EXPECT_TRUE(MsgDiff::Equals(msg, capture_msg_));
+	}
+}
+
+// Negative test case to subscribe to a topic
+TEST_F(SubscriberTest, SubscribeFailWithErrorCode) {
+	auto transport =
+	    std::make_shared<uprotocol::test::UTransportMock>(testTopicUUri_);
+
+	auto callback = [this](auto arg1) {
+		return this->handleCallbackMessage(arg1);
+	};
+
+	uprotocol::v1::UStatus expectedStatus;
+	expectedStatus.set_code(uprotocol::v1::UCode::ABORTED);
+	transport->registerListener_status_ = expectedStatus;
+
+	auto result =
+	    Subscriber::subscribe(transport, testTopicUUri_, std::move(callback));
+
+	auto actualStatus = std::move(result).error();
+	EXPECT_EQ(actualStatus.code(), expectedStatus.code());
+}
+
+// subscribe to a topic with null transport
+TEST_F(SubscriberTest, SubscribeNullTransport) {
+	// set transport to null
+	auto transport = nullptr;
+	auto callback = [this](auto arg1) {
+		return this->handleCallbackMessage(arg1);
+	};
+	EXPECT_THROW(auto result = Subscriber::subscribe(transport, testTopicUUri_,
+	                                                 std::move(callback)),
+	             std::invalid_argument);
+}
+// subscribe to a topic with null callback
+TEST_F(SubscriberTest, SubscribeNullCallback) {
+	auto transport =
+	    std::make_shared<uprotocol::test::UTransportMock>(testTopicUUri_);
+
+	// bind to null callback
+	auto result =
+	    Subscriber::subscribe(transport, testTopicUUri_, std::move(nullptr));
+
+	const size_t max_count = 100;
+	uprotocol::v1::UMessage msg;
+	auto attr = std::make_shared<uprotocol::v1::UAttributes>();
+	*msg.mutable_attributes() = *attr;
+	msg.set_payload(get_random_string(1400));
+	EXPECT_THROW(transport->mockMessage(msg), std::bad_function_call);
+}
 
 }  // namespace
