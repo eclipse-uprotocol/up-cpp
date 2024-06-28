@@ -16,11 +16,31 @@ find_package(protobuf REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(up-core-api REQUIRED)
 
+message("* Adding build types...")
+list(APPEND CMAKE_CONFIGURATION_TYPES Release Coverage)
+list(REMOVE_DUPLICATES CMAKE_CONFIGURATION_TYPES)
+set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
+	"Add the code coverage configuration."
+	FORCE)
+message("  Available build types are now: ${CMAKE_CONFIGURATION_TYPES}")
+
+message("* Current build type is: ${CMAKE_BUILD_TYPE}")
+
+# Settings for Gcc for all builds
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+# Modify settings based on build type
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fprofile-arcs -ftest-coverage")
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+message("* Current Compiler Flags: ${CMAKE_CXX_FLAGS}")
+	
 # TODO NEEDED?
 #add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
 # This is the root CMakeLists.txt file; We can set project wide settings here
-# TODO: Is this needed?
+# TODO: Is this needed? 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	set(CMAKE_CXX_STANDARD 17)
 	# place libraries in a lib directory and executables in a bin directory,
@@ -49,7 +69,8 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE 
 	up-core-api::up-core-api
 	protobuf::libprotobuf 
-	spdlog::spdlog)
+	spdlog::spdlog
+	gcov)
 
 enable_testing()
 add_subdirectory(test)

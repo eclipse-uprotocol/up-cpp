@@ -1,0 +1,117 @@
+name: Test and Coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: ["**"]
+  
+jobs:
+  test:
+    name: Generate Test Coverage eport
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+        with:
+          version: 2.3.2
+
+      - name: Fetch up-cpp
+        uses: actions/checkout@v4
+        with:
+          path: up-cpp
+
+      - name: Install conan CI profile
+        shell: bash
+        run: |
+          conan profile detect
+          cp up-cpp/.github/workflows/ci_conan_profile "$(conan profile path default)"
+          conan profile show
+
+      - name: Install gcovr
+        run: sudo apt-get install -y gcovr
+
+      - name: Fetch up-core-api conan recipe
+        uses: actions/checkout@v4
+        with:
+          path: up-conan-recipes
+          repository: gregmedd/up-conan-recipes
+
+      - name: Build up-core-api conan package
+        shell: bash
+        run: |
+          conan create --version 1.5.8 up-conan-recipes/up-core-api/developer
+
+      - name: Build up-cpp with tests
+        shell: bash
+        run: |
+          cd up-cpp
+          conan install . --build=missing
+          cd build
+          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Coverage
+          cmake --build . -- -j
+
+      - name: Run all tests
+        shell: bash
+        run: |
+          cd up-cpp/build
+          chmod +x bin/*
+          ctest
+
+      - name: Run Coverage report
+        shell: bash
+        run: |
+          cd up-cpp/build/
+          mkdir -p ./Coverage
+          gcovr -r .. --html --html-details -o ./Coverage/index.html -e '.*test.*'
+          cd ..
+          echo "Coverage report can be found here: ./Coverage/index.html"
+
+      - name: Extract and Print Coverage Percentage
+        shell: bash
+        run: |
+          cd up-cpp/build/Coverage
+          COVERAGE_PERCENTAGE=$(grep -oP '>\K[0-9.]+(?=%)' index.html | head -n 1)
+          export COVERAGE_PERCENTAGE=$(printf "%.2f" "$COVERAGE_PERCENTAGE")
+          echo "COVERAGE_PERCENTAGE= $COVERAGE_PERCENTAGE" >> $GITHUB_ENV
+
+
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: coverage-report
+          path: 'up-cpp/build/Coverage'
+
+      - name: Generate coverage comment
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+
+            fs.mkdirSync('./pr-comment', { recursive: true });
+
+            const COVERAGE_PERCENTAGE = `${{ env.COVERAGE_PERCENTAGE }}`;
+
+            const COVERAGE_REPORT_PATH = `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/`;
+
+            var pr_number = `${{ github.event.number }}`;
+            var body = `
+              Code coverage report is ready! :chart_with_upwards_trend:
+
+              - **Code Coverage Percentage:** ${COVERAGE_PERCENTAGE}%
+              - **Code Coverage Report:** [View Coverage Report](${COVERAGE_REPORT_PATH})
+              `;
+
+            fs.writeFileSync('./pr-comment/pr-number.txt', pr_number);
+            fs.writeFileSync('./pr-comment/body.txt', body);
+
+      - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: pr-comment
+          path: pr-comment/
+
+      
