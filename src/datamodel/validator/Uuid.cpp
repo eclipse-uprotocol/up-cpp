@@ -11,34 +11,29 @@
 
 #include "up-cpp/datamodel/validator/Uuid.h"
 
+#include "up-cpp/datamodel/constants/UuidConstants.h"
+
 using namespace std::chrono_literals;
 
 namespace {
 
-constexpr uint64_t TIMESTAMP_MASK = 0xFFFFFFFFFFFF;
-constexpr uint64_t TIMESTAMP_SHIFT = 16;
-constexpr uint64_t VERSION_MASK = 0xF;
-constexpr uint64_t VERSION_SHIFT = 12;
-constexpr uint64_t VARIANT_MASK = 0x3;
-constexpr uint64_t VARIANT_SHIFT = 62;
-constexpr uint64_t COUNTER_MASK = 0xFFF;
-
+using namespace uprotocol::datamodel;
 using milliseconds = std::chrono::milliseconds;
 
 std::chrono::system_clock::time_point getUuidTimestamp(
     const uprotocol::v1::UUID& uuid) {
 	uint64_t msb = uuid.msb();
-	uint64_t timestamp = (msb >> TIMESTAMP_SHIFT) & TIMESTAMP_MASK;
+	uint64_t timestamp = (msb >> UUID_TIMESTAMP_SHIFT) & UUID_TIMESTAMP_MASK;
 
 	return std::chrono::system_clock::time_point(milliseconds(timestamp));
 }
 
 uint8_t internalGetVersion(const uprotocol::v1::UUID& uuid) {
-	return (uuid.msb() >> VERSION_SHIFT) & VERSION_MASK;
+	return (uuid.msb() >> UUID_VERSION_SHIFT) & UUID_VERSION_MASK;
 }
 
 uint8_t internalGetVariant(const uprotocol::v1::UUID& uuid) {
-	return (uuid.lsb() >> VARIANT_SHIFT) & VARIANT_MASK;
+	return (uuid.lsb() >> UUID_VARIANT_SHIFT) & UUID_VARIANT_MASK;
 }
 
 }  // namespace
@@ -65,12 +60,12 @@ ValidationResult isUuid(const uprotocol::v1::UUID uuid) {
 	uint64_t lsb = uuid.lsb();
 
 	uint8_t version = internalGetVersion(uuid);
-	if (version != 8) {
+	if (version != UUID_VERSION_7) {
 		return {false, Reason::WRONG_VERSION};
 	}
 
 	uint8_t variant = internalGetVariant(uuid);
-	if (variant != 2) {  // Variant should be 10 in binary
+	if (variant != UUID_VARIANT_RFC4122) {
 		return {false, Reason::UNSUPPORTED_VARIANT};
 	}
 
@@ -141,14 +136,6 @@ std::chrono::milliseconds getRemainingTime(const uprotocol::v1::UUID uuid,
                                            std::chrono::milliseconds ttl) {
 	auto elapsed_time = getElapsedTime(uuid);
 	return std::max(ttl - elapsed_time, 0ms);
-}
-
-uint16_t getCounter(const uprotocol::v1::UUID uuid) {
-	auto [valid, reason] = isUuid(uuid);
-	if (!valid) {
-		throw InvalidUuid(message(reason.value()));
-	}
-	return (uuid.msb() & COUNTER_MASK);
 }
 
 }  // namespace uprotocol::datamodel::validator::uuid

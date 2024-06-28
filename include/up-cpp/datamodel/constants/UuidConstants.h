@@ -21,12 +21,12 @@ constexpr uint64_t UUID_VERSION_MASK = 0xF;
 constexpr uint64_t UUID_VERSION_SHIFT = 12;
 constexpr uint64_t UUID_VARIANT_MASK = 0x3;
 constexpr uint64_t UUID_VARIANT_SHIFT = 62;
-constexpr uint64_t UUID_COUNTER_MASK = 0xFFF;
-constexpr uint64_t UUID_RANDOM_MASK = 0x3FFFFFFFFFFFFFFF;
+constexpr uint64_t UUID_RANDOM_A_MASK = 0xFFF;
+constexpr uint64_t UUID_RANDOM_B_MASK = 0x3FFFFFFFFFFFFFFF;
 
 // Constants for UUID version and variant
-constexpr uint8_t UUID_VERSION_8 = 8;
-constexpr uint8_t UUID_VARIANT_RFC4122 = 2;
+constexpr uint64_t UUID_VERSION_7 = 7;
+constexpr uint64_t UUID_VARIANT_RFC4122 = 2;
 
 // Other constants
 constexpr uint32_t UUID_BYTE_SIZE = 16;

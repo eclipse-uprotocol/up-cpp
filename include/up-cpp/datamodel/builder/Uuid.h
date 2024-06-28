@@ -77,21 +77,6 @@ struct UuidBuilder {
 	/// @returns A reference to thus UuidBuilder.
 	UuidBuilder& withRandomSource(std::function<uint64_t()>&&);
 
-	/// @brief Replaces the UuidSharedState with a new, non-shared, default
-	///        state.
-	///
-	/// @post The globally shared UUID state will no longer be used for
-	///       building UUIDs from this instance.
-	/// @post This instance will have the default values in its (non)shared
-	///       state.
-	///
-	/// @note This can only be used with a UuidBuilder created with the
-	///       getTestBuilder() interface.
-	///
-	/// @throws std::domain_error If called on a non-test UuidBuilder.
-	/// @returns A reference to thus UuidBuilder.
-	UuidBuilder& withIndependentState();
-
 	/// @brief Creates a uProtocol UUID based on the builder's current state.
 	///
 	/// @remarks As part of the UUID v7/v8 spec, there is a shared state for
@@ -105,9 +90,6 @@ private:
 	const bool testing_{false};
 	std::function<std::chrono::system_clock::time_point()> time_source_;
 	std::function<uint64_t()> random_source_;
-
-	struct UuidSharedState;
-	std::shared_ptr<UuidSharedState> shared_state_;
 };
 
 }  // namespace uprotocol::datamodel::builder

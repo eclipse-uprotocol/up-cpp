@@ -14,6 +14,7 @@
 #include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest.h>
 #include <unistd.h>
+#include <up-cpp/datamodel/builder/Uuid.h>
 
 #include <memory>
 #include <random>
@@ -40,15 +41,8 @@ int get_random_int(int mn = 0, int mx = 100) {
 	return int_dist(random_gen);
 }
 
-uprotocol::v1::UUID* make_uuid() {
-	uint64_t timestamp =
-	    std::chrono::duration_cast<std::chrono::milliseconds>(
-	        std::chrono::system_clock::now().time_since_epoch())
-	        .count();
-	auto id = new uprotocol::v1::UUID();
-	id->set_msb((timestamp << 16) | (8ULL << 12) |
-	            (0x123ULL));  // version 8 ; counter = 0x123
-	id->set_lsb((2ULL << 62) | (0xFFFFFFFFFFFFULL));  // variant 10
+uprotocol::v1::UUID make_uuid() {
+	auto id = uprotocol::datamodel::builder::UuidBuilder::getBuilder().build();
 	return id;
 }
 
@@ -103,7 +97,7 @@ TEST_F(TestMockUTransport, Send) {
 
 		auto attr = new uprotocol::v1::UAttributes();
 		attr->set_type(uprotocol::v1::UMESSAGE_TYPE_PUBLISH);
-		attr->set_allocated_id(make_uuid());
+		*attr->mutable_id() = make_uuid();
 		attr->set_allocated_source(src);
 		// attr->set_allocated_sink(sink);
 		attr->set_payload_format(uprotocol::v1::UPAYLOAD_FORMAT_PROTOBUF);
