@@ -331,12 +331,18 @@ ValidationResult isValidNotification(const v1::UMessage& umessage) {
 		if (!valid) {
 			return {false, Reason::BAD_SOURCE_URI};
 		}
+		if (umessage.attributes().source().resource_id() == 0) {
+			return {false, Reason::BAD_SOURCE_URI};
+		}
 	}
 
 	{
 		auto [valid, reason] =
 		    uri::isValidNotification(umessage.attributes().sink());
 		if (!valid) {
+			return {false, Reason::BAD_SINK_URI};
+		}
+		if (umessage.attributes().sink().resource_id() != 0) {
 			return {false, Reason::BAD_SINK_URI};
 		}
 	}
