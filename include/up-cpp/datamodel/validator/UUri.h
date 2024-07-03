@@ -88,11 +88,17 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// resource_id must be in the range [0x8000, 0xFFFE].
 [[nodiscard]] ValidationResult isValidPublishTopic(const v1::UUri&);
 
-/// @brief Checks if UUri is valid for notification message.
+/// @brief Checks if UUri is valid for notification source.
 ///
 /// The UUri must not be blank, no field can be a wildcard, and
 /// resource_id must be in the range [0x8000, 0xFFFE].
-[[nodiscard]] ValidationResult isValidNotification(const v1::UUri&);
+[[nodiscard]] ValidationResult isValidNotificationSource(const v1::UUri&);
+
+/// @brief Checks if UUri is valid for notification sink.
+///
+/// The UUri must not be blank, no field can be a wildcard, and
+/// resource_id must be 0.
+[[nodiscard]] ValidationResult isValidNotificationSink(const v1::UUri&);
 
 /// @brief Checks if UUri is valid as a subscription to a published topic or
 ///        as a source filter when subscribing to a notification.

@@ -74,7 +74,7 @@ protected:
 		sink_.set_authority_name("10.0.0.2");
 		sink_.set_ue_id(0x00011102);
 		sink_.set_ue_version_major(0xF9);
-		sink_.set_resource_id(0x8102);
+		sink_.set_resource_id(0);
 
 		method_.set_authority_name("10.0.0.3");
 		method_.set_ue_id(0x00011103);

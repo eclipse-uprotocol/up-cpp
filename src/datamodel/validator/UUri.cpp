@@ -75,7 +75,14 @@ ValidationResult isValid(const v1::UUri& uuri) {
 		}
 	}
 
-	return isValidNotification(uuri);
+	{
+		auto [valid, reason] = isValidNotificationSource(uuri);
+		if (valid) {
+			return {true, std::nullopt};
+		}
+	}
+
+	return isValidNotificationSink(uuri);
 }
 
 ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
@@ -125,17 +132,26 @@ ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 	return {true, std::nullopt};
 }
 
-ValidationResult isValidNotification(const v1::UUri& uuri) {
+ValidationResult isValidNotificationSource(const v1::UUri& uuri) {
 	// disallow wildcards
 	if (uses_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
-	if ((uuri.resource_id() < 0x8000) && (uuri.resource_id() != 0)) {
+	if ((uuri.resource_id() < 0x8000) || (uuri.resource_id() > 0xFFFF)) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
-	if (uuri.resource_id() > 0xFFFF) {
+	return {true, std::nullopt};
+}
+
+ValidationResult isValidNotificationSink(const v1::UUri& uuri) {
+	// disallow wildcards
+	if (uses_wildcards(uuri)) {
+		return {false, Reason::DISALLOWED_WILDCARD};
+	}
+
+	if (uuri.resource_id() != 0) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
