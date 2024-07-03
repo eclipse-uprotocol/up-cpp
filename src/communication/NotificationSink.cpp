@@ -11,13 +11,22 @@
 
 #include "up-cpp/communication/NotificationSink.h"
 
+#include "up-cpp/datamodel/validator/UUri.h"
+
 namespace uprotocol::communication {
+namespace UriValidator = uprotocol::datamodel::validator::uri;
 NotificationSink::SinkOrStatus NotificationSink::create(
     std::shared_ptr<transport::UTransport> transport,
     const uprotocol::v1::UUri& sink, ListenCallback&& callback,
     std::optional<uprotocol::v1::UUri>&& source_filter) {
 	if (!transport) {
 		throw std::invalid_argument("transport cannot be null");
+	}
+	auto [sinkOk, sinkReason] = UriValidator::isValidNotificationSource(sink);
+	if (!sinkOk) {
+		throw UriValidator::InvalidUUri(
+		    "URI is not a valid URI |  " +
+		    std::string(UriValidator::message(*sinkReason)));
 	}
 	auto listener = transport->registerListener(sink, std::move(callback),
 	                                            std::move(source_filter));
