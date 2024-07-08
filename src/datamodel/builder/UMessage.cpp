@@ -34,13 +34,13 @@ UMessageBuilder UMessageBuilder::publish(v1::UUri&& topic) {
 
 UMessageBuilder UMessageBuilder::notification(v1::UUri&& source,
                                               v1::UUri&& sink) {
-	auto [srcOk, srcReason] = UriValidator::isValidNotification(source);
+	auto [srcOk, srcReason] = UriValidator::isValidNotificationSource(source);
 	if (!srcOk) {
 		throw UriValidator::InvalidUUri(
 		    "Source URI is not a valid URI |  " +
 		    std::string(UriValidator::message(*srcReason)));
 	}
-	auto [sinkOk, sinkReason] = UriValidator::isValid(sink);
+	auto [sinkOk, sinkReason] = UriValidator::isValidNotificationSink(sink);
 	if (!sinkOk) {
 		throw UriValidator::InvalidUUri(
 		    "Sink URI is not a valid URI |  " +

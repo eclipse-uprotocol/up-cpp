@@ -309,7 +309,7 @@ TEST_F(TestUUriValidator, ValidPublishTopic) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidNotification) {
+TEST_F(TestUUriValidator, ValidNotificationSource) {
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -328,7 +328,7 @@ TEST_F(TestUUriValidator, ValidNotification) {
 
 	{
 		auto uuri = getUuri();
-		auto [valid, reason] = isValidNotification(uuri);
+		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 		EXPECT_FALSE(uses_wildcards(uuri));
@@ -337,7 +337,7 @@ TEST_F(TestUUriValidator, ValidNotification) {
 	{
 		auto uuri = getUuri();
 		uuri.set_authority_name("");
-		auto [valid, reason] = isValidNotification(uuri);
+		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
@@ -345,7 +345,7 @@ TEST_F(TestUUriValidator, ValidNotification) {
 	{
 		auto uuri = getUuri();
 		uuri.set_resource_id(0xFFFF);
-		auto [valid, reason] = isValidNotification(uuri);
+		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
 	}
@@ -353,7 +353,7 @@ TEST_F(TestUUriValidator, ValidNotification) {
 	{
 		auto uuri = getUuri();
 		uuri.set_resource_id(1);
-		auto [valid, reason] = isValidNotification(uuri);
+		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
 	}
@@ -361,17 +361,59 @@ TEST_F(TestUUriValidator, ValidNotification) {
 	{
 		auto uuri = getUuri();
 		uuri.set_resource_id(0x10000);
-		auto [valid, reason] = isValidNotification(uuri);
+		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
+	}
+}
+
+TEST_F(TestUUriValidator, ValidNotificationSink) {
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name(AUTHORITY_NAME);
+		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(0);
+		return uuri;
+	};
+
+	{
+		auto uuri = getUuri();
+		auto [valid, reason] = isValid(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
 		auto uuri = getUuri();
-		uuri.set_resource_id(0);
-		auto [valid, reason] = isValidNotification(uuri);
+		auto [valid, reason] = isValidNotificationSink(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(uses_wildcards(uuri));
+	}
+
+	{
+		auto uuri = getUuri();
+		uuri.set_authority_name("");
+		auto [valid, reason] = isValidNotificationSink(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
+
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(0xFFFF);
+		auto [valid, reason] = isValidNotificationSink(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
+	}
+
+	{
+		auto uuri = getUuri();
+		uuri.set_resource_id(1);
+		auto [valid, reason] = isValidNotificationSink(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
 	}
 }
 

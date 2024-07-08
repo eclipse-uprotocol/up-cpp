@@ -660,7 +660,7 @@ TEST_F(TestUMessageValidator, ValidPublish) {
 
 TEST_F(TestUMessageValidator, ValidNotification) {
 	source_.set_resource_id(0x8001);
-	sink_.set_resource_id(0xFFFE);
+	sink_.set_resource_id(0);
 
 	{
 		// test common attributes for any message
@@ -871,7 +871,7 @@ TEST_F(TestUMessageValidator, IsValid) {
 		auto source = source_;
 		auto sink = sink_;
 		source.set_resource_id(0x8001);
-		sink.set_resource_id(0xFFFE);
+		sink.set_resource_id(0);
 
 		auto attributes = fakeNotification(source, sink);
 		auto umessage = build(attributes);

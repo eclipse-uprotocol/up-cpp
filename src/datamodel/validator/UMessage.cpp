@@ -327,7 +327,7 @@ ValidationResult isValidNotification(const v1::UMessage& umessage) {
 
 	{
 		auto [valid, reason] =
-		    uri::isValidNotification(umessage.attributes().source());
+		    uri::isValidNotificationSource(umessage.attributes().source());
 		if (!valid) {
 			return {false, Reason::BAD_SOURCE_URI};
 		}
@@ -335,7 +335,7 @@ ValidationResult isValidNotification(const v1::UMessage& umessage) {
 
 	{
 		auto [valid, reason] =
-		    uri::isValidNotification(umessage.attributes().sink());
+		    uri::isValidNotificationSink(umessage.attributes().sink());
 		if (!valid) {
 			return {false, Reason::BAD_SINK_URI};
 		}

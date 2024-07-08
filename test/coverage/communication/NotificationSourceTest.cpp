@@ -45,6 +45,9 @@ protected:
 		transportMock_ =
 		    std::make_shared<uprotocol::test::UTransportMock>(source_);
 
+		source_.set_resource_id(0x8101);
+		sink_.set_resource_id(0x0);
+
 		format_ = UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 		priority_ = UPriority::UPRIORITY_CS1;
 		ttl_ = std::chrono::milliseconds(1000);
