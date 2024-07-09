@@ -22,12 +22,13 @@
 namespace {
 using MsgDiff = google::protobuf::util::MessageDifferencer;
 using namespace uprotocol::communication;
+namespace UriValidator = uprotocol::datamodel::validator::uri;
 
 class NotificationSinkTest : public testing::Test {
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
-	void SetUp() override { buildValidSinkURI(); }
+	void SetUp() override;
 	void TearDown() override {}
 
 	// Run once per execution of the test application.
@@ -35,25 +36,52 @@ protected:
 	NotificationSinkTest() = default;
 	~NotificationSinkTest() = default;
 
-	void buildValidSinkURI(const std::string& authority = "192.168.1.10") {
-		testSink_.set_authority_name(authority);
-		testSink_.set_ue_id(0x18000);
-		testSink_.set_ue_version_major(0x1);
-		testSink_.set_resource_id(0x0);
-	}
+	void buildDefaultSourceURI();
+	void buildValidNotificationURI();
+	void buildInValidNotificationURI();
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
-	uprotocol::v1::UUri testSink_;
+	uprotocol::v1::UUri testTopicUUri_;
+	uprotocol::v1::UUri testInvalidTopicUUri_;
+	uprotocol::v1::UUri testDefaultSourceUUri_;
 	size_t capture_count_ = 0;
 	uprotocol::v1::UMessage capture_msg_;
 
 public:
 	void handleCallbackMessage(const uprotocol::v1::UMessage& message);
 };
+
+void NotificationSinkTest::SetUp() {
+	buildValidNotificationURI();
+	buildInValidNotificationURI();
+	buildDefaultSourceURI();
+}
+
+void NotificationSinkTest::buildDefaultSourceURI() {
+	testDefaultSourceUUri_.set_authority_name("192.168.1.10");
+	testDefaultSourceUUri_.set_ue_id(0x00011102);
+	testDefaultSourceUUri_.set_ue_version_major(0x1);
+	testDefaultSourceUUri_.set_resource_id(0x0);
+}
+
+void NotificationSinkTest::buildValidNotificationURI() {
+	testTopicUUri_.set_authority_name("192.168.1.10");
+	testTopicUUri_.set_ue_id(0x00011101);
+	testTopicUUri_.set_ue_version_major(0x1);
+	testTopicUUri_.set_resource_id(0x8001);
+}
+
+void NotificationSinkTest::buildInValidNotificationURI() {
+	testInvalidTopicUUri_.set_authority_name("192.168.1.10");
+	testInvalidTopicUUri_.set_ue_id(0x00011101);
+	testInvalidTopicUUri_.set_ue_version_major(0x1);
+	// Resource ID should be in the range of 0x8000 to 0xFFFF
+	testInvalidTopicUUri_.set_resource_id(0x1200);
+}
 
 void NotificationSinkTest::handleCallbackMessage(
     const uprotocol::v1::UMessage& message) {
@@ -77,8 +105,8 @@ std::string get_random_string(size_t length) {
 
 // Positive test case with no source filter
 TEST_F(NotificationSinkTest, NotificationSinkSuccessWithoutSourceFilter) {
-	auto transport =
-	    std::make_shared<uprotocol::test::UTransportMock>(testSink_);
+	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
+	    testDefaultSourceUUri_);
 
 	auto callback = [this](const auto& arg) {
 		return this->handleCallbackMessage(arg);
@@ -86,15 +114,16 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithoutSourceFilter) {
 
 	std::optional<uprotocol::v1::UUri> source_filter;
 
-	auto result = NotificationSink::create(
-	    transport, testSink_, std::move(callback), std::move(source_filter));
+	auto result =
+	    NotificationSink::create(transport, testTopicUUri_, std::move(callback),
+	                             std::move(source_filter));
 
 	EXPECT_TRUE(transport->listener_);
 	EXPECT_TRUE(result.has_value());
 
 	auto handle = std::move(result).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(testSink_, transport->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->sink_filter_));
 
 	const size_t max_count = 100;
 	for (auto i = 0; i < max_count; i++) {
@@ -108,10 +137,28 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithoutSourceFilter) {
 	}
 }
 
+// Negative test case with  invalid notification resource ID
+TEST_F(NotificationSinkTest, NotificationSinkFailWithInvalidResourceID) {
+	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
+	    testDefaultSourceUUri_);
+
+	auto callback = [this](const auto& arg) {
+		return this->handleCallbackMessage(arg);
+	};
+
+	std::optional<uprotocol::v1::UUri> source_filter;
+
+	// Notification to invalid UUri topic with resource ID not in correct range
+	EXPECT_THROW(auto result = NotificationSink::create(
+	                 transport, testInvalidTopicUUri_, std::move(callback),
+	                 std::move(source_filter)),
+	             UriValidator::InvalidUUri);
+}
+
 // Positive test case with source filter
 TEST_F(NotificationSinkTest, NotificationSinkSuccessWithSourceFilter) {
-	auto transport =
-	    std::make_shared<uprotocol::test::UTransportMock>(testSink_);
+	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
+	    testDefaultSourceUUri_);
 
 	auto callback = [this](const auto& arg) {
 		return this->handleCallbackMessage(arg);
@@ -125,15 +172,16 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithSourceFilter) {
 		source_filter->set_resource_id(0x0);
 	}
 
-	auto result = NotificationSink::create(
-	    transport, testSink_, std::move(callback), std::move(source_filter));
+	auto result =
+	    NotificationSink::create(transport, testTopicUUri_, std::move(callback),
+	                             std::move(source_filter));
 
 	EXPECT_TRUE(transport->listener_);
 	EXPECT_TRUE(result.has_value());
 
 	auto handle = std::move(result).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(testSink_, transport->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->sink_filter_));
 
 	const size_t max_count = 100;
 	for (auto i = 0; i < max_count; i++) {
@@ -149,8 +197,8 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithSourceFilter) {
 
 // Simulate Error code from transport mock
 TEST_F(NotificationSinkTest, NotificationSinkFailWithErroCode) {
-	auto transport =
-	    std::make_shared<uprotocol::test::UTransportMock>(testSink_);
+	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
+	    testDefaultSourceUUri_);
 
 	auto callback = [this](const auto& arg) {
 		return this->handleCallbackMessage(arg);
@@ -162,8 +210,9 @@ TEST_F(NotificationSinkTest, NotificationSinkFailWithErroCode) {
 	expectedStatus.set_code(uprotocol::v1::UCode::ABORTED);
 	transport->registerListener_status_ = expectedStatus;
 
-	auto result = NotificationSink::create(
-	    transport, testSink_, std::move(callback), std::move(source_filter));
+	auto result =
+	    NotificationSink::create(transport, testTopicUUri_, std::move(callback),
+	                             std::move(source_filter));
 
 	auto actualStatus = std::move(result).error();
 	EXPECT_EQ(actualStatus.code(), expectedStatus.code());
@@ -180,21 +229,22 @@ TEST_F(NotificationSinkTest, NotificationSinkNullTransport) {
 	};
 
 	EXPECT_THROW(auto result = NotificationSink::create(
-	                 transport, testSink_, std::move(callback),
+	                 transport, testTopicUUri_, std::move(callback),
 	                 std::move(source_filter)),
 	             std::invalid_argument);
 }
 
 //  notification sink with null callback
 TEST_F(NotificationSinkTest, NotificationSinkNullCallback) {
-	auto transport =
-	    std::make_shared<uprotocol::test::UTransportMock>(testSink_);
+	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
+	    testDefaultSourceUUri_);
 
 	std::optional<uprotocol::v1::UUri> source_filter;
 
 	// bind to null callback
-	auto result = NotificationSink::create(
-	    transport, testSink_, std::move(nullptr), std::move(source_filter));
+	auto result =
+	    NotificationSink::create(transport, testTopicUUri_, std::move(nullptr),
+	                             std::move(source_filter));
 
 	const size_t max_count = 100;
 	uprotocol::v1::UMessage msg;
