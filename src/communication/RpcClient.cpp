@@ -108,24 +108,33 @@ RpcClient::RpcClient(std::shared_ptr<transport::UTransport> transport,
 	}
 }
 
-void RpcClient::invokeMethod(v1::UMessage&& request, Callback&& callback) {
+RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
+                                                Callback&& callback) {
 	auto when_expire = std::chrono::steady_clock::now() + ttl_;
 	auto reqid = request.attributes().id();
 	// Used to ensure that, no matter what, the callback is only called once
 	auto callback_once = std::make_shared<std::once_flag>();
 
+	auto [callback_handle, callable] =
+	    Connection::establish(std::move(callback));
+
 	///////////////////////////////////////////////////////////////////////////
-	// Wraps the callback to handle receive filtering and commstatus checking
-	auto wrapper = [callback, reqid = std::move(reqid),
-	                callback_once](const v1::UMessage& m) {
+	// Wraps the callback to handle receive filtering and commstatus checking.
+	// This is likely less efficient than a single shared callback that maps
+	// responses via request IDs, but we can always optimize once we
+	// characterize performance.
+	auto wrapper = [callable, reqid = std::move(reqid),
+	                callback_once](const v1::UMessage& m) mutable {
 		using MsgDiff = google::protobuf::util::MessageDifferencer;
 		if (MsgDiff::Equals(m.attributes().reqid(), reqid)) {
 			if (m.attributes().commstatus() == v1::UCode::OK) {
-				std::call_once(*callback_once,
-				               [&callback, &m]() { callback(m); });
+				std::call_once(*callback_once, [&callable, &m]() {
+					MessageOrStatus message(m);
+					callable(std::move(message));
+				});
 			} else {
-				std::call_once(*callback_once, [&callback, &m]() {
-					callback(
+				std::call_once(*callback_once, [&callable, &m]() {
+					callable(
 					    utils::Unexpected<Status>(m.attributes().commstatus()));
 				});
 			}
@@ -134,14 +143,14 @@ void RpcClient::invokeMethod(v1::UMessage&& request, Callback&& callback) {
 	///////////////////////////////////////////////////////////////////////////
 
 	///////////////////////////////////////////////////////////////////////////
-	// Called locally when the request has expired. Will be handed off to the
-	// expiration monitoring service.
-	auto expire = [callback = std::move(callback), callback_once](
-	                  std::variant<v1::UStatus, Commstatus>&& reason) {
-		std::call_once(*callback_once, [callback = std::move(callback),
-		                                reason = std::move(reason)]() {
-			callback(utils::Unexpected<Status>(std::move(reason)));
-		});
+	// Called when the request has expired or failed. Will be handed off to the
+	// expiration monitoring service once the request has been sent.
+	auto expire = [callable, callback_once](
+	                  std::variant<v1::UStatus, Commstatus>&& reason) mutable {
+		std::call_once(
+		    *callback_once, [&callable, reason = std::move(reason)]() {
+			    callable(utils::Unexpected<Status>(std::move(reason)));
+		    });
 	};
 	///////////////////////////////////////////////////////////////////////////
 
@@ -155,23 +164,27 @@ void RpcClient::invokeMethod(v1::UMessage&& request, Callback&& callback) {
 		auto send_result = transport_->send(request);
 		if (send_result.code() != v1::UCode::OK) {
 			expire(send_result);
+		} else {
+			expire_service_->enqueue(when_expire,
+			                         std::move(maybe_handle).value(),
+			                         std::move(expire));
 		}
-
-		expire_service_->enqueue(when_expire, std::move(maybe_handle).value(),
-		                         std::move(expire));
 	}
+
+	return std::move(callback_handle);
 }
 
-void RpcClient::invokeMethod(datamodel::builder::Payload&& payload,
-                             Callback&& callback) {
-	invokeMethod(builder_.build(std::move(payload)), std::move(callback));
+RpcClient::InvokeHandle RpcClient::invokeMethod(
+    datamodel::builder::Payload&& payload, Callback&& callback) {
+	return invokeMethod(builder_.build(std::move(payload)),
+	                    std::move(callback));
 }
 
-void RpcClient::invokeMethod(Callback&& callback) {
-	invokeMethod(builder_.build(), std::move(callback));
+RpcClient::InvokeHandle RpcClient::invokeMethod(Callback&& callback) {
+	return invokeMethod(builder_.build(), std::move(callback));
 }
 
-std::future<RpcClient::MessageOrStatus> RpcClient::invokeMethod(
+RpcClient::InvokeFuture RpcClient::invokeMethod(
     datamodel::builder::Payload&& payload) {
 	// Note: functors need to be copy constructable. We work around this by
 	// wrapping the promise in a shared_ptr. Unique access to it will be
@@ -179,30 +192,40 @@ std::future<RpcClient::MessageOrStatus> RpcClient::invokeMethod(
 	// allows exactly one call to the callback via std::call_once.
 	auto promise = std::make_shared<std::promise<MessageOrStatus>>();
 	auto future = promise->get_future();
-	invokeMethod(std::move(payload),
-	             [promise](MessageOrStatus maybe_message) mutable {
-		             promise->set_value(maybe_message);
-	             });
+	auto handle = invokeMethod(
+	    std::move(payload), [promise](MessageOrStatus maybe_message) mutable {
+		    promise->set_value(maybe_message);
+	    });
 
-	return future;
+	return {std::move(future), std::move(handle)};
 }
 
-std::future<RpcClient::MessageOrStatus> RpcClient::invokeMethod() {
+RpcClient::InvokeFuture RpcClient::invokeMethod() {
 	// Note: functors need to be copy constructable. We work around this by
 	// wrapping the promise in a shared_ptr. Unique access to it will be
 	// assured by the implementation at the core of invokeMethod - it only
 	// allows exactly one call to the callback via std::call_once.
 	auto promise = std::make_shared<std::promise<MessageOrStatus>>();
 	auto future = promise->get_future();
-	invokeMethod([promise](MessageOrStatus maybe_message) mutable {
-		promise->set_value(maybe_message);
-	});
+	auto handle =
+	    invokeMethod([promise](MessageOrStatus maybe_message) mutable {
+		    promise->set_value(maybe_message);
+	    });
 
-	return future;
+	return {std::move(future), std::move(handle)};
 }
 
 RpcClient::RpcClient(RpcClient&&) = default;
 RpcClient::~RpcClient() = default;
+
+RpcClient::InvokeFuture::InvokeFuture() = default;
+RpcClient::InvokeFuture::InvokeFuture(InvokeFuture&& other) noexcept = default;
+RpcClient::InvokeFuture& RpcClient::InvokeFuture::operator=(
+    InvokeFuture&& other) noexcept = default;
+
+RpcClient::InvokeFuture::InvokeFuture(std::future<MessageOrStatus>&& future,
+                                      InvokeHandle&& handle) noexcept
+    : callback_handle_(std::move(handle)), future_(std::move(future)) {}
 
 }  // namespace uprotocol::communication
 
