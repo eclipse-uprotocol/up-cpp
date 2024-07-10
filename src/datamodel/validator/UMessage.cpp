@@ -75,6 +75,11 @@ ValidationResult isValid(const v1::UMessage& umessage) {
 
 		case v1::UMessageType::UMESSAGE_TYPE_UNSPECIFIED:
 			return {false, Reason::UNSPECIFIED_MESSAGE_TYPE};
+
+		case v1::UMessageType::UMessageType_INT_MIN_SENTINEL_DO_NOT_USE_:
+		case v1::UMessageType::UMessageType_INT_MAX_SENTINEL_DO_NOT_USE_:
+		default:
+			break;
 	}
 
 	return std::make_tuple(false, Reason::INVALID_MESSAGE_TYPE);

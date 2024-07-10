@@ -322,7 +322,6 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) {
 }
 
 TEST_F(TestUMessageValidator, ValidRpcResponse) {
-	UPriority priority = UPRIORITY_CS4;
 	source_.set_resource_id(0);
 
 	{

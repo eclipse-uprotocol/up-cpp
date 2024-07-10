@@ -180,7 +180,8 @@ TEST_F(TestUuidValidator, RetrieveElapsedTime) {
 	auto expected_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 	    expected_elapsed_time);
 
-	EXPECT_NEAR(elapsed_ms.count(), expected_ms.count(), 10);
+	EXPECT_NEAR(static_cast<double>(elapsed_ms.count()),
+	            static_cast<double>(expected_ms.count()), 10);
 }
 
 // Test retrieving remaining time
@@ -202,7 +203,8 @@ TEST_F(TestUuidValidator, RetrieveRemainingTime) {
 	auto expected_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 	    expected_remaining_time);
 
-	EXPECT_NEAR(remaining_ms.count(), expected_ms.count(), 10);
+	EXPECT_NEAR(static_cast<double>(remaining_ms.count()),
+	            static_cast<double>(expected_ms.count()), 10);
 }
 
 // Test remaining time of 0ms

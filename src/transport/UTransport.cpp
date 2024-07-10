@@ -76,6 +76,8 @@ UTransport::registerListener(const v1::UUri& sink_filter,
 
 const v1::UUri& UTransport::getDefaultSource() const { return defaultSource_; }
 
-void UTransport::cleanupListener(CallableConn listener) {}
+void UTransport::cleanupListener(CallableConn listener) {
+	static_cast<void>(listener);
+}
 
 }  // namespace uprotocol::transport

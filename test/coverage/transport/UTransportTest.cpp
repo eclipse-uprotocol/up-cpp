@@ -27,12 +27,12 @@ static std::mt19937 random_gen(random_dev());
 static std::uniform_int_distribution<int> char_dist('A', 'z');
 
 std::string get_random_string(size_t max_len = 32) {
-	std::uniform_int_distribution<int> len_dist(1, max_len);
+	std::uniform_int_distribution<int> len_dist(1, static_cast<int>(max_len));
 	size_t len = len_dist(random_gen);
 	std::string retval;
 	retval.reserve(len);
 	for (size_t i = 0; i < len; i++)
-		retval += char_dist(random_gen);
+		retval += static_cast<char>(char_dist(random_gen));
 	return retval;
 }
 
@@ -162,7 +162,7 @@ TEST_F(TestMockUTransport, registerListener) {
 	EXPECT_TRUE(MsgDiff::Equals(source_filter, *transport->source_filter_));
 
 	const size_t max_count = 1000 * 100;
-	for (auto i = 0; i < max_count; i++) {
+	for (size_t i = 0; i < max_count; i++) {
 		uprotocol::v1::UMessage msg;
 		auto attr = new uprotocol::v1::UAttributes();
 		msg.set_allocated_attributes(attr);
