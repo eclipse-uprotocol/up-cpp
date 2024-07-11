@@ -54,18 +54,10 @@ struct RpcClient {
 	                   std::optional<uint32_t> permission_level = {},
 	                   std::optional<std::string> token = {});
 
-	/// @brief A status code that can be returned in the response message's
-	///        attributes.
-	using Commstatus = v1::UCode;
-
-	/// @brief Represents the combined status possibilities for transport and
-	///        uProtocol network communications.
-	using Status = std::variant<v1::UStatus, Commstatus>;
-
-	/// @brief Contains either a UMessage (when successful) or a UStatus /
-	///        Commstatus when an error occurred. Commstatus would be set based
+	/// @brief Contains either a UMessage (when successful) or a UStatus
+	///        when an error occurred. The UStatus could be set based
 	///        on the commstatus attributes field in any returned messages.
-	using MessageOrStatus = utils::Expected<v1::UMessage, Status>;
+	using MessageOrStatus = utils::Expected<v1::UMessage, v1::UStatus>;
 
 	/// @brief Callback connections for callbacks passed to invokeMethod()
 	using Connection = utils::callbacks::Connection<void, MessageOrStatus&&>;
@@ -116,7 +108,8 @@ struct RpcClient {
 	///       * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///         received before the request expired (based on request TTL).
 	///       * A UStatus with the value returned by UTransport::send().
-	///       * A Commstatus as received in the response message (if not OK).
+	///       * A UStatus based on the commstatus received in the response
+	///         message (if not OK).
 	///       * A UMessage containing the response from the RPC target.
 	[[nodiscard]] InvokeHandle invokeMethod(datamodel::builder::Payload&&,
 	                                        Callback&&);
@@ -132,7 +125,8 @@ struct RpcClient {
 	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///            received before the request expired (based on request TTL).
 	///          * A UStatus with the value returned by UTransport::send().
-	///          * A Commstatus as received in the response message (if not OK).
+	///          * A UStatus based on the commstatus received in the response
+	///            message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] InvokeFuture invokeMethod(datamodel::builder::Payload&&);
 
@@ -147,7 +141,8 @@ struct RpcClient {
 	///       * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///         received before the request expired (based on request TTL).
 	///       * A UStatus with the value returned by UTransport::send().
-	///       * A Commstatus as received in the response message (if not OK).
+	///       * A UStatus based on the commstatus received in the response
+	///         message (if not OK).
 	///       * A UMessage containing the response from the RPC target.
 	[[nodiscard]] InvokeHandle invokeMethod(Callback&&);
 
@@ -162,7 +157,8 @@ struct RpcClient {
 	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///            received before the request expired (based on request TTL).
 	///          * A UStatus with the value returned by UTransport::send().
-	///          * A Commstatus as received in the response message (if not OK).
+	///          * A UStatus based on the commstatus received in the response
+	///            message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] InvokeFuture invokeMethod();
 

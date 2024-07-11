@@ -24,7 +24,7 @@ using namespace uprotocol;
 struct PendingRequest {
 	std::chrono::steady_clock::time_point when_expire;
 	transport::UTransport::ListenHandle response_listener;
-	std::function<void(communication::RpcClient::Status)> expire;
+	std::function<void(v1::UStatus)> expire;
 	size_t instance_id;
 
 	auto operator>(const PendingRequest& other) const;
@@ -66,7 +66,7 @@ struct RpcClient::ExpireService {
 
 	void enqueue(std::chrono::steady_clock::time_point when_expire,
 	             transport::UTransport::ListenHandle&& response_listener,
-	             std::function<void(RpcClient::Status)> expire) {
+	             std::function<void(v1::UStatus)> expire) {
 		detail::PendingRequest pending{
 		    .when_expire = when_expire,
 		    .response_listener = std::move(response_listener),
@@ -133,9 +133,12 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 					callable(std::move(message));
 				});
 			} else {
-				std::call_once(*callback_once, [&callable, &m]() {
-					callable(
-					    utils::Unexpected<Status>(m.attributes().commstatus()));
+				v1::UStatus status;
+				status.set_code(m.attributes().commstatus());
+				status.set_message("Received response with !OK commstatus");
+				std::call_once(*callback_once, [&callable,
+				                                status = std::move(status)]() {
+					callable(utils::Unexpected<v1::UStatus>(std::move(status)));
 				});
 			}
 		}
@@ -145,11 +148,10 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 	///////////////////////////////////////////////////////////////////////////
 	// Called when the request has expired or failed. Will be handed off to the
 	// expiration monitoring service once the request has been sent.
-	auto expire = [callable, callback_once](
-	                  std::variant<v1::UStatus, Commstatus>&& reason) mutable {
+	auto expire = [callable, callback_once](v1::UStatus&& reason) mutable {
 		std::call_once(
 		    *callback_once, [&callable, reason = std::move(reason)]() {
-			    callable(utils::Unexpected<Status>(std::move(reason)));
+			    callable(utils::Unexpected<v1::UStatus>(std::move(reason)));
 		    });
 	};
 	///////////////////////////////////////////////////////////////////////////
@@ -159,11 +161,11 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 	    request.attributes().sink());
 
 	if (!maybe_handle) {
-		expire(maybe_handle.error());
+		expire(std::move(maybe_handle).error());
 	} else {
 		auto send_result = transport_->send(request);
 		if (send_result.code() != v1::UCode::OK) {
-			expire(send_result);
+			expire(std::move(send_result));
 		} else {
 			expire_service_->enqueue(when_expire,
 			                         std::move(maybe_handle).value(),
@@ -256,8 +258,7 @@ ScrubablePendingQueue::~ScrubablePendingQueue() {
 auto ScrubablePendingQueue::scrub(size_t instance_id) {
 	// Collect all the expire lambdas so they can be called without the
 	// lock held.
-	std::vector<std::function<void(communication::RpcClient::Status)>>
-	    all_expired;
+	std::vector<std::function<void(v1::UStatus)>> all_expired;
 
 	c.erase(
 	    std::remove_if(c.begin(), c.end(),
@@ -304,8 +305,7 @@ void ExpireWorker::enqueue(PendingRequest&& pending) {
 }
 
 void ExpireWorker::scrub(size_t instance_id) {
-	std::vector<std::function<void(communication::RpcClient::Status)>>
-	    all_expired;
+	std::vector<std::function<void(v1::UStatus)>> all_expired;
 	{
 		std::lock_guard lock(pending_mtx_);
 		all_expired = pending_.scrub(instance_id);

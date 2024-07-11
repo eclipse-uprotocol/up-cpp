@@ -113,18 +113,14 @@ protected:
 	std::shared_ptr<uprotocol::test::UTransportMock> transport_;
 };
 
-template <typename StatusT, typename ExpectedT>
+template <typename ExpectedT>
 void checkErrorResponse(
     const uprotocol::communication::RpcClient::MessageOrStatus& maybe_response,
     ExpectedT expected_status) {
 	EXPECT_FALSE(maybe_response);
 	if (!maybe_response) {
-		auto& some_status = maybe_response.error();
-		EXPECT_TRUE(std::holds_alternative<StatusT>(some_status));
-		if (std::holds_alternative<StatusT>(some_status)) {
-			auto& status = std::get<StatusT>(some_status);
-			EXPECT_TRUE(status == expected_status);
-		}
+		auto& status = maybe_response.error();
+		EXPECT_TRUE(status == expected_status);
 	}
 }
 
@@ -252,8 +248,8 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadTimeout) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::DEADLINE_EXCEEDED);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::DEADLINE_EXCEEDED);
 	}
 }
 
@@ -274,8 +270,8 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadListenFail) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::RESOURCE_EXHAUSTED);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::RESOURCE_EXHAUSTED);
 	}
 }
 
@@ -295,8 +291,8 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadSendFail) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::FAILED_PRECONDITION);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::FAILED_PRECONDITION);
 	}
 }
 
@@ -317,8 +313,8 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadClientDestroyed) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		EXPECT_NO_THROW(auto maybe_response = invoke_future.get();
-		                checkErrorResponse<uprotocol::v1::UStatus>(
-		                    maybe_response, uprotocol::v1::UCode::CANCELLED););
+		                checkErrorResponse(maybe_response,
+		                                   uprotocol::v1::UCode::CANCELLED););
 	}
 }
 
@@ -341,8 +337,8 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadCommstatus) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UCode>(
-		    maybe_response, uprotocol::v1::UCode::PERMISSION_DENIED);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::PERMISSION_DENIED);
 	}
 }
 
@@ -446,8 +442,8 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadTimeout) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::DEADLINE_EXCEEDED);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::DEADLINE_EXCEEDED);
 	}
 }
 
@@ -468,8 +464,8 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadListenFail) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::RESOURCE_EXHAUSTED);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::RESOURCE_EXHAUSTED);
 	}
 }
 
@@ -489,8 +485,8 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadSendFail) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::FAILED_PRECONDITION);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::FAILED_PRECONDITION);
 	}
 }
 
@@ -511,8 +507,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadClientDestroyed) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::CANCELLED);
+		checkErrorResponse(maybe_response, uprotocol::v1::UCode::CANCELLED);
 	}
 }
 
@@ -535,8 +530,8 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadCommstatus) {
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
 		auto maybe_response = invoke_future.get();
-		checkErrorResponse<uprotocol::v1::UCode>(
-		    maybe_response, uprotocol::v1::UCode::PERMISSION_DENIED);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::PERMISSION_DENIED);
 	}
 }
 
@@ -597,8 +592,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadTimeout) {
 	    handle = client.invokeMethod(
 	        [this, &callback_called, &callback_event](auto maybe_response) {
 		        callback_called = true;
-		        checkErrorResponse<uprotocol::v1::UStatus>(
-		            maybe_response, uprotocol::v1::UCode::DEADLINE_EXCEEDED);
+		        checkErrorResponse(maybe_response,
+		                           uprotocol::v1::UCode::DEADLINE_EXCEEDED);
 		        callback_event.notify_all();
 	        }));
 
@@ -627,8 +622,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadListenFail) {
 	EXPECT_NO_THROW(handle = client.invokeMethod([this, &callback_called](
 	                                                 auto maybe_response) {
 		callback_called = true;
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::RESOURCE_EXHAUSTED);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::RESOURCE_EXHAUSTED);
 	}));
 
 	EXPECT_EQ(transport_->send_count_, 0);
@@ -648,8 +643,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadSendFail) {
 	EXPECT_NO_THROW(handle = client.invokeMethod([this, &callback_called](
 	                                                 auto maybe_response) {
 		callback_called = true;
-		checkErrorResponse<uprotocol::v1::UStatus>(
-		    maybe_response, uprotocol::v1::UCode::FAILED_PRECONDITION);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::FAILED_PRECONDITION);
 	}));
 
 	EXPECT_TRUE(callback_called);
@@ -669,8 +664,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadClientDestroyed) {
 		EXPECT_NO_THROW(handle = client.invokeMethod([this, &callback_called](
 		                                                 auto maybe_response) {
 			callback_called = true;
-			checkErrorResponse<uprotocol::v1::UStatus>(
-			    maybe_response, uprotocol::v1::UCode::CANCELLED);
+			checkErrorResponse(maybe_response, uprotocol::v1::UCode::CANCELLED);
 		}));
 	}
 
@@ -687,8 +681,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadCommstatus) {
 	EXPECT_NO_THROW(handle = client.invokeMethod([this, &callback_called](
 	                                                 auto maybe_response) {
 		callback_called = true;
-		checkErrorResponse<uprotocol::v1::UCode>(
-		    maybe_response, uprotocol::v1::UCode::PERMISSION_DENIED);
+		checkErrorResponse(maybe_response,
+		                   uprotocol::v1::UCode::PERMISSION_DENIED);
 	}));
 
 	using UMessageBuilder = uprotocol::datamodel::builder::UMessageBuilder;
@@ -803,8 +797,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadTimeout) {
 	        fakePayload(),
 	        [this, &callback_called, &callback_event](auto maybe_response) {
 		        callback_called = true;
-		        checkErrorResponse<uprotocol::v1::UStatus>(
-		            maybe_response, uprotocol::v1::UCode::DEADLINE_EXCEEDED);
+		        checkErrorResponse(maybe_response,
+		                           uprotocol::v1::UCode::DEADLINE_EXCEEDED);
 		        callback_event.notify_all();
 	        }));
 
@@ -834,8 +828,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadListenFail) {
 	    handle = client.invokeMethod(
 	        fakePayload(), [this, &callback_called](auto maybe_response) {
 		        callback_called = true;
-		        checkErrorResponse<uprotocol::v1::UStatus>(
-		            maybe_response, uprotocol::v1::UCode::RESOURCE_EXHAUSTED);
+		        checkErrorResponse(maybe_response,
+		                           uprotocol::v1::UCode::RESOURCE_EXHAUSTED);
 	        }));
 
 	EXPECT_EQ(transport_->send_count_, 0);
@@ -856,8 +850,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadSendFail) {
 	    handle = client.invokeMethod(
 	        fakePayload(), [this, &callback_called](auto maybe_response) {
 		        callback_called = true;
-		        checkErrorResponse<uprotocol::v1::UStatus>(
-		            maybe_response, uprotocol::v1::UCode::FAILED_PRECONDITION);
+		        checkErrorResponse(maybe_response,
+		                           uprotocol::v1::UCode::FAILED_PRECONDITION);
 	        }));
 
 	EXPECT_TRUE(callback_called);
@@ -878,8 +872,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadClientDestroyed) {
 		    handle = client.invokeMethod(
 		        fakePayload(), [this, &callback_called](auto maybe_response) {
 			        callback_called = true;
-			        checkErrorResponse<uprotocol::v1::UStatus>(
-			            maybe_response, uprotocol::v1::UCode::CANCELLED);
+			        checkErrorResponse(maybe_response,
+			                           uprotocol::v1::UCode::CANCELLED);
 		        }));
 	}
 
@@ -897,8 +891,8 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadCommstatus) {
 	    handle = client.invokeMethod(
 	        fakePayload(), [this, &callback_called](auto maybe_response) {
 		        callback_called = true;
-		        checkErrorResponse<uprotocol::v1::UCode>(
-		            maybe_response, uprotocol::v1::UCode::PERMISSION_DENIED);
+		        checkErrorResponse(maybe_response,
+		                           uprotocol::v1::UCode::PERMISSION_DENIED);
 	        }));
 
 	using UMessageBuilder = uprotocol::datamodel::builder::UMessageBuilder;
@@ -1042,7 +1036,7 @@ TEST_F(RpcClientTest, PendingRequestsExpireInOrder) {
 		                         &expire_signal](auto maybe_response) {
 			    if (!maybe_response) {
 				    auto some_status = maybe_response.error();
-				    if (std::get<uprotocol::v1::UStatus>(some_status).code() !=
+				    if (some_status.code() !=
 				        uprotocol::v1::UCode::DEADLINE_EXCEEDED) {
 					    return;
 				    }
@@ -1152,8 +1146,7 @@ TEST_F(RpcClientTest, MultipleClientInstances) {
 		if (future.valid() &&
 		    (future.wait_for(0ms) == std::future_status::ready)) {
 			auto maybe_response = future.get();
-			checkErrorResponse<uprotocol::v1::UStatus>(
-			    maybe_response, uprotocol::v1::UCode::CANCELLED);
+			checkErrorResponse(maybe_response, uprotocol::v1::UCode::CANCELLED);
 			++num_cancelled;
 		}
 	}
@@ -1200,11 +1193,11 @@ TEST_F(RpcClientTest, MultipleClientInstances) {
 				++ready_futures;
 				auto maybe_message = future.get();
 				if (!maybe_message &&
-				    (std::get<uprotocol::v1::UStatus>(maybe_message.error())
-				         .code() == uprotocol::v1::UCode::DEADLINE_EXCEEDED)) {
+				    (maybe_message.error().code() ==
+				     uprotocol::v1::UCode::DEADLINE_EXCEEDED)) {
 					++expired_futures;
-					checkErrorResponse<uprotocol::v1::UStatus>(
-					    maybe_message, uprotocol::v1::UCode::DEADLINE_EXCEEDED);
+					checkErrorResponse(maybe_message,
+					                   uprotocol::v1::UCode::DEADLINE_EXCEEDED);
 				}
 			}
 		}
