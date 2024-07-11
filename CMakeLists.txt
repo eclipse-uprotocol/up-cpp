@@ -35,12 +35,12 @@ if(CMAKE_BUILD_TYPE STREQUAL Coverage)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 message("* Current Compiler Flags: ${CMAKE_CXX_FLAGS}")
-	
+
 # TODO NEEDED?
 #add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
 # This is the root CMakeLists.txt file; We can set project wide settings here
-# TODO: Is this needed? 
+# TODO: Is this needed?
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	set(CMAKE_CXX_STANDARD 17)
 	# place libraries in a lib directory and executables in a bin directory,
@@ -58,17 +58,27 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-	$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}> 
+	$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
 	${up-core-api_INCLUDE_DIR}
 	${protobuf_INCLUDE_DIR}
 	${spdlog_INCLUDE_DIR})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(${PROJECT_NAME} 
-	PRIVATE 
+target_compile_options(${PROJECT_NAME} PUBLIC
+	-Wall
+	-Wswitch-enum
+	-Wcast-qual
+	-Wuninitialized
+	-Wconversion
+	-pedantic
+	-Werror
+)
+
+target_link_libraries(${PROJECT_NAME}
+	PRIVATE
 	up-core-api::up-core-api
-	protobuf::libprotobuf 
+	protobuf::libprotobuf
 	spdlog::spdlog
 	gcov)
 

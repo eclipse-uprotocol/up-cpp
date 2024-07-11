@@ -19,8 +19,8 @@ RpcServer::RpcServer(std::shared_ptr<transport::UTransport> transport,
                      std::optional<v1::UPayloadFormat> format,
                      std::optional<std::chrono::milliseconds> ttl)
     : transport_(std::move(transport)),
-      expected_payload_format_(std::move(format)),
-      ttl_(ttl) {}
+      ttl_(ttl),
+      expected_payload_format_(std::move(format)) {}
 
 RpcServer::ServerOrStatus RpcServer::create(
     std::shared_ptr<transport::UTransport> transport,

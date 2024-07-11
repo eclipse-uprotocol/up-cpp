@@ -126,7 +126,7 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithoutSourceFilter) {
 	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->sink_filter_));
 
 	const size_t max_count = 100;
-	for (auto i = 0; i < max_count; i++) {
+	for (size_t i = 0; i < max_count; i++) {
 		uprotocol::v1::UMessage msg;
 		auto attr = std::make_shared<uprotocol::v1::UAttributes>();
 		*msg.mutable_attributes() = *attr;
@@ -184,7 +184,7 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithSourceFilter) {
 	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->sink_filter_));
 
 	const size_t max_count = 100;
-	for (auto i = 0; i < max_count; i++) {
+	for (size_t i = 0; i < max_count; i++) {
 		uprotocol::v1::UMessage msg;
 		auto attr = std::make_shared<uprotocol::v1::UAttributes>();
 		*msg.mutable_attributes() = *attr;
@@ -246,7 +246,6 @@ TEST_F(NotificationSinkTest, NotificationSinkNullCallback) {
 	    NotificationSink::create(transport, testTopicUUri_, std::move(nullptr),
 	                             std::move(source_filter));
 
-	const size_t max_count = 100;
 	uprotocol::v1::UMessage msg;
 	auto attr = std::make_shared<uprotocol::v1::UAttributes>();
 	*msg.mutable_attributes() = *attr;

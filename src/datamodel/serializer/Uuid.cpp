@@ -89,11 +89,13 @@ uprotocol::v1::UUID AsString::deserialize(const std::string& str) {
 		unix_ts_ms = std::stoull(str.substr(0, 8), nullptr, HEX_BASE) << 16;
 		unix_ts_ms |= std::stoull(str.substr(9, 4), nullptr, HEX_BASE);
 
-		uint16_t msb_low = std::stoul(str.substr(14, 4), nullptr, HEX_BASE);
+		uint16_t msb_low = static_cast<uint16_t>(
+		    std::stoul(str.substr(14, 4), nullptr, HEX_BASE));
 		ver = (msb_low >> 12) & UUID_VERSION_MASK;
 		rand_a = msb_low & UUID_RANDOM_A_MASK;
 
-		uint16_t var_randb = std::stoul(str.substr(19, 4), nullptr, HEX_BASE);
+		uint16_t var_randb = static_cast<uint16_t>(
+		    std::stoul(str.substr(19, 4), nullptr, HEX_BASE));
 		var = (var_randb >> 14) & UUID_VARIANT_MASK;
 		rand_b = static_cast<uint64_t>(var_randb & MASK_14_BITS)
 		         << RANDOM_B_SHIFT;

@@ -56,9 +56,6 @@ std::string_view message(Reason reason) {
 }
 
 ValidationResult isUuid(const uprotocol::v1::UUID uuid) {
-	uint64_t msb = uuid.msb();
-	uint64_t lsb = uuid.lsb();
-
 	uint8_t version = internalGetVersion(uuid);
 	if (version != UUID_VERSION_7) {
 		return {false, Reason::WRONG_VERSION};
