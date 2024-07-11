@@ -40,12 +40,6 @@ bool operator==(const uprotocol::v1::UMessage& lhs,
 }
 
 bool operator==(const uprotocol::v1::UStatus& lhs,
-                const uprotocol::v1::UStatus& rhs) {
-	using namespace google::protobuf::util;
-	return MessageDifferencer::Equals(lhs, rhs);
-}
-
-bool operator==(const uprotocol::v1::UStatus& lhs,
                 const uprotocol::v1::UCode& rhs) {
 	return lhs.code() == rhs;
 }

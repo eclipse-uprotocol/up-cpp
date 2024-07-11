@@ -67,11 +67,11 @@ struct RpcClient::ExpireService {
 	void enqueue(std::chrono::steady_clock::time_point when_expire,
 	             transport::UTransport::ListenHandle&& response_listener,
 	             std::function<void(v1::UStatus)> expire) {
-		detail::PendingRequest pending{
-		    .when_expire = when_expire,
-		    .response_listener = std::move(response_listener),
-		    .expire = std::move(expire),
-		    .instance_id = instance_id_};
+		detail::PendingRequest pending;
+		pending.when_expire = when_expire;
+		pending.response_listener = std::move(response_listener);
+		pending.expire = std::move(expire);
+		pending.instance_id = instance_id_;
 
 		worker.enqueue(std::move(pending));
 	}
@@ -112,7 +112,16 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
                                                 Callback&& callback) {
 	auto when_expire = std::chrono::steady_clock::now() + ttl_;
 	auto reqid = request.attributes().id();
-	// Used to ensure that, no matter what, the callback is only called once
+
+	// There are multiple paths to calling the callback. It can be called for
+	// errors communicating with the transport, errors returned from the
+	// uProtocol network, when the request times out (by the ExpireWorker), or
+	// when a response comes back from the RpcServer. Because several of these
+	// sources are asynchronous, we need to ensure that the callback is called
+	// once and only once. We achieve this using std::call_once as a wrapper
+	// around any point where the callback is called. The std::once_flag is
+	// shared between all of those separate points to ensure that only one
+	// attempt to call the callback succeeds.
 	auto callback_once = std::make_shared<std::once_flag>();
 
 	auto [callback_handle, callable] =
@@ -245,8 +254,11 @@ auto PendingRequest::operator>(const PendingRequest& other) const {
 ScrubablePendingQueue::~ScrubablePendingQueue() {
 	const v1::UStatus cancel_reason = []() {
 		v1::UStatus reason;
-		reason.set_code(v1::UCode::CANCELLED);
-		reason.set_message("ExpireWorker shutting down");
+		reason.set_code(v1::UCode::INTERNAL);
+		reason.set_message(
+		    "ERROR: ExpireWorker has shut down while requests are still "
+		    "pending. This should never occur and likely indicates that an "
+		    "RpcClient instance has been leaked somewhere.");
 		return reason;
 	}();
 
@@ -335,7 +347,7 @@ void ExpireWorker::doWork() {
 			if (!pending_.empty()) {
 				const auto when_expire = pending_.top().when_expire;
 				if (when_expire <= now) {
-					maybe_expire = pending_.top().expire;
+					maybe_expire = std::move(pending_.top().expire);
 					expired_handle =
 					    std::move(pending_.top().response_listener);
 					pending_.pop();
