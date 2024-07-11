@@ -11,22 +11,14 @@
 
 #include <gtest/gtest.h>
 #include <up-cpp/communication/Publisher.h>
-#include <up-cpp/datamodel/builder/Payload.h>
-#include <up-cpp/datamodel/serializer/UUri.h>
+#include <up-cpp/datamodel/validator/UMessage.h>
 #include <uprotocol/v1/uri.pb.h>
 
 #include "UTransportMock.h"
-#include "spdlog/spdlog.h"
-#include "up-cpp/communication/Publisher.h"
-#include "up-cpp/datamodel/builder/UMessage.h"
-#include "up-cpp/datamodel/validator/UMessage.h"
-#include "up-cpp/transport/UTransport.h"
 
 using namespace uprotocol::communication;
-using namespace uprotocol::datamodel::builder;
-using namespace uprotocol::v1;
-using ::testing::_;
-using ::testing::Return;
+using namespace uprotocol;
+
 namespace {
 using namespace uprotocol::datamodel::builder;
 
@@ -47,8 +39,8 @@ protected:
 		transportMock_ =
 		    std::make_shared<uprotocol::test::UTransportMock>(source_);
 
-		format_ = UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
-		priority_ = UPriority::UPRIORITY_CS2;
+		format_ = v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
+		priority_ = v1::UPriority::UPRIORITY_CS2;
 		ttl_ = std::chrono::milliseconds(1000);
 	}
 
@@ -65,11 +57,12 @@ protected:
 	static void TearDownTestSuite() {}
 
 	std::shared_ptr<uprotocol::test::UTransportMock> transportMock_;
-	UUri source_;
-	UUri topic_;
-	UPayloadFormat format_;
-	std::optional<UPriority> priority_;
+	v1::UUri source_;
+	v1::UUri topic_;
+	v1::UPayloadFormat format_;
+	std::optional<v1::UPriority> priority_;
 	std::optional<std::chrono::milliseconds> ttl_;
+	uprotocol::v1::UMessage capture_msg_;
 };
 
 TEST_F(TestPublisher, PublisherSuccess) {
@@ -90,11 +83,6 @@ TEST_F(TestPublisher, PublisherSuccess) {
 	    uprotocol::datamodel::validator::message::isValidPublish(
 	        transportMock_->message_);
 	EXPECT_EQ(valid, true);
-	spdlog::info("RCDBG-1 ttl[{}]",
-	             transportMock_->message_.attributes().ttl());
-	spdlog::info(
-	    "RCDBG-1 priority[{}]",
-	    static_cast<int>(transportMock_->message_.attributes().priority()));
 }
 
 TEST_F(TestPublisher, PublishFailure) {
@@ -110,11 +98,6 @@ TEST_F(TestPublisher, PublishFailure) {
 	auto status = publisher.publish(std::move(testPayload));
 
 	EXPECT_EQ(status.code(), retval.code());
-	spdlog::info("RCDBG-2 ttl[{}]",
-	             transportMock_->message_.attributes().ttl());
-	spdlog::info(
-	    "RCDBG-2 priority[{}]",
-	    static_cast<int>(transportMock_->message_.attributes().priority()));
 }
 
 TEST_F(TestPublisher, PublishSuccessWithoutTTL) {
@@ -159,7 +142,7 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {
 	EXPECT_EQ(valid, true);
 
 	EXPECT_EQ(transportMock_->message_.attributes().priority(),
-	          UPriority::UPRIORITY_CS1);
+	          v1::UPriority::UPRIORITY_CS1);
 }
 
 }  // namespace
