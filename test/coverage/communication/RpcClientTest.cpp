@@ -1051,6 +1051,43 @@ TEST_F(RpcClientTest, PendingRequestsExpireInOrder) {
 	EXPECT_EQ(expire_order, expected_order);
 }
 
+// Tests for a bug found while reviewing the code in PR #202
+//
+// If a client first makes a request with a really long timeout, then another
+// client makes a request with a short timeout while the first request is still
+// pending, the ExpireWorker will remain asleep with the original timeout
+// even though the priority queue has a new order with the second request at
+// the top. This results in the second request not expiring until after the
+// first request's expiration time (even though the expirations will be called
+// in order).
+TEST_F(RpcClientTest, ExpireWorkerWakesForRightPendingRequest) {
+	auto slow_client = uprotocol::communication::RpcClient(
+	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10s);
+
+	auto slow_future = slow_client.invokeMethod();
+
+	// Waits long enough for the worker to wake and go back to sleep with the
+	// 10s TTL for the slow request as the next scheduled wake time.
+	auto slow_ready = slow_future.wait_for(100ms);
+	EXPECT_EQ(slow_ready, std::future_status::timeout);
+
+	auto fast_client = uprotocol::communication::RpcClient(
+	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 25ms);
+
+	auto fast_future = fast_client.invokeMethod();
+
+	// The request from the fast_client should expire within about 25ms, but
+	// the request from the slow_client should still be pending for several
+	// more seconds.
+	auto fast_ready = fast_future.wait_for(1s);
+	slow_ready = slow_future.wait_for(100ms);
+
+	EXPECT_EQ(fast_ready, std::future_status::ready);
+	EXPECT_EQ(slow_ready, std::future_status::timeout);
+}
+// NOTE: for some reason, when the above test fails, the _next_ test also
+//       fails. I do not know how this is possible.
+
 TEST_F(RpcClientTest, MultipleClientInstances) {
 	constexpr size_t num_clients = 20;
 
