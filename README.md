@@ -22,7 +22,7 @@ implementation, such as [up-transport-zenoh-cpp][zenoh-transport-repo].
 Using the recipes found in [up-conan-recipes][conan-recipe-repo], build these
 Conan packages:
 
-1. [up-core-api][spec-repo]: `conan create --version 1.5.8 --build=missing up-core-api/developer`
+1. [up-core-api][spec-repo]: `conan create --version 1.6.0 --build=missing up-core-api/release`
 
 **NOTE:** all `conan` commands in this document use  Conan 2.x syntax. Please
 adjust accordingly when using Conan 1.x.
@@ -34,7 +34,7 @@ To add up-cpp to your conan build dependencies, place following in your
 
 ```
 [requires]
-up-cpp/0.2.0
+up-cpp/[~1.0]
 
 [generators]
 CMakeDeps
