@@ -373,14 +373,20 @@ void ExpireWorker::doWork() {
 				wake_worker_.wait(
 				    lock, [this]() { return stop_ || !pending_.empty(); });
 			} else {
+				// Reasons that we *expect* to wake:
+				// * The time `wake_when` has arrived
+				// * A new pending request has been placed at the top of the
+				//   priority queue (either by insertion or deletion)
+				// * The queue has been emptied (loop back to indefinite sleep)
+				// * A stop has been requested
 				auto wake_when = pending_.top().when_expire;
 				wake_worker_.wait_until(lock, wake_when, [this, &wake_when]() {
 					auto when_next_wake = wake_when;
 					if (!pending_.empty()) {
-						when_next_wake =
-						    std::min(wake_when, pending_.top().when_expire);
+						when_next_wake = pending_.top().when_expire;
 					}
-					return stop_ ||
+					return stop_ || when_next_wake != wake_when ||
+					       pending_.empty() ||
 					       (std::chrono::steady_clock::now() >= when_next_wake);
 				});
 			}
