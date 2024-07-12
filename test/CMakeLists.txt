@@ -30,7 +30,6 @@ function(add_coverage_test Name)
         PUBLIC
         up-core-api::up-core-api
         up-cpp::up-cpp
-        spdlog::spdlog
         protobuf::protobuf
         PRIVATE
         GTest::gtest_main
