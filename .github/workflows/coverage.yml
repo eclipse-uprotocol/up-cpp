@@ -37,12 +37,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: up-conan-recipes
-          repository: gregmedd/up-conan-recipes
+          repository: eclipse-uprotocol/up-conan-recipes
 
       - name: Build up-core-api conan package
         shell: bash
         run: |
-          conan create --version 1.5.8 up-conan-recipes/up-core-api/developer
+          conan create --version 1.6.0 up-conan-recipes/up-core-api/release
 
       - name: Build up-cpp with tests
         shell: bash
