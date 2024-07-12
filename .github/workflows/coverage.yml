@@ -8,7 +8,7 @@ on:
   
 jobs:
   test:
-    name: Generate Test Coverage eport
+    name: Generate Test Coverage Report
     runs-on: ubuntu-latest
 
     steps:
@@ -37,37 +37,37 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: up-conan-recipes
-          repository: gregmedd/up-conan-recipes
+          repository: eclipse-uprotocol/up-conan-recipes
 
       - name: Build up-core-api conan package
         shell: bash
         run: |
-          conan create --version 1.5.8 up-conan-recipes/up-core-api/developer
+          conan create --version 1.6.0 up-conan-recipes/up-core-api/release
 
       - name: Build up-cpp with tests
         shell: bash
         run: |
           cd up-cpp
-          conan install . --build=missing
-          cd build
-          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Coverage
+          conan install --build=missing .
+          cd build/Release
+          cmake -S ../../ -DCMAKE_TOOLCHAIN_FILE=generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Coverage
           cmake --build . -- -j
 
       - name: Run all tests
         shell: bash
         run: |
-          cd up-cpp/build
+          cd up-cpp/build/Release
           chmod +x bin/*
           ctest || true
 
       - name: Run Coverage report
         shell: bash
         run: |
-          cd up-cpp/build/
-          mkdir -p ./Coverage
-          gcovr -r .. --html --html-details -o ./Coverage/index.html -e '.*test.*'
+          cd up-cpp/build/Release
+          mkdir -p ../Coverage
+          gcovr -r ../../ --html --html-details -o ../Coverage/index.html -e '.*test.*'
           cd ..
-          echo "Coverage report can be found here: ./Coverage/index.html"
+          echo "Coverage report can be found here: ../Coverage/index.html"
 
       - name: Extract and Print Coverage Percentage
         shell: bash
@@ -79,7 +79,7 @@ jobs:
 
 
       
-      - name: Upload test results
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:

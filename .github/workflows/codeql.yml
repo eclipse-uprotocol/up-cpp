@@ -69,16 +69,16 @@ jobs:
       name: Build up-core-api conan package
       shell: bash
       run: |
-        conan create --version 1.5.8 up-conan-recipes/up-core-api/developer
+        conan create --version 1.6.0 up-conan-recipes/up-core-api/release
 
     - if: matrix.build-mode == 'manual'
       name: Build up-cpp with tests
       shell: bash
       run: |
         cd up-cpp
-        conan install . --build=missing
-        cd build
-        cmake -S .. -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
+        conan install --build=missing .
+        cmake --preset conan-release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
+        cd build/Release
         cmake --build . -- -j
 
     - name: Perform CodeQL Analysis

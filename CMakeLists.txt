@@ -10,10 +10,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.10.0)
-project(up-cpp VERSION 0.1.5  LANGUAGES CXX DESCRIPTION "C++ API for uProtocol")
+project(up-cpp VERSION 1.0.0  LANGUAGES CXX DESCRIPTION "C++ API for uProtocol")
 
 find_package(protobuf REQUIRED)
-find_package(spdlog REQUIRED)
 find_package(up-core-api REQUIRED)
 
 message("* Adding build types...")
@@ -36,9 +35,6 @@ if(CMAKE_BUILD_TYPE STREQUAL Coverage)
 endif()
 message("* Current Compiler Flags: ${CMAKE_CXX_FLAGS}")
 
-# TODO NEEDED?
-#add_definitions(-DSPDLOG_FMT_EXTERNAL)
-
 # This is the root CMakeLists.txt file; We can set project wide settings here
 # TODO: Is this needed?
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
@@ -60,8 +56,7 @@ target_include_directories(${PROJECT_NAME}
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
 	${up-core-api_INCLUDE_DIR}
-	${protobuf_INCLUDE_DIR}
-	${spdlog_INCLUDE_DIR})
+	${protobuf_INCLUDE_DIR})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
@@ -79,7 +74,6 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 	up-core-api::up-core-api
 	protobuf::libprotobuf
-	spdlog::spdlog
 	gcov)
 
 enable_testing()
