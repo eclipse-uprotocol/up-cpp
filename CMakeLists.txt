@@ -10,7 +10,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.10.0)
-project(up-cpp VERSION 0.1.5  LANGUAGES CXX DESCRIPTION "C++ API for uProtocol")
+project(up-cpp VERSION 1.0.0  LANGUAGES CXX DESCRIPTION "C++ API for uProtocol")
 
 find_package(protobuf REQUIRED)
 find_package(spdlog REQUIRED)
