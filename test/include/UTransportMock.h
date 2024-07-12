@@ -15,6 +15,9 @@
 #include <gmock/gmock.h>
 #include <up-cpp/transport/UTransport.h>
 
+#include <atomic>
+#include <mutex>
+
 namespace uprotocol::test {
 
 class UTransportMock : public uprotocol::transport::UTransport {
@@ -30,9 +33,11 @@ public:
 		(*listener_)(msg);
 	}
 
-	size_t send_count_;
+	std::atomic<size_t> send_count_;
+
 	uprotocol::v1::UStatus send_status_;
 	uprotocol::v1::UStatus registerListener_status_;
+
 	std::optional<uprotocol::utils::callbacks::CallerHandle<
 	    void, uprotocol::v1::UMessage const&>>
 	    listener_;
@@ -41,12 +46,17 @@ public:
 	    cleanup_listener_;
 	std::optional<uprotocol::v1::UUri> source_filter_;
 	v1::UUri sink_filter_;
+	std::mutex register_mtx_;
+
 	v1::UMessage message_;
+	std::mutex message_mtx_;
 
 private:
 	[[nodiscard]] v1::UStatus sendImpl(const v1::UMessage& message) override {
-		v1::UStatus retval;
-		message_ = message;
+		{
+			std::lock_guard lock(message_mtx_);
+			message_ = message;
+		}
 		send_count_++;
 		return send_status_;
 	}
@@ -54,6 +64,7 @@ private:
 	[[nodiscard]] v1::UStatus registerListenerImpl(
 	    const v1::UUri& sink_filter, CallableConn&& listener,
 	    std::optional<v1::UUri>&& source_filter) override {
+		std::lock_guard lock(register_mtx_);
 		listener_ = listener;
 		source_filter_ = source_filter;
 		sink_filter_ = sink_filter;

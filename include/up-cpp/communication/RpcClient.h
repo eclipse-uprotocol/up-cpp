@@ -54,17 +54,49 @@ struct RpcClient {
 	                   std::optional<uint32_t> permission_level = {},
 	                   std::optional<std::string> token = {});
 
-	using Commstatus = v1::UCode;
+	/// @brief Contains either a UMessage (when successful) or a UStatus
+	///        when an error occurred. The UStatus could be set based
+	///        on the commstatus attributes field in any returned messages.
+	using MessageOrStatus = utils::Expected<v1::UMessage, v1::UStatus>;
 
-	/// @brief Contains either a UMessage (when successful) or a UStatus /
-	/// Commstatus when an error occurred. Commstatus would be set based
-	/// on the commstatus attributes field in any returned messages.
-	using MessageOrStatus =
-	    utils::Expected<v1::UMessage, std::variant<v1::UStatus, Commstatus>>;
+	/// @brief Callback connections for callbacks passed to invokeMethod()
+	using Connection = utils::callbacks::Connection<void, MessageOrStatus&&>;
 
 	/// @brief Callback function signature used in the callback form of
-	///        invokeMethod
-	using Callback = std::function<void(MessageOrStatus)>;
+	///        invokeMethod()
+	using Callback = Connection::Callback;
+
+	/// @brief Handle that must be held for a callback to remain registered
+	///        for the duration of an RPC call.
+	using InvokeHandle = Connection::Handle;
+
+	/// @brief Extension to std::future that also holds a callback handle
+	class InvokeFuture {
+		InvokeHandle callback_handle_;
+		std::future<MessageOrStatus> future_;
+
+	public:
+		InvokeFuture();
+		InvokeFuture(InvokeFuture&&) noexcept;
+		InvokeFuture(std::future<MessageOrStatus>&&, InvokeHandle&&) noexcept;
+
+		InvokeFuture& operator=(InvokeFuture&&) noexcept;
+
+		/// @name Passthroughs for std::future
+		/// @{
+		auto get() { return future_.get(); }
+		auto valid() const noexcept { return future_.valid(); }
+		void wait() const { future_.wait(); }
+		template <typename... Args>
+		auto wait_for(Args&&... args) const {
+			return future_.wait_for(std::forward<Args>(args)...);
+		}
+		template <typename... Args>
+		auto wait_until(Args&&... args) const {
+			return future_.wait_until(std::forward<Args>(args)...);
+		}
+		/// @}
+	};
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
@@ -76,9 +108,11 @@ struct RpcClient {
 	///       * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///         received before the request expired (based on request TTL).
 	///       * A UStatus with the value returned by UTransport::send().
-	///       * A Commstatus as received in the response message (if not OK).
+	///       * A UStatus based on the commstatus received in the response
+	///         message (if not OK).
 	///       * A UMessage containing the response from the RPC target.
-	void invokeMethod(datamodel::builder::Payload&&, Callback&&);
+	[[nodiscard]] InvokeHandle invokeMethod(datamodel::builder::Payload&&,
+	                                        Callback&&);
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
@@ -91,10 +125,10 @@ struct RpcClient {
 	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///            received before the request expired (based on request TTL).
 	///          * A UStatus with the value returned by UTransport::send().
-	///          * A Commstatus as received in the response message (if not OK).
+	///          * A UStatus based on the commstatus received in the response
+	///            message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
-	[[nodiscard]] std::future<MessageOrStatus> invokeMethod(
-	    datamodel::builder::Payload&&);
+	[[nodiscard]] InvokeFuture invokeMethod(datamodel::builder::Payload&&);
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
@@ -107,9 +141,10 @@ struct RpcClient {
 	///       * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///         received before the request expired (based on request TTL).
 	///       * A UStatus with the value returned by UTransport::send().
-	///       * A Commstatus as received in the response message (if not OK).
+	///       * A UStatus based on the commstatus received in the response
+	///         message (if not OK).
 	///       * A UMessage containing the response from the RPC target.
-	void invokeMethod(Callback&&);
+	[[nodiscard]] InvokeHandle invokeMethod(Callback&&);
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
@@ -122,15 +157,30 @@ struct RpcClient {
 	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
 	///            received before the request expired (based on request TTL).
 	///          * A UStatus with the value returned by UTransport::send().
-	///          * A Commstatus as received in the response message (if not OK).
+	///          * A UStatus based on the commstatus received in the response
+	///            message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
-	[[nodiscard]] std::future<MessageOrStatus> invokeMethod();
+	[[nodiscard]] InvokeFuture invokeMethod();
 
-	~RpcClient() = default;
+	/// @brief Default move constructor (defined in RpcClient.cpp)
+	RpcClient(RpcClient&&);
+
+	/// @brief Default destructor (defined in RpcClient.cpp)
+	~RpcClient();
 
 private:
+	/// @brief Internal implementation of invokeMethod that handles all the
+	///        shared logic for the public invokeMethod() methods.
+	InvokeHandle invokeMethod(v1::UMessage&&, Callback&&);
+
+	/// @brief Handle to a shared worker that monitors for and cancels expired
+	///        requests.
+	struct ExpireService;
+
 	std::shared_ptr<transport::UTransport> transport_;
+	std::chrono::milliseconds ttl_;
 	datamodel::builder::UMessageBuilder builder_;
+	std::unique_ptr<ExpireService> expire_service_;
 };
 
 }  // namespace uprotocol::communication
