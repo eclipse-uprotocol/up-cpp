@@ -1,6 +1,5 @@
 [requires]
 up-core-api/1.6.0
-spdlog/1.13.0
 protobuf/3.21.12
 
 [test_requires]
