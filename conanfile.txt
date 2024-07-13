@@ -1,9 +1,10 @@
 [requires]
-up-core-api/1.6.0
-protobuf/3.21.12
+up-core-api/[~1.6]
+spdlog/[~1.13]
+protobuf/[~3.21]
 
 [test_requires]
-gtest/1.14.0
+gtest/[~1.14]
 
 [generators]
 CMakeDeps
