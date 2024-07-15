@@ -64,14 +64,15 @@ UTransport::HandleOrStatus UTransport::registerListener(
 		}
 	} else {
 		auto [source_ok, bad_source_reason] =
-		    UriValidator::isValid(source_filter);
+		    UriValidator::isValidFilter(source_filter);
 		if (!source_ok) {
 			throw UriValidator::InvalidUUri(
 			    "source_filter is not a valid URI |  " +
 			    std::string(UriValidator::message(*bad_source_reason)));
 		}
 
-		auto [sink_ok, bad_sink_reason] = UriValidator::isValid(*sink_filter);
+		auto [sink_ok, bad_sink_reason] =
+		    UriValidator::isValidFilter(*sink_filter);
 		if (!sink_ok) {
 			throw UriValidator::InvalidUUri(
 			    "sink_filter is not a valid URI |  " +
