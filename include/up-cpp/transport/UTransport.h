@@ -49,13 +49,13 @@ class UTransport {
 public:
 	/// @brief Constructor
 	///
-	/// @param Default Authority and Entity (as a UUri) for clients using this
-	///        transport instance.
+	/// @param Default Authority and Entity ID representing the uEntity that
+	///        owns this transport instance.
 	///
-	/// @throws InvalidUUri if the provided UUri is not valid as a default
-	///         source. Validation is done with isValidDefaultSource().
+	/// @throws InvalidUUri if the provided UUri is not valid as an entity URI
+	///         Validation is done with isValidDefaultEntityUri().
 	///
-	/// @see uprotocol::datamodel::validator::uri::isValidDefaultSource()
+	/// @see uprotocol::datamodel::validator::uri::isValidEntityUri()
 	/// @see uprotocol::datamodel::validator::uri::InvalidUUri
 	explicit UTransport(const v1::UUri&);
 
@@ -83,54 +83,142 @@ public:
 	/// to check if they are connected.
 	using ListenHandle = typename CallbackConnection::Handle;
 
+	/// @brief Return value where a ListenHandle is provided on success and a
+	///        v1::UStatus is provided on error.
+	using HandleOrStatus = utils::Expected<ListenHandle, v1::UStatus>;
+
 	/// @brief Register listener to be called when UMessage is received
-	///        for the given URI, filtered by message source.
+	///        for the given resource ID.
 	///
-	/// @remarks The UUris here can contain wildcard matches for the filters.
+	/// Automatically populates the sink_filter URI by calling getEntityUri()
+	/// then replacing that URI's resource ID with sink_resource_filter.
 	///
-	/// @param sink_filter UUri for where messages are expected to arrive via
-	///                    the underlying transport technology. The callback
-	///                    will be called when a message with a matching sink
-	///                    arrives.
+	/// @see registerListener(ListenCallback&&, const v1::UUri& source_filter,
+	///                       std::optional<v1::UUri>&& sink_filter)
+	///      for more details on the filter parameters.
+	///
 	/// @param listener Callback to be called when a message is received
-	///                 at the given URI. The UMessage will be provided
-	///                 as a parameter when the callback is called.
-	/// @param source_filter (Optional) UUri for where messages are expected to
-	///                      have been sent from. The callback will only be
-	///                      called for messages where the source matches.
+	///                 matching the provided filters. The received UMessage
+	///                 will be passed to the callback.
+	/// @param source_filter URI to use as a source filter for incoming
+	///                      messages.
+	/// @param sink_resource_filter Resource ID that will be combined with
+	///                             getEntityUri() to produce a sink filter.
 	///
-	/// @throws InvalidUUri if either UUri fails the isValid() check.
+	/// @throws datamodel::validator::InvalidUUri when any URI does not pass
+	///         validation.
+	///
+	/// @returns * A connected ListenHandle if the listener was registered
+	///            successfully.
+	///          * A v1::UStatus containing a FAILSTATUS code otherwise.
+	[[nodiscard]] HandleOrStatus registerListener(
+	    ListenCallback&& listener, const v1::UUri& source_filter,
+	    uint16_t sink_resource_filter);
+
+	/// @brief Register listener to be called when UMessage is received
+	///        matching the URI filters provided.
+	///
+	/// @param listener Callback to be called when a message is received
+	///                 matching the provided filters. The received UMessage
+	///                 will be passed to the callback.
+	/// @param source_filter URI that will be compared to the source URI
+	///                      attribute on incoming messages. This could contain
+	///                      a URI for a specific entity/resource, or contain
+	///                      wildcard values.
+	/// @param sink_filter (optional)
+	///                    * When set, this URI will be compared to the sink
+	///                      URI attribute on incoming messages. This would
+	///                      typically be based on the URI retrieved from
+	///                      getEntityUri(), but could have other values or
+	///                      wildcards present.
+	///                    * When unset, it will be assumed that the
+	///                      source_filter will be used like a topic for
+	///                      pub/sub-like messaging. This is effectively a
+	///                      wildcard, but the precise handling of this state
+	///                      is transport implementation specific.
 	///
 	/// @see uprotocol::datamodel::validator::uri::isValid()
+	/// @see uprotocol::datamodel::validator::uri::isValidSubscription()
 	/// @see uprotocol::datamodel::validator::uri::InvalidUUri
 	///
-	/// @returns * OKSTATUS and a connected ListenHandle if the listener
-	///            was registered successfully.
-	///          * FAILSTATUS with the appropriate failure and an
-	///            unconnected ListenHandle otherwise.
-	[[nodiscard]] utils::Expected<ListenHandle, v1::UStatus> registerListener(
-	    const v1::UUri& sink_filter, ListenCallback&& listener,
-	    std::optional<v1::UUri>&& source_filter = {});
-
-	/// @brief Gets the default source Authority and Entity for all clients
-	///        using this transport instance.
+	/// @throws datamodel::validator::InvalidUUri when any URI does not pass
+	///         validation with isValid().
+	/// @throws datamodel::validator::InvalidUUri the sink_filter is unset and
+	///         source_filter does not pass isValidSubscription().
 	///
-	/// @returns Const reference to the default source.
-	[[nodiscard]] const v1::UUri& getDefaultSource() const;
+	/// @returns * A connected ListenHandle if the listener was registered
+	///            successfully.
+	///          * A v1::UStatus containing a FAILSTATUS code otherwise.
+	[[nodiscard]] HandleOrStatus registerListener(
+	    ListenCallback&& listener, const v1::UUri& source_filter,
+	    std::optional<v1::UUri>&& sink_filter);
+
+	/// @note This interface has been replaced with alternatives that better
+	///       align with the 1.6.0 uProtocol specifications. It is no longer
+	///       recommended to use this method as it will be removed in a future
+	///       release. It has been modified for uP 1.6.0 compliance.
+	///
+	/// @brief Register listener to be called when UMessage is received
+	///        matching the provided filters.
+	///
+	/// @remarks This is a wrapper around the new, non-deprecated
+	///          registerListener() method. Pay special attention to the
+	///          parameters and their meanings.
+	///
+	/// @param sink_or_topic_filter
+	///            Has two different meanings:
+	///                * When source_filter is provided, this filter will be
+	///                  matched against the sink field of received messages.
+	///                * When source_filter is unset, this filter will be the
+	///                  topic for pub/sub-like messaging, passed to the new
+	///                  registerListener() as the source_filter.
+	/// @param listener Callback to be called when a message is received
+	///                 matching the provided filters. The received UMessage
+	///                 will be passed to the callback.
+	/// @param source_filter (Optional)
+	///                      * When set, this filter will be matched against
+	///                        the source field in received messages.
+	///                      * When unset, the sink_or_topic_filter will be
+	///                        treated as the topic for a pub/sub-like mode.
+	///
+	/// @throws datamodel::validator::InvalidUUri when any URI does not pass
+	///         validation.
+	///
+	/// @returns * A connected ListenHandle if the listener was registered
+	///            successfully.
+	///          * A v1::UStatus containing a FAILSTATUS code otherwise.
+	[[deprecated(
+	    "See alternate overload of "
+	    "registerListener()")]] [[nodiscard]] HandleOrStatus
+	registerListener(const v1::UUri& sink_or_topic_filter,
+	                 ListenCallback&& listener,
+	                 std::optional<v1::UUri>&& source_filter = {});
+
+	/// @brief Gets the default URI representing the entity that owns this
+	///        transport instance.
+	///
+	/// @remarks This URI is consumed both by higher-layer APIs and in
+	///          UTransport methods locally (where documented).
+	///
+	/// @returns Const reference to the entity URI.
+	[[nodiscard]] const v1::UUri& getEntityUri() const;
+
+	/// @see getEntityUri()
+	[[deprecated("Replaced with getEntityUri()")]] [[nodiscard]] const v1::UUri&
+	getDefaultSource() const;
 
 	virtual ~UTransport() = default;
 
 protected:
-	/// @brief Send a message.
+	/// @brief Send a message using the transport implementation.
 	///
-	/// Must be implemented by the transport client library.
+	/// @note Must be implemented by the transport library.
 	///
-	/// @param message UMessage to be sent.
+	/// @param UMessage to be sent.
 	///
-	/// @returns * OKSTATUS if the payload has been successfully
-	///            sent (ACK'ed)
+	/// @returns * OKSTATUS if the payload has been successfully sent (ACK'ed)
 	///          * FAILSTATUS with the appropriate failure.
-	[[nodiscard]] virtual v1::UStatus sendImpl(const v1::UMessage& message) = 0;
+	[[nodiscard]] virtual v1::UStatus sendImpl(const v1::UMessage&) = 0;
 
 	/// @brief Represents the callable end of a callback connection.
 	///
@@ -140,44 +228,50 @@ protected:
 	/// to invoke the callback.
 	using CallableConn = typename CallbackConnection::Callable;
 
-	/// @brief Register listener to be called when UMessage is received
-	///        for the given URI.
+	/// @brief Register a connected listener with the transport implementation.
 	///
-	/// The transport library is required to implement this.
+	/// @note The transport library is required to implement this.
 	///
-	/// @remarks If this doesn't return OKSTATUS, the public wrapping
-	///          version of registerListener() will reset the connection
-	///          handle before returning it to the caller.
+	/// @remarks If this doesn't return OKSTATUS, the outer registerListener()
+	///          will reset the connection and return the UStatus as an error
+	///          to the caller.
 	///
-	/// @param sink_filter UUri for where messages are expected to arrive via
-	///                    the underlying transport technology. The callback
-	///                    will be called when a message with a matching sink
-	/// @param listener shared_ptr to a connected callback object, to be
+	/// @param listener Connected CallerHandle representing the callback to be
 	///                 called when a message is received.
-	/// @param source_filter (Optional) UUri for where messages are expected to
-	///                      have been sent from. The callback will only be
-	///                      called for messages where the source matches.
+	/// @param source_filter Filter to compare with the source attribute on
+	///                      incoming messages. Could be a literal match or
+	///                      match on wildcards.
+	/// @param sink_filter (Optional) Filter to compare with the sink attribute
+	///                    on incoming messages. If unset, the transport may
+	///                    need to implement special behavior per UProtocol
+	///                    spec. An unset sink_filter generally implies a
+	///                    pub/sub-like messaging mode.
 	///
 	/// @returns * OKSTATUS if the listener was registered successfully.
 	///          * FAILSTATUS with the appropriate failure otherwise.
 	[[nodiscard]] virtual v1::UStatus registerListenerImpl(
-	    const v1::UUri& sink_filter, CallableConn&& listener,
-	    std::optional<v1::UUri>&& source_filter) = 0;
+	    CallableConn&& listener, const v1::UUri& source_filter,
+	    std::optional<v1::UUri>&& sink_filter) = 0;
 
 	/// @brief Clean up on listener disconnect.
 	///
-	/// The transport library can optionally implement this if it needs
-	/// to clean up when a callbacks::Connection is dropped.
+	/// The transport library can optionally implement this if it needs to
+	/// clean up when a callbacks::Connection is dropped.
 	///
 	/// @note The default implementation does nothing.
 	///
-	/// @param listener shared_ptr of the Connection that has been broken.
+	/// @remarks CallerHandle instances are sortable and matchable on the
+	///          connection they represent.
+	///
+	/// @param listener CallerHandle for the connection that has been broken.
 	virtual void cleanupListener(CallableConn listener);
 
 private:
-	/// @brief Default source Authority and Entity for all clients using this
-	///        transport instance.
-	const v1::UUri defaultSource_;
+	/// @brief URI for the entity owning this transport.
+	///
+	/// @remarks Many Layer 2 implementations will use this to form the source
+	///          address for their calls to UTransport.
+	const v1::UUri entity_uri_;
 };
 
 }  // namespace uprotocol::transport
