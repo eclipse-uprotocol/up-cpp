@@ -27,11 +27,5 @@ SPDX-License-Identifier: Apache-2.0
 
 The following are libraries used by this project:
 
-* http://cloudevents.io
-* https://github.com/google/googletest
 * http://protobuf.dev
-* https://github.com/openssl/openssl
-* https://github.com/topics/libuuid
-* https://github.com/Tencent/rapidjson
-* https://github.com/gabime/spdlog
-* https://github.com/cgreen-devs/cgreen
+* https://github.com/google/googletest

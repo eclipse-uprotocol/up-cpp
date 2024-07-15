@@ -10,7 +10,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.10.0)
-project(up-cpp VERSION 0.1.5  LANGUAGES CXX DESCRIPTION "C++ API for uProtocol")
+project(up-cpp VERSION 1.1.0  LANGUAGES CXX DESCRIPTION "C++ API for uProtocol")
 
 find_package(protobuf REQUIRED)
 find_package(spdlog REQUIRED)
@@ -35,9 +35,6 @@ if(CMAKE_BUILD_TYPE STREQUAL Coverage)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 message("* Current Compiler Flags: ${CMAKE_CXX_FLAGS}")
-
-# TODO NEEDED?
-#add_definitions(-DSPDLOG_FMT_EXTERNAL)
 
 # This is the root CMakeLists.txt file; We can set project wide settings here
 # TODO: Is this needed?

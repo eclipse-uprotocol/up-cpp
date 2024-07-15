@@ -39,15 +39,15 @@ jobs:
       - name: Build up-core-api conan package
         shell: bash
         run: |
-          conan create --version 1.5.8 up-conan-recipes/up-core-api/developer
+          conan create --version 1.6.0 up-conan-recipes/up-core-api/release
 
       - name: Build up-cpp with tests
         shell: bash
         run: |
           cd up-cpp
-          conan install . --build=missing
-          cd build
-          cmake -S .. -DCMAKE_TOOLCHAIN_FILE=Release/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
+          conan install --build=missing .
+          cmake --preset conan-release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
+          cd build/Release
           cmake --build . -- -j
 
       - name: Save conan cache to archive
@@ -59,13 +59,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: up-cpp/build
+          path: up-cpp/build/Release
 
       - name: Upload compile commands
         uses: actions/upload-artifact@v4
         with:
           name: compile-commands
-          path: up-cpp/build/compile_commands.json
+          path: up-cpp/build/Release/compile_commands.json
 
       - name: Upload conan cache for linting
         uses: actions/upload-artifact@v4
@@ -83,12 +83,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: up-cpp/build
+          path: up-cpp/build/Release
 
       - name: Run all tests
         shell: bash
         run: |
-          cd up-cpp/build
+          cd up-cpp/build/Release
           chmod +x bin/*
           ctest
 
@@ -97,7 +97,7 @@ jobs:
         if: success() || failure()
         with:
           name: test-results
-          path: 'up-cpp/build/test/results/*.xml'
+          path: 'up-cpp/build/Release/test/results/*.xml'
 
 # NOTE: Run dynamic analysis in unit tests
   memcheck:
@@ -110,7 +110,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: up-cpp/build
+          path: up-cpp/build/Release
 
       - name: Install Valgrind
         run: |
@@ -120,7 +120,7 @@ jobs:
       - name: Run Valgrind Memcheck
         continue-on-error: true
         run: |
-          cd up-cpp/build
+          cd up-cpp/build/Release
           chmod +x bin/*
           mkdir -p valgrind_logs
           : > valgrind_logs/valgrind_memcheck_summary.log
@@ -166,7 +166,7 @@ jobs:
         if: success() || failure()
         with:
           name: valgrind-memcheck-log
-          path: up-cpp/build/valgrind_logs/valgrind_complete_memcheck_log.log
+          path: up-cpp/build/Release/valgrind_logs/valgrind_complete_memcheck_log.log
 
   threadcheck:
     name: Run Valgrind ThreadCheck
@@ -178,7 +178,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: up-cpp/build
+          path: up-cpp/build/Release
 
       - name: Install Valgrind
         run: |
@@ -188,7 +188,7 @@ jobs:
       - name: Run Valgrind ThreadCheck
         continue-on-error: true
         run: |
-          cd up-cpp/build
+          cd up-cpp/build/Release
           chmod +x bin/*
           mkdir -p valgrind_logs
           : > valgrind_logs/valgrind_threadcheck_summary.log
@@ -235,7 +235,7 @@ jobs:
         if: success() || failure()
         with:
           name: valgrind-threadcheck-log
-          path: up-cpp/build/valgrind_logs/valgrind_complete_threadcheck_log.log
+          path: up-cpp/build/Release/valgrind_logs/valgrind_complete_threadcheck_log.log
 
   helgrind:
     name: Run Valgrind Helgrind
@@ -247,7 +247,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: up-cpp/build
+          path: up-cpp/build/Release
 
       - name: Install Valgrind
         run: |
@@ -257,7 +257,7 @@ jobs:
       - name: Run Valgrind Helgrind
         continue-on-error: true
         run: |
-          cd up-cpp/build
+          cd up-cpp/build/Release
           chmod +x bin/*
           mkdir -p valgrind_logs
           : > valgrind_logs/valgrind_helgrind_summary.log
@@ -304,7 +304,7 @@ jobs:
         if: success() || failure()
         with:
           name: valgrind-helgrind-log
-          path: up-cpp/build/valgrind_logs/valgrind_complete_helgrind_log.log
+          path: up-cpp/build/Release/valgrind_logs/valgrind_complete_helgrind_log.log
 
   dhat:
     name: Run Valgrind DHAT
@@ -316,7 +316,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: up-cpp/build
+          path: up-cpp/build/Release
 
       - name: Install Valgrind
         run: |
@@ -326,7 +326,7 @@ jobs:
       - name: Run Valgrind DHAT
         continue-on-error: true
         run: |
-          cd up-cpp/build
+          cd up-cpp/build/Release
           chmod +x bin/*
           mkdir -p valgrind_logs
           : > valgrind_logs/valgrind_dhat_summary.log
@@ -373,7 +373,7 @@ jobs:
         if: success() || failure()
         with:
           name: valgrind-dhat-log
-          path: up-cpp/build/valgrind_logs/valgrind_complete_dhat_log.log
+          path: up-cpp/build/Release/valgrind_logs/valgrind_complete_dhat_log.log
 
   lint:
     name: Lint C++ sources
