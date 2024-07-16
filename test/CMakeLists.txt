@@ -25,7 +25,7 @@ file(COPY
 # Invoked as add_coverage_test("SomeName" sources...)
 function(add_coverage_test Name)
     add_executable(${Name} ${ARGN})
-    target_compile_options(${Name} PRIVATE -g -Og)
+    target_compile_options(${Name} PRIVATE -g -Og -Wno-deprecated-declarations)
     target_link_libraries(${Name}
         PUBLIC
         up-core-api::up-core-api

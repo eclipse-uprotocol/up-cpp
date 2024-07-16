@@ -157,9 +157,9 @@ TEST_F(TestMockUTransport, registerListener) {
 	EXPECT_TRUE(lhandle.has_value());
 	auto handle = std::move(lhandle).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(sink_filter, transport->sink_filter_));
-	EXPECT_TRUE(transport->source_filter_);
-	EXPECT_TRUE(MsgDiff::Equals(source_filter, *transport->source_filter_));
+	EXPECT_TRUE(transport->sink_filter_);
+	EXPECT_TRUE(MsgDiff::Equals(sink_filter, *transport->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(source_filter, transport->source_filter_));
 
 	const size_t max_count = 1000 * 100;
 	for (size_t i = 0; i < max_count; i++) {

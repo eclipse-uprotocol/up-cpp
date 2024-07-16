@@ -483,7 +483,7 @@ TEST_F(TestUUriValidator, ValidDefaultSource) {
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidDefaultSource(uuri);
 		EXPECT_FALSE(valid);
-		EXPECT_TRUE(reason == Reason::EMPTY);
+		EXPECT_TRUE(reason == Reason::LOCAL_AUTHORITY);
 	}
 }
 

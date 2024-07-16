@@ -119,7 +119,8 @@ TEST_F(SubscriberTest, SubscribeSuccess) {
 	EXPECT_TRUE(result.has_value());
 	auto handle = std::move(result).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->source_filter_));
+	EXPECT_FALSE(transport->sink_filter_);
 
 	const size_t max_count = 100;
 	for (size_t i = 0; i < max_count; i++) {

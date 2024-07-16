@@ -53,6 +53,11 @@ NotificationSink::SinkOrStatus NotificationSink::create(
     std::shared_ptr<transport::UTransport> transport,
     const uprotocol::v1::UUri& sink, ListenCallback&& callback,
     std::optional<uprotocol::v1::UUri>&& source_filter) {
+	// Standard check - transport pointer cannot be null
+	if (!transport) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
 	// With the adjustments to the API to match 1.6.0, the primary filter for
 	// a notification is the _source_ URI. The sink will always be this entity's
 	// URI from the transport.

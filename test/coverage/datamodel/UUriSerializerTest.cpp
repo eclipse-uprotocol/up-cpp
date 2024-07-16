@@ -59,37 +59,43 @@ TEST_F(TestUUriSerializer, SerializeUUriWithNoAuthorityToString) {
 	ASSERT_EQ(expectedUUri, actualUUri);
 }
 
-// Test Service ID in uEID field as a 0xFFFF to see if it thorws an exception
-// for using wildcard
+// Test Service ID in uEID field as a 0xFFFF to see if it serializes without
+// an exception for using wildcard
 TEST_F(TestUUriSerializer, SerializeUUriToStringWithServiceIDWildCard) {
 	v1::UUri testUUri;
 	testUUri.set_authority_name("testAuthority");
-	testUUri.set_ue_id(0xFFFF);  // Wildcard
+	testUUri.set_ue_id(0x1FFFF);  // Wildcard
 	testUUri.set_ue_version_major(0xFE);
 	testUUri.set_resource_id(0x7500);
-	ASSERT_THROW(AsString::serialize(testUUri), std::invalid_argument);
+	std::string serialized;
+	ASSERT_NO_THROW(serialized = AsString::serialize(testUUri));
+	ASSERT_EQ(serialized, "//testAuthority/1FFFF/FE/7500");
 }
 
-// Test Instance ID in uEID field as a 0x0 to see if it thorws an exception for
-// using wildcard
+// Test Instance ID in uEID field as a 0x0 to see if it serializes without an
+// exception for using wildcard
 TEST_F(TestUUriSerializer, SerializeUUriToStringWithInstanceIDWildCard) {
 	v1::UUri testUUri;
 	testUUri.set_authority_name("testAuthority");
 	testUUri.set_ue_id(0x00001234);  // Wildcard
 	testUUri.set_ue_version_major(0xFE);
 	testUUri.set_resource_id(0x7500);
-	ASSERT_THROW(AsString::serialize(testUUri), std::invalid_argument);
+	std::string serialized;
+	ASSERT_NO_THROW(serialized = AsString::serialize(testUUri));
+	ASSERT_EQ(serialized, "//testAuthority/1234/FE/7500");
 }
 
-// Test major version as 0xFF to see if it thorws an exception for using
-// wildcard
+// Test major version as 0xFF to see if it serializes without an exception for
+// using wildcard
 TEST_F(TestUUriSerializer, SerializeUUriToStringWithMajorVersionWildCard) {
 	v1::UUri testUUri;
 	testUUri.set_authority_name("testAuthority");
 	testUUri.set_ue_id(0x12340000);
 	testUUri.set_ue_version_major(0xFF);  // Wildcard
 	testUUri.set_resource_id(0x7500);
-	ASSERT_THROW(AsString::serialize(testUUri), std::invalid_argument);
+	std::string serialized;
+	ASSERT_NO_THROW(serialized = AsString::serialize(testUUri));
+	ASSERT_EQ(serialized, "//testAuthority/12340000/FF/7500");
 }
 
 // Test resource id as 0xFFFF to see if it thorws an exception for using
@@ -100,7 +106,9 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithResourceIDWildCard) {
 	testUUri.set_ue_id(0x12340000);
 	testUUri.set_ue_version_major(0xFE);
 	testUUri.set_resource_id(0xFFFF);  // Wildcard
-	ASSERT_THROW(AsString::serialize(testUUri), std::invalid_argument);
+	std::string serialized;
+	ASSERT_NO_THROW(serialized = AsString::serialize(testUUri));
+	ASSERT_EQ(serialized, "//testAuthority/12340000/FE/FFFF");
 }
 
 // Test deserialize by providing scheme "up:" which is allowed to have as per
@@ -216,21 +224,47 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidArgument) {
 
 // Test deserializing string with eildcard arguments to see if throws exception
 TEST_F(TestUUriSerializer, DeSerializeUUriStringWithWildcardArgument) {
+	uprotocol::v1::UUri uuri;
+
+	auto check_uri = [&uuri](auto auth, uint32_t ueid, uint32_t mv,
+	                         uint32_t resid) {
+		ASSERT_EQ(uuri.authority_name(), auth);
+		ASSERT_EQ(uuri.ue_id(), ueid);
+		ASSERT_EQ(uuri.ue_version_major(), mv);
+		ASSERT_EQ(uuri.resource_id(), resid);
+	};
+
 	// Service ID provided in ueID is wildcard as 0xFFFF
-	std::string uuriAsString = "//192.168.1.10/FFFF/FE/7500";
-	ASSERT_THROW(AsString::deserialize(uuriAsString), std::invalid_argument);
+	std::string uuriAsString = "//192.168.1.10/1FFFF/FE/7500";
+	ASSERT_NO_THROW(uuri = AsString::deserialize(uuriAsString));
+	{
+		SCOPED_TRACE("uE Service ID Wildcard");
+		check_uri("192.168.1.10", 0x1FFFF, 0xFE, 0x7500);
+	}
 
 	// Instance ID provided in ueID is wildcard as 0x0
 	uuriAsString = "//192.168.1.10/00001234/FE/7500";
-	ASSERT_THROW(AsString::deserialize(uuriAsString), std::invalid_argument);
+	ASSERT_NO_THROW(uuri = AsString::deserialize(uuriAsString));
+	{
+		SCOPED_TRACE("uE Service ID Wildcard");
+		check_uri("192.168.1.10", 0x1234, 0xFE, 0x7500);
+	}
 
 	// Major Version provided is wildcard as 0xFF
 	uuriAsString = "//192.168.1.10/10010001/FF/7500";
-	ASSERT_THROW(AsString::deserialize(uuriAsString), std::invalid_argument);
+	ASSERT_NO_THROW(uuri = AsString::deserialize(uuriAsString));
+	{
+		SCOPED_TRACE("uE Service ID Wildcard");
+		check_uri("192.168.1.10", 0x10010001, 0xFF, 0x7500);
+	}
 
 	// Resource ID provided is wildcard as 0xFFFF
 	uuriAsString = "//192.168.1.10/10010001/FE/FFFF";
-	ASSERT_THROW(AsString::deserialize(uuriAsString), std::invalid_argument);
+	ASSERT_NO_THROW(uuri = AsString::deserialize(uuriAsString));
+	{
+		SCOPED_TRACE("uE Service ID Wildcard");
+		check_uri("192.168.1.10", 0x10010001, 0xFE, 0xFFFF);
+	}
 }
 
 }  // namespace
