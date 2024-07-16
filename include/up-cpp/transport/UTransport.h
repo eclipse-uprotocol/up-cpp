@@ -274,6 +274,17 @@ private:
 	const v1::UUri entity_uri_;
 };
 
+struct NullTransport : public std::invalid_argument {
+	template <typename... Args>
+	NullTransport(Args&&... args)
+	    : std::invalid_argument(std::forward<Args>(args)...) {}
+
+	template <typename... Args>
+	NullTransport operator=(Args&&... args) {
+		return std::invalid_argument::operator=(std::forward<Args>(args)...);
+	}
+};
+
 }  // namespace uprotocol::transport
 
 #endif  // UP_CPP_TRANSPORT_UTRANSPORT_H

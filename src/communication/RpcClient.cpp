@@ -92,7 +92,7 @@ RpcClient::RpcClient(std::shared_ptr<transport::UTransport> transport,
     : transport_(transport),
       ttl_(ttl),
       builder_(datamodel::builder::UMessageBuilder::request(
-          std::move(method), v1::UUri(transport_->getDefaultSource()), priority,
+          std::move(method), v1::UUri(transport_->getEntityUri()), priority,
           ttl_)),
       expire_service_(std::make_unique<ExpireService>()) {
 	if (payload_format) {
@@ -166,8 +166,8 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 	///////////////////////////////////////////////////////////////////////////
 
 	auto maybe_handle = transport_->registerListener(
-	    request.attributes().source(), std::move(wrapper),
-	    request.attributes().sink());
+	    std::move(wrapper), request.attributes().sink(),
+	    request.attributes().source());
 
 	if (!maybe_handle) {
 		expire(std::move(maybe_handle).error());

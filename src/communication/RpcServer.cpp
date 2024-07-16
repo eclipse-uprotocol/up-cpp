@@ -68,8 +68,6 @@ RpcServer::ServerOrStatus RpcServer::create(
 v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 	callback_ = std::move(callback);
 	auto result = transport_->registerListener(
-	    // sink_filter=
-	    method,
 	    // listener=
 	    [this](const v1::UMessage& request) {
 		    // Validate the request message using a RPC message validator.
@@ -108,7 +106,19 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 			    // Ignoring status code for transport send
 			    std::ignore = transport_->send(response);
 		    }
-	    });
+	    },
+	    // source_filter=
+	    []() {
+		    v1::UUri any_uri;
+		    any_uri.set_authority_name("*");
+		    // Instance ID 0 and UE ID FFFF for wildcard
+		    any_uri.set_ue_id(0x0000FFFF);
+		    any_uri.set_ue_version_major(0xFF);
+		    any_uri.set_resource_id(0xFFFF);
+		    return any_uri;
+	    }(),
+	    // sink_filter=
+	    method);
 
 	if (result.has_value()) {
 		// If result is successful, extract the UTransport::ListenHandle and
