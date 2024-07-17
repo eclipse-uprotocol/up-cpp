@@ -22,8 +22,8 @@ std::string AsString::serialize(const v1::UUri& uri) {
 	// isValidFilter is the most permissive of the validators
 	auto [valid, reason] = isValidFilter(uri);
 	if (!valid) {
-		throw std::invalid_argument("Invalid UUri For Serialization | " +
-		                            std::string(message(*reason)));
+		throw InvalidUUri("Invalid UUri For Serialization | " +
+		                  std::string(message(*reason)));
 	}
 	std::stringstream ss;
 	ss << std::hex << std::uppercase;
@@ -111,8 +111,8 @@ uprotocol::v1::UUri AsString::deserialize(const std::string& uriAsString) {
 		// isValidFilter is the most permissive of the validators
 		auto [valid, reason] = isValidFilter(uri);
 		if (!valid) {
-			throw std::invalid_argument("Invalid UUri For DeSerialization | " +
-			                            std::string(message(*reason)));
+			throw InvalidUUri("Invalid UUri For DeSerialization | " +
+			                  std::string(message(*reason)));
 		}
 	}
 	return uri;

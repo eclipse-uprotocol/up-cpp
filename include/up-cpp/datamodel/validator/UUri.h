@@ -161,8 +161,10 @@ isValidDefaultSource(const v1::UUri&);
 /// @remarks Generally used by L2 client interfaces. Not used by checks that
 ///          return ValidationResult.
 struct InvalidUUri : public std::invalid_argument {
-	// Inherit constructors
-	using std::invalid_argument::invalid_argument;
+	// Forward constructors
+	template <typename... Args>
+	InvalidUUri(Args&&... args)
+	    : std::invalid_argument(std::forward<Args>(args)...) {}
 
 	InvalidUUri(InvalidUUri&&) noexcept;
 	InvalidUUri& operator=(InvalidUUri&&) noexcept;

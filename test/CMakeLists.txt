@@ -66,7 +66,7 @@ add_coverage_test("UMessageBuilderTest" coverage/datamodel/UMessageBuilderTest.c
 add_coverage_test("UuidBuilderTest" coverage/datamodel/UuidBuilderTest.cpp)
 
 # Transport
-#add_coverage_test("UTransportTest" coverage/transport/UTransportTest.cpp)
+add_coverage_test("UTransportTest" coverage/transport/UTransportTest.cpp)
 
 # Communication
 add_coverage_test("RpcClientTest" coverage/communication/RpcClientTest.cpp)

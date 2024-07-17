@@ -151,7 +151,7 @@ public:
 	///          * A v1::UStatus containing a FAILSTATUS code otherwise.
 	[[nodiscard]] HandleOrStatus registerListener(
 	    ListenCallback&& listener, const v1::UUri& source_filter,
-	    std::optional<v1::UUri>&& sink_filter);
+	    std::optional<v1::UUri>&& sink_filter = {});
 
 	/// @note This interface has been replaced with alternatives that better
 	///       align with the 1.6.0 uProtocol specifications. It is no longer

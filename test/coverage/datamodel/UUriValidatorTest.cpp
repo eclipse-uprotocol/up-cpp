@@ -545,4 +545,145 @@ TEST_F(TestUUriValidator, Empty) {
 	}
 }
 
+TEST_F(TestUUriValidator, ValidFilter) {
+	auto getUuri = []() {
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name("ValidFilterTest");
+		uuri.set_ue_id(10001);
+		uuri.set_ue_version_major(1);
+		uuri.set_resource_id(1);
+		return uuri;
+	};
+
+	////// GOOD //////
+	{
+		// Plain URI
+		auto uuri = getUuri();
+		auto [valid, reason] = isValidFilter(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
+
+	{
+		// Wildcard URI
+		uprotocol::v1::UUri uuri;
+		uuri.set_authority_name("*");
+		uuri.set_ue_id(0xFFFF);
+		uuri.set_ue_version_major(0xFF);
+		uuri.set_resource_id(0xFFFF);
+		auto [valid, reason] = isValidFilter(uuri);
+		EXPECT_TRUE(valid);
+		EXPECT_FALSE(reason.has_value());
+	}
+
+	////// BAD //////
+	{
+		// Empty URI
+		uprotocol::v1::UUri uuri;
+		auto [valid, reason] = isValidFilter(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_EQ(reason.value_or(static_cast<Reason>(-1)), Reason::EMPTY);
+	}
+
+	{
+		// Reserved Version
+		auto uuri = getUuri();
+		uuri.set_ue_version_major(0);
+		auto [valid, reason] = isValidFilter(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_EQ(reason.value_or(static_cast<Reason>(-1)),
+		          Reason::RESERVED_VERSION);
+	}
+
+	{
+		// Overflow Version
+		auto uuri = getUuri();
+		uuri.set_ue_version_major(0x100);
+		auto [valid, reason] = isValidFilter(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_EQ(reason.value_or(static_cast<Reason>(-1)),
+		          Reason::VERSION_OVERFLOW);
+	}
+
+	{
+		// Overflow Resource
+		auto uuri = getUuri();
+		uuri.set_resource_id(0x10000);
+		auto [valid, reason] = isValidFilter(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_EQ(reason.value_or(static_cast<Reason>(-1)),
+		          Reason::RESOURCE_OVERFLOW);
+	}
+
+	{
+		// Long Authority
+		auto uuri = getUuri();
+		uuri.set_authority_name(std::string(129, 'i'));
+		auto [valid, reason] = isValidFilter(uuri);
+		EXPECT_FALSE(valid);
+		EXPECT_EQ(reason.value_or(static_cast<Reason>(-1)),
+		          Reason::AUTHORITY_TOO_LONG);
+	}
+}
+
+TEST_F(TestUUriValidator, ReasonMessages) {
+	std::array all_reasons{Reason::EMPTY,
+	                       Reason::RESERVED_VERSION,
+	                       Reason::RESERVED_RESOURCE,
+	                       Reason::DISALLOWED_WILDCARD,
+	                       Reason::BAD_RESOURCE_ID,
+	                       Reason::LOCAL_AUTHORITY,
+	                       Reason::VERSION_OVERFLOW,
+	                       Reason::RESOURCE_OVERFLOW,
+	                       Reason::AUTHORITY_TOO_LONG};
+
+	std::set<std::string_view> seen_messages;
+
+	for (auto reason : all_reasons) {
+		EXPECT_NE(message(reason), message(static_cast<Reason>(-1)));
+		EXPECT_EQ(seen_messages.count(message(reason)), 0);
+
+		// Track that we have seen a message. Each reason's message should be
+		// unique so that the errors reported have meaningful distinctions.
+		seen_messages.insert(message(reason));
+
+		// Using a switch so we get a warning / error if a reason is missing
+		// from the test. These assertions don't really matter beyond that
+		// purpose (they should be tautologies).
+		//
+		// If you're here adding a reason, make sure it is also in the
+		// all_reasons array above.
+		switch (reason) {
+			case Reason::EMPTY:
+				EXPECT_EQ(message(reason), message(Reason::EMPTY));
+				break;
+			case Reason::RESERVED_VERSION:
+				EXPECT_EQ(message(reason), message(Reason::RESERVED_VERSION));
+				break;
+			case Reason::RESERVED_RESOURCE:
+				EXPECT_EQ(message(reason), message(Reason::RESERVED_RESOURCE));
+				break;
+			case Reason::DISALLOWED_WILDCARD:
+				EXPECT_EQ(message(reason),
+				          message(Reason::DISALLOWED_WILDCARD));
+				break;
+			case Reason::BAD_RESOURCE_ID:
+				EXPECT_EQ(message(reason), message(Reason::BAD_RESOURCE_ID));
+				break;
+			case Reason::LOCAL_AUTHORITY:
+				EXPECT_EQ(message(reason), message(Reason::LOCAL_AUTHORITY));
+				break;
+			case Reason::VERSION_OVERFLOW:
+				EXPECT_EQ(message(reason), message(Reason::VERSION_OVERFLOW));
+				break;
+			case Reason::RESOURCE_OVERFLOW:
+				EXPECT_EQ(message(reason), message(Reason::RESOURCE_OVERFLOW));
+				break;
+			case Reason::AUTHORITY_TOO_LONG:
+				EXPECT_EQ(message(reason), message(Reason::AUTHORITY_TOO_LONG));
+				break;
+		};
+	}
+}
+
 }  // namespace
