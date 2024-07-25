@@ -34,7 +34,7 @@ protected:
 		UPriority priority = UPriority::UPRIORITY_CS4;
 		std::chrono::milliseconds ttl(5000);
 		UUri method = method_;
-		UUri source = source_;
+		UUri source = sink_;
 
 		return UMessageBuilder::request(std::move(method), std::move(source),
 		                                priority, ttl);
@@ -152,16 +152,17 @@ TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) {
 	UPriority priority = UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(5000);
 	UUri method = method_;
-	UUri source = source_;
+	UUri source = sink_;
+
 	EXPECT_NO_THROW({
 		auto builder = UMessageBuilder::request(
 		    std::move(method), std::move(source), priority, ttl);
-		UAttributes attr = builder.attributes();
+		auto attr = builder.build().attributes();
 		EXPECT_EQ(attr.type(), UMessageType::UMESSAGE_TYPE_REQUEST);
 		EXPECT_EQ(AsString::serialize(attr.sink()),
 		          AsString::serialize(method_));
 		EXPECT_EQ(AsString::serialize(attr.source()),
-		          AsString::serialize(source_));
+		          AsString::serialize(sink_));
 		EXPECT_EQ(attr.priority(), priority);
 		EXPECT_EQ(attr.ttl(), 5000);
 	});
@@ -195,7 +196,7 @@ TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {
 
 TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {
 	UUri method = method_;
-	UUri source = source_;
+	UUri source = sink_;
 	UPriority priority = UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(-1);  // Invalid TTL
 	EXPECT_THROW(

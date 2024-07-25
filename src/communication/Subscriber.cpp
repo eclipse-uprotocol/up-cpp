@@ -19,19 +19,25 @@ namespace UriValidator = uprotocol::datamodel::validator::uri;
 [[nodiscard]] Subscriber::SubscriberOrStatus Subscriber::subscribe(
     std::shared_ptr<transport::UTransport> transport, const v1::UUri& topic,
     ListenCallback&& callback) {
+	// Standard check - transport pointer cannot be null
 	if (!transport) {
-		throw std::invalid_argument("transport cannot be null");
+		throw transport::NullTransport("transport cannot be null");
 	}
-	auto [srcOk, srcReason] = UriValidator::isValidSubscription(topic);
-	if (!srcOk) {
+
+	auto [source_ok, bad_source_reason] =
+	    UriValidator::isValidSubscription(topic);
+	if (!source_ok) {
 		throw UriValidator::InvalidUUri(
-		    "URI is not a valid URI |  " +
-		    std::string(UriValidator::message(*srcReason)));
+		    "Topic URI is not a valid topic subscription pattern |  " +
+		    std::string(UriValidator::message(*bad_source_reason)));
 	}
-	auto handle = transport->registerListener(topic, std::move(callback));
+
+	auto handle = transport->registerListener(std::move(callback), topic);
+
 	if (!handle) {
 		return uprotocol::utils::Unexpected(handle.error());
 	}
+
 	return std::make_unique<Subscriber>(
 	    std::forward<std::shared_ptr<transport::UTransport>>(transport),
 	    std::forward<ListenHandle&&>(std::move(handle).value()));

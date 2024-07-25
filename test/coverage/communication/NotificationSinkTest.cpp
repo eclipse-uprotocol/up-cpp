@@ -103,8 +103,8 @@ std::string get_random_string(size_t length) {
 	return str;
 }
 
-// Positive test case with no source filter
-TEST_F(NotificationSinkTest, NotificationSinkSuccessWithoutSourceFilter) {
+// Negative test case with no source filter
+TEST_F(NotificationSinkTest, FailWithoutSourceFilter) {
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
 	    testDefaultSourceUUri_);
 
@@ -114,31 +114,17 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithoutSourceFilter) {
 
 	std::optional<uprotocol::v1::UUri> source_filter;
 
-	auto result =
-	    NotificationSink::create(transport, testTopicUUri_, std::move(callback),
-	                             std::move(source_filter));
-
-	EXPECT_TRUE(transport->listener_);
-	EXPECT_TRUE(result.has_value());
-
-	auto handle = std::move(result).value();
-	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->sink_filter_));
-
-	const size_t max_count = 100;
-	for (size_t i = 0; i < max_count; i++) {
-		uprotocol::v1::UMessage msg;
-		auto attr = std::make_shared<uprotocol::v1::UAttributes>();
-		*msg.mutable_attributes() = *attr;
-		msg.set_payload(get_random_string(1400));
-		transport->mockMessage(msg);
-		EXPECT_EQ(i + 1, capture_count_);
-		EXPECT_TRUE(MsgDiff::Equals(msg, capture_msg_));
-	}
+	EXPECT_THROW(
+	    {
+		    auto result = NotificationSink::create(transport, testTopicUUri_,
+		                                           std::move(callback),
+		                                           std::move(source_filter));
+	    },
+	    UriValidator::InvalidUUri);
 }
 
 // Negative test case with  invalid notification resource ID
-TEST_F(NotificationSinkTest, NotificationSinkFailWithInvalidResourceID) {
+TEST_F(NotificationSinkTest, FailWithInvalidResourceID) {
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
 	    testDefaultSourceUUri_);
 
@@ -156,7 +142,7 @@ TEST_F(NotificationSinkTest, NotificationSinkFailWithInvalidResourceID) {
 }
 
 // Positive test case with source filter
-TEST_F(NotificationSinkTest, NotificationSinkSuccessWithSourceFilter) {
+TEST_F(NotificationSinkTest, SuccessWithSourceFilter) {
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
 	    testDefaultSourceUUri_);
 
@@ -164,24 +150,17 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithSourceFilter) {
 		return this->handleCallbackMessage(arg);
 	};
 
-	std::optional<uprotocol::v1::UUri> source_filter = uprotocol::v1::UUri();
-	if (source_filter) {
-		source_filter->set_authority_name("192.168.1.11");
-		source_filter->set_ue_id(0x18001);
-		source_filter->set_ue_version_major(0x1);
-		source_filter->set_resource_id(0x0);
-	}
-
-	auto result =
-	    NotificationSink::create(transport, testTopicUUri_, std::move(callback),
-	                             std::move(source_filter));
+	auto result = NotificationSink::create(transport, transport->getEntityUri(),
+	                                       std::move(callback), testTopicUUri_);
 
 	EXPECT_TRUE(transport->listener_);
 	EXPECT_TRUE(result.has_value());
 
 	auto handle = std::move(result).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->source_filter_));
+	EXPECT_TRUE(
+	    MsgDiff::Equals(transport->getEntityUri(), *transport->sink_filter_));
 
 	const size_t max_count = 100;
 	for (size_t i = 0; i < max_count; i++) {
@@ -196,7 +175,7 @@ TEST_F(NotificationSinkTest, NotificationSinkSuccessWithSourceFilter) {
 }
 
 // Simulate Error code from transport mock
-TEST_F(NotificationSinkTest, NotificationSinkFailWithErroCode) {
+TEST_F(NotificationSinkTest, FailWithErrorCode) {
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
 	    testDefaultSourceUUri_);
 
@@ -204,22 +183,19 @@ TEST_F(NotificationSinkTest, NotificationSinkFailWithErroCode) {
 		return this->handleCallbackMessage(arg);
 	};
 
-	std::optional<uprotocol::v1::UUri> source_filter;
-
 	uprotocol::v1::UStatus expectedStatus;
 	expectedStatus.set_code(uprotocol::v1::UCode::ABORTED);
 	transport->registerListener_status_ = expectedStatus;
 
-	auto result =
-	    NotificationSink::create(transport, testTopicUUri_, std::move(callback),
-	                             std::move(source_filter));
+	auto result = NotificationSink::create(transport, transport->getEntityUri(),
+	                                       std::move(callback), testTopicUUri_);
 
 	auto actualStatus = std::move(result).error();
 	EXPECT_EQ(actualStatus.code(), expectedStatus.code());
 }
 
 // Notification sink with null transport
-TEST_F(NotificationSinkTest, NotificationSinkNullTransport) {
+TEST_F(NotificationSinkTest, NullTransport) {
 	// set transport to null
 	auto transport = nullptr;
 	std::optional<uprotocol::v1::UUri> source_filter;
@@ -229,22 +205,19 @@ TEST_F(NotificationSinkTest, NotificationSinkNullTransport) {
 	};
 
 	EXPECT_THROW(auto result = NotificationSink::create(
-	                 transport, testTopicUUri_, std::move(callback),
-	                 std::move(source_filter)),
-	             std::invalid_argument);
+	                 transport, testDefaultSourceUUri_, std::move(callback),
+	                 testTopicUUri_),
+	             uprotocol::transport::NullTransport);
 }
 
 //  notification sink with null callback
-TEST_F(NotificationSinkTest, NotificationSinkNullCallback) {
+TEST_F(NotificationSinkTest, NullCallback) {
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
 	    testDefaultSourceUUri_);
 
-	std::optional<uprotocol::v1::UUri> source_filter;
-
 	// bind to null callback
-	auto result =
-	    NotificationSink::create(transport, testTopicUUri_, std::move(nullptr),
-	                             std::move(source_filter));
+	auto result = NotificationSink::create(transport, transport->getEntityUri(),
+	                                       std::move(nullptr), testTopicUUri_);
 
 	uprotocol::v1::UMessage msg;
 	auto attr = std::make_shared<uprotocol::v1::UAttributes>();

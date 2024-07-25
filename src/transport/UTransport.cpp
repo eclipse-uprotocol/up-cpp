@@ -20,12 +20,11 @@ namespace uprotocol::transport {
 namespace UriValidator = uprotocol::datamodel::validator::uri;
 namespace MessageValidator = uprotocol::datamodel::validator::message;
 
-UTransport::UTransport(const v1::UUri& defaultSrc)
-    : defaultSource_(defaultSrc) {
-	auto [srcOk, reason] = UriValidator::isValidDefaultSource(defaultSource_);
-	if (!srcOk) {
+UTransport::UTransport(const v1::UUri& entity_uri) : entity_uri_(entity_uri) {
+	auto [uri_ok, reason] = UriValidator::isValidDefaultEntity(entity_uri_);
+	if (!uri_ok) {
 		throw UriValidator::InvalidUUri(
-		    "Source URI is not a valid URI |  " +
+		    "Transport's entity URI is not a valid URI |  " +
 		    std::string(UriValidator::message(*reason)));
 	}
 }
@@ -41,40 +40,82 @@ v1::UStatus UTransport::send(const v1::UMessage& message) {
 	return sendImpl(message);
 }
 
-utils::Expected<UTransport::ListenHandle, v1::UStatus>
-UTransport::registerListener(const v1::UUri& sink_filter,
-                             ListenCallback&& listener,
-                             std::optional<v1::UUri>&& source_filter) {
-	auto [sinkOk, reason1] = UriValidator::isValid(sink_filter);
-	if (!sinkOk) {
-		throw UriValidator::InvalidUUri(
-		    "sink_filter is not a valid URI |  " +
-		    std::string(UriValidator::message(*reason1)));
-	}
+UTransport::HandleOrStatus UTransport::registerListener(
+    ListenCallback&& listener, const v1::UUri& source_filter,
+    uint16_t sink_resource_filter) {
+	auto sink_filter = getEntityUri();
+	sink_filter.set_resource_id(sink_resource_filter);
+	return registerListener(std::move(listener), source_filter,
+	                        std::move(sink_filter));
+}
 
-	if (source_filter.has_value()) {
-		auto [srcOk, reason2] = UriValidator::isValid(source_filter.value());
-		if (!srcOk) {
+UTransport::HandleOrStatus UTransport::registerListener(
+    ListenCallback&& listener, const v1::UUri& source_filter,
+    std::optional<v1::UUri>&& sink_filter) {
+	if (!sink_filter) {
+		// Handle the special case of publish-like messages where only a source
+		// address is provided.
+		auto [source_ok, bad_source_reason] =
+		    UriValidator::isValidSubscription(source_filter);
+		if (!source_ok) {
 			throw UriValidator::InvalidUUri(
 			    "source_filter is not a valid URI |  " +
-			    std::string(UriValidator::message(*reason2)));
+			    std::string(UriValidator::message(*bad_source_reason)));
+		}
+	} else {
+		auto [source_ok, bad_source_reason] =
+		    UriValidator::isValidFilter(source_filter);
+		if (!source_ok) {
+			throw UriValidator::InvalidUUri(
+			    "source_filter is not a valid URI |  " +
+			    std::string(UriValidator::message(*bad_source_reason)));
+		}
+
+		auto [sink_ok, bad_sink_reason] =
+		    UriValidator::isValidFilter(*sink_filter);
+		if (!sink_ok) {
+			throw UriValidator::InvalidUUri(
+			    "sink_filter is not a valid URI |  " +
+			    std::string(UriValidator::message(*bad_sink_reason)));
 		}
 	}
 
 	auto [handle, callable] = CallbackConnection::establish(
 	    std::move(listener), [this](auto conn) { cleanupListener(conn); });
 
-	v1::UStatus status = registerListenerImpl(sink_filter, std::move(callable),
-	                                          std::move(source_filter));
+	v1::UStatus status = registerListenerImpl(
+	    std::move(callable), source_filter, std::move(sink_filter));
 
 	if (status.code() == v1::UCode::OK) {
 		return std::move(handle);
 	} else {
-		return uprotocol::utils::Unexpected(std::move(status));
+		return utils::Unexpected(std::move(status));
 	}
 }
 
-const v1::UUri& UTransport::getDefaultSource() const { return defaultSource_; }
+// NOTE: deprecated
+utils::Expected<UTransport::ListenHandle, v1::UStatus>
+UTransport::registerListener(const v1::UUri& sink_filter,
+                             ListenCallback&& listener,
+                             std::optional<v1::UUri>&& source_filter) {
+	if (!source_filter) {
+		// Workaround for deprecated API not fully reflecting the use cases
+		// defined in the uprotocol spec: an unset source_filter is treated
+		// as meaning that the sink_filter is a topic to subscribe to. This
+		// will then pass the sink_filter as a source filter to the updated
+		// registerListener(), which is then called with sink_filter unset.
+		return registerListener(std::move(listener), sink_filter,
+		                        std::move(source_filter));
+	} else {
+		v1::UUri sink_filter_copy = sink_filter;
+		return registerListener(std::move(listener), *source_filter,
+		                        std::move(sink_filter_copy));
+	}
+}
+
+const v1::UUri& UTransport::getEntityUri() const { return entity_uri_; }
+
+const v1::UUri& UTransport::getDefaultSource() const { return getEntityUri(); }
 
 void UTransport::cleanupListener(CallableConn listener) {
 	static_cast<void>(listener);

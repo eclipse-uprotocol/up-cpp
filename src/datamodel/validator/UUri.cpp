@@ -11,9 +11,34 @@
 
 #include "up-cpp/datamodel/validator/UUri.h"
 
-namespace uprotocol::datamodel::validator::uri {
+namespace {
 
-using namespace uprotocol;
+constexpr size_t AUTHORITY_SPEC_MAX_LENGTH = 128;
+
+using namespace uprotocol::datamodel::validator::uri;
+ValidationResult uriCommonValidChecks(const uprotocol::v1::UUri& uuri) {
+	if (uuri.ue_version_major() == 0) {
+		return {false, Reason::RESERVED_VERSION};
+	}
+
+	if (uuri.ue_version_major() > std::numeric_limits<uint8_t>::max()) {
+		return {false, Reason::VERSION_OVERFLOW};
+	}
+
+	if (uuri.resource_id() > std::numeric_limits<uint16_t>::max()) {
+		return {false, Reason::RESOURCE_OVERFLOW};
+	}
+
+	if (uuri.authority_name().size() > AUTHORITY_SPEC_MAX_LENGTH) {
+		return {false, Reason::AUTHORITY_TOO_LONG};
+	}
+
+	return {true, {}};
+}
+
+}  // namespace
+
+namespace uprotocol::datamodel::validator::uri {
 
 std::string_view message(Reason reason) {
 	switch (reason) {
@@ -29,6 +54,14 @@ std::string_view message(Reason reason) {
 		case Reason::BAD_RESOURCE_ID:
 			return "The resource ID is not in the allowed range for this URI "
 			       "form.";
+		case Reason::LOCAL_AUTHORITY:
+			return "Local (blank) authority names are not allowed here.";
+		case Reason::VERSION_OVERFLOW:
+			return "uE Major Version is greater than uint8 max";
+		case Reason::RESOURCE_OVERFLOW:
+			return "Resource ID is greater than uint16 max";
+		case Reason::AUTHORITY_TOO_LONG:
+			return "Authority is longer than 128 characters (spec max length)";
 		default:
 			return "Unknown reason.";
 	}
@@ -85,6 +118,20 @@ ValidationResult isValid(const v1::UUri& uuri) {
 	return isValidNotificationSink(uuri);
 }
 
+ValidationResult isValidFilter(const v1::UUri& uuri) {
+	auto [is_empty, empty_reason] = isEmpty(uuri);
+	if (is_empty) {
+		return {false, Reason::EMPTY};
+	}
+
+	auto [common_valid, common_fail_reason] = uriCommonValidChecks(uuri);
+	if (!common_valid) {
+		return {common_valid, common_fail_reason};
+	}
+
+	return {true, {}};
+}
+
 ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
 	// disallow wildcards
 	if (uses_wildcards(uuri)) {
@@ -111,12 +158,16 @@ ValidationResult isValidRpcResponse(const v1::UUri& uuri) {
 	return {true, std::nullopt};
 }
 
-ValidationResult isValidDefaultSource(const v1::UUri& uuri) {
-	if (uuri.authority_name().empty()) {
-		return {false, Reason::EMPTY};
+ValidationResult isValidDefaultEntity(const v1::UUri& uuri) {
+	if (isLocal(uuri)) {
+		return {false, Reason::LOCAL_AUTHORITY};
 	}
 
 	return isValidRpcResponse(uuri);
+}
+
+ValidationResult isValidDefaultSource(const v1::UUri& uuri) {
+	return isValidDefaultEntity(uuri);
 }
 
 ValidationResult isValidPublishTopic(const v1::UUri& uuri) {

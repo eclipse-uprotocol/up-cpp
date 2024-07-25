@@ -41,20 +41,44 @@ struct NotificationSink {
 	/// Resetting the unique_ptr for the NotificationSink will automatically
 	/// unregister the callback.
 	///
-	/// @param sink URI of this uE. The authority and entity will be replaced
-	///             automatically with those found in the transport's default.
-	/// @param callback Called when a notification is received.
-	/// @param source_filter (Optional) URI to compare against notification
-	///                      sources. Only notifications that match will be
-	///                      forwarded tot he callback.
+	/// @param transport Shared pointer to a transport instance.
+	/// @param callback Called when a notification is received from the source.
+	/// @param source_filter Notifications matching this source pattern will
+	///                      be passed to the callback.
+	///
+	/// @remarks The transport's entity URI will be used as a sink filter when
+	///          the callback is registered with the transport.
+	///
+	/// @throws datamodel::validator::uri::InvalidUUri if the source_filter
+	///         is an invalid pattern for matching notification messages.
+	/// @throws transport::NullTransport if the transport pointer is nullptr.
 	///
 	/// @returns
 	///    * unique_ptr to a NotificationSink if the callback was connected
 	///      successfully.
 	///    * UStatus containing an error state otherwise.
-	static SinkOrStatus create(std::shared_ptr<transport::UTransport> transport,
-	                           const v1::UUri& sink, ListenCallback&& callback,
-	                           std::optional<v1::UUri>&& source_filter);
+	[[nodiscard]] static SinkOrStatus create(
+	    std::shared_ptr<transport::UTransport> transport,
+	    ListenCallback&& callback, const v1::UUri& source_filter);
+
+	/// @note DEPRECATED
+	/// @brief Create a notification sink to receive notifications.
+	///
+	/// Now a wrapper for create(transport, callback, source_filter)
+	///
+	/// @param sink URI of this uE. Must be transport->getEntityUri().
+	/// @param callback Called when a notification is received.
+	/// @param source_filter Notifications matching this pattern will be
+	///                      forwarded to the callback. MUST HAVE A VALUE.
+	///
+	/// @throws InvalidUUri if sink is not transport->getEntityUri().
+	/// @throws InvalidUUri if source_filter has no value.
+	[[deprecated(
+	    "See alternate overload of "
+	    "create()")]] [[nodiscard]] static SinkOrStatus
+	create(std::shared_ptr<transport::UTransport> transport,
+	       const v1::UUri& sink, ListenCallback&& callback,
+	       std::optional<v1::UUri>&& source_filter);
 
 	~NotificationSink() = default;
 
