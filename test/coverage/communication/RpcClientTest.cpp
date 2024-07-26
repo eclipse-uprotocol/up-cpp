@@ -92,10 +92,10 @@ protected:
 
 	void validateLastRequest(size_t expected_send_count) {
 		EXPECT_TRUE(transport_->listener_);
-		EXPECT_TRUE(transport_->sink_filter_ == defaultSourceUri());
-		EXPECT_TRUE(transport_->source_filter_);
-		if (transport_->source_filter_) {
-			EXPECT_TRUE(*(transport_->source_filter_) == methodUri());
+		EXPECT_TRUE(transport_->source_filter_ == methodUri());
+		EXPECT_TRUE(transport_->sink_filter_);
+		if (transport_->sink_filter_) {
+			EXPECT_TRUE(*(transport_->sink_filter_) == defaultSourceUri());
 		}
 		EXPECT_EQ(transport_->send_count_, expected_send_count);
 		using namespace uprotocol::datamodel::validator;

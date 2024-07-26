@@ -44,12 +44,14 @@ public:
 	std::optional<uprotocol::utils::callbacks::CallerHandle<
 	    void, uprotocol::v1::UMessage const&>>
 	    cleanup_listener_;
-	std::optional<uprotocol::v1::UUri> source_filter_;
-	v1::UUri sink_filter_;
+	std::optional<uprotocol::v1::UUri> sink_filter_;
+	v1::UUri source_filter_;
 	std::mutex register_mtx_;
 
 	v1::UMessage message_;
 	std::mutex message_mtx_;
+
+	virtual ~UTransportMock() = default;
 
 private:
 	[[nodiscard]] v1::UStatus sendImpl(const v1::UMessage& message) override {
@@ -62,8 +64,8 @@ private:
 	}
 
 	[[nodiscard]] v1::UStatus registerListenerImpl(
-	    const v1::UUri& sink_filter, CallableConn&& listener,
-	    std::optional<v1::UUri>&& source_filter) override {
+	    CallableConn&& listener, const v1::UUri& source_filter,
+	    std::optional<v1::UUri>&& sink_filter) override {
 		std::lock_guard lock(register_mtx_);
 		listener_ = listener;
 		source_filter_ = source_filter;

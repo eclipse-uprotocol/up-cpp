@@ -30,7 +30,15 @@ enum class Reason {
 	///        for this particular form.
 	DISALLOWED_WILDCARD,
 	/// @brief The resource ID is not in the allowed range for this URI form.
-	BAD_RESOURCE_ID
+	BAD_RESOURCE_ID,
+	/// @brief The URI has a blank (local) authority name
+	LOCAL_AUTHORITY,
+	/// @brief uE Major Version is greater than uint8_t max
+	VERSION_OVERFLOW,
+	/// @brief Resource ID is greater than uint16_t max
+	RESOURCE_OVERFLOW,
+	/// @brief Authority Name is longer than 128 characters
+	AUTHORITY_TOO_LONG
 };
 
 /// @brief Get a descriptive message for a reason code.
@@ -49,7 +57,13 @@ std::string_view message(Reason);
 ///     }
 using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 
-/// @brief Checks if UUri is a valid UUri of any format.
+/// @note DEPRECATED - This check can produce misleading results. It doesn't
+///       handle filters with wildcards. It also is not very useful when
+///       checking URI fields in messages where a message type is already
+///       available. In those cases, the appropriate type-specfic check should
+///       be used instead.
+///
+/// @brief Checks if UUri is a valid UUri for use as an attribute in a message
 ///
 /// A UUri is valid if:
 ///
@@ -59,7 +73,14 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 ///     * isValidRpcResponse()
 ///     * isValidPublishTopic()
 ///     * isValidNotification()
-[[nodiscard]] ValidationResult isValid(const v1::UUri&);
+[[deprecated(
+    "Use isValidFilter or a message-type-specific "
+    "validator")]] [[nodiscard]] ValidationResult
+isValid(const v1::UUri&);
+
+/// @brief Checks if a UUri is valid as a source_filter or sink_filter when
+///        registering a listener with a transport.
+[[nodiscard]] ValidationResult isValidFilter(const v1::UUri&);
 
 /// @brief Checks if UUri is valid for invoking an RPC method
 ///
@@ -73,12 +94,18 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// resource_id must be 0.
 [[nodiscard]] ValidationResult isValidRpcResponse(const v1::UUri&);
 
-/// @brief Checks if UUri is valid as a default source on a UTransport.
+/// @brief Checks if UUri is valid as an entity URI for a UTransport.
 ///
-/// @note This just calls isValidRpcResponse() because the requirements are the
-///       same in both cases. It is provided as a separate function here for
-///       improved readability where it is called.
-[[nodiscard]] ValidationResult isValidDefaultSource(const v1::UUri&);
+/// @note The requirements for this URI are identical to isValidRpcResponse()
+///       except that the authority name is not allowed to be blank.
+[[nodiscard]] ValidationResult isValidDefaultEntity(const v1::UUri&);
+
+/// @note DEPRECATED
+/// @see isValidDefaultEntity()
+/// @brief Checks if UUri is valid as a default source on a UTransport.
+[[deprecated(
+    "Use isValidDefaultEntity instead")]] [[nodiscard]] ValidationResult
+isValidDefaultSource(const v1::UUri&);
 
 /// @brief Checks if UUri is valid for publishing to a topic, OR as a source
 ///        and sink for sending notifications, OR as a sink for receiving
@@ -134,8 +161,10 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// @remarks Generally used by L2 client interfaces. Not used by checks that
 ///          return ValidationResult.
 struct InvalidUUri : public std::invalid_argument {
-	// Inherit constructors
-	using std::invalid_argument::invalid_argument;
+	// Forward constructors
+	template <typename... Args>
+	InvalidUUri(Args&&... args)
+	    : std::invalid_argument(std::forward<Args>(args)...) {}
 
 	InvalidUUri(InvalidUUri&&) noexcept;
 	InvalidUUri& operator=(InvalidUUri&&) noexcept;

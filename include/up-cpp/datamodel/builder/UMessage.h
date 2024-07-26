@@ -234,7 +234,10 @@ struct UMessageBuilder {
 
 	/// @brief Access the attributes of the message being built.
 	/// @return A reference to the attributes of the message being built.
-	[[nodiscard]] const v1::UAttributes& attributes() const {
+	[[deprecated(
+	    "Created for tests. Unused now. Do not use")]] [[nodiscard]] const v1::
+	    UAttributes&
+	    attributes() const {
 		return attributes_;
 	}
 

@@ -254,7 +254,7 @@ TEST_F(TestRpcServer, ConnectwithValidHandle) {
 	EXPECT_NE(handle, nullptr);
 
 	// Verify that the register listener uri mataches with input method uri
-	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mockTransport_->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, *mockTransport_->sink_filter_));
 }
 
 // Test case to verify RPC request handling with return payload and TTL
@@ -274,7 +274,7 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 	auto& handle = serverOrStatus.value();
 	EXPECT_NE(handle, nullptr);
 
-	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mockTransport_->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, *mockTransport_->sink_filter_));
 
 	// Create request umessage
 	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
@@ -330,7 +330,7 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 	auto& handle = serverOrStatus.value();
 	EXPECT_NE(handle, nullptr);
 
-	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, mockTransport_->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, *mockTransport_->sink_filter_));
 
 	// Create request umessage
 	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
@@ -380,17 +380,11 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
 	auto& handle = serverOrStatus.value();
 	EXPECT_NE(handle, nullptr);
 
-	// Set valid response resource id for request uri
-	request_uri_->set_resource_id(0x3);
-
-	// Create UUID for request id
-	auto reqid =
-	    uprotocol::datamodel::builder::UuidBuilder::getBuilder().build();
-
 	// Create request umessage
-	auto builder = uprotocol::datamodel::builder::UMessageBuilder::response(
-	    std::move(*method_uri_), std::move(reqid),
-	    uprotocol::v1::UPriority::UPRIORITY_CS5, std::move(*request_uri_));
+	using namespace std::chrono_literals;
+	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
+	    std::move(*method_uri_), std::move(*request_uri_),
+	    uprotocol::v1::UPriority::UPRIORITY_CS5, 300ms);
 
 	auto msg = builder.build();
 

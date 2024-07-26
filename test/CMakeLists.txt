@@ -25,7 +25,7 @@ file(COPY
 # Invoked as add_coverage_test("SomeName" sources...)
 function(add_coverage_test Name)
     add_executable(${Name} ${ARGN})
-    target_compile_options(${Name} PRIVATE -g -Og)
+    target_compile_options(${Name} PRIVATE -g -Og -Wno-deprecated-declarations)
     target_link_libraries(${Name}
         PUBLIC
         up-core-api::up-core-api
@@ -85,3 +85,4 @@ add_coverage_test("NotificationSourceTest" coverage/communication/NotificationSo
 add_extra_test("PublisherSubscriberTest" extra/PublisherSubscriberTest.cpp)
 add_extra_test("NotificationTest" extra/NotificationTest.cpp)
 add_extra_test("RpcClientServerTest" extra/RpcClientServerTest.cpp)
+add_extra_test("UTransportMockTest" extra/UTransportMockTest.cpp)

@@ -62,7 +62,7 @@ UMessageBuilder UMessageBuilder::request(v1::UUri&& method, v1::UUri&& source,
 		    "Method URI is not a valid URI |  " +
 		    std::string(UriValidator::message(*methodReason)));
 	}
-	auto [srcOk, srcReason] = UriValidator::isValid(source);
+	auto [srcOk, srcReason] = UriValidator::isValidRpcResponse(source);
 	if (!srcOk) {
 		throw UriValidator::InvalidUUri(
 		    "Source URI is not a valid URI |  " +
@@ -89,7 +89,7 @@ UMessageBuilder UMessageBuilder::response(v1::UUri&& sink,
 		    "Method URI is not a valid URI |  " +
 		    std::string(UriValidator::message(*methodReason)));
 	}
-	auto [sinkOk, sinkReason] = UriValidator::isValid(sink);
+	auto [sinkOk, sinkReason] = UriValidator::isValidRpcResponse(sink);
 	if (!sinkOk) {
 		throw UriValidator::InvalidUUri(
 		    "Source URI is not a valid URI |  " +

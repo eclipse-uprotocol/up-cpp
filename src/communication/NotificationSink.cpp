@@ -11,35 +11,73 @@
 
 #include "up-cpp/communication/NotificationSink.h"
 
+#include <google/protobuf/util/message_differencer.h>
+
 #include "up-cpp/datamodel/validator/UUri.h"
 
 namespace uprotocol::communication {
-namespace UriValidator = uprotocol::datamodel::validator::uri;
+namespace UriValidator = datamodel::validator::uri;
+
+NotificationSink::SinkOrStatus NotificationSink::create(
+    std::shared_ptr<transport::UTransport> transport, ListenCallback&& callback,
+    const uprotocol::v1::UUri& source_filter) {
+	// Standard check - transport pointer cannot be null
+	if (!transport) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
+	// NOTE: isValidSubscription() is documented as
+	// "valid ... as a source filter when subscribing to a notification"
+	auto [source_ok, bad_source_reason] =
+	    UriValidator::isValidSubscription(source_filter);
+	if (!source_ok) {
+		throw UriValidator::InvalidUUri(
+		    "Source filter is not a valid notification source URI |  " +
+		    std::string(UriValidator::message(*bad_source_reason)));
+	}
+
+	auto listener = transport->registerListener(
+	    std::move(callback), source_filter, transport->getEntityUri());
+
+	if (!listener) {
+		return uprotocol::utils::Unexpected(listener.error());
+	}
+
+	return std::make_unique<NotificationSink>(
+	    std::forward<std::shared_ptr<transport::UTransport>>(transport),
+	    std::forward<ListenHandle&&>(std::move(listener).value()));
+}
+
+// NOTE: deprecated
 NotificationSink::SinkOrStatus NotificationSink::create(
     std::shared_ptr<transport::UTransport> transport,
     const uprotocol::v1::UUri& sink, ListenCallback&& callback,
     std::optional<uprotocol::v1::UUri>&& source_filter) {
+	// Standard check - transport pointer cannot be null
 	if (!transport) {
-		throw std::invalid_argument("transport cannot be null");
+		throw transport::NullTransport("transport cannot be null");
 	}
-	auto [sinkOk, sinkReason] = UriValidator::isValidNotificationSource(sink);
-	if (!sinkOk) {
+
+	// With the adjustments to the API to match 1.6.0, the primary filter for
+	// a notification is the _source_ URI. The sink will always be this entity's
+	// URI from the transport.
+	if (!source_filter) {
+		throw UriValidator::InvalidUUri("Source filter must be provided");
+	}
+
+	using MessageDifferencer = google::protobuf::util::MessageDifferencer;
+
+	if (!MessageDifferencer::Equals(sink, transport->getEntityUri())) {
 		throw UriValidator::InvalidUUri(
-		    "URI is not a valid URI |  " +
-		    std::string(UriValidator::message(*sinkReason)));
+		    "Sink filter must match transport->getEntityUri()");
 	}
-	auto listener = transport->registerListener(sink, std::move(callback),
-	                                            std::move(source_filter));
-	if (!listener) {
-		return uprotocol::utils::Unexpected(listener.error());
-	}
-	return std::make_unique<NotificationSink>(
-	    std::forward<std::shared_ptr<transport::UTransport>>(transport),
-	    std::forward<ListenHandle&&>(std::move(listener).value()));
+
+	return create(transport, std::move(callback), *source_filter);
 }
 
 NotificationSink::NotificationSink(
     std::shared_ptr<transport::UTransport> transport,
     NotificationSink::ListenHandle&& listener)
     : transport_(std::move(transport)), listener_(std::move(listener)) {}
+
 }  // namespace uprotocol::communication
