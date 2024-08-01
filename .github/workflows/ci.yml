@@ -416,14 +416,14 @@ jobs:
           sudo apt-get install -y clang-tidy-12
 
       - name: Run clang-tidy on source
-        working-directory: up-cpp
+        working-directory: .
         run: |
           find src include -name '*.cpp' -or -name '*.hpp' | \
           xargs -I {} clang-tidy -p build/Release/compile_commands.json {} \
           2>&1 | tee clang_tidy_source_report.txt
 
       - name: Run clang-tidy on tests
-        working-directory: up-cpp
+        working-directory: .
         run: |
           find test -name '*.cpp' -or -name '*.hpp' | \
           xargs -I {} clang-tidy -p build/Release/compile_commands.json {} \
