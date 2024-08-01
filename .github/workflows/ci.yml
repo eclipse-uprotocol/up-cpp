@@ -410,34 +410,44 @@ jobs:
         with:
           path: up-cpp
 
-      - name: Run linters on source
-        id: source-linter
-        uses: cpp-linter/cpp-linter-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          repo-root: up-cpp
-          ignore: 'test'
-          style: 'file' # read .clang-format for configuration
-          tidy-checks: '' # Read .clang-tidy for configuration
-          database: compile_commands.json
-
-      - name: Run linters on tests
-        id: test-linter
-        uses: cpp-linter/cpp-linter-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          repo-root: up-cpp
-          ignore: 'src|include'
-          style: 'file' # read .clang-format for configuration
-          tidy-checks: '' # Read .clang-tidy for configuration
-          database: compile_commands.json
-
-      - name: Report lint failure
-        if: steps.source-linter.outputs.checks-failed > 0 || steps.test-linter.outputs.checks-failed > 0
+      - name: Install clang-tidy-12
         run: |
-          exit 1
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy-12
+
+      - name: Run clang-tidy on source
+        working-directory: up-cpp
+        run: |
+          find src include -name '*.cpp' -or -name '*.hpp' | \
+          xargs -I {} clang-tidy -p build/Release/compile_commands.json {} \
+          2>&1 | tee clang_tidy_source_report.txt
+
+      - name: Run clang-tidy on tests
+        working-directory: up-cpp
+        run: |
+          find test -name '*.cpp' -or -name '*.hpp' | \
+          xargs -I {} clang-tidy -p build/Release/compile_commands.json {} \
+          2>&1 | tee clang_tidy_test_report.txt
+
+      - name: Check clang-tidy and fail if errors
+        working-directory: up-cpp
+        run: |
+          if grep -q "error:" clang_tidy_source_report.txt clang_tidy_test_report.txt; then
+            echo "clang-tidy found errors:"
+            grep "error:" clang_tidy_source_report.txt clang_tidy_test_report.txt
+            exit 1
+          else
+            echo "No errors found by clang-tidy"
+          fi
+
+      - name: Upload clang-tidy reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: clang-tidy-reports
+          path: |
+            up-cpp/clang_tidy_source_report.txt
+            up-cpp/clang_tidy_test_report.txt
 
   # NOTE: In GitHub repository settings, the "Require status checks to pass
   # before merging" branch protection rule ensures that commits are only merged
@@ -447,7 +457,7 @@ jobs:
   ci:
     name: CI status checks
     runs-on: ubuntu-latest
-    needs: [build, test, memcheck, threadcheck, helgrind, dhat]
+    needs: [build, test, memcheck, threadcheck, helgrind, dhat, lint]
     if: always()
     steps:
       - name: Check whether all jobs pass
