@@ -185,4 +185,14 @@ TEST_F(TestNotificationSource, NotifyWithoutPayloadFailure) {
 	EXPECT_EQ(status.code(), retval.code());
 }
 
+// Test with Null transport
+TEST_F(TestNotificationSource, NullTransport) {
+	auto transport = nullptr;
+
+	EXPECT_THROW(NotificationSource notificationSource(
+	                 transport, std::move(source_), std::move(sink_), format_,
+	                 priority_, ttl_),
+	             uprotocol::transport::NullTransport);
+}
+
 }  // namespace
