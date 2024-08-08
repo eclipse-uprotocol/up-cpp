@@ -1,6 +1,6 @@
 # uProtocol C++ Interface Library (up-cpp)
 
-[![Build & Test](https://github.com/eclipse-uprotocol/up-cpp/actions/workflows/ci.yml/badge.svg?branch=v1.0_up-v1.6.0)](https://github.com/eclipse-uprotocol/up-cpp/actions/workflows/ci.yml)
+[![CI](https://github.com/eclipse-uprotocol/up-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/eclipse-uprotocol/up-cpp/actions/workflows/ci.yml)
 
 ## Welcome!
 

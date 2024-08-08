@@ -145,4 +145,12 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {
 	          v1::UPriority::UPRIORITY_CS1);
 }
 
+// publisher with null transport
+TEST_F(TestPublisher, PublisherWithNullTransport) {
+	auto transport = nullptr;
+	EXPECT_THROW(Publisher publisher(transport, std::move(topic_), format_,
+	                                 priority_, ttl_),
+	             uprotocol::transport::NullTransport);
+}
+
 }  // namespace

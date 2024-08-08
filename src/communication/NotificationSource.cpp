@@ -23,6 +23,10 @@ NotificationSource::NotificationSource(
       notify_builder_(
           UMessageBuilder::notification(std::move(source), std::move(sink))
               .withPriority(priority.value_or(v1::UPriority::UPRIORITY_CS1))) {
+	if (!transport_) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
 	if (payload_format.has_value()) {
 		notify_builder_.withPayloadFormat(payload_format.value());
 	}
@@ -35,11 +39,19 @@ NotificationSource::NotificationSource(
 v1::UStatus NotificationSource::notify(
     datamodel::builder::Payload&& payload) const {
 	auto message = notify_builder_.build(std::move(payload));
+	if (!transport_) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
 	return transport_->send(std::move(message));
 }
 
 v1::UStatus NotificationSource::notify() const {
 	auto message = notify_builder_.build();
+	if (!transport_) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
 	return transport_->send(std::move(message));
 }
 

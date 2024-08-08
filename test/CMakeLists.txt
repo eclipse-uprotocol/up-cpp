@@ -30,6 +30,7 @@ function(add_coverage_test Name)
         PUBLIC
         up-core-api::up-core-api
         up-cpp::up-cpp
+        spdlog::spdlog
         protobuf::protobuf
         PRIVATE
         GTest::gtest_main
@@ -49,7 +50,11 @@ endfunction()
 ########################### COVERAGE ##########################################
 # Utils
 add_coverage_test("ExpectedTest" coverage/utils/ExpectedTest.cpp)
+add_coverage_test("base64Test" coverage/utils/base64Test.cpp)
+add_coverage_test("IpAddressTest" coverage/utils/IpAddressTest.cpp)
 add_coverage_test("CallbackConnectionTest" coverage/utils/CallbackConnectionTest.cpp)
+add_coverage_test("CyclicQueueTest" coverage/utils/CyclicQueueTest.cpp)
+add_coverage_test("ThreadPoolTest" coverage/utils/ThreadPoolTest.cpp)
 
 # Validators
 add_coverage_test("UuidValidatorTest" coverage/datamodel/UuidValidatorTest.cpp)

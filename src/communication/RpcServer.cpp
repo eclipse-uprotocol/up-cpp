@@ -20,7 +20,11 @@ RpcServer::RpcServer(std::shared_ptr<transport::UTransport> transport,
                      std::optional<std::chrono::milliseconds> ttl)
     : transport_(std::move(transport)),
       ttl_(ttl),
-      expected_payload_format_(std::move(format)) {}
+      expected_payload_format_(std::move(format)) {
+	if (!transport_) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+}
 
 RpcServer::ServerOrStatus RpcServer::create(
     std::shared_ptr<transport::UTransport> transport,
@@ -29,6 +33,11 @@ RpcServer::ServerOrStatus RpcServer::create(
     std::optional<std::chrono::milliseconds> ttl) {
 	// Validate the method name using a URI validator.
 	auto [valid, reason] = Validator::uri::isValidRpcMethod(method_name);
+
+	if (!transport) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
 	if (!valid) {
 		// If the method name is invalid, return an error status.
 		v1::UStatus status;
@@ -67,6 +76,11 @@ RpcServer::ServerOrStatus RpcServer::create(
 
 v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 	callback_ = std::move(callback);
+
+	if (!transport_) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
 	auto result = transport_->registerListener(
 	    // listener=
 	    [this](const v1::UMessage& request) {
