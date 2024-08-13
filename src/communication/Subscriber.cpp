@@ -47,6 +47,9 @@ Subscriber::Subscriber(std::shared_ptr<transport::UTransport> transport,
                        ListenHandle&& subscription)
     : transport_(transport), subscription_(std::move(subscription)) {
 	// Constructor body. Any additional setup can go here.
+	if (!transport_) {
+		throw transport::NullTransport("transport cannot be null");
+	}
 }
 
 }  // namespace uprotocol::communication
