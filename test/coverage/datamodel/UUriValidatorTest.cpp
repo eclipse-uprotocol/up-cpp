@@ -135,7 +135,7 @@ TEST_F(TestUUriValidator, Wildcards) {
 	{	// Set Service ID to 1 and Instance ID to FFFF (Any)
 		// This changed in 581291f in up-spec
 		auto uuri = getUuri();
-		uuri.set_ue_id(0xFFFF001);
+		uuri.set_ue_id(0xFFFF0001);
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 

@@ -74,7 +74,7 @@ bool uses_wildcards(const v1::UUri& uuri) {
 	if ((uuri.ue_id() & 0xFFFF) == 0xFFFF) {  // service ID
 		return true;
 	}
-	if ((uuri.ue_id() & 0xFFFF0000) == 0) {  // service instance ID
+	if ((uuri.ue_id() & 0xFFFF0000) == 0xFFFF0000) {  // service instance ID
 		return true;
 	}
 	if (uuri.ue_version_major() == 0xFF) {
