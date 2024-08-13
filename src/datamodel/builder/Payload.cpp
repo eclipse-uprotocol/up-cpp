@@ -46,6 +46,13 @@ Payload::Payload(Serialized&& serialized) {
 	payload_ = std::move(serialized);
 }
 
+// google::protobuf::Any constructor
+Payload::Payload(const google::protobuf::Any& any) {
+	payload_ = std::make_tuple(
+	    std::move(any.SerializeAsString()),
+	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY);
+}
+
 // Move constructor
 Payload::Payload(Payload&& other) noexcept
     : payload_(std::move(other.payload_)), moved_(std::move(other.moved_)) {}
