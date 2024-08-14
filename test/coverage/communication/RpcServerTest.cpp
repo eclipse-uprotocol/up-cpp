@@ -132,6 +132,20 @@ TEST_F(TestRpcServer, ConstructorValidParams) {
 	ASSERT_NE(serverPtr, nullptr);
 }
 
+// Null transport
+TEST_F(TestRpcServer, CreateWithNullTransport) {
+	// Define a callback function to be used with the RpcServer
+	uprotocol::communication::RpcServer::RpcCallback callback =
+	    RpcCallbackNoReturn;
+
+	auto transport = nullptr;
+	// Attempt to create an RpcServer instance with valid parameters
+	EXPECT_THROW(
+	    auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	        transport, *method_uri_, std::move(callback)),
+	    uprotocol::transport::NullTransport);
+}
+
 // Test to verify RpcServer construction with a specific payload format
 TEST_F(TestRpcServer, ConstructorWithPayloadFormat) {
 	// Define a callback that returns a specific value, simulating a response

@@ -25,6 +25,10 @@ Publisher::Publisher(std::shared_ptr<transport::UTransport> transport,
 	publish_builder_.withPayloadFormat(format).withPriority(
 	    priority.value_or(v1::UPriority::UPRIORITY_CS1));
 
+	if (!transport_) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
 	if (ttl.has_value()) {
 		publish_builder_.withTtl(ttl.value());
 	}
@@ -32,6 +36,10 @@ Publisher::Publisher(std::shared_ptr<transport::UTransport> transport,
 
 v1::UStatus Publisher::publish(datamodel::builder::Payload&& payload) const {
 	auto message = publish_builder_.build(std::move(payload));
+	if (!transport_) {
+		throw transport::NullTransport("transport cannot be null");
+	}
+
 	return transport_->send(std::move(message));
 }
 
