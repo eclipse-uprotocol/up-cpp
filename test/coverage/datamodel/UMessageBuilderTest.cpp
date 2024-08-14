@@ -133,7 +133,8 @@ TEST_F(TestUMessageBuilder, NotificationTest) {
 
 TEST_F(TestUMessageBuilder, NotificationInvalidSourceUriThrows) {
 	UUri source;
-	source.set_ue_id(0xFFFF0000); // Set the source Service Instance ID a wildcard (any)
+	// Set the source Service Instance ID a wildcard (any)
+	source.set_ue_id(0xFFFF0000);
 	UUri sink = sink_;
 	EXPECT_THROW(
 	    { UMessageBuilder::notification(std::move(source), std::move(sink)); },
@@ -143,7 +144,8 @@ TEST_F(TestUMessageBuilder, NotificationInvalidSourceUriThrows) {
 TEST_F(TestUMessageBuilder, NotificationInvalidSinkUriThrows) {
 	UUri source = source_;
 	UUri sink;
-	sink.set_ue_id(0xFFFF0000); // Set the source Service Instance ID a wildcard (any)
+	// Set the source Service Instance ID a wildcard (any)
+	sink.set_ue_id(0xFFFF0000);
 	EXPECT_THROW(
 	    { UMessageBuilder::notification(std::move(source), std::move(sink)); },
 	    InvalidUUri);
@@ -185,7 +187,8 @@ TEST_F(TestUMessageBuilder, RequestInvalidMethodUriThrows) {
 
 TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {
 	UUri source;
-	source.set_ue_id(0xFFFF0000); // Set the source Service Instance ID a wildcard (any)
+	// Set the source Service Instance ID a wildcard (any)
+	source.set_ue_id(0xFFFF0000);
 	UUri method = method_;
 	UPriority priority = UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(5000);
@@ -246,7 +249,8 @@ TEST_F(TestUMessageBuilder, ResponseInvalidMethodUriThrows) {
 
 TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) {
 	UUri sink;
-	sink.set_ue_id(0xFFFF0000); // Set the source Service Instance ID a wildcard (any)
+	// Set the source Service Instance ID a wildcard (any)
+	sink.set_ue_id(0xFFFF0000);
 	UUri method = method_;
 	UUID request_id = reqId_;
 	UPriority priority = UPriority::UPRIORITY_CS4;
