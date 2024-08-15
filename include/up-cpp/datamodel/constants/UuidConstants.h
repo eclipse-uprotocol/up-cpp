@@ -9,8 +9,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_DATAMODEL_UUID_CONSTANTS_H
-#define UP_CPP_DATAMODEL_UUID_CONSTANTS_H
+#ifndef UP_CPP_DATAMODEL_CONSTANTS_UUIDCONSTANTS_H
+#define UP_CPP_DATAMODEL_CONSTANTS_UUIDCONSTANTS_H
+
+#include <cstdint>
 
 namespace uprotocol::datamodel {
 
@@ -38,4 +40,4 @@ constexpr uint64_t MASK_14_BITS = 0x3FFF;
 
 }  // namespace uprotocol::datamodel
 
-#endif  // UP_CPP_DATAMODEL_UUID_CONSTANTS_H
+#endif  // UP_CPP_DATAMODEL_CONSTANTS_UUIDCONSTANTS_H
