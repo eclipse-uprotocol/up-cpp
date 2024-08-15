@@ -115,36 +115,37 @@ TEST_F(TestUUriValidator, Wildcards) {
 		return uuri;
 	};
 
-	{
+	{  // Check for no wildcards
 		auto uuri = getUuri();
 		EXPECT_FALSE(uses_wildcards(uuri));
 	}
 
-	{
+	{  // Change Authority name to "hello*" (Any)
 		auto uuri = getUuri();
 		uuri.set_authority_name("hello*");
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
-	{
+	{  // Set Service ID to FFFF (Any) and Instance ID to 1
 		auto uuri = getUuri();
 		uuri.set_ue_id(0x0001FFFF);
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
-	{
+	{  // Set Service ID to 1 and Instance ID to FFFF (Any)
+		// This changed in 581291f in up-spec
 		auto uuri = getUuri();
-		uuri.set_ue_id(0x00000001);
+		uuri.set_ue_id(0xFFFF0001);
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
-	{
+	{  // Set major version to FF (Any)
 		auto uuri = getUuri();
 		uuri.set_ue_version_major(0xFF);
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
-	{
+	{  // Set Resource ID to FFFF (any)
 		auto uuri = getUuri();
 		uuri.set_resource_id(0xFFFF);
 		EXPECT_TRUE(uses_wildcards(uuri));
