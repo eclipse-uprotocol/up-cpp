@@ -340,6 +340,31 @@ TEST_F(PayloadTest, StringMovePayloadTest) {
 	EXPECT_THROW(auto _ = payload.buildCopy(), Payload::PayloadMoved);
 }
 
+// Create Any and move payload object test
+TEST_F(PayloadTest, AnyMovePayloadTest) {  // NOLINT
+	// Arrange
+	uprotocol::v1::UUri uri_object;  // NOLINT
+	uri_object.set_authority_name(testStringPayload_);
+	google::protobuf::Any any;
+	any.PackFrom(uri_object, "hello_world");
+
+	// Act
+	Payload payload(any);
+	auto [serialized_data, payload_format] = std::move(payload).buildMove();
+
+	// Assert
+	EXPECT_EQ(
+	    payload_format,
+	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY);
+	google::protobuf::Any parsed_any;
+	EXPECT_TRUE(parsed_any.ParseFromString(serialized_data));
+	EXPECT_EQ(parsed_any.type_url(), "hello_world/uprotocol.v1.UUri");
+
+	uprotocol::v1::UUri parsed_uri_object;
+	EXPECT_TRUE(parsed_uri_object.ParseFromString(parsed_any.value()));
+	EXPECT_EQ(parsed_uri_object.authority_name(), testStringPayload_);
+}
+
 /////////////////////RValue String Payload Tests/////////////////////
 
 // Create RValue String Payload
