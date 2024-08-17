@@ -234,6 +234,18 @@ struct BadConnection : public std::runtime_error {
 	    : std::runtime_error(std::forward<Args>(args)...) {}
 };
 
+/// @brief Thrown if an empty std::function parameter was received
+///
+/// A std::function can be empty. When an empty function is invoked, it will
+/// throw std::bad_function_call. We can check earlier by casting the function
+/// to a boolean. If the check fails, EmptyFunctionObject is thrown. This makes
+/// the error appear earlier without waiting for invokation to occur.
+struct EmptyFunctionObject : public std::invalid_argument {
+	template <typename... Args>
+	EmptyFunctionObject(Args&&... args)
+	    : std::invalid_argument(std::forward<Args>(args)...) {}
+};
+
 template <typename RT, typename... Args>
 struct [[nodiscard]] CalleeHandle {
 	using Conn = Connection<RT, Args...>;
