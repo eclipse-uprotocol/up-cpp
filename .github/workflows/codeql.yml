@@ -69,7 +69,7 @@ jobs:
       name: Build up-core-api conan package
       shell: bash
       run: |
-        conan create --version 1.6.0 up-conan-recipes/up-core-api/release
+        conan create --version 1.6.0-alpha3 up-conan-recipes/up-core-api/release
 
     - if: matrix.build-mode == 'manual'
       name: Build up-cpp with tests
