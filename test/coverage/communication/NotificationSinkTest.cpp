@@ -216,14 +216,23 @@ TEST_F(NotificationSinkTest, NullCallback) {
 	    testDefaultSourceUUri_);
 
 	// bind to null callback
-	auto result = NotificationSink::create(transport, transport->getEntityUri(),
-	                                       std::move(nullptr), testTopicUUri_);
+	auto test_create_nullptr = [transport, this]() {
+		std::ignore =
+		    NotificationSink::create(transport, transport->getEntityUri(),
+		                             std::move(nullptr), testTopicUUri_);
+	};
 
-	uprotocol::v1::UMessage msg;
-	auto attr = std::make_shared<uprotocol::v1::UAttributes>();
-	*msg.mutable_attributes() = *attr;
-	msg.set_payload(get_random_string(1400));
-	EXPECT_THROW(transport->mockMessage(msg), std::bad_function_call);
+	using namespace uprotocol::utils;
+
+	EXPECT_THROW(test_create_nullptr(), callbacks::EmptyFunctionObject);
+
+	// Default construct a function object
+	auto test_create_empty = [transport, this]() {
+		std::ignore = NotificationSink::create(
+		    transport, transport->getEntityUri(), {}, testTopicUUri_);
+	};
+
+	EXPECT_THROW(test_create_empty(), callbacks::EmptyFunctionObject);
 }
 
 }  // namespace

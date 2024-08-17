@@ -186,14 +186,21 @@ TEST_F(SubscriberTest, SubscribeNullCallback) {
 	    testDefaultSourceUUri_);
 
 	// bind to null callback
-	auto result =
-	    Subscriber::subscribe(transport, testTopicUUri_, std::move(nullptr));
+	auto test_subscribe_nullptr = [transport, this]() {
+		std::ignore = Subscriber::subscribe(transport, testTopicUUri_,
+		                                    std::move(nullptr));
+	};
 
-	uprotocol::v1::UMessage msg;
-	auto attr = std::make_shared<uprotocol::v1::UAttributes>();
-	*msg.mutable_attributes() = *attr;
-	msg.set_payload(get_random_string(1400));
-	EXPECT_THROW(transport->mockMessage(msg), std::bad_function_call);
+	using namespace uprotocol::utils;
+
+	EXPECT_THROW(test_subscribe_nullptr(), callbacks::EmptyFunctionObject);
+
+	// Default construct a function object
+	auto test_subscribe_empty = [transport, this]() {
+		std::ignore = Subscriber::subscribe(transport, testTopicUUri_, {});
+	};
+
+	EXPECT_THROW(test_subscribe_empty(), callbacks::EmptyFunctionObject);
 }
 
 }  // namespace
