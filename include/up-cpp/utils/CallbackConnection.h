@@ -266,10 +266,20 @@ struct [[nodiscard]] CalleeHandle {
 			    "Attempted to create a connected CalleeHandle with bad "
 			    "connection pointer");
 		}
+
 		if (!callback_) {
 			throw BadConnection(
 			    "Attempted to create a connected CalleeHandle with bad "
 			    "callback pointer");
+		}
+
+		const auto& callback_obj = *callback_;
+		if (!callback_obj) {
+			throw EmptyFunctionObject("Callback function is empty");
+		}
+
+		if (cleanup_ && !cleanup_.value()) {
+			throw EmptyFunctionObject("Cleanup function is empty");
 		}
 	}
 
