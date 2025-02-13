@@ -239,7 +239,7 @@ struct BadConnection : public std::runtime_error {
 /// A std::function can be empty. When an empty function is invoked, it will
 /// throw std::bad_function_call. We can check earlier by casting the function
 /// to a boolean. If the check fails, EmptyFunctionObject is thrown. This makes
-/// the error appear earlier without waiting for invokation to occur.
+/// the error appear earlier without waiting for invocation to occur.
 struct EmptyFunctionObject : public std::invalid_argument {
 	template <typename... Args>
 	EmptyFunctionObject(Args&&... args)
