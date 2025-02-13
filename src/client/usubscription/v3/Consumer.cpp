@@ -80,14 +80,12 @@ v1::UStatus Consumer::createNotificationSink() {
 }
 
 SubscriptionRequest Consumer::buildSubscriptionRequest() {
-	auto subscriber_info = ProtoConverter::BuildSubscriberInfo(
-	    transport_->getEntityUri(), consumer_options_.subscriber_details);
 	auto attributes = ProtoConverter::BuildSubscribeAttributes(
 	    consumer_options_.when_expire, consumer_options_.subscription_details,
 	    consumer_options_.sample_period_ms);
 
 	auto subscription_request = ProtoConverter::BuildSubscriptionRequest(
-	    subscription_topic_, subscriber_info, attributes);
+	    subscription_topic_, attributes);
 	return subscription_request;
 }
 
@@ -132,11 +130,8 @@ v1::UStatus Consumer::subscribe(
 }
 
 UnsubscribeRequest Consumer::buildUnsubscriptionRequest() {
-	auto subscriber_info = ProtoConverter::BuildSubscriberInfo(
-	    transport_->getEntityUri(), consumer_options_.subscriber_details);
-
 	auto unsubscribe_request = ProtoConverter::BuildUnSubscribeRequest(
-	    subscription_topic_, subscriber_info);
+	    subscription_topic_);
 	return unsubscribe_request;
 }
 

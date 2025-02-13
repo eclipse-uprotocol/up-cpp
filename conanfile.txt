@@ -1,5 +1,5 @@
 [requires]
-up-core-api/[~1.6, include_prerelease]
+up-core-api/1.6.0-alpha4
 spdlog/[~1.13]
 protobuf/[~3.21]
 

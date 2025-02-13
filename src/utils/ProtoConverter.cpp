@@ -18,17 +18,11 @@ google::protobuf::Timestamp ProtoConverter::ConvertToProtoTimestamp(
 }
 
 // SubscriberInfo builder
-SubscriberInfo ProtoConverter::BuildSubscriberInfo(
-    const v1::UUri& entity_uri,
-    std::optional<google::protobuf::Any> subscriber_details) {
+SubscriberInfo ProtoConverter::BuildSubscriberInfo(const v1::UUri& entity_uri) {
 	SubscriberInfo subscriber_info;
 
 	// Create a new instance of UUri and copy the contents from entity_uri
 	*subscriber_info.mutable_uri() = entity_uri;
-
-	if (subscriber_details.has_value()) {
-		subscriber_info.add_details()->CopyFrom(subscriber_details.value());
-	}
 
 	return subscriber_info;
 }
@@ -59,11 +53,10 @@ SubscribeAttributes ProtoConverter::BuildSubscribeAttributes(
 
 // SubscriptionRequest builder
 SubscriptionRequest ProtoConverter::BuildSubscriptionRequest(
-    const v1::UUri& subscription_topic, SubscriberInfo& subscriber_info,
+    const v1::UUri& subscription_topic,
     std::optional<SubscribeAttributes> attributes) {
 	SubscriptionRequest subscription_request;
 	*subscription_request.mutable_topic() = subscription_topic;
-	*subscription_request.mutable_subscriber() = subscriber_info;
 
 	// Use mutable attributes if provided
 	if (attributes.has_value()) {
@@ -75,10 +68,9 @@ SubscriptionRequest ProtoConverter::BuildSubscriptionRequest(
 }
 
 UnsubscribeRequest ProtoConverter::BuildUnSubscribeRequest(
-    const v1::UUri& subscription_topic, SubscriberInfo& subscriber_info) {
+    const v1::UUri& subscription_topic) {
 	UnsubscribeRequest unsubscribe_request;
 	*unsubscribe_request.mutable_topic() = subscription_topic;
-	*unsubscribe_request.mutable_subscriber() = subscriber_info;
 
 	return unsubscribe_request;
 }

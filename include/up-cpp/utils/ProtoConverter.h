@@ -21,11 +21,8 @@ struct ProtoConverter {
 	/// @brief Builds a SubscriberInfo from the given parameters
 	///
 	/// @param entity_uri the UUri of the entity subscribing
-	/// @param subscriber_details the details of the subscriber
 	/// @return the built SubscriberInfo
-	static SubscriberInfo BuildSubscriberInfo(
-	    const v1::UUri& entity_uri,
-	    std::optional<google::protobuf::Any> subscriber_details);
+	static SubscriberInfo BuildSubscriberInfo(const v1::UUri& entity_uri);
 
 	/// @brief Builds a SubscribeAttributes from the given parameters
 	///
@@ -41,20 +38,18 @@ struct ProtoConverter {
 	/// @brief Builds a SubscriptionRequest from the given parameters
 	///
 	/// @param subscription_topic the UUri of the topic to subscribe to
-	/// @param subscriber_info the SubscriberInfo of the subscriber
 	/// @param attributes the SubscribeAttributes for the subscription
 	/// @return the built SubscriptionRequest
 	static SubscriptionRequest BuildSubscriptionRequest(
-	    const v1::UUri& subscription_topic, SubscriberInfo& subscriber_info,
+	    const v1::UUri& subscription_topic,
 	    std::optional<SubscribeAttributes> attributes = {});
 
 	/// @brief Builds a UnsubscribeRequest from the given parameters
 	///
 	/// @param subscription_topic the UUri of the topic to unsubscribe from
-	/// @param subscriber_info the SubscriberInfo of the subscriber
 	/// @return the built UnsubscribeRequest
 	static UnsubscribeRequest BuildUnSubscribeRequest(
-	    const v1::UUri& subscription_topic, SubscriberInfo& subscriber_info);
+	    const v1::UUri& subscription_topic);
 };
 };  // namespace uprotocol::utils
 #endif  // PROTO_CONVERTER_H
