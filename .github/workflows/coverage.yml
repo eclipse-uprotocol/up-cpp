@@ -65,7 +65,7 @@ jobs:
         run: |
           cd up-cpp/build/Release
           mkdir -p ../Coverage
-          gcovr -r ../../ --html --html-details -o ../Coverage/index.html -e '.*test.*'
+          gcovr -r ../../ --html --html-details -o ../Coverage/index.html -e '.*test.*' --gcov-ignore-parse-errors negative_hits.warn_once_per_file
           cd ..
           echo "Coverage report can be found here: ../Coverage/index.html"
 
