@@ -94,7 +94,7 @@ v1::UStatus Consumer::subscribe(
     ListenCallback&& callback) {
 	rpc_client_ = std::make_unique<communication::RpcClient>(
 	    transport_,
-	    std::move(uSubscriptionUUriBuilder_.getServiceUriWithResourceId(1)),
+	    uSubscriptionUUriBuilder_.getServiceUriWithResourceId(1),
 	    priority, subscription_request_ttl);
 
 	auto onResponse = [this](auto maybeResponse) {
@@ -130,19 +130,18 @@ v1::UStatus Consumer::subscribe(
 }
 
 UnsubscribeRequest Consumer::buildUnsubscriptionRequest() {
-	auto unsubscribe_request = ProtoConverter::BuildUnSubscribeRequest(
-	    subscription_topic_);
+	auto unsubscribe_request =
+	    ProtoConverter::BuildUnSubscribeRequest(subscription_topic_);
 	return unsubscribe_request;
 }
 
 void Consumer::unsubscribe(v1::UPriority priority,
                            std::chrono::milliseconds request_ttl) {
 	rpc_client_ = std::make_unique<communication::RpcClient>(
-	    transport_,
-	    std::move(uSubscriptionUUriBuilder_.getServiceUriWithResourceId(2)),
+	    transport_, uSubscriptionUUriBuilder_.getServiceUriWithResourceId(2),
 	    priority, request_ttl);
 
-	auto onResponse = [this](auto maybeResponse) {
+	auto onResponse = [](auto maybeResponse) {
 		if (!maybeResponse.has_value()) {
 			// Do something as this means sucessfully unsubscribed.
 		}
