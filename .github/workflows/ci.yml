@@ -422,8 +422,6 @@ jobs:
           cd up-cpp
           conan install --build=missing .
           cmake --preset conan-release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
-          cd build/Release
-          cmake --build . -- -j
 
       - name: Run linters on source
         continue-on-error: true
