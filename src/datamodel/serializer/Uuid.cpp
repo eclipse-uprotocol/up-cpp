@@ -106,7 +106,7 @@ uprotocol::v1::UUID AsString::deserialize(const std::string& str) {
 
 	// Reconstruct the UUID
 	uuid.set_msb((unix_ts_ms << UUID_TIMESTAMP_SHIFT) |
-	             (ver << UUID_VERSION_SHIFT) | rand_a);
+	             ((static_cast<uint64_t>(ver) << UUID_VERSION_SHIFT)) | rand_a);
 	uuid.set_lsb((static_cast<uint64_t>(var) << UUID_VARIANT_SHIFT) | rand_b);
 
 	return uuid;
