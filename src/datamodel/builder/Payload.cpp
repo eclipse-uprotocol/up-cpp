@@ -49,8 +49,8 @@ Payload::Payload(Serialized&& serialized) {
 // google::protobuf::Any constructor
 Payload::Payload(const google::protobuf::Any& any) {
 	payload_ = std::make_tuple(
-	    std::move(any.SerializeAsString()),
-	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY);
+		any.SerializeAsString(),
+		uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY);	
 }
 
 // Move constructor

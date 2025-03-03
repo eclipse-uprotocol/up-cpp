@@ -101,7 +101,7 @@ TEST_F(PayloadTest, CreateSerializedProtobufPayloadAndMoveTest) {
 
 	// Act
 	Payload payload(uriObject);
-	auto& [payload_reference, _] = payload.buildCopy();
+	auto& [payload_reference, payload_format] = payload.buildCopy();
 	const void* original_address = payload_reference.data();
 
 	// Assert
@@ -110,7 +110,7 @@ TEST_F(PayloadTest, CreateSerializedProtobufPayloadAndMoveTest) {
 	          uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
 	EXPECT_EQ(payloadData, expectedPayloadData);
 
-	EXPECT_THROW(auto _ = payload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_THROW(auto result = payload.buildCopy(), Payload::PayloadMoved);
 	EXPECT_EQ(original_address, payloadData.data());
 }
 
