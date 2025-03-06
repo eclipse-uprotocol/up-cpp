@@ -3,13 +3,14 @@
 namespace uprotocol::utils {
 google::protobuf::Timestamp ProtoConverter::ConvertToProtoTimestamp(
     const std::chrono::system_clock::time_point& tp) {
+	constexpr auto NANOSECONDS_PER_SECOND = 1000000000LL;
 	google::protobuf::Timestamp timestamp;
 	auto duration = tp.time_since_epoch();
 	auto seconds =
 	    std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 	auto nanoseconds =
 	    std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count() %
-	    1000000000ll;
+	    NANOSECONDS_PER_SECOND;
 
 	timestamp.set_seconds(seconds);
 	timestamp.set_nanos(static_cast<int32_t>(nanoseconds));

@@ -15,24 +15,39 @@
 
 #include <chrono>
 #include <queue>
+#include <utility>
 
 namespace {
 namespace detail {
 
-using namespace uprotocol;
+using uprotocol::v1::UStatus;
+using ListenHandle = uprotocol::transport::UTransport::ListenHandle;
 
 struct PendingRequest {
-	std::chrono::steady_clock::time_point when_expire;
-	transport::UTransport::ListenHandle response_listener;
-	std::function<void(v1::UStatus)> expire;
-	size_t instance_id;
+	friend struct ScrubablePendingQueue;
+	friend struct ExpireWorker;
+
+	PendingRequest(const std::chrono::steady_clock::time_point& when_expire,
+		ListenHandle response_listener,
+		std::function<void(UStatus)> expire,
+		const size_t& instance_id)
+		: when_expire_(when_expire),
+		response_listener_(std::move(response_listener)),
+		expire_(std::move(expire)),
+		instance_id_(instance_id) {}
 
 	auto operator>(const PendingRequest& other) const;
+private:
+	std::chrono::steady_clock::time_point when_expire_;
+	ListenHandle response_listener_;
+	std::function<void(UStatus)> expire_;
+	size_t instance_id_{};
 };
+
 
 struct ScrubablePendingQueue
     : public std::priority_queue<PendingRequest, std::vector<PendingRequest>,
-                                 std::greater<PendingRequest>> {
+                                 std::greater<>> {
 	~ScrubablePendingQueue();
 	auto scrub(size_t instance_id);
 	PendingRequest& top();
@@ -41,7 +56,7 @@ struct ScrubablePendingQueue
 struct ExpireWorker {
 	ExpireWorker();
 	~ExpireWorker();
-	void enqueue(PendingRequest&& request);
+	void enqueue(PendingRequest&& pending);
 	void scrub(size_t instance_id);
 	void doWork();
 
@@ -60,25 +75,26 @@ namespace uprotocol::communication {
 
 ////////////////////////////////////////////////////////////////////////////////
 struct RpcClient::ExpireService {
-	ExpireService() : instance_id_(next_instance_id++) {}
+	ExpireService() : instance_id_(next_instance_id_++) {}
 
-	~ExpireService() { worker.scrub(instance_id_); }
+	~ExpireService() { worker_.scrub(instance_id_); }
 
 	void enqueue(std::chrono::steady_clock::time_point when_expire,
 	             transport::UTransport::ListenHandle&& response_listener,
-	             std::function<void(v1::UStatus)> expire) {
-		detail::PendingRequest pending;
-		pending.when_expire = when_expire;
-		pending.response_listener = std::move(response_listener);
-		pending.expire = std::move(expire);
-		pending.instance_id = instance_id_;
+	             std::function<void(v1::UStatus)> expire) const {
+		auto pending = detail::PendingRequest(when_expire,
+			std::move(response_listener),
+			std::move(expire),
+			instance_id_);
 
-		worker.enqueue(std::move(pending));
+		worker_.enqueue(std::move(pending));
 	}
 
 private:
-	static inline std::atomic<size_t> next_instance_id{0};
-	static inline detail::ExpireWorker worker;
+	static inline std::atomic<size_t> next_instance_id_{0};
+	//constructor for ExpireWorker can throw an exception when trying to create new thread
+	//this can be problematic when used in a static constructor
+	static inline detail::ExpireWorker worker_; //NOLINT
 	size_t instance_id_;
 };
 
@@ -89,7 +105,7 @@ RpcClient::RpcClient(std::shared_ptr<transport::UTransport> transport,
                      std::optional<v1::UPayloadFormat> payload_format,
                      std::optional<uint32_t> permission_level,
                      std::optional<std::string> token)
-    : transport_(transport),
+    : transport_(std::move(transport)),
       ttl_(ttl),
       builder_(datamodel::builder::UMessageBuilder::request(
           std::move(method), v1::UUri(transport_->getEntityUri()), priority,
@@ -124,8 +140,10 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 	// attempt to call the callback succeeds.
 	auto callback_once = std::make_shared<std::once_flag>();
 
-	auto [callback_handle, callable] =
+	auto connected_pair =
 	    Connection::establish(std::move(callback));
+	auto callback_handle = std::move(std::get<0>(connected_pair));
+	auto callable = std::get<1>(connected_pair);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Wraps the callback to handle receive filtering and commstatus checking.
@@ -147,7 +165,7 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 				status.set_message("Received response with !OK commstatus");
 				std::call_once(*callback_once, [&callable,
 				                                status = std::move(status)]() {
-					callable(utils::Unexpected<v1::UStatus>(std::move(status)));
+					callable(utils::Expected<v1::UMessage,v1::UStatus>(utils::Unexpected<v1::UStatus>(status)));
 				});
 			}
 		}
@@ -160,7 +178,7 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 	auto expire = [callable, callback_once](v1::UStatus&& reason) mutable {
 		std::call_once(
 		    *callback_once, [&callable, reason = std::move(reason)]() {
-			    callable(utils::Unexpected<v1::UStatus>(std::move(reason)));
+			    callable(utils::Expected<v1::UMessage,v1::UStatus>(utils::Unexpected<v1::UStatus>(reason)));
 		    });
 	};
 	///////////////////////////////////////////////////////////////////////////
@@ -182,7 +200,7 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 		}
 	}
 
-	return std::move(callback_handle);
+	return callback_handle;
 }
 
 RpcClient::InvokeHandle RpcClient::invokeMethod(
@@ -204,7 +222,7 @@ RpcClient::InvokeFuture RpcClient::invokeMethod(
 	auto promise = std::make_shared<std::promise<MessageOrStatus>>();
 	auto future = promise->get_future();
 	auto handle = invokeMethod(
-	    std::move(payload), [promise](MessageOrStatus maybe_message) mutable {
+	    std::move(payload), [promise](const MessageOrStatus& maybe_message) mutable {
 		    promise->set_value(maybe_message);
 	    });
 
@@ -219,14 +237,14 @@ RpcClient::InvokeFuture RpcClient::invokeMethod() {
 	auto promise = std::make_shared<std::promise<MessageOrStatus>>();
 	auto future = promise->get_future();
 	auto handle =
-	    invokeMethod([promise](MessageOrStatus maybe_message) mutable {
+	    invokeMethod([promise](const MessageOrStatus& maybe_message) mutable {
 		    promise->set_value(maybe_message);
 	    });
 
 	return {std::move(future), std::move(handle)};
 }
 
-RpcClient::RpcClient(RpcClient&&) = default;
+RpcClient::RpcClient(RpcClient&&) noexcept = default;
 RpcClient::~RpcClient() = default;
 
 RpcClient::InvokeFuture::InvokeFuture() = default;
@@ -244,17 +262,19 @@ RpcClient::InvokeFuture::InvokeFuture(std::future<MessageOrStatus>&& future,
 namespace {
 namespace detail {
 
-using namespace uprotocol;
-using namespace std::chrono_literals;
+using uprotocol::v1::UStatus;
+using uprotocol::v1::UCode;
+// using namespace std::chrono_literals;
+using ListenHandle = uprotocol::transport::UTransport::ListenHandle;
 
 auto PendingRequest::operator>(const PendingRequest& other) const {
-	return when_expire > other.when_expire;
+	return when_expire_ > other.when_expire_;
 }
 
 ScrubablePendingQueue::~ScrubablePendingQueue() {
-	const v1::UStatus cancel_reason = []() {
-		v1::UStatus reason;
-		reason.set_code(v1::UCode::INTERNAL);
+	const UStatus cancel_reason = []() {
+		UStatus reason;
+		reason.set_code(UCode::INTERNAL);
 		reason.set_message(
 		    "ERROR: ExpireWorker has shut down while requests are still "
 		    "pending. This should never occur and likely indicates that an "
@@ -263,30 +283,30 @@ ScrubablePendingQueue::~ScrubablePendingQueue() {
 	}();
 
 	for (auto& pending : c) {
-		pending.expire(cancel_reason);
+		pending.expire_(cancel_reason);
 	}
 }
 
 auto ScrubablePendingQueue::scrub(size_t instance_id) {
 	// Collect all the expire lambdas so they can be called without the
 	// lock held.
-	std::vector<std::function<void(v1::UStatus)>> all_expired;
+	std::vector<std::function<void(UStatus)>> all_expired;
 
 	c.erase(
 	    std::remove_if(c.begin(), c.end(),
 	                   [instance_id, &all_expired](const PendingRequest& p) {
-		                   if (instance_id == p.instance_id) {
-			                   all_expired.push_back(p.expire);
+		                   if (instance_id == p.instance_id_) {
+			                   all_expired.push_back(p.expire_);
 			                   return true;
 		                   }
 		                   return false;
 	                   }),
 	    c.end());
 
-	// TODO - is there a better way to shrink the internal container?
+	// TODO(missing_author) - is there a better way to shrink the internal container?
 	// Maybe instead we should enforce a capacity limit
-	constexpr size_t capacity_shrink_threshold = 16;
-	if ((c.capacity() > capacity_shrink_threshold) &&
+	constexpr size_t CAPACITY_SHRINK_THRESHOLD = 16;
+	if ((c.capacity() > CAPACITY_SHRINK_THRESHOLD) &&
 	    (c.size() < c.capacity() / 2)) {
 		c.shrink_to_fit();
 	}
@@ -304,29 +324,29 @@ ExpireWorker::ExpireWorker() {
 ExpireWorker::~ExpireWorker() {
 	stop_ = true;
 	{
-		std::lock_guard lock(pending_mtx_);
+		std::lock_guard const lock(pending_mtx_);
 		wake_worker_.notify_one();
 	}
 	worker_.join();
 }
 
 void ExpireWorker::enqueue(PendingRequest&& pending) {
-	std::lock_guard lock(pending_mtx_);
+	std::lock_guard const lock(pending_mtx_);
 	pending_.emplace(std::move(pending));
 	wake_worker_.notify_one();
 }
 
 void ExpireWorker::scrub(size_t instance_id) {
-	std::vector<std::function<void(v1::UStatus)>> all_expired;
+	std::vector<std::function<void(UStatus)>> all_expired;
 	{
-		std::lock_guard lock(pending_mtx_);
+		std::lock_guard const lock(pending_mtx_);
 		all_expired = pending_.scrub(instance_id);
 		wake_worker_.notify_one();
 	}
 
-	static const v1::UStatus cancel_reason = []() {
-		v1::UStatus reason;
-		reason.set_code(v1::UCode::CANCELLED);
+	static const UStatus cancel_reason = []() {
+		UStatus reason;
+		reason.set_code(UCode::CANCELLED);
 		reason.set_message("RpcClient for this request was discarded");
 		return reason;
 	}();
@@ -339,17 +359,17 @@ void ExpireWorker::scrub(size_t instance_id) {
 void ExpireWorker::doWork() {
 	while (!stop_) {
 		const auto now = std::chrono::steady_clock::now();
-		std::optional<decltype(PendingRequest::expire)> maybe_expire;
+		std::optional<decltype(PendingRequest::expire_)> maybe_expire;
 
 		{
-			transport::UTransport::ListenHandle expired_handle;
-			std::lock_guard lock(pending_mtx_);
+			ListenHandle expired_handle;
+			std::lock_guard const lock(pending_mtx_);
 			if (!pending_.empty()) {
-				const auto when_expire = pending_.top().when_expire;
+				const auto when_expire = pending_.top().when_expire_;
 				if (when_expire <= now) {
-					maybe_expire = std::move(pending_.top().expire);
+					maybe_expire = std::move(pending_.top().expire_);
 					expired_handle =
-					    std::move(pending_.top().response_listener);
+					    std::move(pending_.top().response_listener_);
 					pending_.pop();
 				}
 			}
@@ -358,9 +378,9 @@ void ExpireWorker::doWork() {
 		if (maybe_expire) {
 			auto& expire = *maybe_expire;
 
-			static const v1::UStatus expire_reason = []() {
-				v1::UStatus reason;
-				reason.set_code(v1::UCode::DEADLINE_EXCEEDED);
+			static const UStatus expire_reason = []() {
+				UStatus reason;
+				reason.set_code(UCode::DEADLINE_EXCEEDED);
 				reason.set_message("Request expired before response received");
 				return reason;
 			}();
@@ -379,11 +399,11 @@ void ExpireWorker::doWork() {
 				//   priority queue (either by insertion or deletion)
 				// * The queue has been emptied (loop back to indefinite sleep)
 				// * A stop has been requested
-				auto wake_when = pending_.top().when_expire;
+				auto wake_when = pending_.top().when_expire_;
 				wake_worker_.wait_until(lock, wake_when, [this, &wake_when]() {
 					auto when_next_wake = wake_when;
 					if (!pending_.empty()) {
-						when_next_wake = pending_.top().when_expire;
+						when_next_wake = pending_.top().when_expire_;
 					}
 					return stop_ || when_next_wake != wake_when ||
 					       pending_.empty() ||

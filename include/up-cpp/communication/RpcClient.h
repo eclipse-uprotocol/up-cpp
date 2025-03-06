@@ -85,7 +85,7 @@ struct RpcClient {
 		/// @name Passthroughs for std::future
 		/// @{
 		auto get() { return future_.get(); }
-		auto valid() const noexcept { return future_.valid(); }
+		[[nodiscard]] auto valid() const noexcept { return future_.valid(); }
 		void wait() const { future_.wait(); }
 		template <typename... Args>
 		auto wait_for(Args&&... args) const {
@@ -163,7 +163,7 @@ struct RpcClient {
 	[[nodiscard]] InvokeFuture invokeMethod();
 
 	/// @brief Default move constructor (defined in RpcClient.cpp)
-	RpcClient(RpcClient&&);
+	RpcClient(RpcClient&&) noexcept ;
 
 	/// @brief Default destructor (defined in RpcClient.cpp)
 	~RpcClient();

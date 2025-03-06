@@ -82,23 +82,23 @@ protected:
 
 // Negative test case with no source filter
 TEST_F(ConsumerTest, ConstructorTestSuccess) {
-	auto subcriptionCallback = someCallBack;
+	auto subcription_callback = someCallBack;
 	auto subscribe_request_ttl = std::chrono::milliseconds(1000);
 	auto priority = uprotocol::v1::UPriority::UPRIORITY_CS4;
 
 	auto options = uprotocol::client::usubscription::v3::ConsumerOptions();
 
-	auto consumerOrSatus =
+	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
 	        mockTransportClient_, subcription_uuri,
-	        std::move(subcriptionCallback), priority,
-	        std::move(subscribe_request_ttl), options);
+	        subcription_callback, priority,
+	        subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
-	ASSERT_TRUE(consumerOrSatus.has_value());
+	ASSERT_TRUE(consumer_or_status.has_value());
 
 	// Obtain a pointer to the created consumer instance
-	auto& consumerPtr = consumerOrSatus.value();
+	const auto& consumerPtr = consumer_or_status.value();
 
 	// Verify that the consumer pointer is not null, indicating successful
 	// creation
@@ -115,8 +115,8 @@ TEST_F(ConsumerTest, SubscribeTestSuccess) {
 	auto consumerOrSatus =
 	    uprotocol::client::usubscription::v3::Consumer::create(
 	        mockTransportClient_, subcription_uuri,
-	        std::move(subcriptionCallback), priority,
-	        std::move(subscribe_request_ttl), options);
+	        subcriptionCallback, priority,
+	        subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
 	ASSERT_TRUE(consumerOrSatus.has_value());
@@ -160,14 +160,14 @@ TEST_F(ConsumerTest, UnsubscribeTestSuccess) {
 	auto consumerOrSatus =
 	    uprotocol::client::usubscription::v3::Consumer::create(
 	        mockTransportClient_, subcription_uuri,
-	        std::move(subcriptionCallback), priority,
-	        std::move(subscribe_request_ttl), options);
+	        subcriptionCallback, priority,
+	        subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
 	ASSERT_TRUE(consumerOrSatus.has_value());
 
 	// Obtain a pointer to the created consumer instance
-	auto& consumerPtr = consumerOrSatus.value();
+	const auto& consumerPtr = consumerOrSatus.value();
 
 	// Verify that the consumer pointer is not null, indicating successful
 	// creation

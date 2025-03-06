@@ -489,7 +489,7 @@ TEST_F(TestUUriValidator, ValidDefaultSource) {
 }
 
 TEST_F(TestUUriValidator, Empty) {
-	auto getUuri = []() {
+	auto get_uuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name("");
 		uuri.set_ue_id(0);
@@ -499,14 +499,14 @@ TEST_F(TestUUriValidator, Empty) {
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_uuri();
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_uuri();
 		uuri.set_authority_name("     bad    ");
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -514,7 +514,7 @@ TEST_F(TestUUriValidator, Empty) {
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_uuri();
 		uuri.set_authority_name(AUTHORITY_NAME);
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -522,7 +522,7 @@ TEST_F(TestUUriValidator, Empty) {
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_uuri();
 		uuri.set_ue_id(1);
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -530,7 +530,7 @@ TEST_F(TestUUriValidator, Empty) {
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_uuri();
 		uuri.set_ue_version_major(1);
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -538,7 +538,7 @@ TEST_F(TestUUriValidator, Empty) {
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_uuri();
 		uuri.set_resource_id(1);
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);

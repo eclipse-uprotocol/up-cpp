@@ -80,13 +80,13 @@ struct Payload {
 	///          will compile out.
 	/// @param data Data to be serialized and stored.
 	template <typename Serializer, typename ValueT>
-	Payload(Serializer s, const ValueT& data) {
-		auto serializedData = Serializer::serialize(data);
+	Payload(Serializer s [[maybe_unused]], const ValueT& data) {
+		auto serialized_data = Serializer::serialize(data);
 		if (!UPayloadFormat_IsValid(
-		        std::get<PayloadType::Format>(serializedData))) {
+		        std::get<PayloadType::Format>(serialized_data))) {
 			throw std::out_of_range("Invalid Serializer payload format");
 		}
-		payload_ = std::move(serializedData);
+		payload_ = std::move(serialized_data);
 	}
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
@@ -96,7 +96,7 @@ struct Payload {
 	///
 	/// @throws std::out_of_range If format is not valid for v1::UPayloadFormat
 	Payload(const std::vector<uint8_t>& value_bytes,
-	        const v1::UPayloadFormat format);
+	        v1::UPayloadFormat format);
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
@@ -107,7 +107,7 @@ struct Payload {
 	///
 	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT or
 	///       UPAYLOAD_FORMAT_JSON, but can be used for other payload formats.
-	Payload(const std::string& value, const v1::UPayloadFormat format);
+	Payload(const std::string& value, v1::UPayloadFormat format);
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///
@@ -120,7 +120,7 @@ struct Payload {
 	///
 	/// @note This would typically be used for UPAYLOAD_FORMAT_TEXT or
 	///       UPAYLOAD_FORMAT_JSON, but can be used for other payload formats.
-	Payload(std::string&& value, const v1::UPayloadFormat format);
+	Payload(std::string&& value, v1::UPayloadFormat format);
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///

@@ -54,13 +54,13 @@ using ValidationResult = std::tuple<bool, std::optional<Reason>>;
 /// @{
 /// @brief Checks if the provided UUID contains valid uP v8 UUID data.
 /// @returns True if the UUID has valid UUID data, false otherwise.
-ValidationResult isUuid(v1::UUID);
+ValidationResult isUuid(const v1::UUID&);
 
 /// @brief Checks if the provided UUID has expired based on the given TTL.
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns True if the difference between the current system time and
 ///          the the timestamp in the UUID is greater than the TTL.
-ValidationResult isExpired(v1::UUID uuid, std::chrono::milliseconds ttl);
+ValidationResult isExpired(const v1::UUID& uuid, std::chrono::milliseconds ttl);
 /// @}
 
 /// @name Inspection utilities
@@ -68,30 +68,30 @@ ValidationResult isExpired(v1::UUID uuid, std::chrono::milliseconds ttl);
 /// @brief Gets the version field from a UUID object
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns The UUID's version
-uint8_t getVersion(v1::UUID);
+uint8_t getVersion(const v1::UUID&);
 
 /// @brief Gets the variant field from a UUID object
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns The UUID's variant
-uint8_t getVariant(v1::UUID);
+uint8_t getVariant(const v1::UUID&);
 
 /// @brief Gets the timestamp field from a UUID object
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns The UUID's timestamp as a chrono::time_point for the system
 ///          clock.
-std::chrono::system_clock::time_point getTime(v1::UUID uuid);
+std::chrono::system_clock::time_point getTime(const v1::UUID& uuid);
 
 /// @brief Gets the difference between a UUID's timestamp and the current
 ///        time according to the system clock/
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns The age of the UUID in milliseconds
-std::chrono::milliseconds getElapsedTime(v1::UUID);
+std::chrono::milliseconds getElapsedTime(const v1::UUID& uuid);
 
 /// @brief Gets the time remaining before the UUID expires, based on the
 ///        given TTL.
 /// @throws InvalidUuid if the UUID does not contain valid UUID data
 /// @returns Remaining time (ttl - getElapsedTime(uuid)) in milliseconds
-std::chrono::milliseconds getRemainingTime(v1::UUID uuid,
+std::chrono::milliseconds getRemainingTime(const v1::UUID& uuid,
                                            std::chrono::milliseconds ttl);
 /// @}
 

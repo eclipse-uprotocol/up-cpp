@@ -9,8 +9,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_CLIENT_Consumer_H
-#define UP_CPP_CLIENT_Consumer_H
+#ifndef UP_CPP_CLIENT_USUBSCRIPTION_V3_CONSUMER_H
+#define UP_CPP_CLIENT_USUBSCRIPTION_V3_CONSUMER_H
 
 #include <up-cpp/communication/NotificationSink.h>
 #include <up-cpp/communication/RpcClient.h>
@@ -23,8 +23,10 @@
 #include <utility>
 
 namespace uprotocol::client::usubscription::v3 {
-using namespace uprotocol::core::usubscription::v3;
-using namespace uprotocol::utils;
+using uprotocol::core::usubscription::v3::uSubscription;
+using uprotocol::core::usubscription::v3::Update;
+using uprotocol::core::usubscription::v3::UnsubscribeRequest;
+using uprotocol::core::usubscription::v3::SubscriptionRequest;
 
 /**
  * @struct ConsumerOptions
@@ -54,7 +56,7 @@ struct ConsumerOptions {
 /// This structure is used to build URIs for uSubscription service. It uses the
 /// service options from uSubscription proto to set the authority name, ue_id, ue_version_major, and
 /// the notification topic resource ID in the URI.
-struct uSubscriptionUUriBuilder {
+struct USubscriptionUUriBuilder {
 private:
 	/// URI for the uSubscription service
 	v1::UUri uri_;
@@ -63,7 +65,7 @@ private:
 
 public:
 	/// @brief Constructor for uSubscriptionUUriBuilder.
-	uSubscriptionUUriBuilder() {
+	USubscriptionUUriBuilder() {
 		// Get the service descriptor
 		const google::protobuf::ServiceDescriptor* service =
 		    uSubscription::descriptor();
@@ -128,7 +130,7 @@ struct Consumer {
 	/// @param consumer_options Additional details for uSubscription service.
 	[[nodiscard]] static ConsumerOrStatus create(
 	    std::shared_ptr<transport::UTransport> transport,
-	    const v1::UUri subscription_topic, ListenCallback&& callback,
+	    const v1::UUri& subscription_topic, ListenCallback&& callback,
 	    v1::UPriority priority,
 	    std::chrono::milliseconds subscription_request_ttl,
 	    ConsumerOptions consumer_options);
@@ -156,7 +158,7 @@ protected:
 	/// @param transport Transport to register with.
 	/// @param subscriber_details Additional details about the subscriber.
 	Consumer(std::shared_ptr<transport::UTransport> transport,
-	         const v1::UUri subscription_topic,
+	         v1::UUri  subscription_topic,
 	         ConsumerOptions consumer_options = {});
 
 private:
@@ -169,7 +171,7 @@ private:
 	ConsumerOptions consumer_options_;
 
 	// URI info about the uSubscription service
-	uSubscriptionUUriBuilder uSubscriptionUUriBuilder_;
+	USubscriptionUUriBuilder uSubscriptionUUriBuilder_;
 
 	// Subscription updates
 	std::unique_ptr<communication::NotificationSink> noficationSinkHandle_;
@@ -214,4 +216,4 @@ private:
 
 }  // namespace uprotocol::client::usubscription::v3
 
-#endif  // UP_CPP_CLIENT_Consumer_H
+#endif  // UP_CPP_CLIENT_USUBSCRIPTION_V3_CONSUMER_H

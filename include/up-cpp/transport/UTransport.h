@@ -57,7 +57,7 @@ public:
 	///
 	/// @see uprotocol::datamodel::validator::uri::isValidEntityUri()
 	/// @see uprotocol::datamodel::validator::uri::InvalidUUri
-	explicit UTransport(const v1::UUri&);
+	explicit UTransport(v1::UUri );
 
 	/// @brief Send a message.
 	///
@@ -264,7 +264,7 @@ protected:
 	///          connection they represent.
 	///
 	/// @param listener CallerHandle for the connection that has been broken.
-	virtual void cleanupListener(CallableConn listener);
+	virtual void cleanupListener(const CallableConn& listener);
 
 private:
 	/// @brief URI for the entity owning this transport.
@@ -274,14 +274,15 @@ private:
 	const v1::UUri entity_uri_;
 };
 
-struct NullTransport : public std::invalid_argument {
+struct NullTransport : std::invalid_argument {
 	template <typename... Args>
-	NullTransport(Args&&... args)
+	explicit NullTransport(Args&&... args)
 	    : std::invalid_argument(std::forward<Args>(args)...) {}
 
 	template <typename... Args>
-	NullTransport operator=(Args&&... args) {
-		return std::invalid_argument::operator=(std::forward<Args>(args)...);
+	NullTransport& operator=(Args&&... args) {
+		std::invalid_argument::operator=(std::forward<Args>(args)...);
+		return *this;
 	}
 };
 

@@ -31,7 +31,7 @@ static_assert(!__has_cpp_attribute(__cpp_lib_expected),
 /// @{
 struct BadExpectedAccess : public std::runtime_error {
 	template <typename... Args>
-	BadExpectedAccess(Args&&... args)
+	explicit BadExpectedAccess(Args&&... args)
 	    : std::runtime_error(std::forward<Args>(args)...) {}
 };
 
@@ -41,7 +41,7 @@ template <typename E>
 class Unexpected {
 public:
 	constexpr Unexpected(const Unexpected&) = default;
-	constexpr Unexpected(Unexpected&&) = default;
+	constexpr Unexpected(Unexpected&&) noexcept= default;
 
 	constexpr explicit Unexpected(const E& rhs) : storage_(rhs) {}
 	constexpr explicit Unexpected(E&& rhs) : storage_(std::move(rhs)) {}
@@ -57,14 +57,15 @@ private:
 template <typename T, typename E>
 class Expected {
 public:
-	template <typename... Args>
-	constexpr Expected(Args&&... args)
-	    : storage_(std::forward<Args>(args)...) {}
+	constexpr explicit Expected(T arg) : storage_(std::forward<T>(arg)) {}
+	//It E and T are the same type, this can cause problems. Previously, this was in use by implicid conversion
+	// constexpr explicit Expected(E arg) : storage_(std::forward<Unexpected<E>>(Unexpected<E>(arg))) {}
+	constexpr explicit Expected(Unexpected<E> arg) : storage_(std::forward<Unexpected<E>>(arg)) {}
 
 	constexpr Expected(const Expected&) = default;
-	constexpr Expected(Expected&&) = default;
+	constexpr Expected(Expected&&) noexcept = default;
 
-	constexpr bool has_value() const noexcept {
+	[[nodiscard]] constexpr bool has_value() const noexcept {
 		return std::holds_alternative<T>(storage_);
 	}
 
@@ -79,44 +80,50 @@ public:
 	}
 
 	constexpr const T& value() const& {
-		if (!has_value())
+		if (!has_value()) {
 			throw BadExpectedAccess(
-			    "Attempt to access value() when unexpected.");
+				"Attempt to access value() when unexpected.");
+		}
 		return std::get<T>(storage_);
 	}
 
 	constexpr T value() && {
-		if (!has_value())
+		if (!has_value()) {
 			throw BadExpectedAccess(
-			    "Attempt to access value() when unexpected.");
+				"Attempt to access value() when unexpected.");
+		}
 		return std::move(std::get<T>(storage_));
 	}
 
 	constexpr const E& error() const& {
-		if (has_value())
+		if (has_value()) {
 			throw BadExpectedAccess(
-			    "Attempt to access error() when not unexpected.");
+				"Attempt to access error() when not unexpected.");
+		}
 		return std::get<Unexpected<E>>(storage_).error();
 	}
 
 	constexpr E error() && {
-		if (has_value())
+		if (has_value()) {
 			throw BadExpectedAccess(
-			    "Attempt to access error() when not unexpected.");
+				"Attempt to access error() when not unexpected.");
+		}
 		return std::move(std::get<Unexpected<E>>(storage_)).error();
 	}
 
 	constexpr const T& operator*() const {
-		if (!has_value())
+		if (!has_value()) {
 			throw BadExpectedAccess(
-			    "Attempt to dereference expected value when unexpected.");
+				"Attempt to dereference expected value when unexpected.");
+		}
 		return std::get<T>(storage_);
 	}
 
 	constexpr const T* operator->() const {
-		if (!has_value())
+		if (!has_value()) {
 			throw BadExpectedAccess(
-			    "Attempt to dereference expected pointer when unexpected.");
+				"Attempt to dereference expected pointer when unexpected.");
+		}
 		return &std::get<T>(storage_);
 	}
 

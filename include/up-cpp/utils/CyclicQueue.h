@@ -23,7 +23,7 @@ namespace uprotocol::utils {
 template <typename T>
 class CyclicQueue final {
 public:
-	explicit CyclicQueue(const size_t max_size);
+	explicit CyclicQueue(size_t max_size);
 
 	CyclicQueue(const CyclicQueue&) = delete;
 	CyclicQueue& operator=(const CyclicQueue&) = delete;

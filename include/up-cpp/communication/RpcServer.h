@@ -90,7 +90,7 @@ protected:
 	/// @param ttl (Optional) Time response will be valid from the moment
 	///            respond() is called. Note that the original request's TTL
 	///            may also still apply.
-	RpcServer(std::shared_ptr<transport::UTransport> transport,
+	explicit RpcServer(std::shared_ptr<transport::UTransport> transport,
 	          std::optional<v1::UPayloadFormat> format = {},
 	          std::optional<std::chrono::milliseconds> ttl = {});
 

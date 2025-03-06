@@ -431,6 +431,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           repo-root: up-cpp
+          version: 13
           ignore: 'test'
           style: 'file' # read .clang-format for configuration
           tidy-checks: '' # Read .clang-tidy for configuration

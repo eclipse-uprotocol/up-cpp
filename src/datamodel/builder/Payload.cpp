@@ -27,7 +27,7 @@ Payload::Payload(const std::string& value, const v1::UPayloadFormat format) {
 	if (!UPayloadFormat_IsValid(format)) {
 		throw std::out_of_range("Invalid String payload format");
 	}
-	payload_ = std::make_tuple(std::move(value), format);
+	payload_ = std::make_tuple(value, format);
 }
 
 // Move string constructor
@@ -55,25 +55,21 @@ Payload::Payload(const google::protobuf::Any& any) {
 
 // Move constructor
 Payload::Payload(Payload&& other) noexcept
-    : payload_(std::move(other.payload_)), moved_(std::move(other.moved_)) {}
+    : payload_(std::move(other.payload_)), moved_(other.moved_) {}
 
 // Copy constructor
-Payload::Payload(const Payload& other)
-    : payload_(other.payload_), moved_(other.moved_) {}
+Payload::Payload(const Payload& other)=default;
+
 
 // Move assignment operator
 Payload& Payload::operator=(Payload&& other) noexcept {
 	payload_ = std::move(other.payload_);
-	moved_ = std::move(other.moved_);
+	moved_ = other.moved_;
 	return *this;
 }
 
 // Copy assignment operator
-Payload& Payload::operator=(const Payload& other) {
-	payload_ = other.payload_;
-	moved_ = other.moved_;
-	return *this;
-}
+Payload& Payload::operator=(const Payload& other) = default;
 
 Payload::PayloadMoved::PayloadMoved(PayloadMoved&& other) noexcept
     : std::runtime_error(std::move(other)) {}
@@ -86,15 +82,11 @@ Payload::PayloadMoved& Payload::PayloadMoved::operator=(
 }
 
 // PayloadMoved copy constructor
-Payload::PayloadMoved::PayloadMoved(const PayloadMoved& other)
-    : std::runtime_error(other) {}
+Payload::PayloadMoved::PayloadMoved(const PayloadMoved& other) = default;
 
 // PayloadMoved copy assignment operator
 Payload::PayloadMoved& Payload::PayloadMoved::operator=(
-    const PayloadMoved& other) {
-	std::runtime_error::operator=(other);
-	return *this;
-}
+    const PayloadMoved& other) = default;
 
 // buildCopy method
 [[nodiscard]] const Payload::Serialized& Payload::buildCopy() const {

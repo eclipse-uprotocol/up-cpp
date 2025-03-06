@@ -18,7 +18,7 @@
 #include <vector>
 
 /// @brief Utilities for encoding / decoding data in Base 64 format.
-namespace uprotocol::utils::Base64 {
+namespace uprotocol::utils::base64 {
 
 /// @brief Encode a string of bytes to base64.
 std::string encode(std::string_view);
@@ -44,6 +44,6 @@ size_t encodedLen(std::vector<uint8_t>);
 ///        decoded data.
 size_t decodedLen(std::string_view);
 
-}  // namespace uprotocol::utils::Base64
+}  // namespace uprotocol::utils::base64
 
 #endif  // UP_CPP_UTILS_BASE64_H

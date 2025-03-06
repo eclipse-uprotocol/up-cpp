@@ -58,7 +58,7 @@ struct NotificationSink {
 	///      successfully.
 	///    * UStatus containing an error state otherwise.
 	[[nodiscard]] static SinkOrStatus create(
-	    std::shared_ptr<transport::UTransport> transport,
+	    const std::shared_ptr<transport::UTransport>& transport,
 	    ListenCallback&& callback, const v1::UUri& source_filter);
 
 	/// @note DEPRECATED
@@ -76,13 +76,12 @@ struct NotificationSink {
 	[[deprecated(
 	    "See alternate overload of "
 	    "create()")]] [[nodiscard]] static SinkOrStatus
-	create(std::shared_ptr<transport::UTransport> transport,
+	create(const std::shared_ptr<transport::UTransport>& transport,
 	       const v1::UUri& sink, ListenCallback&& callback,
 	       std::optional<v1::UUri>&& source_filter);
 
 	~NotificationSink() = default;
 
-protected:
 	/// @brief Constructs a notification listener connected to a given
 	///        transport.
 	///

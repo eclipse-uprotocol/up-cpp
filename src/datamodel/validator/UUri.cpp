@@ -14,8 +14,13 @@
 namespace {
 
 constexpr size_t AUTHORITY_SPEC_MAX_LENGTH = 128;
+//TODO(max) try to find a better name
+constexpr auto START_OF_TOPICS = 0x8000;
+constexpr auto MAX_RESOURCE_ID = 0xFFFF;
 
-using namespace uprotocol::datamodel::validator::uri;
+using uprotocol::datamodel::validator::uri::ValidationResult;
+using uprotocol::datamodel::validator::uri::Reason;
+
 ValidationResult uriCommonValidChecks(const uprotocol::v1::UUri& uuri) {
 	if (uuri.ue_version_major() == 0) {
 		return {false, Reason::RESERVED_VERSION};
@@ -68,19 +73,23 @@ std::string_view message(Reason reason) {
 }
 
 bool uses_wildcards(const v1::UUri& uuri) {
-	if (uuri.authority_name().find("*") != std::string::npos) {
+	constexpr auto LOWER_8_BIT_MASK = 0xFF;
+	constexpr auto LOWER_16_BIT_MASK = 0xFFFF;
+	constexpr auto UPPER_16_BIT_MASK = 0xFFFF0000;
+
+	if (uuri.authority_name().find_first_of('*') != std::string::npos) {
 		return true;
 	}
-	if ((uuri.ue_id() & 0xFFFF) == 0xFFFF) {  // service ID
+	if ((uuri.ue_id() & LOWER_16_BIT_MASK) == LOWER_16_BIT_MASK) {  // service ID
 		return true;
 	}
-	if ((uuri.ue_id() & 0xFFFF0000) == 0xFFFF0000) {  // service instance ID
+	if ((uuri.ue_id() & UPPER_16_BIT_MASK) == UPPER_16_BIT_MASK) {  // service instance ID
 		return true;
 	}
-	if (uuri.ue_version_major() == 0xFF) {
+	if (uuri.ue_version_major() == LOWER_8_BIT_MASK) {
 		return true;
 	}
-	if (uuri.resource_id() == 0xFFFF) {
+	if (uuri.resource_id() == LOWER_16_BIT_MASK) {
 		return true;
 	}
 	return false;
@@ -139,7 +148,7 @@ ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
 	}
 
 	// check resource ID [0x0001, 0x7FFF]
-	if (uuri.resource_id() == 0 || uuri.resource_id() > 0x7FFF) {
+	if (uuri.resource_id() == 0 || uuri.resource_id() >= START_OF_TOPICS) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
@@ -176,7 +185,7 @@ ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
-	if ((uuri.resource_id() < 0x8000) || (uuri.resource_id() > 0xFFFF)) {
+	if ((uuri.resource_id() < START_OF_TOPICS) || (uuri.resource_id() > MAX_RESOURCE_ID)) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
@@ -189,7 +198,7 @@ ValidationResult isValidNotificationSource(const v1::UUri& uuri) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
-	if ((uuri.resource_id() < 0x8000) || (uuri.resource_id() > 0xFFFF)) {
+	if ((uuri.resource_id() < START_OF_TOPICS) || (uuri.resource_id() > MAX_RESOURCE_ID)) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
@@ -210,7 +219,7 @@ ValidationResult isValidNotificationSink(const v1::UUri& uuri) {
 }
 
 ValidationResult isValidSubscription(const v1::UUri& uuri) {
-	if (uuri.resource_id() < 0x8000 || uuri.resource_id() > 0xFFFF) {
+	if (uuri.resource_id() < START_OF_TOPICS || uuri.resource_id() > MAX_RESOURCE_ID) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 

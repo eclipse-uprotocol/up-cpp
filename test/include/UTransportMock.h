@@ -9,8 +9,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_TEST_UTRANSPORTMOCK_H
-#define UP_CPP_TEST_UTRANSPORTMOCK_H
+#ifndef UTRANSPORTMOCK_H
+#define UTRANSPORTMOCK_H
 
 #include <gmock/gmock.h>
 #include <up-cpp/transport/UTransport.h>
@@ -33,6 +33,8 @@ public:
 		(*listener_)(msg);
 	}
 
+//TODO(max) set private again and fix access in RpcServerTest
+public:
 	std::atomic<size_t> send_count_;
 
 	uprotocol::v1::UStatus send_status_;
@@ -51,9 +53,8 @@ public:
 	v1::UMessage message_;
 	std::mutex message_mtx_;
 
-	virtual ~UTransportMock() = default;
+	~UTransportMock() override = default;
 
-private:
 	[[nodiscard]] v1::UStatus sendImpl(const v1::UMessage& message) override {
 		{
 			std::lock_guard lock(message_mtx_);
@@ -73,11 +74,11 @@ private:
 		return registerListener_status_;
 	}
 
-	void cleanupListener(CallableConn listener) override {
+	void cleanupListener(const CallableConn& listener) override {
 		cleanup_listener_ = listener;
 	}
 };
 
 };  // namespace uprotocol::test
 
-#endif  // UP_CPP_TEST_UTRANSPORTMOCK_H
+#endif  // UTRANSPORTMOCK_H

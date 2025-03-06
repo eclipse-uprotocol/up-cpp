@@ -111,11 +111,11 @@ UMessageBuilder UMessageBuilder::response(v1::UUri&& sink,
 
 UMessageBuilder UMessageBuilder::response(const v1::UMessage& request) {
 	v1::UUri sink = request.attributes().source();
-	v1::UUID reqId = request.attributes().id();
+	v1::UUID req_id = request.attributes().id();
 	v1::UPriority priority = request.attributes().priority();
 	v1::UUri method = request.attributes().sink();
 
-	return UMessageBuilder::response(std::move(sink), std::move(reqId),
+	return UMessageBuilder::response(std::move(sink), std::move(req_id),
 	                                 priority, std::move(method));
 }
 
@@ -224,11 +224,11 @@ v1::UMessage UMessageBuilder::build(builder::Payload&& payload) const {
 	return message;
 }
 
-UMessageBuilder::UMessageBuilder(v1::UMessageType msgType, v1::UUri&& source,
+UMessageBuilder::UMessageBuilder(v1::UMessageType msg_type, v1::UUri&& source,
                                  std::optional<v1::UUri>&& sink,
                                  std::optional<v1::UUID>&& request_id)
     : uuidBuilder_(UuidBuilder::getBuilder()) {
-	attributes_.set_type(msgType);
+	attributes_.set_type(msg_type);
 
 	*attributes_.mutable_source() = std::move(source);
 

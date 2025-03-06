@@ -56,7 +56,7 @@ TEST_F(ExpectedTest, ExpectScalarScalar) {
 
 TEST_F(ExpectedTest, UnexpectScalarScalar) {
 	int sample = get_rand();
-	auto expected = Expected<int, int>(Unexpected(sample));
+	auto expected = Expected<int, int>(Unexpected<int>(sample));
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
 	EXPECT_EQ(sample, expected.error());
@@ -73,7 +73,7 @@ TEST_F(ExpectedTest, ExpectScalar) {
 
 TEST_F(ExpectedTest, UnexpectScalar) {
 	int sample = get_rand();
-	auto expected = Expected<std::string, int>(Unexpected(sample));
+	auto expected = Expected<std::string, int>(Unexpected<int>(sample));
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
 	EXPECT_EQ(sample, expected.error());
@@ -82,7 +82,7 @@ TEST_F(ExpectedTest, UnexpectScalar) {
 TEST_F(ExpectedTest, UnexpectValueOr) {
 	int sample = get_rand();
 	auto expected =
-	    Expected<int, std::string>(Unexpected(std::string("hello")));
+	    Expected<int, std::string>(Unexpected<std::string>(std::string("hello")));
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
 	EXPECT_EQ(sample, expected.value_or(sample));
@@ -111,7 +111,7 @@ TEST_F(ExpectedTest, UnexpectUnique) {
 	auto x = get_rand();
 	auto y = get_rand();
 	auto expected = Expected<int, std::unique_ptr<Pair>>(
-	    Unexpected(std::make_unique<Pair>(x, y)));
+	    Unexpected<std::unique_ptr<Pair>>(std::make_unique<Pair>(x, y)));
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
 	auto p = std::move(expected).error();
@@ -136,7 +136,7 @@ TEST_F(ExpectedTest, UnexpectShared) {
 	auto x = get_rand();
 	auto y = get_rand();
 	auto expected = Expected<int, std::shared_ptr<Pair>>(
-	    Unexpected(std::make_shared<Pair>(x, y)));
+	    Unexpected<std::shared_ptr<Pair>>(std::make_shared<Pair>(x, y)));
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
 	EXPECT_EQ(x, expected.error()->x);
@@ -158,7 +158,7 @@ TEST_F(ExpectedTest, ExpectStruct) {
 TEST_F(ExpectedTest, UnexpectStruct) {
 	auto x = get_rand();
 	auto y = get_rand();
-	auto expected = Expected<int, Pair>(Unexpected(Pair(x, y)));
+	auto expected = Expected<int, Pair>(Unexpected<Pair>(Pair(x, y)));
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
 	EXPECT_EQ(x, expected.error().x);
@@ -202,7 +202,7 @@ TEST_F(ExpectedTest, UnexpectStructDestruct) {
 		auto x = get_rand();
 		auto y = get_rand();
 		auto expected =
-		    Expected<int, PairDestruct>(Unexpected(PairDestruct(x, y)));
+		    Expected<int, PairDestruct>(Unexpected<PairDestruct>(PairDestruct(x, y)));
 		EXPECT_EQ(1, PairDestruct::cd_count);
 		EXPECT_FALSE(bool(expected));
 		EXPECT_FALSE(expected.has_value());
@@ -214,7 +214,7 @@ TEST_F(ExpectedTest, UnexpectStructDestruct) {
 
 TEST_F(ExpectedTest, ExceptionValueCheckedWhenIsError) {
 	auto expected =
-	    Expected<int, std::string>(Unexpected(std::string("hello")));
+	    Expected<int, std::string>(Unexpected<std::string>(std::string("hello")));
 	EXPECT_THROW(
 	    {
 		    try {
@@ -249,7 +249,7 @@ TEST_F(ExpectedTest, ExceptionErrorCheckedWhenNotError) {
 
 TEST_F(ExpectedTest, ExceptionDerefValueWhenUnexpected) {
 	auto expected =
-	    Expected<const Pair, std::string>(Unexpected(std::string("hello")));
+	    Expected<const Pair, std::string>(Unexpected<std::string>(std::string("hello")));
 	EXPECT_THROW(
 	    {
 		    try {
@@ -268,7 +268,7 @@ TEST_F(ExpectedTest, ExceptionDerefValueWhenUnexpected) {
 
 TEST_F(ExpectedTest, ExceptionDerefPtrWhenUnexpected) {
 	auto expected =
-	    Expected<Pair, std::string>(Unexpected(std::string("hello")));
+	    Expected<Pair, std::string>(Unexpected<std::string>(std::string("hello")));
 	EXPECT_THROW(
 	    {
 		    try {

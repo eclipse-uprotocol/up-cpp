@@ -43,7 +43,7 @@ protected:
 TEST_F(CallbackTest, EstablishDoesNotThrow) {
 	using namespace uprotocol::utils;
 
-	EXPECT_NO_THROW(callbacks::Connection<void>::establish([]() {}));
+	EXPECT_NO_THROW(auto result = callbacks::Connection<void>::establish([]() {}));
 }
 
 /// It should be possible to establish a connection and call the callback

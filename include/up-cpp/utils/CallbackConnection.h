@@ -173,7 +173,7 @@ struct [[nodiscard]] Connection {
 		}
 
 		if constexpr (!std::is_void_v<RT>) {
-			return result;
+			return static_cast<std::optional<RT>>(std::move(result));
 		}
 	}
 
@@ -193,7 +193,7 @@ struct [[nodiscard]] Connection {
 	};
 
 	/// @brief Semi-private constructor. Use the static establish() instead.
-	Connection(std::shared_ptr<Callback> cb, PrivateConstructToken)
+	Connection(std::shared_ptr<Callback> cb, PrivateConstructToken token [[maybe_unused]])
 	    : callback_(cb) {}
 
 	// Connection is only ever available wrapped in a std::shared_ptr.
@@ -230,7 +230,7 @@ private:
 /// reason.
 struct BadConnection : public std::runtime_error {
 	template <typename... Args>
-	BadConnection(Args&&... args)
+	explicit BadConnection(Args&&... args)
 	    : std::runtime_error(std::forward<Args>(args)...) {}
 };
 
@@ -242,7 +242,7 @@ struct BadConnection : public std::runtime_error {
 /// the error appear earlier without waiting for invocation to occur.
 struct EmptyFunctionObject : public std::invalid_argument {
 	template <typename... Args>
-	EmptyFunctionObject(Args&&... args)
+	explicit EmptyFunctionObject(Args&&... args)
 	    : std::invalid_argument(std::forward<Args>(args)...) {}
 };
 
@@ -257,7 +257,7 @@ struct [[nodiscard]] CalleeHandle {
 	CalleeHandle(std::shared_ptr<Conn> connection,
 	             std::shared_ptr<typename Conn::Callback> callback,
 	             std::optional<typename Conn::Cleanup>&& cleanup,
-	             typename Conn::PrivateConstructToken)
+	             typename Conn::PrivateConstructToken token [[maybe_unused]])
 	    : connection_(connection),
 	      callback_(callback),
 	      cleanup_(std::move(cleanup)) {
@@ -333,7 +333,7 @@ struct [[nodiscard]] CalleeHandle {
 	///     * False if the connection has been broken (i.e. This handle has
 	///       been reset/moved, or all other references to the connection
 	///       have been discarded)
-	bool isConnected() const {
+	[[nodiscard]] bool isConnected() const {
 		auto locked_connection = connection_.lock();
 		return locked_connection && (*locked_connection);
 	}
@@ -351,7 +351,7 @@ private:
 /// CallerHandle that needs to be corrected.
 struct BadCallerAccess : public std::logic_error {
 	template <typename... Args>
-	BadCallerAccess(Args&&... args)
+	explicit BadCallerAccess(Args&&... args)
 	    : std::logic_error(std::forward<Args>(args)...) {}
 };
 
@@ -364,7 +364,7 @@ struct [[nodiscard]] CallerHandle {
 
 	/// @brief Creates a connected handle. Only usable by Connection
 	CallerHandle(std::shared_ptr<Conn> connection,
-	             typename Conn::PrivateConstructToken)
+	             typename Conn::PrivateConstructToken token [[maybe_unused]])
 	    : connection_(connection) {
 		if (!connection_) {
 			throw BadConnection(
@@ -390,7 +390,7 @@ struct [[nodiscard]] CallerHandle {
 	///     * False if the connection has been broken (i.e. This handle has
 	///       been reset/moved, or all other references to the connection
 	///       have been discarded)
-	bool isConnected() const { return connection_ && (*connection_); }
+	[[nodiscard]] bool isConnected() const { return connection_ && (*connection_); }
 
 	/// @throws BadCallerAccess if this handle has been default constructed OR
 	///         reset() has left it without a valid conneciton pointer.
@@ -440,7 +440,7 @@ struct InvokeResult {
 		value_ = std::move(v);
 		return *this;
 	}
-	operator std::optional<RT>&&() && { return std::move(value_); }
+	explicit operator std::optional<RT>&&() && { return std::move(value_); }
 
 private:
 	std::optional<RT> value_;

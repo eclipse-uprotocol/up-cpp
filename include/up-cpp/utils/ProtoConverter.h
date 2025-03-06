@@ -1,5 +1,5 @@
-#ifndef PROTO_CONVERTER_H
-#define PROTO_CONVERTER_H
+#ifndef UP_CPP_UTILS_PROTOCONVERTER_H
+#define UP_CPP_UTILS_PROTOCONVERTER_H
 
 #include <google/protobuf/timestamp.pb.h>
 #include <uprotocol/core/usubscription/v3/usubscription.pb.h>
@@ -8,7 +8,11 @@
 #include <optional>
 
 namespace uprotocol::utils {
-using namespace uprotocol::core::usubscription::v3;
+using uprotocol::core::usubscription::v3::SubscriberInfo;
+using uprotocol::core::usubscription::v3::SubscribeAttributes;
+using uprotocol::core::usubscription::v3::SubscriptionRequest;
+using uprotocol::core::usubscription::v3::UnsubscribeRequest;
+
 
 struct ProtoConverter {
 	/// @brief Converts std::chrono::time_point to google::protobuf::Timestamp
@@ -52,4 +56,4 @@ struct ProtoConverter {
 	    const v1::UUri& subscription_topic);
 };
 };  // namespace uprotocol::utils
-#endif  // PROTO_CONVERTER_H
+#endif  // UP_CPP_UTILS_PROTOCONVERTER_H
