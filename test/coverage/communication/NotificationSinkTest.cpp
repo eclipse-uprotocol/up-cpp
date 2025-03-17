@@ -34,7 +34,7 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	NotificationSinkTest() = default;
-	~NotificationSinkTest() override = default;
+	~NotificationSinkTest() = default;
 
 	void buildDefaultSourceURI();
 	void buildValidNotificationURI();
