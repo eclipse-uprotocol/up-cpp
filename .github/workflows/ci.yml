@@ -431,12 +431,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           repo-root: up-cpp
-          version: 13
           ignore: 'test'
           style: 'file' # read .clang-format for configuration
           tidy-checks: '' # Read .clang-tidy for configuration
           database: build/Release/compile_commands.json
-          version: 12
+          version: 13
 
           
       - name: Run linters on tests
@@ -451,7 +450,7 @@ jobs:
           style: 'file' # read .clang-format for configuration
           tidy-checks: '' # Read .clang-tidy for configuration
           database: build/Release/compile_commands.json
-          version: 12
+          version: 13
 
 
       - name: Report lint failure
