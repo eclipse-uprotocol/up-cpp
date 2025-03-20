@@ -49,8 +49,8 @@ Payload::Payload(Serialized&& serialized) {
 // google::protobuf::Any constructor
 Payload::Payload(const google::protobuf::Any& any) {
 	payload_ = std::make_tuple(
-		any.SerializeAsString(),
-		uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY);	
+	    any.SerializeAsString(),
+	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY);
 }
 
 // Move constructor
@@ -58,8 +58,7 @@ Payload::Payload(Payload&& other) noexcept
     : payload_(std::move(other.payload_)), moved_(other.moved_) {}
 
 // Copy constructor
-Payload::Payload(const Payload& other)=default;
-
+Payload::Payload(const Payload& other) = default;
 
 // Move assignment operator
 Payload& Payload::operator=(Payload&& other) noexcept {

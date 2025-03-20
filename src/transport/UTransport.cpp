@@ -9,9 +9,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include <utility>
-
 #include "up-cpp/transport/UTransport.h"
+
+#include <utility>
 
 #include "up-cpp/datamodel/validator/UMessage.h"
 #include "up-cpp/datamodel/validator/UUri.h"
@@ -22,7 +22,8 @@ namespace uprotocol::transport {
 namespace uri_validator = uprotocol::datamodel::validator::uri;
 namespace message_validator = uprotocol::datamodel::validator::message;
 
-UTransport::UTransport(v1::UUri  entity_uri) : entity_uri_(std::move(entity_uri)) {
+UTransport::UTransport(v1::UUri entity_uri)
+    : entity_uri_(std::move(entity_uri)) {
 	auto [uri_ok, reason] = uri_validator::isValidDefaultEntity(entity_uri_);
 	if (!uri_ok) {
 		throw uri_validator::InvalidUUri(
@@ -110,7 +111,7 @@ UTransport::registerListener(const v1::UUri& sink_or_topic_filter,
 	}
 	v1::UUri sink_filter_copy = sink_or_topic_filter;
 	return registerListener(std::move(listener), *source_filter,
-							std::move(sink_filter_copy));
+	                        std::move(sink_filter_copy));
 }
 
 const v1::UUri& UTransport::getEntityUri() const { return entity_uri_; }

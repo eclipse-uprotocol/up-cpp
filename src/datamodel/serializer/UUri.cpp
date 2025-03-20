@@ -18,15 +18,15 @@
 namespace uprotocol::datamodel::serializer::uri {
 
 std::string AsString::serialize(const v1::UUri& uri) {
-	using uprotocol::datamodel::validator::uri::isValidFilter;
 	using uprotocol::datamodel::validator::uri::InvalidUUri;
 	using uprotocol::datamodel::validator::uri::isLocal;
+	using uprotocol::datamodel::validator::uri::isValidFilter;
 
 	// isValidFilter is the most permissive of the validators
 	auto [valid, reason] = isValidFilter(uri);
 	if (!valid) {
 		throw InvalidUUri("Invalid UUri For Serialization | " +
-						  std::string(message(*reason)));
+		                  std::string(message(*reason)));
 	}
 	std::stringstream ss;
 	ss << std::hex << std::uppercase;
@@ -111,13 +111,13 @@ uprotocol::v1::UUri AsString::deserialize(const std::string& uri_as_string) {
 	uri.set_resource_id(segmentToUint32(uri_view));
 
 	{
-		using uprotocol::datamodel::validator::uri::isValidFilter;
 		using uprotocol::datamodel::validator::uri::InvalidUUri;
+		using uprotocol::datamodel::validator::uri::isValidFilter;
 		// isValidFilter is the most permissive of the validators
 		auto [valid, reason] = isValidFilter(uri);
 		if (!valid) {
 			throw InvalidUUri("Invalid UUri For DeSerialization | " +
-							  std::string(message(*reason)));
+			                  std::string(message(*reason)));
 		}
 	}
 	return uri;

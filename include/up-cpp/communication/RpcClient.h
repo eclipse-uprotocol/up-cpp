@@ -163,7 +163,7 @@ struct RpcClient {
 	[[nodiscard]] InvokeFuture invokeMethod();
 
 	/// @brief Default move constructor (defined in RpcClient.cpp)
-	RpcClient(RpcClient&&) noexcept ;
+	RpcClient(RpcClient&&) noexcept;
 
 	/// @brief Default destructor (defined in RpcClient.cpp)
 	~RpcClient();

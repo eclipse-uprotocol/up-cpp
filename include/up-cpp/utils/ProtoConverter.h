@@ -8,11 +8,10 @@
 #include <optional>
 
 namespace uprotocol::utils {
-using uprotocol::core::usubscription::v3::SubscriberInfo;
 using uprotocol::core::usubscription::v3::SubscribeAttributes;
+using uprotocol::core::usubscription::v3::SubscriberInfo;
 using uprotocol::core::usubscription::v3::SubscriptionRequest;
 using uprotocol::core::usubscription::v3::UnsubscribeRequest;
-
 
 struct ProtoConverter {
 	/// @brief Converts std::chrono::time_point to google::protobuf::Timestamp
@@ -55,5 +54,5 @@ struct ProtoConverter {
 	static UnsubscribeRequest BuildUnSubscribeRequest(
 	    const v1::UUri& subscription_topic);
 };
-};  // namespace uprotocol::utils
+};      // namespace uprotocol::utils
 #endif  // UP_CPP_UTILS_PROTOCONVERTER_H

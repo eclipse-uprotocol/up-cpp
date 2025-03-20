@@ -14,12 +14,12 @@
 namespace {
 
 constexpr size_t AUTHORITY_SPEC_MAX_LENGTH = 128;
-//TODO(max) try to find a better name
+// TODO(max) try to find a better name
 constexpr auto START_OF_TOPICS = 0x8000;
 constexpr auto MAX_RESOURCE_ID = 0xFFFF;
 
-using uprotocol::datamodel::validator::uri::ValidationResult;
 using uprotocol::datamodel::validator::uri::Reason;
+using uprotocol::datamodel::validator::uri::ValidationResult;
 
 ValidationResult uriCommonValidChecks(const uprotocol::v1::UUri& uuri) {
 	if (uuri.ue_version_major() == 0) {
@@ -80,10 +80,12 @@ bool uses_wildcards(const v1::UUri& uuri) {
 	if (uuri.authority_name().find_first_of('*') != std::string::npos) {
 		return true;
 	}
-	if ((uuri.ue_id() & LOWER_16_BIT_MASK) == LOWER_16_BIT_MASK) {  // service ID
+	if ((uuri.ue_id() & LOWER_16_BIT_MASK) ==
+	    LOWER_16_BIT_MASK) {  // service ID
 		return true;
 	}
-	if ((uuri.ue_id() & UPPER_16_BIT_MASK) == UPPER_16_BIT_MASK) {  // service instance ID
+	if ((uuri.ue_id() & UPPER_16_BIT_MASK) ==
+	    UPPER_16_BIT_MASK) {  // service instance ID
 		return true;
 	}
 	if (uuri.ue_version_major() == LOWER_8_BIT_MASK) {
@@ -185,7 +187,8 @@ ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
-	if ((uuri.resource_id() < START_OF_TOPICS) || (uuri.resource_id() > MAX_RESOURCE_ID)) {
+	if ((uuri.resource_id() < START_OF_TOPICS) ||
+	    (uuri.resource_id() > MAX_RESOURCE_ID)) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
@@ -198,7 +201,8 @@ ValidationResult isValidNotificationSource(const v1::UUri& uuri) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
-	if ((uuri.resource_id() < START_OF_TOPICS) || (uuri.resource_id() > MAX_RESOURCE_ID)) {
+	if ((uuri.resource_id() < START_OF_TOPICS) ||
+	    (uuri.resource_id() > MAX_RESOURCE_ID)) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 
@@ -219,7 +223,8 @@ ValidationResult isValidNotificationSink(const v1::UUri& uuri) {
 }
 
 ValidationResult isValidSubscription(const v1::UUri& uuri) {
-	if (uuri.resource_id() < START_OF_TOPICS || uuri.resource_id() > MAX_RESOURCE_ID) {
+	if (uuri.resource_id() < START_OF_TOPICS ||
+	    uuri.resource_id() > MAX_RESOURCE_ID) {
 		return {false, Reason::BAD_RESOURCE_ID};
 	}
 

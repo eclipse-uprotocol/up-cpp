@@ -193,7 +193,8 @@ struct [[nodiscard]] Connection {
 	};
 
 	/// @brief Semi-private constructor. Use the static establish() instead.
-	Connection(std::shared_ptr<Callback> cb, PrivateConstructToken token [[maybe_unused]])
+	Connection(std::shared_ptr<Callback> cb,
+	           PrivateConstructToken token [[maybe_unused]])
 	    : callback_(cb) {}
 
 	// Connection is only ever available wrapped in a std::shared_ptr.
@@ -390,7 +391,9 @@ struct [[nodiscard]] CallerHandle {
 	///     * False if the connection has been broken (i.e. This handle has
 	///       been reset/moved, or all other references to the connection
 	///       have been discarded)
-	[[nodiscard]] bool isConnected() const { return connection_ && (*connection_); }
+	[[nodiscard]] bool isConnected() const {
+		return connection_ && (*connection_);
+	}
 
 	/// @throws BadCallerAccess if this handle has been default constructed OR
 	///         reset() has left it without a valid conneciton pointer.

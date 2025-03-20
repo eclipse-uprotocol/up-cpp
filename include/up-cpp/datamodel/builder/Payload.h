@@ -95,8 +95,7 @@ struct Payload {
 	/// @param format The data format of the payload in value_bytes.
 	///
 	/// @throws std::out_of_range If format is not valid for v1::UPayloadFormat
-	Payload(const std::vector<uint8_t>& value_bytes,
-	        v1::UPayloadFormat format);
+	Payload(const std::vector<uint8_t>& value_bytes, v1::UPayloadFormat format);
 
 	/// @brief Creates a Payload builder with a provided pre-serialized data.
 	///

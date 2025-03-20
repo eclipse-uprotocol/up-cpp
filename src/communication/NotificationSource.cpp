@@ -13,7 +13,7 @@
 
 namespace uprotocol::communication {
 
-using  uprotocol::datamodel::builder::UMessageBuilder;
+using uprotocol::datamodel::builder::UMessageBuilder;
 
 NotificationSource::NotificationSource(
     std::shared_ptr<transport::UTransport> transport, v1::UUri&& source,

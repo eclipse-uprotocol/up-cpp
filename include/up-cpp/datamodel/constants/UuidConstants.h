@@ -43,7 +43,7 @@ constexpr uint64_t LEN_16_BITS_IN_HEX = 4;
 constexpr uint64_t LEN_32_BITS_IN_HEX = 8;
 constexpr uint64_t LEN_48_BITS_IN_HEX = 12;
 
-//number of characters a valid uuid
+// number of characters a valid uuid
 constexpr uint64_t TOTAL_UUID_LENGTH = 36;
 constexpr uint64_t LEN_MSB_IN_HEX = 8;
 constexpr uint64_t LEN_LSB_IN_HEX = 4;
@@ -51,18 +51,20 @@ constexpr uint64_t LEN_VCANT_IN_HEX = 4;
 constexpr uint64_t LEN_VARR_IN_HEX = 4;
 constexpr uint64_t LEN_RAND_IN_HEX = 8;
 
-//number of bits represented by a single hex character
+// number of bits represented by a single hex character
 constexpr uint64_t LEN_HEX_TO_BIT = 4;
 
-//number of bits to represent uint64
-constexpr uint64_t LEN_UINT64_IN_BIT = sizeof(uint64_t)*8;
+// number of bits to represent uint64
+constexpr uint64_t LEN_UINT64_IN_BIT = sizeof(uint64_t) * 8;
 
-//expected positions of the '-' separators in a valid uuid
+// expected positions of the '-' separators in a valid uuid
 constexpr uint64_t POS_FIRST_SEPARATOR = LEN_MSB_IN_HEX;
-constexpr uint64_t POS_SECOND_SEPARATOR = POS_FIRST_SEPARATOR +LEN_LSB_IN_HEX +1;
-constexpr uint64_t POS_THIRD_SEPARATOR = POS_SECOND_SEPARATOR +LEN_VCANT_IN_HEX +1;
-constexpr uint64_t POS_FOURTH_SEPARATOR = POS_THIRD_SEPARATOR +LEN_VARR_IN_HEX +1;
-
+constexpr uint64_t POS_SECOND_SEPARATOR =
+    POS_FIRST_SEPARATOR + LEN_LSB_IN_HEX + 1;
+constexpr uint64_t POS_THIRD_SEPARATOR =
+    POS_SECOND_SEPARATOR + LEN_VCANT_IN_HEX + 1;
+constexpr uint64_t POS_FOURTH_SEPARATOR =
+    POS_THIRD_SEPARATOR + LEN_VARR_IN_HEX + 1;
 
 }  // namespace uprotocol::datamodel
 

@@ -23,10 +23,10 @@
 #include <utility>
 
 namespace uprotocol::client::usubscription::v3 {
-using uprotocol::core::usubscription::v3::uSubscription;
-using uprotocol::core::usubscription::v3::Update;
-using uprotocol::core::usubscription::v3::UnsubscribeRequest;
 using uprotocol::core::usubscription::v3::SubscriptionRequest;
+using uprotocol::core::usubscription::v3::UnsubscribeRequest;
+using uprotocol::core::usubscription::v3::Update;
+using uprotocol::core::usubscription::v3::uSubscription;
 
 /**
  * @struct ConsumerOptions
@@ -49,13 +49,12 @@ struct ConsumerOptions {
 	std::optional<google::protobuf::Any> subscription_details;
 };
 
-
 /// @struct uSubscriptionUUriBuilder
 /// @brief Structure to build uSubscription request URIs.
 ///
 /// This structure is used to build URIs for uSubscription service. It uses the
-/// service options from uSubscription proto to set the authority name, ue_id, ue_version_major, and
-/// the notification topic resource ID in the URI.
+/// service options from uSubscription proto to set the authority name, ue_id,
+/// ue_version_major, and the notification topic resource ID in the URI.
 struct USubscriptionUUriBuilder {
 private:
 	/// URI for the uSubscription service
@@ -124,7 +123,8 @@ struct Consumer {
 	///
 	/// @param transport Transport to register with.
 	/// @param subscription_topic Topic to subscribe to.
-	/// @param callback Function that is called when publish message is received.
+	/// @param callback Function that is called when publish message is
+	/// received.
 	/// @param priority Priority of the subscription request.
 	/// @param subscribe_request_ttl Time to live for the subscription request.
 	/// @param consumer_options Additional details for uSubscription service.
@@ -135,7 +135,8 @@ struct Consumer {
 	    std::chrono::milliseconds subscription_request_ttl,
 	    ConsumerOptions consumer_options);
 
-	/// @brief Unsubscribe from the topic and call uSubscription service to close the subscription.
+	/// @brief Unsubscribe from the topic and call uSubscription service to
+	/// close the subscription.
 	///
 	/// @param priority Priority of the unsubscribe request.
 	/// @param request_ttl Time to live for the unsubscribe request.
@@ -158,7 +159,7 @@ protected:
 	/// @param transport Transport to register with.
 	/// @param subscriber_details Additional details about the subscriber.
 	Consumer(std::shared_ptr<transport::UTransport> transport,
-	         v1::UUri  subscription_topic,
+	         v1::UUri subscription_topic,
 	         ConsumerOptions consumer_options = {});
 
 private:
@@ -207,8 +208,10 @@ private:
 	/// @brief Subscribe to the topic
 	///
 	/// @param topic Topic to subscribe to.
-	/// @param subscription_request_ttl Time to live for the subscription request.
-	/// @param callback Function that is called when a published message is received.
+	/// @param subscription_request_ttl Time to live for the subscription
+	/// request.
+	/// @param callback Function that is called when a published message is
+	/// received.
 	v1::UStatus subscribe(v1::UPriority priority,
 	                      std::chrono::milliseconds subscription_request_ttl,
 	                      ListenCallback&& callback);

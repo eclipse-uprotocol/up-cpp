@@ -16,11 +16,12 @@
 namespace uprotocol::client::usubscription::v3 {
 
 Consumer::Consumer(std::shared_ptr<uprotocol::transport::UTransport> transport,
-                   v1::UUri  subscription_topic,
+                   v1::UUri subscription_topic,
                    ConsumerOptions consumer_options)
     : transport_(std::move(transport)),
       subscription_topic_(std::move(subscription_topic)),
-      consumer_options_(std::move(consumer_options)), rpc_client_(nullptr) {
+      consumer_options_(std::move(consumer_options)),
+      rpc_client_(nullptr) {
 	// Initialize uSubscriptionUUriBuilder_
 	uSubscriptionUUriBuilder_ = USubscriptionUUriBuilder();
 }
@@ -65,8 +66,7 @@ v1::UStatus Consumer::createNotificationSink() {
 	auto notification_topic = uSubscriptionUUriBuilder_.getNotificationUri();
 
 	auto result = communication::NotificationSink::create(
-	    transport_, std::move(notification_sink_callback),
-	    notification_topic);
+	    transport_, std::move(notification_sink_callback), notification_topic);
 
 	if (result.has_value()) {
 		noficationSinkHandle_ = std::move(result).value();
@@ -91,12 +91,12 @@ v1::UStatus Consumer::subscribe(
     v1::UPriority priority, std::chrono::milliseconds subscription_request_ttl,
     ListenCallback&& callback) {
 	rpc_client_ = std::make_unique<communication::RpcClient>(
-	    transport_,
-	    uSubscriptionUUriBuilder_.getServiceUriWithResourceId(1),
+	    transport_, uSubscriptionUUriBuilder_.getServiceUriWithResourceId(1),
 	    priority, subscription_request_ttl);
 
 	auto on_response = [this](const auto& maybe_response) {
-		if (maybe_response.has_value() && maybe_response.value().has_payload()) {
+		if (maybe_response.has_value() &&
+		    maybe_response.value().has_payload()) {
 			SubscriptionResponse response;
 			if (response.ParseFromString(maybe_response.value().payload())) {
 				if (response.topic().SerializeAsString() ==

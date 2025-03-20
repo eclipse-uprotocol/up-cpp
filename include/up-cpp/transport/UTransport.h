@@ -57,7 +57,7 @@ public:
 	///
 	/// @see uprotocol::datamodel::validator::uri::isValidEntityUri()
 	/// @see uprotocol::datamodel::validator::uri::InvalidUUri
-	explicit UTransport(v1::UUri );
+	explicit UTransport(v1::UUri);
 
 	/// @brief Send a message.
 	///

@@ -9,9 +9,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include <utility>
-
 #include "up-cpp/communication/Subscriber.h"
+
+#include <utility>
 
 #include "up-cpp/datamodel/validator/UUri.h"
 
@@ -37,7 +37,8 @@ namespace uri_validator = uprotocol::datamodel::validator::uri;
 	auto handle = transport->registerListener(std::move(callback), topic);
 
 	if (!handle) {
-		return SubscriberOrStatus(utils::Unexpected<v1::UStatus>(handle.error()));
+		return SubscriberOrStatus(
+		    utils::Unexpected<v1::UStatus>(handle.error()));
 	}
 
 	return SubscriberOrStatus(std::make_unique<Subscriber>(

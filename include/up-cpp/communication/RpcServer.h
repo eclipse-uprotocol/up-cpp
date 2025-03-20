@@ -91,8 +91,8 @@ protected:
 	///            respond() is called. Note that the original request's TTL
 	///            may also still apply.
 	explicit RpcServer(std::shared_ptr<transport::UTransport> transport,
-	          std::optional<v1::UPayloadFormat> format = {},
-	          std::optional<std::chrono::milliseconds> ttl = {});
+	                   std::optional<v1::UPayloadFormat> format = {},
+	                   std::optional<std::chrono::milliseconds> ttl = {});
 
 	/// @brief Allows std::make_unique to directly access RpcServer's private
 	/// constructor.

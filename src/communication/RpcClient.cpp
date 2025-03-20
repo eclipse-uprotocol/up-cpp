@@ -28,22 +28,22 @@ struct PendingRequest {
 	friend struct ExpireWorker;
 
 	PendingRequest(const std::chrono::steady_clock::time_point& when_expire,
-		ListenHandle response_listener,
-		std::function<void(UStatus)> expire,
-		const size_t& instance_id)
-		: when_expire_(when_expire),
-		response_listener_(std::move(response_listener)),
-		expire_(std::move(expire)),
-		instance_id_(instance_id) {}
+	               ListenHandle response_listener,
+	               std::function<void(UStatus)> expire,
+	               const size_t& instance_id)
+	    : when_expire_(when_expire),
+	      response_listener_(std::move(response_listener)),
+	      expire_(std::move(expire)),
+	      instance_id_(instance_id) {}
 
 	auto operator>(const PendingRequest& other) const;
+
 private:
 	std::chrono::steady_clock::time_point when_expire_;
 	ListenHandle response_listener_;
 	std::function<void(UStatus)> expire_;
 	size_t instance_id_{};
 };
-
 
 struct ScrubablePendingQueue
     : public std::priority_queue<PendingRequest, std::vector<PendingRequest>,
@@ -82,19 +82,18 @@ struct RpcClient::ExpireService {
 	void enqueue(std::chrono::steady_clock::time_point when_expire,
 	             transport::UTransport::ListenHandle&& response_listener,
 	             std::function<void(v1::UStatus)> expire) const {
-		auto pending = detail::PendingRequest(when_expire,
-			std::move(response_listener),
-			std::move(expire),
-			instance_id_);
+		auto pending =
+		    detail::PendingRequest(when_expire, std::move(response_listener),
+		                           std::move(expire), instance_id_);
 
 		worker_.enqueue(std::move(pending));
 	}
 
 private:
 	static inline std::atomic<size_t> next_instance_id_{0};
-	//constructor for ExpireWorker can throw an exception when trying to create new thread
-	//this can be problematic when used in a static constructor
-	static inline detail::ExpireWorker worker_; //NOLINT
+	// constructor for ExpireWorker can throw an exception when trying to create
+	// new thread this can be problematic when used in a static constructor
+	static inline detail::ExpireWorker worker_;  // NOLINT
 	size_t instance_id_;
 };
 
@@ -140,8 +139,7 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 	// attempt to call the callback succeeds.
 	auto callback_once = std::make_shared<std::once_flag>();
 
-	auto connected_pair =
-	    Connection::establish(std::move(callback));
+	auto connected_pair = Connection::establish(std::move(callback));
 	auto callback_handle = std::move(std::get<0>(connected_pair));
 	auto callable = std::get<1>(connected_pair);
 
@@ -163,10 +161,11 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 				v1::UStatus status;
 				status.set_code(m.attributes().commstatus());
 				status.set_message("Received response with !OK commstatus");
-				std::call_once(*callback_once, [&callable,
-				                                status = std::move(status)]() {
-					callable(utils::Expected<v1::UMessage,v1::UStatus>(utils::Unexpected<v1::UStatus>(status)));
-				});
+				std::call_once(
+				    *callback_once, [&callable, status = std::move(status)]() {
+					    callable(utils::Expected<v1::UMessage, v1::UStatus>(
+					        utils::Unexpected<v1::UStatus>(status)));
+				    });
 			}
 		}
 	};
@@ -176,10 +175,11 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 	// Called when the request has expired or failed. Will be handed off to the
 	// expiration monitoring service once the request has been sent.
 	auto expire = [callable, callback_once](v1::UStatus&& reason) mutable {
-		std::call_once(
-		    *callback_once, [&callable, reason = std::move(reason)]() {
-			    callable(utils::Expected<v1::UMessage,v1::UStatus>(utils::Unexpected<v1::UStatus>(reason)));
-		    });
+		std::call_once(*callback_once,
+		               [&callable, reason = std::move(reason)]() {
+			               callable(utils::Expected<v1::UMessage, v1::UStatus>(
+			                   utils::Unexpected<v1::UStatus>(reason)));
+		               });
 	};
 	///////////////////////////////////////////////////////////////////////////
 
@@ -221,10 +221,11 @@ RpcClient::InvokeFuture RpcClient::invokeMethod(
 	// allows exactly one call to the callback via std::call_once.
 	auto promise = std::make_shared<std::promise<MessageOrStatus>>();
 	auto future = promise->get_future();
-	auto handle = invokeMethod(
-	    std::move(payload), [promise](const MessageOrStatus& maybe_message) mutable {
-		    promise->set_value(maybe_message);
-	    });
+	auto handle =
+	    invokeMethod(std::move(payload),
+	                 [promise](const MessageOrStatus& maybe_message) mutable {
+		                 promise->set_value(maybe_message);
+	                 });
 
 	return {std::move(future), std::move(handle)};
 }
@@ -262,8 +263,8 @@ RpcClient::InvokeFuture::InvokeFuture(std::future<MessageOrStatus>&& future,
 namespace {
 namespace detail {
 
-using uprotocol::v1::UStatus;
 using uprotocol::v1::UCode;
+using uprotocol::v1::UStatus;
 // using namespace std::chrono_literals;
 using ListenHandle = uprotocol::transport::UTransport::ListenHandle;
 
@@ -303,8 +304,8 @@ auto ScrubablePendingQueue::scrub(size_t instance_id) {
 	                   }),
 	    c.end());
 
-	// TODO(missing_author) - is there a better way to shrink the internal container?
-	// Maybe instead we should enforce a capacity limit
+	// TODO(missing_author) - is there a better way to shrink the internal
+	// container? Maybe instead we should enforce a capacity limit
 	constexpr size_t CAPACITY_SHRINK_THRESHOLD = 16;
 	if ((c.capacity() > CAPACITY_SHRINK_THRESHOLD) &&
 	    (c.size() < c.capacity() / 2)) {

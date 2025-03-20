@@ -41,7 +41,7 @@ template <typename E>
 class Unexpected {
 public:
 	constexpr Unexpected(const Unexpected&) = default;
-	constexpr Unexpected(Unexpected&&) noexcept= default;
+	constexpr Unexpected(Unexpected&&) noexcept = default;
 
 	constexpr explicit Unexpected(const E& rhs) : storage_(rhs) {}
 	constexpr explicit Unexpected(E&& rhs) : storage_(std::move(rhs)) {}
@@ -58,9 +58,12 @@ template <typename T, typename E>
 class Expected {
 public:
 	constexpr explicit Expected(T arg) : storage_(std::forward<T>(arg)) {}
-	//It E and T are the same type, this can cause problems. Previously, this was in use by implicid conversion
-	// constexpr explicit Expected(E arg) : storage_(std::forward<Unexpected<E>>(Unexpected<E>(arg))) {}
-	constexpr explicit Expected(Unexpected<E> arg) : storage_(std::forward<Unexpected<E>>(arg)) {}
+	// It E and T are the same type, this can cause problems. Previously, this
+	// was in use by implicid conversion
+	//  constexpr explicit Expected(E arg) :
+	//  storage_(std::forward<Unexpected<E>>(Unexpected<E>(arg))) {}
+	constexpr explicit Expected(Unexpected<E> arg)
+	    : storage_(std::forward<Unexpected<E>>(arg)) {}
 
 	constexpr Expected(const Expected&) = default;
 	constexpr Expected(Expected&&) noexcept = default;
@@ -82,7 +85,7 @@ public:
 	constexpr const T& value() const& {
 		if (!has_value()) {
 			throw BadExpectedAccess(
-				"Attempt to access value() when unexpected.");
+			    "Attempt to access value() when unexpected.");
 		}
 		return std::get<T>(storage_);
 	}
@@ -90,7 +93,7 @@ public:
 	constexpr T value() && {
 		if (!has_value()) {
 			throw BadExpectedAccess(
-				"Attempt to access value() when unexpected.");
+			    "Attempt to access value() when unexpected.");
 		}
 		return std::move(std::get<T>(storage_));
 	}
@@ -98,7 +101,7 @@ public:
 	constexpr const E& error() const& {
 		if (has_value()) {
 			throw BadExpectedAccess(
-				"Attempt to access error() when not unexpected.");
+			    "Attempt to access error() when not unexpected.");
 		}
 		return std::get<Unexpected<E>>(storage_).error();
 	}
@@ -106,7 +109,7 @@ public:
 	constexpr E error() && {
 		if (has_value()) {
 			throw BadExpectedAccess(
-				"Attempt to access error() when not unexpected.");
+			    "Attempt to access error() when not unexpected.");
 		}
 		return std::move(std::get<Unexpected<E>>(storage_)).error();
 	}
@@ -114,7 +117,7 @@ public:
 	constexpr const T& operator*() const {
 		if (!has_value()) {
 			throw BadExpectedAccess(
-				"Attempt to dereference expected value when unexpected.");
+			    "Attempt to dereference expected value when unexpected.");
 		}
 		return std::get<T>(storage_);
 	}
@@ -122,7 +125,7 @@ public:
 	constexpr const T* operator->() const {
 		if (!has_value()) {
 			throw BadExpectedAccess(
-				"Attempt to dereference expected pointer when unexpected.");
+			    "Attempt to dereference expected pointer when unexpected.");
 		}
 		return &std::get<T>(storage_);
 	}
