@@ -59,7 +59,7 @@ struct IpAddress {
 
 	/// @brief Constructs an IP address from a string representation of
 	///        an address.
-	explicit IpAddress(std::string_view const ip_string);
+	explicit IpAddress(std::string_view ip_string);
 
 	/// @brief Constructs an IP address from a binary representation of
 	///        an address.
@@ -83,10 +83,10 @@ struct IpAddress {
 	[[nodiscard]] std::string getBytesString() const;
 
 	/// @brief Number of bytes in IPv4 address.
-	static constexpr uint8_t ip_v4_address_bytes = 4;
+	static constexpr uint8_t IP_V4_ADDRESS_BYTES = 4;
 
 	/// @brief Number of bytes in IPv6 address.
-	static constexpr uint8_t ip_v6_address_bytes = 16;
+	static constexpr uint8_t IP_V6_ADDRESS_BYTES = 16;
 
 private:
 	/// @brief Updates the state of this instance from the value of the

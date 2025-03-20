@@ -163,7 +163,7 @@ isValidDefaultSource(const v1::UUri&);
 struct InvalidUUri : public std::invalid_argument {
 	// Forward constructors
 	template <typename... Args>
-	InvalidUUri(Args&&... args)
+	explicit InvalidUUri(Args&&... args)
 	    : std::invalid_argument(std::forward<Args>(args)...) {}
 
 	InvalidUUri(InvalidUUri&&) noexcept;

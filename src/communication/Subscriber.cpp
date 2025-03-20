@@ -11,10 +11,12 @@
 
 #include "up-cpp/communication/Subscriber.h"
 
+#include <utility>
+
 #include "up-cpp/datamodel/validator/UUri.h"
 
 namespace uprotocol::communication {
-namespace UriValidator = uprotocol::datamodel::validator::uri;
+namespace uri_validator = uprotocol::datamodel::validator::uri;
 
 [[nodiscard]] Subscriber::SubscriberOrStatus Subscriber::subscribe(
     std::shared_ptr<transport::UTransport> transport, const v1::UUri& topic,
@@ -25,27 +27,28 @@ namespace UriValidator = uprotocol::datamodel::validator::uri;
 	}
 
 	auto [source_ok, bad_source_reason] =
-	    UriValidator::isValidSubscription(topic);
+	    uri_validator::isValidSubscription(topic);
 	if (!source_ok) {
-		throw UriValidator::InvalidUUri(
+		throw uri_validator::InvalidUUri(
 		    "Topic URI is not a valid topic subscription pattern |  " +
-		    std::string(UriValidator::message(*bad_source_reason)));
+		    std::string(uri_validator::message(*bad_source_reason)));
 	}
 
 	auto handle = transport->registerListener(std::move(callback), topic);
 
 	if (!handle) {
-		return uprotocol::utils::Unexpected(handle.error());
+		return SubscriberOrStatus(
+		    utils::Unexpected<v1::UStatus>(handle.error()));
 	}
 
-	return std::make_unique<Subscriber>(
+	return SubscriberOrStatus(std::make_unique<Subscriber>(
 	    std::forward<std::shared_ptr<transport::UTransport>>(transport),
-	    std::forward<ListenHandle&&>(std::move(handle).value()));
+	    std::forward<ListenHandle&&>(std::move(handle).value())));
 }
 
 Subscriber::Subscriber(std::shared_ptr<transport::UTransport> transport,
                        ListenHandle&& subscription)
-    : transport_(transport), subscription_(std::move(subscription)) {
+    : transport_(std::move(transport)), subscription_(std::move(subscription)) {
 	// Constructor body. Any additional setup can go here.
 	if (!transport_) {
 		throw transport::NullTransport("transport cannot be null");

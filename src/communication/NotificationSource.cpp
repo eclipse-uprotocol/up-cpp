@@ -12,7 +12,8 @@
 #include "up-cpp/communication/NotificationSource.h"
 
 namespace uprotocol::communication {
-using namespace uprotocol::datamodel::builder;
+
+using uprotocol::datamodel::builder::UMessageBuilder;
 
 NotificationSource::NotificationSource(
     std::shared_ptr<transport::UTransport> transport, v1::UUri&& source,
@@ -40,7 +41,7 @@ v1::UStatus NotificationSource::notify(
     datamodel::builder::Payload&& payload) const {
 	auto message = notify_builder_.build(std::move(payload));
 
-	return transport_->send(std::move(message));
+	return transport_->send(message);
 }
 
 v1::UStatus NotificationSource::notify() const {
@@ -49,7 +50,7 @@ v1::UStatus NotificationSource::notify() const {
 		throw transport::NullTransport("transport cannot be null");
 	}
 
-	return transport_->send(std::move(message));
+	return transport_->send(message);
 }
 
 }  // namespace uprotocol::communication

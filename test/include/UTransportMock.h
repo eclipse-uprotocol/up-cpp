@@ -73,7 +73,7 @@ private:
 		return registerListener_status_;
 	}
 
-	void cleanupListener(CallableConn listener) override {
+	void cleanupListener(const CallableConn& listener) override {
 		cleanup_listener_ = listener;
 	}
 };

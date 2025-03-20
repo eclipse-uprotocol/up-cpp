@@ -130,9 +130,8 @@ TEST_F(PayloadTest, CreateSerializedProtobufPayloadAndMoveTwiceExceptionTest) {
 	          uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
 	EXPECT_EQ(payloadData, uriObject.SerializeAsString());
 
-	EXPECT_THROW({
-		auto _ = std::move(payload).buildMove();
-	}, Payload::PayloadMoved);	
+	EXPECT_THROW({ auto _ = std::move(payload).buildMove(); },
+	             Payload::PayloadMoved);
 }
 
 // Create serialized protobuf payload. Call build after move.

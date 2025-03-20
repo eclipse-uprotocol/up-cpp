@@ -18,7 +18,10 @@
 namespace uprotocol::datamodel::serializer::uri {
 
 std::string AsString::serialize(const v1::UUri& uri) {
-	using namespace uprotocol::datamodel::validator::uri;
+	using uprotocol::datamodel::validator::uri::InvalidUUri;
+	using uprotocol::datamodel::validator::uri::isLocal;
+	using uprotocol::datamodel::validator::uri::isValidFilter;
+
 	// isValidFilter is the most permissive of the validators
 	auto [valid, reason] = isValidFilter(uri);
 	if (!valid) {
@@ -37,23 +40,24 @@ std::string AsString::serialize(const v1::UUri& uri) {
 	return std::move(ss).str();
 }
 
-std::string_view extractSegment(std::string_view& uriView) {
-	constexpr std::string_view segment_separator = "/";
-	const auto end = uriView.find(segment_separator);
-	if (end == uriView.npos) {
+std::string_view extractSegment(std::string_view& uri_view) {
+	constexpr std::string_view SEGMENT_SEPARATOR = "/";
+	const auto end = uri_view.find(SEGMENT_SEPARATOR);
+	if (end == std::string_view::npos) {
 		throw std::invalid_argument("Could not extract segment from '" +
-		                            std::string(uriView) +
+		                            std::string(uri_view) +
 		                            "' with separator '" + "/" + "'");
 	}
-	auto segment = uriView.substr(0, end);
-	uriView = uriView.substr(end + 1);
+	auto segment = uri_view.substr(0, end);
+	uri_view = uri_view.substr(end + 1);
 	return segment;
 }
 
 uint32_t segmentToUint32(const std::string_view& segment) {
 	uint32_t value = 0;
+	constexpr auto HEX_BASE = 16;
 	auto [end, ec] = std::from_chars(
-	    segment.data(), segment.data() + segment.size(), value, 16);
+	    segment.data(), segment.data() + segment.size(), value, HEX_BASE);
 	const bool convert_ok =
 	    (ec == std::errc{}) && (end == segment.data() + segment.size());
 	if (!convert_ok) {
@@ -63,51 +67,52 @@ uint32_t segmentToUint32(const std::string_view& segment) {
 	return value;
 }
 
-uprotocol::v1::UUri AsString::deserialize(const std::string& uriAsString) {
-	if (uriAsString.empty()) {
+uprotocol::v1::UUri AsString::deserialize(const std::string& uri_as_string) {
+	if (uri_as_string.empty()) {
 		throw std::invalid_argument("Cannot deserialize empty string");
 	}
 
-	constexpr std::string_view schema_prefix = "up://";
-	constexpr std::string_view remote_prefix = "//";
-	constexpr std::string_view segment_separator = "/";
+	constexpr std::string_view SCHEMA_PREFIX = "up://";
+	constexpr std::string_view REMOTE_PREFIX = "//";
+	constexpr std::string_view SEGMENT_SEPARATOR = "/";
 
 	// Operating on a string view to avoid copies and reallocations
-	std::string_view uriView(uriAsString);
+	std::string_view uri_view(uri_as_string);
 
 	// Extract and convert the rest of the URI string
 	v1::UUri uri;
 
 	// Verify start and extract Authority, if present
 	// With up:// schema
-	if (uriView.substr(0, schema_prefix.size()) == schema_prefix) {
+	if (uri_view.substr(0, SCHEMA_PREFIX.size()) == SCHEMA_PREFIX) {
 		// Advance past the prefix
-		uriView = uriView.substr(schema_prefix.size());
-		uri.set_authority_name(std::string(extractSegment(uriView)));
+		uri_view = uri_view.substr(SCHEMA_PREFIX.size());
+		uri.set_authority_name(std::string(extractSegment(uri_view)));
 		// with // remote prefix
-	} else if (uriView.substr(0, remote_prefix.size()) == remote_prefix) {
+	} else if (uri_view.substr(0, REMOTE_PREFIX.size()) == REMOTE_PREFIX) {
 		// Advance past the prefix
-		uriView = uriView.substr(remote_prefix.size());
-		uri.set_authority_name(std::string(extractSegment(uriView)));
+		uri_view = uri_view.substr(REMOTE_PREFIX.size());
+		uri.set_authority_name(std::string(extractSegment(uri_view)));
 
 		// with / local prefix
-	} else if (uriView.substr(0, segment_separator.size()) ==
-	           segment_separator) {
+	} else if (uri_view.substr(0, SEGMENT_SEPARATOR.size()) ==
+	           SEGMENT_SEPARATOR) {
 		// Advance past the prefix
-		uriView = uriView.substr(segment_separator.size());
+		uri_view = uri_view.substr(SEGMENT_SEPARATOR.size());
 
 		// Missing required prefix
 	} else {
 		throw std::invalid_argument(
 		    "Did not find expected URI start in string: '" +
-		    std::string(uriView) + "'");
+		    std::string(uri_view) + "'");
 	}
-	uri.set_ue_id(segmentToUint32(extractSegment(uriView)));
-	uri.set_ue_version_major(segmentToUint32(extractSegment(uriView)));
-	uri.set_resource_id(segmentToUint32(uriView));
+	uri.set_ue_id(segmentToUint32(extractSegment(uri_view)));
+	uri.set_ue_version_major(segmentToUint32(extractSegment(uri_view)));
+	uri.set_resource_id(segmentToUint32(uri_view));
 
 	{
-		using namespace uprotocol::datamodel::validator::uri;
+		using uprotocol::datamodel::validator::uri::InvalidUUri;
+		using uprotocol::datamodel::validator::uri::isValidFilter;
 		// isValidFilter is the most permissive of the validators
 		auto [valid, reason] = isValidFilter(uri);
 		if (!valid) {

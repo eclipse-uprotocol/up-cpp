@@ -27,13 +27,13 @@ namespace uprotocol::datamodel::serializer::uuid {
 
 /// @brief Converts to and from a human-readable string representation of UUID
 struct AsString {
-	[[nodiscard]] static std::string serialize(v1::UUID);
+	[[nodiscard]] static std::string serialize(const v1::UUID&);
 	[[nodiscard]] static v1::UUID deserialize(const std::string&);
 };
 
 /// @brief Converts to and from byte vector representation of UUID
 struct AsBytes {
-	[[nodiscard]] static std::vector<uint8_t> serialize(v1::UUID);
+	[[nodiscard]] static std::vector<uint8_t> serialize(const v1::UUID&);
 	[[nodiscard]] static v1::UUID deserialize(const std::vector<uint8_t>&);
 };
 
