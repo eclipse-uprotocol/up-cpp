@@ -59,7 +59,7 @@ class Expected {
 public:
 	constexpr explicit Expected(T arg) : storage_(std::forward<T>(arg)) {}
 	// It E and T are the same type, this can cause problems. Previously, this
-	// was in use by implicid conversion
+	// was in use by implicit conversion
 	//  constexpr explicit Expected(E arg) :
 	//  storage_(std::forward<Unexpected<E>>(Unexpected<E>(arg))) {}
 	constexpr explicit Expected(Unexpected<E> arg)
