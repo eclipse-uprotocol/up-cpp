@@ -64,7 +64,7 @@ TEST(UuidBuilderTest, WithTimeSource) {
 
 // Test RandomSource
 TEST(UuidBuilderTest, WithRandomSource) {
-	auto fixed_random = 0x1234567890ABCDEF;
+	uint64_t fixed_random = 0x1234567890ABCDEF;
 	auto builder = UuidBuilder::getTestBuilder().withRandomSource(
 	    [fixed_random]() { return fixed_random; });
 	auto uuid = builder.build();
