@@ -131,7 +131,7 @@ uprotocol::datamodel::builder::Payload fakePayload() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Construction
-TEST_F(RpcClientTest, CanConstructWithoutExceptions) {
+TEST_F(RpcClientTest, CanConstructWithoutExceptions) {	// NOLINT
 	// Base parameters
 	EXPECT_NO_THROW(auto client = uprotocol::communication::RpcClient(
 	                    transport_, methodUri(),
@@ -155,7 +155,7 @@ TEST_F(RpcClientTest, CanConstructWithoutExceptions) {
 	                    "Some token"););
 }
 
-TEST_F(RpcClientTest, ExceptionThrownWithInvalidConstructorArguments) {
+TEST_F(RpcClientTest, ExceptionThrownWithInvalidConstructorArguments) {	// NOLINT
 	// Bad method URI
 	EXPECT_THROW(auto uri = methodUri(); uri.set_resource_id(0);
 	             auto client = uprotocol::communication::RpcClient(
@@ -185,7 +185,7 @@ TEST_F(RpcClientTest, ExceptionThrownWithInvalidConstructorArguments) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // RpcClient::invokeMethod()
-TEST_F(RpcClientTest, InvokeFutureWithoutPayload) {
+TEST_F(RpcClientTest, InvokeFutureWithoutPayload) {		// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -211,7 +211,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayload) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithoutPayloadAndFormatSet) {
+TEST_F(RpcClientTest, InvokeFutureWithoutPayloadAndFormatSet) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms,
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_SOMEIP);
@@ -224,7 +224,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadAndFormatSet) {
 	EXPECT_FALSE(transport_->listener_);
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithoutPayloadTimeout) {
+TEST_F(RpcClientTest, InvokeFutureWithoutPayloadTimeout) {		// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -247,7 +247,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadTimeout) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithoutPayloadListenFail) {
+TEST_F(RpcClientTest, InvokeFutureWithoutPayloadListenFail) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -269,7 +269,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadListenFail) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithoutPayloadSendFail) {
+TEST_F(RpcClientTest, InvokeFutureWithoutPayloadSendFail) {		// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -290,7 +290,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadSendFail) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithoutPayloadClientDestroyed) {
+TEST_F(RpcClientTest, InvokeFutureWithoutPayloadClientDestroyed) {		// NOLINT
 	uprotocol::communication::RpcClient::InvokeFuture invoke_future;
 
 	{
@@ -312,7 +312,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadClientDestroyed) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithoutPayloadCommstatus) {
+TEST_F(RpcClientTest, InvokeFutureWithoutPayloadCommstatus) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -338,7 +338,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadCommstatus) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // RpcClient::invokeMethod(Payload)
-TEST_F(RpcClientTest, InvokeFutureWithPayload) {
+TEST_F(RpcClientTest, InvokeFutureWithPayload) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -371,7 +371,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayload) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithPayloadAndFormatSet) {
+TEST_F(RpcClientTest, InvokeFutureWithPayloadAndFormatSet) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms,
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
@@ -405,7 +405,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadAndFormatSet) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithPayloadAndWrongFormatSet) {
+TEST_F(RpcClientTest, InvokeFutureWithPayloadAndWrongFormatSet) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms,
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON);
@@ -418,7 +418,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadAndWrongFormatSet) {
 	EXPECT_FALSE(transport_->listener_);
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithPayloadTimeout) {
+TEST_F(RpcClientTest, InvokeFutureWithPayloadTimeout) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -441,7 +441,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadTimeout) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithPayloadListenFail) {
+TEST_F(RpcClientTest, InvokeFutureWithPayloadListenFail) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -463,7 +463,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadListenFail) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithPayloadSendFail) {
+TEST_F(RpcClientTest, InvokeFutureWithPayloadSendFail) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -484,7 +484,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadSendFail) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithPayloadClientDestroyed) {
+TEST_F(RpcClientTest, InvokeFutureWithPayloadClientDestroyed) {	// NOLINT
 	uprotocol::communication::RpcClient::InvokeFuture invoke_future;
 
 	{
@@ -505,7 +505,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadClientDestroyed) {
 	}
 }
 
-TEST_F(RpcClientTest, InvokeFutureWithPayloadCommstatus) {
+TEST_F(RpcClientTest, InvokeFutureWithPayloadCommstatus) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -531,7 +531,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadCommstatus) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // RpcClient::invokeMethod(Callback)
-TEST_F(RpcClientTest, InvokeCallbackWithoutPayload) {
+TEST_F(RpcClientTest, InvokeCallbackWithoutPayload) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -559,7 +559,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayload) {
 	EXPECT_TRUE(response == received_response);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadAndFormatSet) {
+TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadAndFormatSet) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms,
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_SOMEIP);
@@ -573,7 +573,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadAndFormatSet) {
 	EXPECT_FALSE(transport_->listener_);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadTimeout) {
+TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadTimeout) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -603,7 +603,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadTimeout) {
 	EXPECT_TRUE(callback_called);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadListenFail) {
+TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadListenFail) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -624,7 +624,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadListenFail) {
 	EXPECT_TRUE(callback_called);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadSendFail) {
+TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadSendFail) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -644,7 +644,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadSendFail) {
 	EXPECT_TRUE(callback_called);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadClientDestroyed) {
+TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadClientDestroyed) {	// NOLINT
 	uprotocol::communication::RpcClient::InvokeFuture invoke_future;
 
 	bool callback_called = false;
@@ -665,7 +665,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadClientDestroyed) {
 	EXPECT_TRUE(callback_called);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadCommstatus) {
+TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadCommstatus) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -690,7 +690,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadCommstatus) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // RpcClient::invokeMethod(Payload, Callback)
-TEST_F(RpcClientTest, InvokeCallbackWithPayload) {
+TEST_F(RpcClientTest, InvokeCallbackWithPayload) {		// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -726,7 +726,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayload) {
 	EXPECT_TRUE(response == received_response);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithPayloadAndFormatSet) {
+TEST_F(RpcClientTest, InvokeCallbackWithPayloadAndFormatSet) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms,
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
@@ -763,7 +763,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadAndFormatSet) {
 	EXPECT_TRUE(response == received_response);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithPayloadAndWrongFormatSet) {
+TEST_F(RpcClientTest, InvokeCallbackWithPayloadAndWrongFormatSet) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms,
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON);
@@ -777,7 +777,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadAndWrongFormatSet) {
 	EXPECT_FALSE(transport_->listener_);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithPayloadTimeout) {
+TEST_F(RpcClientTest, InvokeCallbackWithPayloadTimeout) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -808,7 +808,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadTimeout) {
 	EXPECT_TRUE(callback_called);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithPayloadListenFail) {
+TEST_F(RpcClientTest, InvokeCallbackWithPayloadListenFail) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -830,7 +830,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadListenFail) {
 	EXPECT_TRUE(callback_called);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithPayloadSendFail) {
+TEST_F(RpcClientTest, InvokeCallbackWithPayloadSendFail) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -851,7 +851,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadSendFail) {
 	EXPECT_TRUE(callback_called);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithPayloadClientDestroyed) {
+TEST_F(RpcClientTest, InvokeCallbackWithPayloadClientDestroyed) {	// NOLINT
 	uprotocol::communication::RpcClient::InvokeFuture invoke_future;
 
 	bool callback_called = false;
@@ -874,7 +874,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadClientDestroyed) {
 	EXPECT_TRUE(callback_called);
 }
 
-TEST_F(RpcClientTest, InvokeCallbackWithPayloadCommstatus) {
+TEST_F(RpcClientTest, InvokeCallbackWithPayloadCommstatus) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10ms);
 
@@ -900,7 +900,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadCommstatus) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Usecases
-TEST_F(RpcClientTest, MultiplePendingInvocationsOnOneClient) {
+TEST_F(RpcClientTest, MultiplePendingInvocationsOnOneClient) {	// NOLINT
 	auto client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4,
 	    250ms);
@@ -991,7 +991,7 @@ TEST_F(RpcClientTest, MultiplePendingInvocationsOnOneClient) {
 	// Intentionally leaving a couple pending requests to discard
 }
 
-TEST_F(RpcClientTest, PendingRequestsExpireInOrder) {
+TEST_F(RpcClientTest, PendingRequestsExpireInOrder) {	// NOLINT
 	constexpr size_t num_clients = 10;
 	std::vector<std::tuple<size_t, uprotocol::communication::RpcClient>>
 	    clients;
@@ -1060,7 +1060,7 @@ TEST_F(RpcClientTest, PendingRequestsExpireInOrder) {
 // the top. This results in the second request not expiring until after the
 // first request's expiration time (even though the expirations will be called
 // in order).
-TEST_F(RpcClientTest, ExpireWorkerWakesForRightPendingRequest) {
+TEST_F(RpcClientTest, ExpireWorkerWakesForRightPendingRequest) {	// NOLINT
 	auto slow_client = uprotocol::communication::RpcClient(
 	    transport_, methodUri(), uprotocol::v1::UPriority::UPRIORITY_CS4, 10s);
 
@@ -1088,7 +1088,7 @@ TEST_F(RpcClientTest, ExpireWorkerWakesForRightPendingRequest) {
 // NOTE: for some reason, when the above test fails, the _next_ test also
 //       fails. I do not know how this is possible.
 
-TEST_F(RpcClientTest, MultipleClientInstances) {
+TEST_F(RpcClientTest, MultipleClientInstances) {	// NOLINT
 	constexpr size_t num_clients = 20;
 
 	using UTransportMock = uprotocol::test::UTransportMock;
@@ -1241,7 +1241,7 @@ TEST_F(RpcClientTest, MultipleClientInstances) {
 	// Discard the rest
 }
 
-TEST_F(RpcClientTest, ParallelAccessSingleClient) {
+TEST_F(RpcClientTest, ParallelAccessSingleClient) {	// NOLINT
 	std::array<std::thread, 10> workers;
 
 	auto client = uprotocol::communication::RpcClient(
@@ -1280,7 +1280,7 @@ TEST_F(RpcClientTest, ParallelAccessSingleClient) {
 	EXPECT_EQ(call_count, num_requests_per_worker * workers.size());
 }
 
-TEST_F(RpcClientTest, ParallelAccessMultipleClients) {
+TEST_F(RpcClientTest, ParallelAccessMultipleClients) {	// NOLINT
 	std::vector<std::thread> workers;
 
 	constexpr size_t num_requests_per_worker = 1500;

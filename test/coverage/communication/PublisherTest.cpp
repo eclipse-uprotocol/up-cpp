@@ -65,7 +65,7 @@ protected:
 	uprotocol::v1::UMessage capture_msg_;
 };
 
-TEST_F(TestPublisher, PublisherSuccess) {
+TEST_F(TestPublisher, PublisherSuccess) {	// NOLINT
 	std::string testPayloadStr = "test_payload";
 	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
 	                    ttl_);
@@ -85,7 +85,7 @@ TEST_F(TestPublisher, PublisherSuccess) {
 	EXPECT_EQ(valid, true);
 }
 
-TEST_F(TestPublisher, PublishFailure) {
+TEST_F(TestPublisher, PublishFailure) {	// NOLINT
 	std::string testPayloadStr = "test_payload";
 	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
 	                    ttl_);
@@ -100,7 +100,7 @@ TEST_F(TestPublisher, PublishFailure) {
 	EXPECT_EQ(status.code(), retval.code());
 }
 
-TEST_F(TestPublisher, PublishSuccessWithoutTTL) {
+TEST_F(TestPublisher, PublishSuccessWithoutTTL) {	// NOLINT
 	std::string testPayloadStr = "test_payload";
 	Publisher publisher(transportMock_, std::move(topic_), format_, priority_);
 
@@ -121,7 +121,7 @@ TEST_F(TestPublisher, PublishSuccessWithoutTTL) {
 	EXPECT_EQ(transportMock_->message_.attributes().ttl(), 0);
 }
 
-TEST_F(TestPublisher, PublishSuccessWithoutPriority) {
+TEST_F(TestPublisher, PublishSuccessWithoutPriority) {	// NOLINT
 	std::string testPayloadStr = "test_payload";
 	priority_.reset();
 	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
@@ -146,7 +146,7 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {
 }
 
 // publisher with null transport
-TEST_F(TestPublisher, PublisherWithNullTransport) {
+TEST_F(TestPublisher, PublisherWithNullTransport) {	// NOLINT
 	auto transport = nullptr;
 	EXPECT_THROW(Publisher publisher(transport, std::move(topic_), format_,
 	                                 priority_, ttl_),

@@ -14,7 +14,6 @@
 #include <up-cpp/client/usubscription/v3/Consumer.h>
 #include <up-cpp/communication/NotificationSource.h>
 
-#include <random>
 #include <string>
 
 #include "UTransportMock.h"
@@ -28,19 +27,46 @@ void someCallBack(const uprotocol::v1::UMessage& message) {
 }
 
 class ConsumerTest : public testing::Test {
-protected:
-	// Run once per TEST_F.
-	// Used to set up clean environments per test.
+private:
 	std::shared_ptr<uprotocol::test::UTransportMock> mockTransportClient_;
 	std::shared_ptr<uprotocol::test::UTransportMock> mockTransportServer_;
 	uprotocol::v1::UUri client_uuri;
 	uprotocol::v1::UUri server_uuri;
 	uprotocol::v1::UUri subcription_uuri;
+protected:
+	// Run once per TEST_F.
+	// Used to set up clean environments per test.
+	
+	std::shared_ptr<uprotocol::test::UTransportMock> getMockTransportClient() const { return mockTransportClient_; }
+	std::shared_ptr<uprotocol::test::UTransportMock> getMockTransportServer() const { return mockTransportServer_; }
+	uprotocol::v1::UUri& getClientUUri() {
+        return client_uuri;
+    }
+	const uprotocol::v1::UUri& getServerUUri() const {
+        return server_uuri;
+    }
+	const uprotocol::v1::UUri& getSubcriptionUUri() const {
+        return subcription_uuri;
+    }
+    void setMockTransportClient(const std::shared_ptr<uprotocol::test::UTransportMock>& client) { mockTransportClient_ = client; }
+	void setMockTransportServer(const std::shared_ptr<uprotocol::test::UTransportMock>& server) { mockTransportClient_ = server; }
+	void setClientUUri(const uprotocol::v1::UUri& uuri) {
+        client_uuri = uuri;
+    }
+	void setServerUUri(const uprotocol::v1::UUri& uuri) {
+        server_uuri = uuri;
+    }
+	void setSubcriptionUUri(const uprotocol::v1::UUri& uuri) {
+        subcription_uuri = uuri;
+    }
+
 
 	void SetUp() override {
+		constexpr uint32_t TEST_UE_ID = 0x18000;
+		constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8000;
 		// Create a generic transport uri
 		client_uuri.set_authority_name("random_string");
-		client_uuri.set_ue_id(0x18000);
+		client_uuri.set_ue_id(TEST_UE_ID);
 		client_uuri.set_ue_version_major(3);
 		client_uuri.set_resource_id(0);
 
@@ -59,16 +85,15 @@ protected:
 
 		// Create a generic subscription uri
 		subcription_uuri.set_authority_name("10.0.0.2");
-		subcription_uuri.set_ue_id(0x18000);
+		subcription_uuri.set_ue_id(TEST_UE_ID);
 		subcription_uuri.set_ue_version_major(3);
-		subcription_uuri.set_resource_id(0x8000);
+		subcription_uuri.set_resource_id(DEFAULT_RESOURCE_ID);
 	};
 	void TearDown() override {}
 
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	ConsumerTest() = default;
-	~ConsumerTest() = default;
 
 	void buildDefaultSourceURI();
 	void buildValidNotificationURI();
@@ -78,125 +103,132 @@ protected:
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+public:
+	~ConsumerTest() override = default;
 };
 
 // Negative test case with no source filter
-TEST_F(ConsumerTest, ConstructorTestSuccess) {
-	auto subcriptionCallback = someCallBack;
-	auto subscribe_request_ttl = std::chrono::milliseconds(1000);
+TEST_F(ConsumerTest, ConstructorTestSuccess) {	// NOLINT
+	constexpr int REQUEST_TTL_TIME = 0x8000;
+	auto subcription_callback = someCallBack;
+	auto subscribe_request_ttl = std::chrono::milliseconds(REQUEST_TTL_TIME);
 	auto priority = uprotocol::v1::UPriority::UPRIORITY_CS4;
 
 	auto options = uprotocol::client::usubscription::v3::ConsumerOptions();
 
-	auto consumerOrSatus =
+	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
-	        mockTransportClient_, subcription_uuri,
-	        std::move(subcriptionCallback), priority,
-	        std::move(subscribe_request_ttl), options);
+	        getMockTransportClient(), getSubcriptionUUri(),
+	        subcription_callback, priority,
+	        subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
-	ASSERT_TRUE(consumerOrSatus.has_value());
+	ASSERT_TRUE(consumer_or_status.has_value());
 
 	// Obtain a pointer to the created consumer instance
-	auto& consumerPtr = consumerOrSatus.value();
+	const auto& consumer_ptr = consumer_or_status.value();
 
 	// Verify that the consumer pointer is not null, indicating successful
 	// creation
-	ASSERT_NE(consumerPtr, nullptr);
+	ASSERT_NE(consumer_ptr, nullptr);
 }
 
-TEST_F(ConsumerTest, SubscribeTestSuccess) {
-	auto subcriptionCallback = someCallBack;
-	auto subscribe_request_ttl = std::chrono::milliseconds(1000);
+TEST_F(ConsumerTest, SubscribeTestSuccess) { // NOLINT
+	constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8000;
+	constexpr int REQUEST_TTL_TIME = 0x8000;
+	auto subcription_callback = someCallBack;
+	auto subscribe_request_ttl = std::chrono::milliseconds(REQUEST_TTL_TIME);
 	auto priority = uprotocol::v1::UPriority::UPRIORITY_CS4;
 
 	auto options = uprotocol::client::usubscription::v3::ConsumerOptions();
 
-	auto consumerOrSatus =
+	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
-	        mockTransportClient_, subcription_uuri,
-	        std::move(subcriptionCallback), priority,
-	        std::move(subscribe_request_ttl), options);
+	        getMockTransportClient(), getSubcriptionUUri(),
+	        subcription_callback, priority,
+	        subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
-	ASSERT_TRUE(consumerOrSatus.has_value());
+	ASSERT_TRUE(consumer_or_status.has_value());
 
 	// Obtain a pointer to the created consumer instance
-	auto& consumerPtr = consumerOrSatus.value();
+	const auto& consumer_ptr = consumer_or_status.value();
 
 	// Verify that the consumer pointer is not null, indicating successful
 	// creation
-	ASSERT_NE(consumerPtr, nullptr);
+	ASSERT_NE(consumer_ptr, nullptr);
 
 	// Create notification source sink uri to match resource id of sink
-	auto notification_uuri = server_uuri;
-	notification_uuri.set_resource_id(0x8000);
+	auto notification_uuri = getServerUUri();
+	notification_uuri.set_resource_id(DEFAULT_RESOURCE_ID);
 
 	// set format UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY
 	auto format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY;
 
-	auto norificationSource = uprotocol::communication::NotificationSource(
-	    mockTransportServer_, std::move(notification_uuri),
-	    std::move(client_uuri), format);
+	auto notification_source = uprotocol::communication::NotificationSource(
+	    getMockTransportServer(), std::move(notification_uuri),
+	    std::move(getClientUUri()), format);
 	// Build payload
 	const std::string data = "test";
 	auto payload = uprotocol::datamodel::builder::Payload(data, format);
 
-	norificationSource.notify(std::move(payload));
+	notification_source.notify(std::move(payload));
 
 	// Check send count
-	EXPECT_TRUE(mockTransportServer_->send_count_ == 1);
-	EXPECT_TRUE(mockTransportClient_->send_count_ == 1);
+	EXPECT_TRUE(getMockTransportServer()->send_count_ == 1);
+	EXPECT_TRUE(getMockTransportClient()->send_count_ == 1);
 }
 
-TEST_F(ConsumerTest, UnsubscribeTestSuccess) {
-	auto subcriptionCallback = someCallBack;
-	auto subscribe_request_ttl = std::chrono::milliseconds(1000);
+TEST_F(ConsumerTest, UnsubscribeTestSuccess) { 	// NOLINT
+	constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8000;
+	constexpr int REQUEST_TTL_TIME = 0x8000;
+	auto subcription_callback = someCallBack;
+	auto subscribe_request_ttl = std::chrono::milliseconds(REQUEST_TTL_TIME);
 	auto priority = uprotocol::v1::UPriority::UPRIORITY_CS4;
 
 	auto options = uprotocol::client::usubscription::v3::ConsumerOptions();
 
-	auto consumerOrSatus =
+	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
-	        mockTransportClient_, subcription_uuri,
-	        std::move(subcriptionCallback), priority,
-	        std::move(subscribe_request_ttl), options);
+	        getMockTransportClient(), getSubcriptionUUri(),
+	        subcription_callback, priority,
+	        subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
-	ASSERT_TRUE(consumerOrSatus.has_value());
+	ASSERT_TRUE(consumer_or_status.has_value());
 
 	// Obtain a pointer to the created consumer instance
-	auto& consumerPtr = consumerOrSatus.value();
+	const auto& consumer_ptr = consumer_or_status.value();
 
 	// Verify that the consumer pointer is not null, indicating successful
 	// creation
-	ASSERT_NE(consumerPtr, nullptr);
+	ASSERT_NE(consumer_ptr, nullptr);
 
 	// Create notification source sink uri to match resource id of sink
-	auto notification_uuri = server_uuri;
-	notification_uuri.set_resource_id(0x8000);
+	auto notification_uuri = getServerUUri();
+	notification_uuri.set_resource_id(DEFAULT_RESOURCE_ID);
 
 	// set format UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY
 	auto format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY;
 
-	auto norificationSource = uprotocol::communication::NotificationSource(
-	    mockTransportServer_, std::move(notification_uuri),
-	    std::move(client_uuri), format);
+	auto notification_source = uprotocol::communication::NotificationSource(
+	    getMockTransportServer(), std::move(notification_uuri),
+	    std::move(getClientUUri()), format);
 	// Build payload
 	const std::string data = "test";
 	auto payload = uprotocol::datamodel::builder::Payload(data, format);
 
-	norificationSource.notify(std::move(payload));
+	notification_source.notify(std::move(payload));
 
 	// Check send count
-	EXPECT_TRUE(mockTransportServer_->send_count_ == 1);
-	EXPECT_TRUE(mockTransportClient_->send_count_ == 1);
+	EXPECT_TRUE(getMockTransportServer()->send_count_ == 1);
+	EXPECT_TRUE(getMockTransportClient()->send_count_ == 1);
 
-	consumerPtr->unsubscribe(priority, subscribe_request_ttl);
+	consumer_ptr->unsubscribe(priority, subscribe_request_ttl);
 
-	EXPECT_TRUE(mockTransportClient_->send_count_ == 2);
+	EXPECT_TRUE(getMockTransportClient()->send_count_ == 2);
 }
 
 }  // namespace
