@@ -66,7 +66,7 @@ protected:
 };
 
 TEST_F(TestPublisher, PublisherSuccess) {	// NOLINT
-	std::string testPayloadStr = "test_payload";
+	std::string test_payload_str = "test_payload";
 	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
 	                    ttl_);
 
@@ -74,8 +74,8 @@ TEST_F(TestPublisher, PublisherSuccess) {	// NOLINT
 	retval.set_code(uprotocol::v1::UCode::OK);
 	transportMock_->send_status_ = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	Payload test_payload(test_payload_str, format_);
+	auto status = publisher.publish(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
@@ -86,7 +86,7 @@ TEST_F(TestPublisher, PublisherSuccess) {	// NOLINT
 }
 
 TEST_F(TestPublisher, PublishFailure) {	// NOLINT
-	std::string testPayloadStr = "test_payload";
+	std::string test_payload_str = "test_payload";
 	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
 	                    ttl_);
 
@@ -94,22 +94,22 @@ TEST_F(TestPublisher, PublishFailure) {	// NOLINT
 	retval.set_code(uprotocol::v1::UCode::DATA_LOSS);
 	transportMock_->send_status_ = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	Payload test_payload(test_payload_str, format_);
+	auto status = publisher.publish(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 }
 
 TEST_F(TestPublisher, PublishSuccessWithoutTTL) {	// NOLINT
-	std::string testPayloadStr = "test_payload";
+	std::string test_payload_str = "test_payload";
 	Publisher publisher(transportMock_, std::move(topic_), format_, priority_);
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
 	transportMock_->send_status_ = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	Payload test_payload(test_payload_str, format_);
+	auto status = publisher.publish(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
@@ -122,7 +122,7 @@ TEST_F(TestPublisher, PublishSuccessWithoutTTL) {	// NOLINT
 }
 
 TEST_F(TestPublisher, PublishSuccessWithoutPriority) {	// NOLINT
-	std::string testPayloadStr = "test_payload";
+	std::string test_payload_str = "test_payload";
 	priority_.reset();
 	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
 	                    ttl_);
@@ -131,8 +131,8 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {	// NOLINT
 	retval.set_code(uprotocol::v1::UCode::OK);
 	transportMock_->send_status_ = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	Payload test_payload(test_payload_str, format_);
+	auto status = publisher.publish(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
