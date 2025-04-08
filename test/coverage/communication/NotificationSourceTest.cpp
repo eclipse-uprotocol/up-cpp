@@ -72,7 +72,7 @@ protected:
 	uprotocol::v1::UUri getSource() const { return source_; }
     uprotocol::v1::UUri getSink() const { return sink_; }
     uprotocol::v1::UPayloadFormat getFormat() const { return format_; }
-    std::optional<uprotocol::v1::UPriority> getPriority() const { return priority_; }
+    std::optional<uprotocol::v1::UPriority>& getPriority() { return priority_; }
     std::optional<std::chrono::milliseconds> getTTL() const { return ttl_; }
 
     void setTransportMock(const std::shared_ptr<uprotocol::test::UTransportMock>& transport_mock) { transportMock_ = transport_mock; }

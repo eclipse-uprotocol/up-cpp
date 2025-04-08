@@ -1364,7 +1364,7 @@ TEST_F(RpcClientTest, ParallelAccessMultipleClients) {	// NOLINT
 			futures.emplace_back(client.invokeMethod());
 		}
 		for (auto& future : futures) {
-			auto is_ready = future.wait_for(std::chrono::seconds());
+			auto is_ready = future.wait_for(std::chrono::seconds(1));
 			if (is_ready == std::future_status::ready) {
 				try {
 					auto maybe_response = future.get();

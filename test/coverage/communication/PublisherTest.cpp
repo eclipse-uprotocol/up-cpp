@@ -35,7 +35,7 @@ protected:
 	v1::UUri getSource() const { return source_; }
 	v1::UUri getTopic() const { return topic_; }
 	v1::UPayloadFormat getFormat() const { return format_; }
-	std::optional<v1::UPriority> getPriority() const { return priority_; }
+	std::optional<v1::UPriority>& getPriority() { return priority_; }
 	std::optional<std::chrono::milliseconds> getTTL() const { return ttl_; }
 	uprotocol::v1::UMessage getCaptureMsg() const { return capture_msg_; }
 
