@@ -15,7 +15,6 @@
 
 #include <memory>
 #include <random>
-#include <sstream>
 
 #include "UTransportMock.h"
 
@@ -32,23 +31,24 @@ std::string get_random_string(size_t max_len = 32) {
 	size_t len = len_dist(random_gen);
 	std::string retval;
 	retval.reserve(len);
-	for (size_t i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++) {
 		retval += static_cast<char>(char_dist(random_gen));
+}
 	return retval;
 }
 
 std::optional<uprotocol::datamodel::builder::Payload> RpcCallbackNoReturn(
-    const uprotocol::v1::UMessage& message) {
+    const uprotocol::v1::UMessage&  /*message*/) {
 	return std::nullopt;
 }
 
 std::optional<uprotocol::datamodel::builder::Payload> RpcCallbackWithReturn(
-    const uprotocol::v1::UMessage& message) {
+    const uprotocol::v1::UMessage&  /*message*/) {
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
-	std::string responseData = "RPC Response";
+	std::string response_data = "RPC Response";
 
-	uprotocol::datamodel::builder::Payload payload(responseData, format);
+	uprotocol::datamodel::builder::Payload payload(response_data, format);
 
 	return payload;
 }
@@ -118,18 +118,18 @@ TEST_F(TestRpcServer, ConstructorValidParams) {
 	    RpcCallbackNoReturn;
 
 	// Attempt to create an RpcServer instance with valid parameters
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, *method_uri_, std::move(callback));
 
 	// Ensure that the server creation was successful
-	ASSERT_TRUE(serverOrStatus.has_value());
+	ASSERT_TRUE(server_or_status.has_value());
 
 	// Obtain a pointer to the created RpcServer instance
-	auto& serverPtr = serverOrStatus.value();
+	const auto& server_ptr = server_or_status.value();
 
 	// Verify that the server pointer is not null, indicating successful
 	// creation
-	ASSERT_NE(serverPtr, nullptr);
+	ASSERT_NE(server_ptr, nullptr);
 }
 
 // Null transport
@@ -141,7 +141,7 @@ TEST_F(TestRpcServer, CreateWithNullTransport) {
 	auto transport = nullptr;
 	// Attempt to create an RpcServer instance with valid parameters
 	EXPECT_THROW(
-	    auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	    auto server_or_status = uprotocol::communication::RpcServer::create(
 	        transport, *method_uri_, std::move(callback)),
 	    uprotocol::transport::NullTransport);
 }
@@ -154,19 +154,19 @@ TEST_F(TestRpcServer, ConstructorWithPayloadFormat) {
 
 	// Attempt to create an RpcServer instance with the provided callback and a
 	// specific format
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, *method_uri_, std::move(callback), format);
 
 	// Ensure the server creation was successful and a valid instance was
 	// returned
-	ASSERT_TRUE(serverOrStatus.has_value());
+	ASSERT_TRUE(server_or_status.has_value());
 
 	// Retrieve the server instance from the optional return value
-	auto& serverPtr = serverOrStatus.value();
+	const auto& server_ptr = server_or_status.value();
 
 	// Verify that the server instance is not null, indicating successful
 	// creation
-	ASSERT_NE(serverPtr, nullptr);
+	ASSERT_NE(server_ptr, nullptr);
 }
 
 // Test to ensure RpcServer can be constructed with both a specific payload
@@ -179,19 +179,19 @@ TEST_F(TestRpcServer, ConstructorWithPayloadFormatAndTTL) {
 
 	// Attempt to create an RpcServer instance with additional parameters:
 	// payload format and TTL
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, *method_uri_, std::move(callback), format, ttl_);
 
 	// Verify that the server creation was successful and a valid instance was
 	// returned
-	ASSERT_TRUE(serverOrStatus.has_value());
+	ASSERT_TRUE(server_or_status.has_value());
 
 	// Retrieve the server instance from the optional return value
-	auto& serverPtr = serverOrStatus.value();
+	const auto& server_ptr = server_or_status.value();
 
 	// Ensure that the server instance is not null, indicating successful
 	// creation
-	ASSERT_NE(serverPtr, nullptr);
+	ASSERT_NE(server_ptr, nullptr);
 }
 
 // Test to verify RpcServer construction fails with invalid URI
@@ -208,16 +208,16 @@ TEST_F(TestRpcServer, ConstructorWithInvalidURI) {
 
 	// Attempt to create an RpcServer instance with the invalid URI and verify
 	// creation fails
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, invalid_uri, std::move(callback));
 
 	// Define the expected error code for this operation
-	uprotocol::v1::UCode expectedCode = uprotocol::v1::UCode::INVALID_ARGUMENT;
+	uprotocol::v1::UCode expected_code = uprotocol::v1::UCode::INVALID_ARGUMENT;
 
 	// Verify that the error code matches the expected error code for invalid
 	// arguments
-	EXPECT_EQ(serverOrStatus.error().code(), expectedCode);
-	EXPECT_EQ(serverOrStatus.error().message(), error_message);
+	EXPECT_EQ(server_or_status.error().code(), expected_code);
+	EXPECT_EQ(server_or_status.error().message(), error_message);
 }
 
 // Test to verify RpcServer construction fails with invalid PaylodFormat
@@ -235,16 +235,16 @@ TEST_F(TestRpcServer, ConstructorWithInvalidPaylodFormat) {
 
 	// Attempt to create an RpcServer instance with the invalid PaylodFormat and
 	// verify creation fails
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, *method_uri_, std::move(callback), invalid_format);
 
 	// Define the expected error code for this operation
-	uprotocol::v1::UCode expectedCode = uprotocol::v1::UCode::OUT_OF_RANGE;
+	uprotocol::v1::UCode expected_code = uprotocol::v1::UCode::OUT_OF_RANGE;
 
 	// Verify that the error code matches the expected error code for invalid
 	// arguments
-	EXPECT_EQ(serverOrStatus.error().code(), expectedCode);
-	EXPECT_EQ(serverOrStatus.error().message(), error_message);
+	EXPECT_EQ(server_or_status.error().code(), expected_code);
+	EXPECT_EQ(server_or_status.error().message(), error_message);
 }
 
 // Test case to verify successful connection with a valid handle
@@ -254,15 +254,15 @@ TEST_F(TestRpcServer, ConnectwithValidHandle) {
 	    RpcCallbackWithReturn;
 
 	// Attempt to create an RpcServer instance with mockTransport_
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, *method_uri_, std::move(callback), format);
 
 	// Check if the RpcServer was successfully created and a valid handle was
 	// returned
-	EXPECT_TRUE(serverOrStatus.has_value());
+	EXPECT_TRUE(server_or_status.has_value());
 
-	// Retrieve the handle from the serverOrStatus object
-	auto& handle = serverOrStatus.value();
+	// Retrieve the handle from the server_or_status object
+	const auto& handle = server_or_status.value();
 
 	// Ensure that the handle is not null, indicating successful server creation
 	EXPECT_NE(handle, nullptr);
@@ -281,11 +281,11 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 	    RpcCallbackWithReturn;
 
 	// Create a server to offer the RPC method
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, *method_uri_, std::move(callback), format, ttl_);
 
 	// Check if the server was created successfully
-	auto& handle = serverOrStatus.value();
+	const auto& handle = server_or_status.value();
 	EXPECT_NE(handle, nullptr);
 
 	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, *mockTransport_->sink_filter_));
@@ -337,11 +337,11 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 	    RpcCallbackNoReturn;
 
 	// Create a server to offer the RPC method
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, *method_uri_, std::move(callback));
 
 	// Check if the server was created successfully
-	auto& handle = serverOrStatus.value();
+	const auto& handle = server_or_status.value();
 	EXPECT_NE(handle, nullptr);
 
 	EXPECT_TRUE(MsgDiff::Equals(*method_uri_, *mockTransport_->sink_filter_));
@@ -387,11 +387,11 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
 	    RpcCallbackWithReturn;
 
 	// Create a server to offer the RPC method
-	auto serverOrStatus = uprotocol::communication::RpcServer::create(
+	auto server_or_status = uprotocol::communication::RpcServer::create(
 	    mockTransport_, *method_uri_, std::move(callback), format, ttl_);
 
 	// Check if the server was created successfully
-	auto& handle = serverOrStatus.value();
+	const auto& handle = server_or_status.value();
 	EXPECT_NE(handle, nullptr);
 
 	// Create request umessage
@@ -418,12 +418,12 @@ TEST_F(TestRpcServer, RestRPCServerHandle) {
 	    RpcCallbackWithReturn;
 
 	{
-		auto serverOrStatus = uprotocol::communication::RpcServer::create(
+		auto server_or_status = uprotocol::communication::RpcServer::create(
 		    mockTransport_, *method_uri_, std::move(callback), format);
 
-		EXPECT_TRUE(serverOrStatus.has_value());
+		EXPECT_TRUE(server_or_status.has_value());
 
-		auto& handle = serverOrStatus.value();
+		const auto& handle = server_or_status.value();
 		EXPECT_NE(handle, nullptr);
 	}
 
