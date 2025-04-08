@@ -14,6 +14,7 @@
 #include <up-cpp/communication/NotificationSink.h>
 
 #include <string>
+#include <random>
 
 #include "UTransportMock.h"
 #include "up-cpp/datamodel/validator/UUri.h"
@@ -72,25 +73,30 @@ void NotificationSinkTest::SetUp() {
 }
 
 void NotificationSinkTest::buildDefaultSourceURI() {
+	constexpr uint32_t DEFAULT_SOURCE_UURI_UE_ID = 0x00011102;
 	testDefaultSourceUUri_.set_authority_name("192.168.1.10");
-	testDefaultSourceUUri_.set_ue_id(0x00011102);
+	testDefaultSourceUUri_.set_ue_id(DEFAULT_SOURCE_UURI_UE_ID);
 	testDefaultSourceUUri_.set_ue_version_major(0x1);
 	testDefaultSourceUUri_.set_resource_id(0x0);
 }
 
 void NotificationSinkTest::buildValidNotificationURI() {
+	constexpr uint32_t TOPIC_UURI_UE_ID = 0x00011101;
+	constexpr uint32_t TOPIC_UURI_RESOURCE_ID = 0x8001;
 	testTopicUUri_.set_authority_name("192.168.1.10");
-	testTopicUUri_.set_ue_id(0x00011101);
+	testTopicUUri_.set_ue_id(TOPIC_UURI_UE_ID);
 	testTopicUUri_.set_ue_version_major(0x1);
-	testTopicUUri_.set_resource_id(0x8001);
+	testTopicUUri_.set_resource_id(TOPIC_UURI_RESOURCE_ID);
 }
 
 void NotificationSinkTest::buildInValidNotificationURI() {
+	constexpr uint32_t TOPIC_UURI_UE_ID = 0x00011101;
+	constexpr uint32_t TOPIC_UURI_RESOURCE_ID = 0x1200;
 	testInvalidTopicUUri_.set_authority_name("192.168.1.10");
-	testInvalidTopicUUri_.set_ue_id(0x00011101);
+	testInvalidTopicUUri_.set_ue_id(TOPIC_UURI_UE_ID);
 	testInvalidTopicUUri_.set_ue_version_major(0x1);
 	// Resource ID should be in the range of 0x8000 to 0xFFFF
-	testInvalidTopicUUri_.set_resource_id(0x1200);
+	testInvalidTopicUUri_.set_resource_id(TOPIC_UURI_RESOURCE_ID);
 }
 
 void NotificationSinkTest::handleCallbackMessage(
@@ -101,12 +107,15 @@ void NotificationSinkTest::handleCallbackMessage(
 
 std::string get_random_string(size_t length) {
 	auto randchar = []() -> char {
-		const char charset[] =
-		    "0123456789"
-		    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		    "abcdefghijklmnopqrstuvwxyz";
-		const size_t max_index = (sizeof(charset) - 1);
-		return charset[rand() % max_index];
+		constexpr std::array<char, 62> CHARSET = {
+			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+		};
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> distr(0, CHARSET.size() - 1);
+		return CHARSET.at(static_cast<std::size_t>(distr(gen)));
 	};
 	std::string str(length, 0);
 	std::generate_n(str.begin(), length, randchar);
@@ -124,7 +133,7 @@ TEST_F(NotificationSinkTest, FailWithoutSourceFilter) {		// NOLINT
 
 	std::optional<uprotocol::v1::UUri> source_filter;
 
-	EXPECT_THROW(
+	EXPECT_THROW(	// NOLINT
 	    {
 		    auto result = NotificationSink::create(transport, getTestTopicUUri(),
 		                                           std::move(callback),
@@ -145,7 +154,7 @@ TEST_F(NotificationSinkTest, FailWithInvalidResourceID) {	// NOLINT
 	std::optional<uprotocol::v1::UUri> source_filter;
 
 	// Notification to invalid UUri topic with resource ID not in correct range
-	EXPECT_THROW(auto result = NotificationSink::create(
+	EXPECT_THROW(auto result = NotificationSink::create(	// NOLINT
 	                 transport, getTestInvalidTopicUUri(), std::move(callback),
 	                 std::move(source_filter)),
 	             UriValidator::InvalidUUri);
@@ -215,7 +224,7 @@ TEST_F(NotificationSinkTest, NullTransport) {		// NOLINT
 		return this->handleCallbackMessage(arg);
 	};
 
-	EXPECT_THROW(auto result = NotificationSink::create(
+	EXPECT_THROW(auto result = NotificationSink::create(	// NOLINT
 	                 transport, getTestDefaultSourceUUri(), std::move(callback),
 	                 getTestTopicUUri()),
 	             uprotocol::transport::NullTransport);
@@ -233,7 +242,7 @@ TEST_F(NotificationSinkTest, NullCallback) {	// NOLINT
 		                             nullptr, getTestTopicUUri());
 	};
 
-	EXPECT_THROW(test_create_nullptr(), utils::callbacks::EmptyFunctionObject);
+	EXPECT_THROW(test_create_nullptr(), utils::callbacks::EmptyFunctionObject);		// NOLINT
 
 	// Default construct a function object
 	auto test_create_empty = [transport, this]() {
@@ -241,7 +250,7 @@ TEST_F(NotificationSinkTest, NullCallback) {	// NOLINT
 		    transport, transport->getEntityUri(), {}, getTestTopicUUri());
 	};
 
-	EXPECT_THROW(test_create_empty(), utils::callbacks::EmptyFunctionObject);
+	EXPECT_THROW(test_create_empty(), utils::callbacks::EmptyFunctionObject);	// NOLINT
 }
 
 }  // namespace uprotocol::communication
