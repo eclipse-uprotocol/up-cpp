@@ -1085,7 +1085,6 @@ TEST_F(RpcClientTest, PendingRequestsExpireInOrder) {	// NOLINT
 TEST_F(RpcClientTest, ExpireWorkerWakesForRightPendingRequest) {	// NOLINT
 	constexpr std::chrono::seconds TEN_SECONDS(10);
 	constexpr std::chrono::milliseconds TWENTY_FIVE_MILLISECONDS(25);
-
 	constexpr std::chrono::milliseconds ONE_HUNDRED_MILLISECONDS(100);
 
 	auto slow_client = uprotocol::communication::RpcClient(
@@ -1106,12 +1105,13 @@ TEST_F(RpcClientTest, ExpireWorkerWakesForRightPendingRequest) {	// NOLINT
 	// The request from the fast_client should expire within about 25ms, but
 	// the request from the slow_client should still be pending for several
 	// more seconds.
-	auto fast_ready = fast_future.wait_for(std::chrono::seconds());
+	auto fast_ready = fast_future.wait_for(std::chrono::seconds(1));
 	slow_ready = slow_future.wait_for(ONE_HUNDRED_MILLISECONDS);
 
 	EXPECT_EQ(fast_ready, std::future_status::ready);
 	EXPECT_EQ(slow_ready, std::future_status::timeout);
 }
+
 // NOTE: for some reason, when the above test fails, the _next_ test also
 //       fails. I do not know how this is possible.
 
