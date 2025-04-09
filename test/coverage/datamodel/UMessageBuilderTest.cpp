@@ -108,9 +108,9 @@ v1::UUri TestUMessageBuilder::method_;
 v1::UUID TestUMessageBuilder:: req_id_;
 
 /// @brief  Test the publish function of the UMessageBuilder
-TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) {
+TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) { // NOLINT
 	v1::UUri topic = source_;
-	EXPECT_NO_THROW({
+	EXPECT_NO_THROW({ // NOLINT
 		auto builder = datamodel::builder::UMessageBuilder::publish(std::move(topic));
 		const v1::UAttributes& attr = builder.attributes();
 		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_PUBLISH);
@@ -119,18 +119,18 @@ TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) {
 	});
 }
 
-TEST_F(TestUMessageBuilder, PublishInvalidTopicUriThrows) {
+TEST_F(TestUMessageBuilder, PublishInvalidTopicUriThrows) { // NOLINT
 	v1::UUri topic;
-	EXPECT_THROW({ datamodel::builder::UMessageBuilder::publish(std::move(topic)); }, datamodel::validator::uri::InvalidUUri);
+	EXPECT_THROW({ datamodel::builder::UMessageBuilder::publish(std::move(topic)); }, datamodel::validator::uri::InvalidUUri); // NOLINT
 }
 
 /// @brief  Test the notification function of the UMessageBuilder
-TEST_F(TestUMessageBuilder, NotificationTest) {
+TEST_F(TestUMessageBuilder, NotificationTest) { // NOLINT
 	// Call the notification function
 	v1::UUri source = source_;
 	v1::UUri sink = sink_;
 
-	EXPECT_NO_THROW({
+	EXPECT_NO_THROW({ // NOLINT
 		auto builder =
 		datamodel::builder::UMessageBuilder::notification(std::move(source), std::move(sink));
 		// Verify the result
@@ -142,34 +142,34 @@ TEST_F(TestUMessageBuilder, NotificationTest) {
 	});
 }
 
-TEST_F(TestUMessageBuilder, NotificationInvalidSourceUriThrows) {
+TEST_F(TestUMessageBuilder, NotificationInvalidSourceUriThrows) { // NOLINT
 	v1::UUri source;
 	// Set the source Service Instance ID a wildcard (any)
 	source.set_ue_id(UI_ID_INVALID_TEST);
 	v1::UUri sink = sink_;
-	EXPECT_THROW(
+	EXPECT_THROW(	// NOLINT
 	    { datamodel::builder::UMessageBuilder::notification(std::move(source), std::move(sink)); },
 	    datamodel::validator::uri::InvalidUUri);
 }
 
-TEST_F(TestUMessageBuilder, NotificationInvalidSinkUriThrows) {
+TEST_F(TestUMessageBuilder, NotificationInvalidSinkUriThrows) { // NOLINT
 	v1::UUri source = source_;
 	v1::UUri sink;
 	// Set the source Service Instance ID a wildcard (any)
 	sink.set_ue_id(UI_ID_INVALID_TEST);
-	EXPECT_THROW(
+	EXPECT_THROW(	// NOLINT
 	    { datamodel::builder::UMessageBuilder::notification(std::move(source), std::move(sink)); },
 	    datamodel::validator::uri::InvalidUUri);
 }
 
 /// @brief  Test the request function of the UMessageBuilder
-TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) {
+TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) { // NOLINT
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(TTL_TIME);
 	v1::UUri method = method_;
 	v1::UUri source = sink_;
 
-	EXPECT_NO_THROW({
+	EXPECT_NO_THROW({ // NOLINT
 		auto builder = datamodel::builder::UMessageBuilder::request(
 		    std::move(method), std::move(source), priority, ttl);
 		auto attr = builder.build().attributes();
@@ -183,12 +183,12 @@ TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) {
 	});
 }
 
-TEST_F(TestUMessageBuilder, RequestInvalidMethodUriThrows) {
+TEST_F(TestUMessageBuilder, RequestInvalidMethodUriThrows) { // NOLINT
 	v1::UUri method;
 	v1::UUri source = source_;
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(TTL_TIME);
-	EXPECT_THROW(
+	EXPECT_THROW(	// NOLINT
 	    {
 		    datamodel::builder::UMessageBuilder::request(std::move(method), std::move(source),
 		                             priority, ttl);
@@ -196,14 +196,14 @@ TEST_F(TestUMessageBuilder, RequestInvalidMethodUriThrows) {
 	    datamodel::validator::uri::InvalidUUri);
 }
 
-TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {
+TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) { // NOLINT
 	v1::UUri source;
 	// Set the source Service Instance ID a wildcard (any)
 	source.set_ue_id(UI_ID_INVALID_TEST);
 	v1::UUri method = method_;
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(TTL_TIME);
-	EXPECT_THROW(
+	EXPECT_THROW(	// NOLINT
 	    {
 		    datamodel::builder::UMessageBuilder::request(std::move(method), std::move(source),
 		                             priority, ttl);
@@ -211,12 +211,12 @@ TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {
 	    datamodel::validator::uri::InvalidUUri);
 }
 
-TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {
+TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) { // NOLINT
 	v1::UUri method = method_;
 	v1::UUri source = sink_;
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(-1);  // Invalid TTL
-	EXPECT_THROW(
+	EXPECT_THROW(	// NOLINT
 	    {
 		    datamodel::builder::UMessageBuilder::request(std::move(method), std::move(source),
 		                             priority, ttl);
@@ -225,13 +225,13 @@ TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {
 }
 
 /// @brief  Test the response function of the UMessageBuilder
-TEST_F(TestUMessageBuilder, ResponseValidParametersSuccess) {
+TEST_F(TestUMessageBuilder, ResponseValidParametersSuccess) { // NOLINT
 	v1::UUri sink = sink_;
 	v1::UUri method = method_;
 	v1::UUID request_id =  req_id_;
 
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
-	EXPECT_NO_THROW({
+	EXPECT_NO_THROW({ // NOLINT
 		auto builder =
 		datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                              priority, std::move(method));
@@ -245,12 +245,12 @@ TEST_F(TestUMessageBuilder, ResponseValidParametersSuccess) {
 	});
 }
 
-TEST_F(TestUMessageBuilder, ResponseInvalidMethodUriThrows) {
+TEST_F(TestUMessageBuilder, ResponseInvalidMethodUriThrows) { // NOLINT
 	v1::UUri sink = sink_;
 	v1::UUri method;
 	v1::UUID request_id =  req_id_;
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
-	EXPECT_THROW(
+	EXPECT_THROW(	// NOLINT
 	    {
 		    datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                              priority, std::move(method));
@@ -258,14 +258,14 @@ TEST_F(TestUMessageBuilder, ResponseInvalidMethodUriThrows) {
 	    datamodel::validator::uri::InvalidUUri);
 }
 
-TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) {
+TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) { // NOLINT
 	v1::UUri sink;
 	// Set the source Service Instance ID a wildcard (any)
 	sink.set_ue_id(UI_ID_INVALID_TEST);
 	v1::UUri method = method_;
 	v1::UUID request_id =  req_id_;
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                              priority, std::move(method));
@@ -273,12 +273,12 @@ TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) {
 	    datamodel::validator::uri::InvalidUUri);
 }
 
-TEST_F(TestUMessageBuilder, ResponseInvalidRequestIdThrows) {
+TEST_F(TestUMessageBuilder, ResponseInvalidRequestIdThrows) { // NOLINT
 	v1::UUri sink = sink_;
 	v1::UUri method = method_;
 	v1::UUID request_id;
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
-	EXPECT_THROW(
+	EXPECT_THROW(// NOLINT
 	    {
 		    datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                              priority, std::move(method));
@@ -287,31 +287,31 @@ TEST_F(TestUMessageBuilder, ResponseInvalidRequestIdThrows) {
 }
 
 /// @brief withPriority test
-TEST_F(TestUMessageBuilder, WithPriorityValidForRequestOrResponseSuccess) {
+TEST_F(TestUMessageBuilder, WithPriorityValidForRequestOrResponseSuccess) { // NOLINT
 	auto builder = createFakeRequest();
 
-	EXPECT_NO_THROW({ builder.withPriority(v1::UPriority::UPRIORITY_CS4); });
+	EXPECT_NO_THROW({ builder.withPriority(v1::UPriority::UPRIORITY_CS4); }); // NOLINT
 
 	auto builder2 = createFakeResponse();
 
-	EXPECT_NO_THROW({ builder2.withPriority(v1::UPriority::UPRIORITY_CS4); });
+	EXPECT_NO_THROW({ builder2.withPriority(v1::UPriority::UPRIORITY_CS4); }); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, WithPriorityOutOfRangeThrows) {
+TEST_F(TestUMessageBuilder, WithPriorityOutOfRangeThrows) { // NOLINT
 	auto builder = createFakeRequest();
 
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    { builder.withPriority(static_cast<v1::UPriority>(v1::UPriority_MIN - 1)); },
 	    std::out_of_range);
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    { builder.withPriority(static_cast<v1::UPriority>(v1::UPriority_MAX + 1)); },
 	    std::out_of_range);
 }
 
-TEST_F(TestUMessageBuilder, WithPriorityLessThanCS4ForRequestOrResponseThrows) {
+TEST_F(TestUMessageBuilder, WithPriorityLessThanCS4ForRequestOrResponseThrows) { // NOLINT
 	auto builder = createFakeRequest();
 
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    builder.withPriority(
 		        static_cast<v1::UPriority>(v1::UPriority::UPRIORITY_CS4 - 1));
@@ -320,7 +320,7 @@ TEST_F(TestUMessageBuilder, WithPriorityLessThanCS4ForRequestOrResponseThrows) {
 
 	auto builder2 = createFakeResponse();
 
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    builder2.withPriority(
 		        static_cast<v1::UPriority>(v1::UPriority::UPRIORITY_CS4 - 1));
@@ -329,22 +329,22 @@ TEST_F(TestUMessageBuilder, WithPriorityLessThanCS4ForRequestOrResponseThrows) {
 }
 
 ///@brief withTtl() tests
-TEST_F(TestUMessageBuilder, WithTtlValidSuccess) {
+TEST_F(TestUMessageBuilder, WithTtlValidSuccess) {   // NOLINT
 	auto builder = createFakeRequest();
 
-	EXPECT_NO_THROW({ builder.withTtl(std::chrono::milliseconds(1)); });
-	EXPECT_NO_THROW({
+	EXPECT_NO_THROW({ builder.withTtl(std::chrono::milliseconds(1)); }); // NOLINT
+	EXPECT_NO_THROW({ // NOLINT
 		builder.withTtl(
 		    std::chrono::milliseconds(std::numeric_limits<uint32_t>::max()));
 	});
 }
 
-TEST_F(TestUMessageBuilder, WithTtlOutOfRangeThrows) {
+TEST_F(TestUMessageBuilder, WithTtlOutOfRangeThrows) {   // NOLINT
 	auto builder = createFakeRequest();
 
-	EXPECT_THROW({ builder.withTtl(std::chrono::milliseconds(-1)); },
+	EXPECT_THROW({ builder.withTtl(std::chrono::milliseconds(-1)); }, // NOLINT
 	             std::out_of_range);
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    builder.withTtl(std::chrono::milliseconds(
 		        static_cast<long long>(std::numeric_limits<uint32_t>::max()) +
@@ -353,83 +353,83 @@ TEST_F(TestUMessageBuilder, WithTtlOutOfRangeThrows) {
 	    std::out_of_range);
 }
 
-TEST_F(TestUMessageBuilder, WithTtlZeroThrows) {
+TEST_F(TestUMessageBuilder, WithTtlZeroThrows) {   // NOLINT
 	auto builder = createFakeRequest();
 
-	EXPECT_THROW({ builder.withTtl(std::chrono::milliseconds(0)); },
+	EXPECT_THROW({ builder.withTtl(std::chrono::milliseconds(0)); }, // NOLINT
 	             std::out_of_range);
 }
 
 /// @brief  withToken tests
-TEST_F(TestUMessageBuilder, WithTokenEmptyStringSuccess) {
+TEST_F(TestUMessageBuilder, WithTokenEmptyStringSuccess) {   // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_NO_THROW({ builder.withToken(""); });
+	EXPECT_NO_THROW({ builder.withToken(""); }); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, WithTokenOnNonRequestThrows) {
+TEST_F(TestUMessageBuilder, WithTokenOnNonRequestThrows) {   // NOLINT
 	auto builder = createFakeResponse();
-	EXPECT_THROW({ builder.withToken("token"); }, std::domain_error);
+	EXPECT_THROW({ builder.withToken("token"); }, std::domain_error); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, WithTokenOnRequestSuccess) {
+TEST_F(TestUMessageBuilder, WithTokenOnRequestSuccess) {    // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_NO_THROW({ builder.withToken("token"); });
+	EXPECT_NO_THROW({ builder.withToken("token"); }); // NOLINT
 }
 
 /// @brief  withPermissionLevel tests
-TEST_F(TestUMessageBuilder, WithPermissionLevelOnRequestSuccess) {
+TEST_F(TestUMessageBuilder, WithPermissionLevelOnRequestSuccess) {   // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_NO_THROW({ builder.withPermissionLevel(1); });
+	EXPECT_NO_THROW({ builder.withPermissionLevel(1); }); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, WithPermissionLevelOnNonRequestThrows) {
+TEST_F(TestUMessageBuilder, WithPermissionLevelOnNonRequestThrows) { // NOLINT
 	auto builder = createFakeResponse();
-	EXPECT_THROW({ builder.withPermissionLevel(1); }, std::domain_error);
+	EXPECT_THROW({ builder.withPermissionLevel(1); }, std::domain_error); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, WithPermissionLevelZeroSuccess) {
+TEST_F(TestUMessageBuilder, WithPermissionLevelZeroSuccess) {   // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_NO_THROW({ builder.withPermissionLevel(0); });
+	EXPECT_NO_THROW({ builder.withPermissionLevel(0); }); // NOLINT
 }
 
 /// @brief  withCommStatus tests
-TEST_F(TestUMessageBuilder, WithCommStatusOnResponseSuccess) {
+TEST_F(TestUMessageBuilder, WithCommStatusOnResponseSuccess) {   // NOLINT
 	auto builder = createFakeResponse();
-	EXPECT_NO_THROW({ builder.withCommStatus(v1::UCode::OK); });
+	EXPECT_NO_THROW({ builder.withCommStatus(v1::UCode::OK); }); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, WithCommStatusValidValueSuccess) {
+TEST_F(TestUMessageBuilder, WithCommStatusValidValueSuccess) {   // NOLINT
 	auto builder = createFakeResponse();
-	EXPECT_NO_THROW({ builder.withCommStatus(v1::UCode::OK); });
+	EXPECT_NO_THROW({ builder.withCommStatus(v1::UCode::OK); }); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, WithCommStatusOnNonResponseThrows) {
+TEST_F(TestUMessageBuilder, WithCommStatusOnNonResponseThrows) {   // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_THROW({ builder.withCommStatus(v1::UCode::OK); }, std::domain_error);
+	EXPECT_THROW({ builder.withCommStatus(v1::UCode::OK); }, std::domain_error); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, WithCommStatusInvalidValueThrows) {
+TEST_F(TestUMessageBuilder, WithCommStatusInvalidValueThrows) {   // NOLINT
 	auto builder = createFakeResponse();
-	EXPECT_THROW({ builder.withCommStatus(static_cast<v1::UCode>(-1)); },
+	EXPECT_THROW({ builder.withCommStatus(static_cast<v1::UCode>(-1)); }, // NOLINT
 	             std::out_of_range);
 }
 
 /// @brief  withPayloadFormat tests
-TEST_F(TestUMessageBuilder, WithPayloadFormatOnRequestSuccess) {
+TEST_F(TestUMessageBuilder, WithPayloadFormatOnRequestSuccess) {   // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_NO_THROW(
+	EXPECT_NO_THROW( // NOLINT
 	    { builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON); });
 }
 
-TEST_F(TestUMessageBuilder, WithPayloadFormatOnResponseSuccess) {
+TEST_F(TestUMessageBuilder, WithPayloadFormatOnResponseSuccess) {   // NOLINT
 	auto builder = createFakeResponse();
-	EXPECT_NO_THROW(
+	EXPECT_NO_THROW( // NOLINT
 	    { builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON); });
 }
 
-TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueLessThanMinThrows) {
+TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueLessThanMinThrows) {   // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    builder.withPayloadFormat(
 		        static_cast<v1::UPayloadFormat>(v1::UPayloadFormat_MIN - 1));
@@ -437,9 +437,9 @@ TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueLessThanMinThrows) {
 	    std::out_of_range);
 }
 
-TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueMoreThanMaxThrows) {
+TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueMoreThanMaxThrows) {   // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    builder.withPayloadFormat(
 		        static_cast<v1::UPayloadFormat>(v1::UPayloadFormat_MAX + 1));
@@ -448,12 +448,12 @@ TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueMoreThanMaxThrows) {
 }
 
 /// @brief  build() tests
-TEST_F(TestUMessageBuilder, BuildWithPayloadFormatSuccess) {
+TEST_F(TestUMessageBuilder, BuildWithPayloadFormatSuccess) {   // NOLINT
 	auto builder = createFakeRequest();
-	EXPECT_NO_THROW({ auto message = builder.build(); });
+	EXPECT_NO_THROW({ auto message = builder.build(); }); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, BuildReturnsUMessage) {
+TEST_F(TestUMessageBuilder, BuildReturnsUMessage) {   // NOLINT
 	auto builder = createFakeRequest();
 	auto message = builder.build();
 	EXPECT_TRUE(typeid(message) == typeid(v1::UMessage));
@@ -466,32 +466,32 @@ TEST_F(TestUMessageBuilder, BuildReturnsUMessage) {
 	    urisAreEqual(builder.attributes().sink(), message.attributes().sink()));
 }
 
-TEST_F(TestUMessageBuilder, BuildWithoutPayloadFormatThrows) {
+TEST_F(TestUMessageBuilder, BuildWithoutPayloadFormatThrows) {   // NOLINT
 	auto builder = createFakeRequest();
 	builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON);
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    { auto message = builder.build(); },
 	    datamodel::builder::UMessageBuilder::UnexpectedFormat);
 }
 
-TEST_F(TestUMessageBuilder, BuildWithPayloadWithPayloadFormatSuccess) {
+TEST_F(TestUMessageBuilder, BuildWithPayloadWithPayloadFormatSuccess) {   // NOLINT
 	auto builder = createFakeRequest();
 	builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 	std::string data = "test-data";
 	datamodel::builder::Payload payload(data, v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 
-	EXPECT_NO_THROW({ auto message = builder.build(std::move(payload)); });
+	EXPECT_NO_THROW({ auto message = builder.build(std::move(payload)); }); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, BuildWithPayloadWithoutPayloadFormatSuccess) {
+TEST_F(TestUMessageBuilder, BuildWithPayloadWithoutPayloadFormatSuccess) {   // NOLINT
 	auto builder = createFakeRequest();
 	std::string data = "test-data";
 	datamodel::builder::Payload payload(data, v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 
-	EXPECT_NO_THROW({ auto message = builder.build(std::move(payload)); });
+	EXPECT_NO_THROW({ auto message = builder.build(std::move(payload)); }); // NOLINT
 }
 
-TEST_F(TestUMessageBuilder, BuildWithPayloadReturnsUMessage) {
+TEST_F(TestUMessageBuilder, BuildWithPayloadReturnsUMessage) {   // NOLINT
 	auto builder = createFakeRequest();
 	builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 	std::string data = "test-data";
@@ -510,13 +510,13 @@ TEST_F(TestUMessageBuilder, BuildWithPayloadReturnsUMessage) {
 	EXPECT_TRUE(message.payload() == data);
 }
 
-TEST_F(TestUMessageBuilder, BuildWithPayloadMismatchedPayloadFormatThrows) {
+TEST_F(TestUMessageBuilder, BuildWithPayloadMismatchedPayloadFormatThrows) {   // NOLINT
 	auto builder = createFakeRequest();
 	builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON);
 	std::string data = "test-data";
 	datamodel::builder::Payload payload(data, v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    { auto message = builder.build(std::move(payload)); },
 	    datamodel::builder::UMessageBuilder::UnexpectedFormat);
 }
