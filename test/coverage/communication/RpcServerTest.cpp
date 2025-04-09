@@ -68,11 +68,11 @@ protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
 
-	std::shared_ptr<test::UTransportMock> getMockTransport() const { return mockTransport_; }
-    std::shared_ptr<v1::UUri> getMethodUri() const { return method_uri_; }
-    std::shared_ptr<v1::UUri> getRequestUri() const { return request_uri_; }
-    std::chrono::milliseconds getTTL() const { return ttl_; }
-    v1::UPayloadFormat getFormat() const { return format; }
+	[[nodiscard]] std::shared_ptr<test::UTransportMock> getMockTransport() const { return mockTransport_; }
+    [[nodiscard]] std::shared_ptr<v1::UUri> getMethodUri() const { return method_uri_; }
+    [[nodiscard]] std::shared_ptr<v1::UUri> getRequestUri() const { return request_uri_; }
+    [[nodiscard]] std::chrono::milliseconds getTTL() const { return ttl_; }
+    [[nodiscard]] v1::UPayloadFormat getFormat() const { return format; }
 
 	void setMockTransport(const std::shared_ptr<test::UTransportMock>& mock_transport) { mockTransport_ = mock_transport; }
     void setMethodUri(const std::shared_ptr<v1::UUri>& method_uri) { method_uri_ = method_uri; }
@@ -131,7 +131,7 @@ public:
 
 // Test to ensure RpcServer constructor initializes correctly with valid
 // parameters
-TEST_F(TestRpcServer, ConstructorValidParams) {
+TEST_F(TestRpcServer, ConstructorValidParams) {		// NOLINT
 	// Define a callback function to be used with the RpcServer
 	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackNoReturn;
@@ -152,21 +152,21 @@ TEST_F(TestRpcServer, ConstructorValidParams) {
 }
 
 // Null transport
-TEST_F(TestRpcServer, CreateWithNullTransport) {
+TEST_F(TestRpcServer, CreateWithNullTransport) {	// NOLINT
 	// Define a callback function to be used with the RpcServer
 	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackNoReturn;
 
 	auto transport = nullptr;
 	// Attempt to create an RpcServer instance with valid parameters
-	EXPECT_THROW(
+	EXPECT_THROW(	// NOLINT
 	    auto server_or_status = communication::RpcServer::create(
 	        transport, *getMethodUri(), std::move(callback)),
 	    transport::NullTransport);
 }
 
 // Test to verify RpcServer construction with a specific payload format
-TEST_F(TestRpcServer, ConstructorWithPayloadFormat) {
+TEST_F(TestRpcServer, ConstructorWithPayloadFormat) {	// NOLINT
 	// Define a callback that returns a specific value, simulating a response
 	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
@@ -190,7 +190,7 @@ TEST_F(TestRpcServer, ConstructorWithPayloadFormat) {
 
 // Test to ensure RpcServer can be constructed with both a specific payload
 // format and TTL
-TEST_F(TestRpcServer, ConstructorWithPayloadFormatAndTTL) {
+TEST_F(TestRpcServer, ConstructorWithPayloadFormatAndTTL) {	// NOLINT
 	// Define a callback that returns a specific value, simulating a server
 	// response
 	communication::RpcServer::RpcCallback callback =
@@ -214,7 +214,7 @@ TEST_F(TestRpcServer, ConstructorWithPayloadFormatAndTTL) {
 }
 
 // Test to verify RpcServer construction fails with invalid URI
-TEST_F(TestRpcServer, ConstructorWithInvalidURI) {
+TEST_F(TestRpcServer, ConstructorWithInvalidURI) {	// NOLINT
 	// Create an invalid URI object to simulate invalid input parameters
 	v1::UUri invalid_uri;
 
@@ -240,7 +240,7 @@ TEST_F(TestRpcServer, ConstructorWithInvalidURI) {
 }
 
 // Test to verify RpcServer construction fails with invalid PaylodFormat
-TEST_F(TestRpcServer, ConstructorWithInvalidPaylodFormat) {
+TEST_F(TestRpcServer, ConstructorWithInvalidPaylodFormat) {	// NOLINT
 	constexpr uint16_t INVALID_PAYLOADFORMAT = 9999;
 
 	// Create an invalid PaylodFormat to simulate invalid input parameters
@@ -269,7 +269,7 @@ TEST_F(TestRpcServer, ConstructorWithInvalidPaylodFormat) {
 }
 
 // Test case to verify successful connection with a valid handle
-TEST_F(TestRpcServer, ConnectwithValidHandle) {
+TEST_F(TestRpcServer, ConnectwithValidHandle) {		// NOLINT
 	// Define a callback function that simulates a server response
 	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
@@ -293,7 +293,7 @@ TEST_F(TestRpcServer, ConnectwithValidHandle) {
 }
 
 // Test case to verify RPC request handling with return payload and TTL
-TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
+TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {		// NOLINT
 	// Expected response by RPC method
 	std::string expected_response_payload = "RPC Response";
 
@@ -352,7 +352,7 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 }
 
 // Test case to verify RPC request handling without return payload
-TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
+TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {		// NOLINT
 	// Create a callback to be called when request is received
 	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackNoReturn;
@@ -402,7 +402,7 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 }
 
 // Test case to verify RPC request handling with invalid request
-TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
+TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {		// NOLINT
 	// Create a callback to be called when request is received
 	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
@@ -434,7 +434,7 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
 
 // Test case to verify RPC sever resets the listener when the server is
 // destroyed
-TEST_F(TestRpcServer, RestRPCServerHandle) {
+TEST_F(TestRpcServer, RestRPCServerHandle) {		// NOLINT
 	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
 

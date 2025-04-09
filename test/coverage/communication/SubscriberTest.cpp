@@ -125,7 +125,7 @@ void SubscriberTest::handleCallbackMessage(
 }
 
 // Positive test case to subscribe to a valid topic
-TEST_F(SubscriberTest, SubscribeSuccess) {
+TEST_F(SubscriberTest, SubscribeSuccess) {	// NOLINT
 	constexpr uint16_t RANDOM_STRING_LENGTH = 1400;
 
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
@@ -158,7 +158,7 @@ TEST_F(SubscriberTest, SubscribeSuccess) {
 }
 
 // Negative test case to subscribe to a invalid topic
-TEST_F(SubscriberTest, SubscribeFailWithInvalidTopic) {
+TEST_F(SubscriberTest, SubscribeFailWithInvalidTopic) {		// NOLINT
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
 	    getTestDefaultSourceUUri());
 
@@ -167,13 +167,13 @@ TEST_F(SubscriberTest, SubscribeFailWithInvalidTopic) {
 	};
 
 	// Subscribe to invalid UUri topic with resource ID not in correct range
-	EXPECT_THROW(auto result = communication::Subscriber::subscribe(
+	EXPECT_THROW(auto result = communication::Subscriber::subscribe(	// NOLINT
 	                 transport, getTestInvalidTopicUUri(), std::move(callback)),
 					 datamodel::validator::uri::InvalidUUri);
 }
 
 // Negative test case to subscribe to a topic with registerListener failure
-TEST_F(SubscriberTest, SubscribeFailWithErrorCode) {
+TEST_F(SubscriberTest, SubscribeFailWithErrorCode) {	// NOLINT
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
 	    getTestDefaultSourceUUri());
 
@@ -193,18 +193,18 @@ TEST_F(SubscriberTest, SubscribeFailWithErrorCode) {
 }
 
 // subscribe to a topic with null transport
-TEST_F(SubscriberTest, SubscribeNullTransport) {
+TEST_F(SubscriberTest, SubscribeNullTransport) {	// NOLINT
 	// set transport to null
 	auto transport = nullptr;
 	auto callback = [this](const auto& arg1) {
 		return this->handleCallbackMessage(arg1);
 	};
-	EXPECT_THROW(auto result = communication::Subscriber::subscribe(transport, getTestTopicUUri(),
+	EXPECT_THROW(auto result = communication::Subscriber::subscribe(transport, getTestTopicUUri(),	// NOLINT
 	                                                 std::move(callback)),
 	             std::invalid_argument);
 }
 // subscribe to a topic with null callback
-TEST_F(SubscriberTest, SubscribeNullCallback) {
+TEST_F(SubscriberTest, SubscribeNullCallback) {		// NOLINT
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
 	    getTestDefaultSourceUUri());
 
@@ -214,14 +214,14 @@ TEST_F(SubscriberTest, SubscribeNullCallback) {
 		                                    nullptr);
 	};
 
-	EXPECT_THROW(test_subscribe_nullptr(), utils::callbacks::EmptyFunctionObject);
+	EXPECT_THROW(test_subscribe_nullptr(), utils::callbacks::EmptyFunctionObject);	// NOLINT
 
 	// Default construct a function object
 	auto test_subscribe_empty = [transport, this]() {
 		std::ignore = communication::Subscriber::subscribe(transport, getTestTopicUUri(), {});
 	};
 
-	EXPECT_THROW(test_subscribe_empty(), utils::callbacks::EmptyFunctionObject);
+	EXPECT_THROW(test_subscribe_empty(), utils::callbacks::EmptyFunctionObject);	// NOLINT
 }
 
 }  // namespace uprotocol

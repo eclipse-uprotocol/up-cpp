@@ -16,12 +16,10 @@
 #include <up-cpp/datamodel/validator/UUri.h>
 #include <up-cpp/datamodel/validator/Uuid.h>
 
-namespace {
-using namespace uprotocol::v1;
-using namespace uprotocol::datamodel::serializer::uri;
-using namespace uprotocol::datamodel::validator::uri;
-using namespace uprotocol::datamodel::builder;
-using namespace uprotocol::datamodel::validator::uuid;
+constexpr uint16_t TTL_TIME = 5000;
+constexpr uint32_t UI_ID_INVALID_TEST = 0xFFFF0000;
+
+namespace uprotocol{
 
 class TestUMessageBuilder : public testing::Test {
 protected:
@@ -30,28 +28,28 @@ protected:
 	void SetUp() override {}
 	void TearDown() override {}
 
-	UMessageBuilder createFakeRequest() {
-		UPriority priority = UPriority::UPRIORITY_CS4;
-		std::chrono::milliseconds ttl(5000);
-		UUri method = method_;
-		UUri source = sink_;
+	static datamodel::builder::UMessageBuilder createFakeRequest() {
+		v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
+		std::chrono::milliseconds ttl(TTL_TIME);
+		v1::UUri method = method_;
+		v1::UUri source = sink_;
 
-		return UMessageBuilder::request(std::move(method), std::move(source),
+		return datamodel::builder::UMessageBuilder::request(std::move(method), std::move(source),
 		                                priority, ttl);
 	}
 
-	UMessageBuilder createFakeResponse() {
-		UUri sink = sink_;
-		UUri method = method_;
-		UUID request_id = reqId_;
+	static datamodel::builder::UMessageBuilder createFakeResponse() {
+		v1::UUri sink = sink_;
+		v1::UUri method = method_;
+		v1::UUID request_id =  req_id_;
 
-		UPriority priority = UPriority::UPRIORITY_CS4;
-		return UMessageBuilder::response(std::move(sink), std::move(request_id),
+		v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
+		return datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                                 priority, std::move(method));
 	}
 
-	bool urisAreEqual(const uprotocol::v1::UUri& uri1,
-	                  const uprotocol::v1::UUri& uri2) {
+	static bool urisAreEqual(const v1::UUri& uri1,
+	                  const v1::UUri& uri2) {
 		return uri1.authority_name() == uri2.authority_name() &&
 		       uri1.ue_id() == uri2.ue_id() &&
 		       uri1.ue_version_major() == uri2.ue_version_major() &&
@@ -60,154 +58,167 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	TestUMessageBuilder() = default;
-	~TestUMessageBuilder() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {
+		constexpr uint32_t SOURCE_UE_ID = 0x00011101;
+		constexpr uint32_t SINK_UE_ID = 0x00011102;
+		constexpr uint32_t METHOD_UE_ID = 0x00011103;
+
+		constexpr uint32_t SOURCE_UE_VERSION_MAJOR = 0xF8;
+		constexpr uint32_t SINK_UE_VERSION_MAJOR = 0xF9;
+		constexpr uint32_t METHOD_UE_VERSION_MAJOR = 0xFA;
+
+		constexpr uint32_t SOURCE_RESOURCE_ID = 0x8101;
+		constexpr uint32_t SINK_RESOURCE_ID = 0;
+		constexpr uint32_t METHOD_RESOURCE_ID = 0x0101;
+
 		// Create a UUri object for testing
 		source_.set_authority_name("10.0.0.1");
-		source_.set_ue_id(0x00011101);
-		source_.set_ue_version_major(0xF8);
-		source_.set_resource_id(0x8101);
+		source_.set_ue_id(SOURCE_UE_ID);
+		source_.set_ue_version_major(SOURCE_UE_VERSION_MAJOR);
+		source_.set_resource_id(SOURCE_RESOURCE_ID);
 
 		sink_.set_authority_name("10.0.0.2");
-		sink_.set_ue_id(0x00011102);
-		sink_.set_ue_version_major(0xF9);
-		sink_.set_resource_id(0);
+		sink_.set_ue_id(SINK_UE_ID);
+		sink_.set_ue_version_major(SINK_UE_VERSION_MAJOR);
+		sink_.set_resource_id(SINK_RESOURCE_ID);
 
 		method_.set_authority_name("10.0.0.3");
-		method_.set_ue_id(0x00011103);
-		method_.set_ue_version_major(0xFA);
-		method_.set_resource_id(0x0101);
+		method_.set_ue_id(METHOD_UE_ID);
+		method_.set_ue_version_major(METHOD_UE_VERSION_MAJOR);
+		method_.set_resource_id(METHOD_RESOURCE_ID);
 
-		reqId_ = UuidBuilder::getBuilder().build();
+		 req_id_ = datamodel::builder::UuidBuilder::getBuilder().build();
 	}
 	static void TearDownTestSuite() {}
 
-	static UUri source_;
-	static UUri sink_;
-	static UUri method_;
-	static UUID reqId_;
+	static v1::UUri source_;
+	static v1::UUri sink_;
+	static v1::UUri method_;
+	static v1::UUID  req_id_;
+public:
+	~TestUMessageBuilder() override = default;
 };
 
-UUri TestUMessageBuilder::source_;
-UUri TestUMessageBuilder::sink_;
-UUri TestUMessageBuilder::method_;
-UUID TestUMessageBuilder::reqId_;
+v1::UUri TestUMessageBuilder::source_;
+v1::UUri TestUMessageBuilder::sink_;
+v1::UUri TestUMessageBuilder::method_;
+v1::UUID TestUMessageBuilder:: req_id_;
 
 /// @brief  Test the publish function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) {
-	UUri topic = source_;
+	v1::UUri topic = source_;
 	EXPECT_NO_THROW({
-		auto builder = UMessageBuilder::publish(std::move(topic));
-		UAttributes attr = builder.attributes();
-		EXPECT_EQ(attr.type(), UMessageType::UMESSAGE_TYPE_PUBLISH);
-		EXPECT_EQ(AsString::serialize(attr.source()),
-		          AsString::serialize(source_));
+		auto builder = datamodel::builder::UMessageBuilder::publish(std::move(topic));
+		const v1::UAttributes& attr = builder.attributes();
+		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_PUBLISH);
+		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.source()),
+		datamodel::serializer::uri::AsString::serialize(source_));
 	});
 }
 
 TEST_F(TestUMessageBuilder, PublishInvalidTopicUriThrows) {
-	UUri topic;
-	EXPECT_THROW({ UMessageBuilder::publish(std::move(topic)); }, InvalidUUri);
+	v1::UUri topic;
+	EXPECT_THROW({ datamodel::builder::UMessageBuilder::publish(std::move(topic)); }, datamodel::validator::uri::InvalidUUri);
 }
 
 /// @brief  Test the notification function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, NotificationTest) {
 	// Call the notification function
-	UUri source = source_;
-	UUri sink = sink_;
+	v1::UUri source = source_;
+	v1::UUri sink = sink_;
 
 	EXPECT_NO_THROW({
 		auto builder =
-		    UMessageBuilder::notification(std::move(source), std::move(sink));
+		datamodel::builder::UMessageBuilder::notification(std::move(source), std::move(sink));
 		// Verify the result
-		UAttributes attr = builder.attributes();
-		EXPECT_EQ(attr.type(), UMessageType::UMESSAGE_TYPE_NOTIFICATION);
-		EXPECT_EQ(AsString::serialize(attr.source()),
-		          AsString::serialize(source_));
-		EXPECT_EQ(AsString::serialize(attr.sink()), AsString::serialize(sink_));
+		const v1::UAttributes& attr = builder.attributes();
+		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_NOTIFICATION);
+		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.source()),
+		          datamodel::serializer::uri::AsString::serialize(source_));
+		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.sink()), datamodel::serializer::uri::AsString::serialize(sink_));
 	});
 }
 
 TEST_F(TestUMessageBuilder, NotificationInvalidSourceUriThrows) {
-	UUri source;
+	v1::UUri source;
 	// Set the source Service Instance ID a wildcard (any)
-	source.set_ue_id(0xFFFF0000);
-	UUri sink = sink_;
+	source.set_ue_id(UI_ID_INVALID_TEST);
+	v1::UUri sink = sink_;
 	EXPECT_THROW(
-	    { UMessageBuilder::notification(std::move(source), std::move(sink)); },
-	    InvalidUUri);
+	    { datamodel::builder::UMessageBuilder::notification(std::move(source), std::move(sink)); },
+	    datamodel::validator::uri::InvalidUUri);
 }
 
 TEST_F(TestUMessageBuilder, NotificationInvalidSinkUriThrows) {
-	UUri source = source_;
-	UUri sink;
+	v1::UUri source = source_;
+	v1::UUri sink;
 	// Set the source Service Instance ID a wildcard (any)
-	sink.set_ue_id(0xFFFF0000);
+	sink.set_ue_id(UI_ID_INVALID_TEST);
 	EXPECT_THROW(
-	    { UMessageBuilder::notification(std::move(source), std::move(sink)); },
-	    InvalidUUri);
+	    { datamodel::builder::UMessageBuilder::notification(std::move(source), std::move(sink)); },
+	    datamodel::validator::uri::InvalidUUri);
 }
 
 /// @brief  Test the request function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) {
-	UPriority priority = UPriority::UPRIORITY_CS4;
-	std::chrono::milliseconds ttl(5000);
-	UUri method = method_;
-	UUri source = sink_;
+	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
+	std::chrono::milliseconds ttl(TTL_TIME);
+	v1::UUri method = method_;
+	v1::UUri source = sink_;
 
 	EXPECT_NO_THROW({
-		auto builder = UMessageBuilder::request(
+		auto builder = datamodel::builder::UMessageBuilder::request(
 		    std::move(method), std::move(source), priority, ttl);
 		auto attr = builder.build().attributes();
-		EXPECT_EQ(attr.type(), UMessageType::UMESSAGE_TYPE_REQUEST);
-		EXPECT_EQ(AsString::serialize(attr.sink()),
-		          AsString::serialize(method_));
-		EXPECT_EQ(AsString::serialize(attr.source()),
-		          AsString::serialize(sink_));
+		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_REQUEST);
+		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.sink()),
+		          datamodel::serializer::uri::AsString::serialize(method_));
+		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.source()),
+		          datamodel::serializer::uri::AsString::serialize(sink_));
 		EXPECT_EQ(attr.priority(), priority);
-		EXPECT_EQ(attr.ttl(), 5000);
+		EXPECT_EQ(attr.ttl(), TTL_TIME);
 	});
 }
 
 TEST_F(TestUMessageBuilder, RequestInvalidMethodUriThrows) {
-	UUri method;
-	UUri source = source_;
-	UPriority priority = UPriority::UPRIORITY_CS4;
-	std::chrono::milliseconds ttl(5000);
+	v1::UUri method;
+	v1::UUri source = source_;
+	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
+	std::chrono::milliseconds ttl(TTL_TIME);
 	EXPECT_THROW(
 	    {
-		    UMessageBuilder::request(std::move(method), std::move(source),
+		    datamodel::builder::UMessageBuilder::request(std::move(method), std::move(source),
 		                             priority, ttl);
 	    },
-	    InvalidUUri);
+	    datamodel::validator::uri::InvalidUUri);
 }
 
 TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {
-	UUri source;
+	v1::UUri source;
 	// Set the source Service Instance ID a wildcard (any)
-	source.set_ue_id(0xFFFF0000);
-	UUri method = method_;
-	UPriority priority = UPriority::UPRIORITY_CS4;
-	std::chrono::milliseconds ttl(5000);
+	source.set_ue_id(UI_ID_INVALID_TEST);
+	v1::UUri method = method_;
+	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
+	std::chrono::milliseconds ttl(TTL_TIME);
 	EXPECT_THROW(
 	    {
-		    UMessageBuilder::request(std::move(method), std::move(source),
+		    datamodel::builder::UMessageBuilder::request(std::move(method), std::move(source),
 		                             priority, ttl);
 	    },
-	    InvalidUUri);
+	    datamodel::validator::uri::InvalidUUri);
 }
 
 TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {
-	UUri method = method_;
-	UUri source = sink_;
-	UPriority priority = UPriority::UPRIORITY_CS4;
+	v1::UUri method = method_;
+	v1::UUri source = sink_;
+	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(-1);  // Invalid TTL
 	EXPECT_THROW(
 	    {
-		    UMessageBuilder::request(std::move(method), std::move(source),
+		    datamodel::builder::UMessageBuilder::request(std::move(method), std::move(source),
 		                             priority, ttl);
 	    },
 	    std::out_of_range);
@@ -215,85 +226,85 @@ TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {
 
 /// @brief  Test the response function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, ResponseValidParametersSuccess) {
-	UUri sink = sink_;
-	UUri method = method_;
-	UUID request_id = reqId_;
+	v1::UUri sink = sink_;
+	v1::UUri method = method_;
+	v1::UUID request_id =  req_id_;
 
-	UPriority priority = UPriority::UPRIORITY_CS4;
+	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	EXPECT_NO_THROW({
 		auto builder =
-		    UMessageBuilder::response(std::move(sink), std::move(request_id),
+		datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                              priority, std::move(method));
-		UAttributes attr = builder.attributes();
-		EXPECT_EQ(attr.type(), UMessageType::UMESSAGE_TYPE_RESPONSE);
-		EXPECT_EQ(AsString::serialize(attr.sink()), AsString::serialize(sink_));
-		EXPECT_EQ(AsString::serialize(attr.source()),
-		          AsString::serialize(method_));
-		// EXPECT_EQ(attr.reqid(), reqId_);
+		const v1::UAttributes& attr = builder.attributes();
+		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_RESPONSE);
+		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.sink()), datamodel::serializer::uri::AsString::serialize(sink_));
+		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.source()),
+		          datamodel::serializer::uri::AsString::serialize(method_));
+		// EXPECT_EQ(attr.reqid(),  req_id_);
 		EXPECT_EQ(attr.priority(), priority);
 	});
 }
 
 TEST_F(TestUMessageBuilder, ResponseInvalidMethodUriThrows) {
-	UUri sink = sink_;
-	UUri method;
-	UUID request_id = reqId_;
-	UPriority priority = UPriority::UPRIORITY_CS4;
+	v1::UUri sink = sink_;
+	v1::UUri method;
+	v1::UUID request_id =  req_id_;
+	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	EXPECT_THROW(
 	    {
-		    UMessageBuilder::response(std::move(sink), std::move(request_id),
+		    datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                              priority, std::move(method));
 	    },
-	    InvalidUUri);
+	    datamodel::validator::uri::InvalidUUri);
 }
 
 TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) {
-	UUri sink;
+	v1::UUri sink;
 	// Set the source Service Instance ID a wildcard (any)
-	sink.set_ue_id(0xFFFF0000);
-	UUri method = method_;
-	UUID request_id = reqId_;
-	UPriority priority = UPriority::UPRIORITY_CS4;
+	sink.set_ue_id(UI_ID_INVALID_TEST);
+	v1::UUri method = method_;
+	v1::UUID request_id =  req_id_;
+	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	EXPECT_THROW(
 	    {
-		    UMessageBuilder::response(std::move(sink), std::move(request_id),
+		    datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                              priority, std::move(method));
 	    },
-	    InvalidUUri);
+	    datamodel::validator::uri::InvalidUUri);
 }
 
 TEST_F(TestUMessageBuilder, ResponseInvalidRequestIdThrows) {
-	UUri sink = sink_;
-	UUri method = method_;
-	UUID request_id;
-	UPriority priority = UPriority::UPRIORITY_CS4;
+	v1::UUri sink = sink_;
+	v1::UUri method = method_;
+	v1::UUID request_id;
+	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	EXPECT_THROW(
 	    {
-		    UMessageBuilder::response(std::move(sink), std::move(request_id),
+		    datamodel::builder::UMessageBuilder::response(std::move(sink), std::move(request_id),
 		                              priority, std::move(method));
 	    },
-	    InvalidUuid);
+	    datamodel::validator::uuid::InvalidUuid);
 }
 
 /// @brief withPriority test
 TEST_F(TestUMessageBuilder, WithPriorityValidForRequestOrResponseSuccess) {
 	auto builder = createFakeRequest();
 
-	EXPECT_NO_THROW({ builder.withPriority(UPriority::UPRIORITY_CS4); });
+	EXPECT_NO_THROW({ builder.withPriority(v1::UPriority::UPRIORITY_CS4); });
 
 	auto builder2 = createFakeResponse();
 
-	EXPECT_NO_THROW({ builder2.withPriority(UPriority::UPRIORITY_CS4); });
+	EXPECT_NO_THROW({ builder2.withPriority(v1::UPriority::UPRIORITY_CS4); });
 }
 
 TEST_F(TestUMessageBuilder, WithPriorityOutOfRangeThrows) {
 	auto builder = createFakeRequest();
 
 	EXPECT_THROW(
-	    { builder.withPriority(static_cast<UPriority>(UPriority_MIN - 1)); },
+	    { builder.withPriority(static_cast<v1::UPriority>(v1::UPriority_MIN - 1)); },
 	    std::out_of_range);
 	EXPECT_THROW(
-	    { builder.withPriority(static_cast<UPriority>(UPriority_MAX + 1)); },
+	    { builder.withPriority(static_cast<v1::UPriority>(v1::UPriority_MAX + 1)); },
 	    std::out_of_range);
 }
 
@@ -303,7 +314,7 @@ TEST_F(TestUMessageBuilder, WithPriorityLessThanCS4ForRequestOrResponseThrows) {
 	EXPECT_THROW(
 	    {
 		    builder.withPriority(
-		        static_cast<UPriority>(UPriority::UPRIORITY_CS4 - 1));
+		        static_cast<v1::UPriority>(v1::UPriority::UPRIORITY_CS4 - 1));
 	    },
 	    std::out_of_range);
 
@@ -312,7 +323,7 @@ TEST_F(TestUMessageBuilder, WithPriorityLessThanCS4ForRequestOrResponseThrows) {
 	EXPECT_THROW(
 	    {
 		    builder2.withPriority(
-		        static_cast<UPriority>(UPriority::UPRIORITY_CS4 - 1));
+		        static_cast<v1::UPriority>(v1::UPriority::UPRIORITY_CS4 - 1));
 	    },
 	    std::out_of_range);
 }
@@ -384,22 +395,22 @@ TEST_F(TestUMessageBuilder, WithPermissionLevelZeroSuccess) {
 /// @brief  withCommStatus tests
 TEST_F(TestUMessageBuilder, WithCommStatusOnResponseSuccess) {
 	auto builder = createFakeResponse();
-	EXPECT_NO_THROW({ builder.withCommStatus(UCode::OK); });
+	EXPECT_NO_THROW({ builder.withCommStatus(v1::UCode::OK); });
 }
 
 TEST_F(TestUMessageBuilder, WithCommStatusValidValueSuccess) {
 	auto builder = createFakeResponse();
-	EXPECT_NO_THROW({ builder.withCommStatus(UCode::OK); });
+	EXPECT_NO_THROW({ builder.withCommStatus(v1::UCode::OK); });
 }
 
 TEST_F(TestUMessageBuilder, WithCommStatusOnNonResponseThrows) {
 	auto builder = createFakeRequest();
-	EXPECT_THROW({ builder.withCommStatus(UCode::OK); }, std::domain_error);
+	EXPECT_THROW({ builder.withCommStatus(v1::UCode::OK); }, std::domain_error);
 }
 
 TEST_F(TestUMessageBuilder, WithCommStatusInvalidValueThrows) {
 	auto builder = createFakeResponse();
-	EXPECT_THROW({ builder.withCommStatus(static_cast<UCode>(-1)); },
+	EXPECT_THROW({ builder.withCommStatus(static_cast<v1::UCode>(-1)); },
 	             std::out_of_range);
 }
 
@@ -407,13 +418,13 @@ TEST_F(TestUMessageBuilder, WithCommStatusInvalidValueThrows) {
 TEST_F(TestUMessageBuilder, WithPayloadFormatOnRequestSuccess) {
 	auto builder = createFakeRequest();
 	EXPECT_NO_THROW(
-	    { builder.withPayloadFormat(UPayloadFormat::UPAYLOAD_FORMAT_JSON); });
+	    { builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON); });
 }
 
 TEST_F(TestUMessageBuilder, WithPayloadFormatOnResponseSuccess) {
 	auto builder = createFakeResponse();
 	EXPECT_NO_THROW(
-	    { builder.withPayloadFormat(UPayloadFormat::UPAYLOAD_FORMAT_JSON); });
+	    { builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON); });
 }
 
 TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueLessThanMinThrows) {
@@ -421,7 +432,7 @@ TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueLessThanMinThrows) {
 	EXPECT_THROW(
 	    {
 		    builder.withPayloadFormat(
-		        static_cast<UPayloadFormat>(UPayloadFormat_MIN - 1));
+		        static_cast<v1::UPayloadFormat>(v1::UPayloadFormat_MIN - 1));
 	    },
 	    std::out_of_range);
 }
@@ -431,7 +442,7 @@ TEST_F(TestUMessageBuilder, WithPayloadFormatInvalidValueMoreThanMaxThrows) {
 	EXPECT_THROW(
 	    {
 		    builder.withPayloadFormat(
-		        static_cast<UPayloadFormat>(UPayloadFormat_MAX + 1));
+		        static_cast<v1::UPayloadFormat>(v1::UPayloadFormat_MAX + 1));
 	    },
 	    std::out_of_range);
 }
@@ -445,7 +456,7 @@ TEST_F(TestUMessageBuilder, BuildWithPayloadFormatSuccess) {
 TEST_F(TestUMessageBuilder, BuildReturnsUMessage) {
 	auto builder = createFakeRequest();
 	auto message = builder.build();
-	EXPECT_TRUE(typeid(message) == typeid(UMessage));
+	EXPECT_TRUE(typeid(message) == typeid(v1::UMessage));
 	EXPECT_TRUE(builder.attributes().priority() ==
 	            message.attributes().priority());
 	EXPECT_TRUE(builder.attributes().ttl() == message.attributes().ttl());
@@ -457,17 +468,17 @@ TEST_F(TestUMessageBuilder, BuildReturnsUMessage) {
 
 TEST_F(TestUMessageBuilder, BuildWithoutPayloadFormatThrows) {
 	auto builder = createFakeRequest();
-	builder.withPayloadFormat(UPayloadFormat::UPAYLOAD_FORMAT_JSON);
+	builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON);
 	EXPECT_THROW(
 	    { auto message = builder.build(); },
-	    uprotocol::datamodel::builder::UMessageBuilder::UnexpectedFormat);
+	    datamodel::builder::UMessageBuilder::UnexpectedFormat);
 }
 
 TEST_F(TestUMessageBuilder, BuildWithPayloadWithPayloadFormatSuccess) {
 	auto builder = createFakeRequest();
-	builder.withPayloadFormat(UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
+	builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 	std::string data = "test-data";
-	Payload payload(data, UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
+	datamodel::builder::Payload payload(data, v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 
 	EXPECT_NO_THROW({ auto message = builder.build(std::move(payload)); });
 }
@@ -475,19 +486,19 @@ TEST_F(TestUMessageBuilder, BuildWithPayloadWithPayloadFormatSuccess) {
 TEST_F(TestUMessageBuilder, BuildWithPayloadWithoutPayloadFormatSuccess) {
 	auto builder = createFakeRequest();
 	std::string data = "test-data";
-	Payload payload(data, UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
+	datamodel::builder::Payload payload(data, v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 
 	EXPECT_NO_THROW({ auto message = builder.build(std::move(payload)); });
 }
 
 TEST_F(TestUMessageBuilder, BuildWithPayloadReturnsUMessage) {
 	auto builder = createFakeRequest();
-	builder.withPayloadFormat(UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
+	builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 	std::string data = "test-data";
-	Payload payload(data, UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
+	datamodel::builder::Payload payload(data, v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 
 	auto message = builder.build(std::move(payload));
-	EXPECT_TRUE(typeid(message) == typeid(UMessage));
+	EXPECT_TRUE(typeid(message) == typeid(v1::UMessage));
 	EXPECT_TRUE(builder.attributes().priority() ==
 	            message.attributes().priority());
 	EXPECT_TRUE(builder.attributes().ttl() == message.attributes().ttl());
@@ -496,18 +507,18 @@ TEST_F(TestUMessageBuilder, BuildWithPayloadReturnsUMessage) {
 	EXPECT_TRUE(
 	    urisAreEqual(builder.attributes().sink(), message.attributes().sink()));
 
-	EXPECT_TRUE(message.payload().data() == data);
+	EXPECT_TRUE(message.payload() == data);
 }
 
 TEST_F(TestUMessageBuilder, BuildWithPayloadMismatchedPayloadFormatThrows) {
 	auto builder = createFakeRequest();
-	builder.withPayloadFormat(UPayloadFormat::UPAYLOAD_FORMAT_JSON);
+	builder.withPayloadFormat(v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON);
 	std::string data = "test-data";
-	Payload payload(data, UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
+	datamodel::builder::Payload payload(data, v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 
 	EXPECT_THROW(
 	    { auto message = builder.build(std::move(payload)); },
-	    uprotocol::datamodel::builder::UMessageBuilder::UnexpectedFormat);
+	    datamodel::builder::UMessageBuilder::UnexpectedFormat);
 }
 
-}  // namespace
+}  // namespace uprotocol
