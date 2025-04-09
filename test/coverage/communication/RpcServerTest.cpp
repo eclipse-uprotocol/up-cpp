@@ -20,7 +20,7 @@
 
 constexpr size_t MAX_LEN_RANDOM_STRING = 32;
 
-namespace {
+namespace uprotocol{
 
 using MsgDiff = google::protobuf::util::MessageDifferencer;
 
@@ -39,18 +39,18 @@ std::string get_random_string(size_t max_len = MAX_LEN_RANDOM_STRING) {
 	return retval;
 }
 
-std::optional<uprotocol::datamodel::builder::Payload> RpcCallbackNoReturn(
-    const uprotocol::v1::UMessage&  /*message*/) {
+std::optional<datamodel::builder::Payload> RpcCallbackNoReturn(
+    const v1::UMessage&  /*message*/) {
 	return std::nullopt;
 }
 
-std::optional<uprotocol::datamodel::builder::Payload> RpcCallbackWithReturn(
-    const uprotocol::v1::UMessage&  /*message*/) {
-	uprotocol::v1::UPayloadFormat format =
-	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
+std::optional<datamodel::builder::Payload> RpcCallbackWithReturn(
+    const v1::UMessage&  /*message*/) {
+	v1::UPayloadFormat format =
+	    v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 	std::string response_data = "RPC Response";
 
-	uprotocol::datamodel::builder::Payload payload(response_data, format);
+	datamodel::builder::Payload payload(response_data, format);
 
 	return payload;
 }
@@ -58,27 +58,27 @@ std::optional<uprotocol::datamodel::builder::Payload> RpcCallbackWithReturn(
 class TestRpcServer : public testing::Test {
 private:
 	static constexpr uint16_t DEFAULT_TTL_TIME = 1000;
-	std::shared_ptr<uprotocol::test::UTransportMock> mockTransport_;
-	std::shared_ptr<uprotocol::v1::UUri> method_uri_;
-	std::shared_ptr<uprotocol::v1::UUri> request_uri_;
+	std::shared_ptr<test::UTransportMock> mockTransport_;
+	std::shared_ptr<v1::UUri> method_uri_;
+	std::shared_ptr<v1::UUri> request_uri_;
 	std::chrono::milliseconds ttl_ = std::chrono::milliseconds(DEFAULT_TTL_TIME);
-	uprotocol::v1::UPayloadFormat format = uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
+	v1::UPayloadFormat format = v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
 
-	std::shared_ptr<uprotocol::test::UTransportMock> getMockTransport() const { return mockTransport_; }
-    std::shared_ptr<uprotocol::v1::UUri> getMethodUri() const { return method_uri_; }
-    std::shared_ptr<uprotocol::v1::UUri> getRequestUri() const { return request_uri_; }
+	std::shared_ptr<test::UTransportMock> getMockTransport() const { return mockTransport_; }
+    std::shared_ptr<v1::UUri> getMethodUri() const { return method_uri_; }
+    std::shared_ptr<v1::UUri> getRequestUri() const { return request_uri_; }
     std::chrono::milliseconds getTTL() const { return ttl_; }
-    uprotocol::v1::UPayloadFormat getFormat() const { return format; }
+    v1::UPayloadFormat getFormat() const { return format; }
 
-	void setMockTransport(const std::shared_ptr<uprotocol::test::UTransportMock>& mock_transport) { mockTransport_ = mock_transport; }
-    void setMethodUri(const std::shared_ptr<uprotocol::v1::UUri>& method_uri) { method_uri_ = method_uri; }
-    void setRequestUri(const std::shared_ptr<uprotocol::v1::UUri>& request_uri) { request_uri_ = request_uri; }
+	void setMockTransport(const std::shared_ptr<test::UTransportMock>& mock_transport) { mockTransport_ = mock_transport; }
+    void setMethodUri(const std::shared_ptr<v1::UUri>& method_uri) { method_uri_ = method_uri; }
+    void setRequestUri(const std::shared_ptr<v1::UUri>& request_uri) { request_uri_ = request_uri; }
     void setTTL(const std::chrono::milliseconds& ttl) { ttl_ = ttl; }
-    void setFormat(uprotocol::v1::UPayloadFormat format) { this->format = format; }
+    void setFormat(v1::UPayloadFormat format) { this->format = format; }
 
 	void SetUp() override {
 		constexpr uint32_t DEF_UE_ID = 0x18000;
@@ -86,7 +86,7 @@ protected:
 		constexpr uint32_t REQUEST_UE_ID = 0x00010001;
 
 		// Set up a transport URI
-		uprotocol::v1::UUri def_src_uuri;
+		v1::UUri def_src_uuri;
 		def_src_uuri.set_authority_name(get_random_string());
 		def_src_uuri.set_ue_id(DEF_UE_ID);
 		def_src_uuri.set_ue_version_major(1);
@@ -94,17 +94,17 @@ protected:
 
 		// Set up a transport
 		mockTransport_ =
-		    std::make_shared<uprotocol::test::UTransportMock>(def_src_uuri);
+		    std::make_shared<test::UTransportMock>(def_src_uuri);
 
 		// Set up a method URI
-		method_uri_ = std::make_shared<uprotocol::v1::UUri>();
+		method_uri_ = std::make_shared<v1::UUri>();
 		method_uri_->set_authority_name("10.0.0.2");
 		method_uri_->set_ue_id(METHOD_UE_ID);
 		method_uri_->set_ue_version_major(2);
 		method_uri_->set_resource_id(0x2);
 
 		// Create a src uri of entity
-		request_uri_ = std::make_shared<uprotocol::v1::UUri>();
+		request_uri_ = std::make_shared<v1::UUri>();
 		request_uri_->set_authority_name("10.0.0.1");
 		request_uri_->set_ue_id(REQUEST_UE_ID);
 		request_uri_->set_ue_version_major(1);
@@ -133,11 +133,11 @@ public:
 // parameters
 TEST_F(TestRpcServer, ConstructorValidParams) {
 	// Define a callback function to be used with the RpcServer
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackNoReturn;
 
 	// Attempt to create an RpcServer instance with valid parameters
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), *getMethodUri(), std::move(callback));
 
 	// Ensure that the server creation was successful
@@ -154,26 +154,26 @@ TEST_F(TestRpcServer, ConstructorValidParams) {
 // Null transport
 TEST_F(TestRpcServer, CreateWithNullTransport) {
 	// Define a callback function to be used with the RpcServer
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackNoReturn;
 
 	auto transport = nullptr;
 	// Attempt to create an RpcServer instance with valid parameters
 	EXPECT_THROW(
-	    auto server_or_status = uprotocol::communication::RpcServer::create(
+	    auto server_or_status = communication::RpcServer::create(
 	        transport, *getMethodUri(), std::move(callback)),
-	    uprotocol::transport::NullTransport);
+	    transport::NullTransport);
 }
 
 // Test to verify RpcServer construction with a specific payload format
 TEST_F(TestRpcServer, ConstructorWithPayloadFormat) {
 	// Define a callback that returns a specific value, simulating a response
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
 
 	// Attempt to create an RpcServer instance with the provided callback and a
 	// specific format
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), *getMethodUri(), std::move(callback), getFormat());
 
 	// Ensure the server creation was successful and a valid instance was
@@ -193,12 +193,12 @@ TEST_F(TestRpcServer, ConstructorWithPayloadFormat) {
 TEST_F(TestRpcServer, ConstructorWithPayloadFormatAndTTL) {
 	// Define a callback that returns a specific value, simulating a server
 	// response
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
 
 	// Attempt to create an RpcServer instance with additional parameters:
 	// payload format and TTL
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), *getMethodUri(), std::move(callback), getFormat(), getTTL());
 
 	// Verify that the server creation was successful and a valid instance was
@@ -216,22 +216,22 @@ TEST_F(TestRpcServer, ConstructorWithPayloadFormatAndTTL) {
 // Test to verify RpcServer construction fails with invalid URI
 TEST_F(TestRpcServer, ConstructorWithInvalidURI) {
 	// Create an invalid URI object to simulate invalid input parameters
-	uprotocol::v1::UUri invalid_uri;
+	v1::UUri invalid_uri;
 
 	// Expecte error message
 	const std::string error_message = "Invalid rpc URI";
 	// Define a callback function to be used with the RpcServer, even though
 	// it's expected to fail
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackNoReturn;
 
 	// Attempt to create an RpcServer instance with the invalid URI and verify
 	// creation fails
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), invalid_uri, std::move(callback));
 
 	// Define the expected error code for this operation
-	uprotocol::v1::UCode expected_code = uprotocol::v1::UCode::INVALID_ARGUMENT;
+	v1::UCode expected_code = v1::UCode::INVALID_ARGUMENT;
 
 	// Verify that the error code matches the expected error code for invalid
 	// arguments
@@ -244,23 +244,23 @@ TEST_F(TestRpcServer, ConstructorWithInvalidPaylodFormat) {
 	constexpr uint16_t INVALID_PAYLOADFORMAT = 9999;
 
 	// Create an invalid PaylodFormat to simulate invalid input parameters
-	auto invalid_format = static_cast<uprotocol::v1::UPayloadFormat>(INVALID_PAYLOADFORMAT);
+	auto invalid_format = static_cast<v1::UPayloadFormat>(INVALID_PAYLOADFORMAT);
 
 	// Expecte error message
 	const std::string error_message = "Invalid payload format";
 
 	// Define a callback function to be used with the RpcServer, even though
 	// it's expected to fail
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackNoReturn;
 
 	// Attempt to create an RpcServer instance with the invalid PaylodFormat and
 	// verify creation fails
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), *getMethodUri(), std::move(callback), invalid_format);
 
 	// Define the expected error code for this operation
-	uprotocol::v1::UCode expected_code = uprotocol::v1::UCode::OUT_OF_RANGE;
+	v1::UCode expected_code = v1::UCode::OUT_OF_RANGE;
 
 	// Verify that the error code matches the expected error code for invalid
 	// arguments
@@ -271,11 +271,11 @@ TEST_F(TestRpcServer, ConstructorWithInvalidPaylodFormat) {
 // Test case to verify successful connection with a valid handle
 TEST_F(TestRpcServer, ConnectwithValidHandle) {
 	// Define a callback function that simulates a server response
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
 
 	// Attempt to create an RpcServer instance with mockTransport_
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), *getMethodUri(), std::move(callback), getFormat());
 
 	// Check if the RpcServer was successfully created and a valid handle was
@@ -298,11 +298,11 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 	std::string expected_response_payload = "RPC Response";
 
 	// Create a callback to be called when request is received
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
 
 	// Create a server to offer the RPC method
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), *getMethodUri(), std::move(callback), getFormat(), getTTL());
 
 	// Check if the server was created successfully
@@ -312,9 +312,9 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 	EXPECT_TRUE(MsgDiff::Equals(*getMethodUri(), *getMockTransport()->sink_filter_));
 
 	// Create request umessage
-	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
+	auto builder = datamodel::builder::UMessageBuilder::request(
 	    std::move(*getMethodUri()), std::move(*getRequestUri()),
-	    uprotocol::v1::UPriority::UPRIORITY_CS5, getTTL());
+	    v1::UPriority::UPRIORITY_CS5, getTTL());
 
 	auto msg = builder.build();
 
@@ -327,7 +327,7 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 
 	// Compare expected reposen message with actual response message
 	auto expected_response_msg =
-	    uprotocol::datamodel::builder::UMessageBuilder::response(msg)
+	    datamodel::builder::UMessageBuilder::response(msg)
 	        .withTtl(getTTL())
 	        .withPayloadFormat(getFormat())
 	        .build({expected_response_payload, getFormat()});
@@ -354,11 +354,11 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {
 // Test case to verify RPC request handling without return payload
 TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 	// Create a callback to be called when request is received
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackNoReturn;
 
 	// Create a server to offer the RPC method
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), *getMethodUri(), std::move(callback));
 
 	// Check if the server was created successfully
@@ -368,9 +368,9 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 	EXPECT_TRUE(MsgDiff::Equals(*getMethodUri(), *getMockTransport()->sink_filter_));
 
 	// Create request umessage
-	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
+	auto builder = datamodel::builder::UMessageBuilder::request(
 	    std::move(*getMethodUri()), std::move(*getRequestUri()),
-	    uprotocol::v1::UPriority::UPRIORITY_CS5, getTTL());
+	    v1::UPriority::UPRIORITY_CS5, getTTL());
 
 	auto msg = builder.build();
 
@@ -383,7 +383,7 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 
 	// Compare expected reposen message with actual response message
 	auto expected_response_msg =
-	    uprotocol::datamodel::builder::UMessageBuilder::response(msg).build();
+	    datamodel::builder::UMessageBuilder::response(msg).build();
 
 	EXPECT_TRUE(
 	    MsgDiff::Equals(expected_response_msg.attributes().source(),
@@ -404,11 +404,11 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {
 // Test case to verify RPC request handling with invalid request
 TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
 	// Create a callback to be called when request is received
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
 
 	// Create a server to offer the RPC method
-	auto server_or_status = uprotocol::communication::RpcServer::create(
+	auto server_or_status = communication::RpcServer::create(
 	    getMockTransport(), *getMethodUri(), std::move(callback), getFormat(), getTTL());
 
 	// Check if the server was created successfully
@@ -417,9 +417,9 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
 
 	// Create request umessage
 	using namespace std::chrono_literals;
-	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
+	auto builder = datamodel::builder::UMessageBuilder::request(
 	    std::move(*getMethodUri()), std::move(*getRequestUri()),
-	    uprotocol::v1::UPriority::UPRIORITY_CS5, 300ms);
+	    v1::UPriority::UPRIORITY_CS5, 300ms);
 
 	auto msg = builder.build();
 
@@ -435,11 +435,11 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {
 // Test case to verify RPC sever resets the listener when the server is
 // destroyed
 TEST_F(TestRpcServer, RestRPCServerHandle) {
-	uprotocol::communication::RpcServer::RpcCallback callback =
+	communication::RpcServer::RpcCallback callback =
 	    RpcCallbackWithReturn;
 
 	{
-		auto server_or_status = uprotocol::communication::RpcServer::create(
+		auto server_or_status = communication::RpcServer::create(
 		    getMockTransport(), *getMethodUri(), std::move(callback), getFormat());
 
 		EXPECT_TRUE(server_or_status.has_value());
@@ -449,9 +449,9 @@ TEST_F(TestRpcServer, RestRPCServerHandle) {
 	}
 
 	// Create request umessage
-	auto builder = uprotocol::datamodel::builder::UMessageBuilder::request(
+	auto builder = datamodel::builder::UMessageBuilder::request(
 	    std::move(*getMethodUri()), std::move(*getRequestUri()),
-	    uprotocol::v1::UPriority::UPRIORITY_CS5, getTTL());
+	    v1::UPriority::UPRIORITY_CS5, getTTL());
 
 	auto msg = builder.build();
 
@@ -463,4 +463,4 @@ TEST_F(TestRpcServer, RestRPCServerHandle) {
 	EXPECT_FALSE(getMockTransport()->send_count_ == 2);
 }
 
-}  // namespace
+}  // namespace uprotocol

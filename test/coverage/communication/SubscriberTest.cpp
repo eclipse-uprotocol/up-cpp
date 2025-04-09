@@ -13,6 +13,7 @@
 #include <gtest/gtest.h>
 #include <up-cpp/communication/Subscriber.h>
 
+#include <random>
 #include <string>
 
 #include "UTransportMock.h"
@@ -20,11 +21,15 @@
 
 namespace uprotocol{
 using MsgDiff = google::protobuf::util::MessageDifferencer;
-// using namespace uprotocol::communication;
-using namespace uprotocol::test;
-namespace UriValidator = uprotocol::datamodel::validator::uri;
 
 class SubscriberTest : public testing::Test {
+private:
+	uprotocol::v1::UUri testTopicUUri_;
+	uprotocol::v1::UUri testInvalidTopicUUri_;
+	uprotocol::v1::UUri testDefaultSourceUUri_;
+	size_t capture_count_ = 0;
+	uprotocol::v1::UMessage capture_msg_;
+
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
@@ -34,7 +39,6 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	SubscriberTest() = default;
-	~SubscriberTest() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
@@ -45,14 +49,21 @@ protected:
 	void buildInValidSubscribeURI();
 	void buildDefaultSourceURI();
 
-	uprotocol::v1::UUri testTopicUUri_;
-	uprotocol::v1::UUri testInvalidTopicUUri_;
-	uprotocol::v1::UUri testDefaultSourceUUri_;
-	size_t capture_count_ = 0;
-	uprotocol::v1::UMessage capture_msg_;
+	uprotocol::v1::UUri getTestTopicUUri() const { return testTopicUUri_; }
+    uprotocol::v1::UUri getTestInvalidTopicUUri() const { return testInvalidTopicUUri_; }
+    uprotocol::v1::UUri getTestDefaultSourceUUri() const { return testDefaultSourceUUri_; }
+    size_t getCaptureCount() const { return capture_count_; }
+    uprotocol::v1::UMessage getCaptureMsg() const { return capture_msg_; }
+
+    void setTestTopicUUri(const uprotocol::v1::UUri& uri) { testTopicUUri_ = uri; }
+    void setTestInvalidTopicUUri(const uprotocol::v1::UUri& uri) { testInvalidTopicUUri_ = uri; }
+    void setTestDefaultSourceUUri(const uprotocol::v1::UUri& uri) { testDefaultSourceUUri_ = uri; }
+    void setCaptureCount(size_t count) { capture_count_ = count; }
+    void setCaptureMsg(const uprotocol::v1::UMessage& msg) { capture_msg_ = msg; }
 
 public:
 	void handleCallbackMessage(const uprotocol::v1::UMessage& message);
+	~SubscriberTest() override = default;
 };
 
 void SubscriberTest::SetUp() {
@@ -62,34 +73,45 @@ void SubscriberTest::SetUp() {
 }
 
 void SubscriberTest::buildValidSubscribeURI() {
+	constexpr uint32_t VALID_UE_ID = 0x00011101;
+	constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8001;
+	
 	testTopicUUri_.set_authority_name("192.168.1.10");
-	testTopicUUri_.set_ue_id(0x00011101);
+	testTopicUUri_.set_ue_id(VALID_UE_ID);
 	testTopicUUri_.set_ue_version_major(0x1);
-	testTopicUUri_.set_resource_id(0x8001);
+	testTopicUUri_.set_resource_id(DEFAULT_RESOURCE_ID);
 }
 
 void SubscriberTest::buildInValidSubscribeURI() {
-	testInvalidTopicUUri_.set_authority_name("192.168.1.10");
-	testInvalidTopicUUri_.set_ue_id(0x00011101);
-	testInvalidTopicUUri_.set_ue_version_major(0x1);
+	constexpr uint32_t VALID_UE_ID = 0x00011101;
 	// Resource ID should be in the range of 0x8000 to 0xFFFF
-	testInvalidTopicUUri_.set_resource_id(0x1200);
+	constexpr uint32_t INVALID_RESOURCE_ID = 0x1200;
+	
+	testInvalidTopicUUri_.set_authority_name("192.168.1.10");
+	testInvalidTopicUUri_.set_ue_id(VALID_UE_ID);
+	testInvalidTopicUUri_.set_ue_version_major(0x1);
+	testInvalidTopicUUri_.set_resource_id(INVALID_RESOURCE_ID);
 }
 
 void SubscriberTest::buildDefaultSourceURI() {
+	constexpr uint32_t DEFAULT_UE_ID = 0x00011102;
+	
 	testDefaultSourceUUri_.set_authority_name("192.168.1.10");
-	testDefaultSourceUUri_.set_ue_id(0x00011102);
+	testDefaultSourceUUri_.set_ue_id(DEFAULT_UE_ID);
 	testDefaultSourceUUri_.set_ue_version_major(0x1);
 	testDefaultSourceUUri_.set_resource_id(0x0);
 }
 std::string get_random_string(size_t length) {
 	auto randchar = []() -> char {
-		const char charset[] =
-		    "0123456789"
-		    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		    "abcdefghijklmnopqrstuvwxyz";
-		const size_t max_index = (sizeof(charset) - 1);
-		return charset[rand() % max_index];
+		constexpr std::array<char, 62> CHARSET = {
+			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+		};
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> distr(0, CHARSET.size() - 1);
+		return CHARSET.at(static_cast<std::size_t>(distr(gen)));
 	};
 	std::string str(length, 0);
 	std::generate_n(str.begin(), length, randchar);
@@ -104,21 +126,23 @@ void SubscriberTest::handleCallbackMessage(
 
 // Positive test case to subscribe to a valid topic
 TEST_F(SubscriberTest, SubscribeSuccess) {
-	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
-	    testDefaultSourceUUri_);
+	constexpr uint16_t RANDOM_STRING_LENGTH = 1400;
 
-	auto callback = [this](auto arg1) {
+	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
+	    getTestDefaultSourceUUri());
+
+	auto callback = [this](const auto& arg1) {
 		return this->handleCallbackMessage(arg1);
 	};
 
 	auto result =
-	    Subscriber::subscribe(transport, testTopicUUri_, std::move(callback));
+	    communication::Subscriber::subscribe(transport, getTestTopicUUri(), std::move(callback));
 
 	EXPECT_TRUE(transport->listener_);
 	EXPECT_TRUE(result.has_value());
 	auto handle = std::move(result).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(testTopicUUri_, transport->source_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(getTestTopicUUri(), transport->source_filter_));
 	EXPECT_FALSE(transport->sink_filter_);
 
 	const size_t max_count = 100;
@@ -126,80 +150,78 @@ TEST_F(SubscriberTest, SubscribeSuccess) {
 		uprotocol::v1::UMessage msg;
 		auto attr = std::make_shared<uprotocol::v1::UAttributes>();
 		*msg.mutable_attributes() = *attr;
-		msg.set_payload(get_random_string(1400));
+		msg.set_payload(get_random_string(RANDOM_STRING_LENGTH));
 		transport->mockMessage(msg);
-		EXPECT_EQ(i + 1, capture_count_);
-		EXPECT_TRUE(MsgDiff::Equals(msg, capture_msg_));
+		EXPECT_EQ(i + 1, getCaptureCount());
+		EXPECT_TRUE(MsgDiff::Equals(msg, getCaptureMsg()));
 	}
 }
 
 // Negative test case to subscribe to a invalid topic
 TEST_F(SubscriberTest, SubscribeFailWithInvalidTopic) {
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
-	    testDefaultSourceUUri_);
+	    getTestDefaultSourceUUri());
 
-	auto callback = [this](auto arg1) {
+	auto callback = [this](const auto& arg1) {
 		return this->handleCallbackMessage(arg1);
 	};
 
 	// Subscribe to invalid UUri topic with resource ID not in correct range
-	EXPECT_THROW(auto result = Subscriber::subscribe(
-	                 transport, testInvalidTopicUUri_, std::move(callback)),
-	             UriValidator::InvalidUUri);
+	EXPECT_THROW(auto result = communication::Subscriber::subscribe(
+	                 transport, getTestInvalidTopicUUri(), std::move(callback)),
+					 datamodel::validator::uri::InvalidUUri);
 }
 
 // Negative test case to subscribe to a topic with registerListener failure
 TEST_F(SubscriberTest, SubscribeFailWithErrorCode) {
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
-	    testDefaultSourceUUri_);
+	    getTestDefaultSourceUUri());
 
-	auto callback = [this](auto arg1) {
+	auto callback = [this](const auto& arg1) {
 		return this->handleCallbackMessage(arg1);
 	};
 
-	uprotocol::v1::UStatus expectedStatus;
-	expectedStatus.set_code(uprotocol::v1::UCode::ABORTED);
-	transport->registerListener_status_ = expectedStatus;
+	uprotocol::v1::UStatus expected_status;
+	expected_status.set_code(uprotocol::v1::UCode::ABORTED);
+	transport->registerListener_status_ = expected_status;
 
 	auto result =
-	    Subscriber::subscribe(transport, testTopicUUri_, std::move(callback));
+	    communication::Subscriber::subscribe(transport, getTestTopicUUri(), std::move(callback));
 
-	auto actualStatus = std::move(result).error();
-	EXPECT_EQ(actualStatus.code(), expectedStatus.code());
+	auto actual_status = std::move(result).error();
+	EXPECT_EQ(actual_status.code(), expected_status.code());
 }
 
 // subscribe to a topic with null transport
 TEST_F(SubscriberTest, SubscribeNullTransport) {
 	// set transport to null
 	auto transport = nullptr;
-	auto callback = [this](auto arg1) {
+	auto callback = [this](const auto& arg1) {
 		return this->handleCallbackMessage(arg1);
 	};
-	EXPECT_THROW(auto result = Subscriber::subscribe(transport, testTopicUUri_,
+	EXPECT_THROW(auto result = communication::Subscriber::subscribe(transport, getTestTopicUUri(),
 	                                                 std::move(callback)),
 	             std::invalid_argument);
 }
 // subscribe to a topic with null callback
 TEST_F(SubscriberTest, SubscribeNullCallback) {
 	auto transport = std::make_shared<uprotocol::test::UTransportMock>(
-	    testDefaultSourceUUri_);
+	    getTestDefaultSourceUUri());
 
 	// bind to null callback
 	auto test_subscribe_nullptr = [transport, this]() {
-		std::ignore = Subscriber::subscribe(transport, testTopicUUri_,
-		                                    std::move(nullptr));
+		std::ignore = communication::Subscriber::subscribe(transport, getTestTopicUUri(),
+		                                    nullptr);
 	};
 
-	using namespace uprotocol::utils;
-
-	EXPECT_THROW(test_subscribe_nullptr(), callbacks::EmptyFunctionObject);
+	EXPECT_THROW(test_subscribe_nullptr(), utils::callbacks::EmptyFunctionObject);
 
 	// Default construct a function object
 	auto test_subscribe_empty = [transport, this]() {
-		std::ignore = Subscriber::subscribe(transport, testTopicUUri_, {});
+		std::ignore = communication::Subscriber::subscribe(transport, getTestTopicUUri(), {});
 	};
 
-	EXPECT_THROW(test_subscribe_empty(), callbacks::EmptyFunctionObject);
+	EXPECT_THROW(test_subscribe_empty(), utils::callbacks::EmptyFunctionObject);
 }
 
 }  // namespace uprotocol
