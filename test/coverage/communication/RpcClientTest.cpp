@@ -27,6 +27,8 @@ constexpr std::chrono::milliseconds TEN_MILLISECONDS(10);
 constexpr std::chrono::milliseconds ONE_HUNDRED_FIFTY_MILLISECONDS(150);
 constexpr uint32_t SHIFT_AMOUNT = 16;
 
+namespace uprotocol{
+
 bool operator==(const uprotocol::v1::UUri& lhs,
                 const uprotocol::v1::UUri& rhs) {
 	return google::protobuf::util::MessageDifferencer::Equals(lhs, rhs);
@@ -41,8 +43,6 @@ bool operator==(const uprotocol::v1::UStatus& lhs,
                 const uprotocol::v1::UCode& rhs) {
 	return lhs.code() == rhs;
 }
-
-namespace uprotocol{
 
 class RpcClientTest : public testing::Test {
 private:

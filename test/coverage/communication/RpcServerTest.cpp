@@ -18,17 +18,19 @@
 
 #include "UTransportMock.h"
 
+constexpr size_t MAX_LEN_RANDOM_STRING = 32;
+
 namespace {
 
 using MsgDiff = google::protobuf::util::MessageDifferencer;
 
-static std::random_device random_dev;
-static std::mt19937 random_gen(random_dev());
-static std::uniform_int_distribution<int> char_dist('A', 'z');
+std::string get_random_string(size_t max_len = MAX_LEN_RANDOM_STRING) {
+	std::random_device random_dev;
+	std::mt19937 random_gen(random_dev());
+	std::uniform_int_distribution<int> char_dist('A', 'z');
 
-std::string get_random_string(size_t max_len = 32) {
 	std::uniform_int_distribution<int> len_dist(1, static_cast<int>(max_len));
-	size_t len = len_dist(random_gen);
+	auto len = static_cast<size_t>(len_dist(random_gen));
 	std::string retval;
 	retval.reserve(len);
 	for (size_t i = 0; i < len; i++) {
@@ -55,10 +57,11 @@ std::optional<uprotocol::datamodel::builder::Payload> RpcCallbackWithReturn(
 
 class TestRpcServer : public testing::Test {
 private:
+	static constexpr uint16_t DEFAULT_TTL_TIME = 1000;
 	std::shared_ptr<uprotocol::test::UTransportMock> mockTransport_;
 	std::shared_ptr<uprotocol::v1::UUri> method_uri_;
 	std::shared_ptr<uprotocol::v1::UUri> request_uri_;
-	std::chrono::milliseconds ttl_ = std::chrono::milliseconds(1000);
+	std::chrono::milliseconds ttl_ = std::chrono::milliseconds(DEFAULT_TTL_TIME);
 	uprotocol::v1::UPayloadFormat format = uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 
 protected:
@@ -78,10 +81,14 @@ protected:
     void setFormat(uprotocol::v1::UPayloadFormat format) { this->format = format; }
 
 	void SetUp() override {
+		constexpr uint32_t DEF_UE_ID = 0x18000;
+		constexpr uint32_t METHOD_UE_ID = 0x00010002;
+		constexpr uint32_t REQUEST_UE_ID = 0x00010001;
+
 		// Set up a transport URI
 		uprotocol::v1::UUri def_src_uuri;
 		def_src_uuri.set_authority_name(get_random_string());
-		def_src_uuri.set_ue_id(0x18000);
+		def_src_uuri.set_ue_id(DEF_UE_ID);
 		def_src_uuri.set_ue_version_major(1);
 		def_src_uuri.set_resource_id(0);
 
@@ -92,14 +99,14 @@ protected:
 		// Set up a method URI
 		method_uri_ = std::make_shared<uprotocol::v1::UUri>();
 		method_uri_->set_authority_name("10.0.0.2");
-		method_uri_->set_ue_id(0x00010002);
+		method_uri_->set_ue_id(METHOD_UE_ID);
 		method_uri_->set_ue_version_major(2);
 		method_uri_->set_resource_id(0x2);
 
 		// Create a src uri of entity
 		request_uri_ = std::make_shared<uprotocol::v1::UUri>();
 		request_uri_->set_authority_name("10.0.0.1");
-		request_uri_->set_ue_id(0x00010001);
+		request_uri_->set_ue_id(REQUEST_UE_ID);
 		request_uri_->set_ue_version_major(1);
 		request_uri_->set_resource_id(0x0);
 	}
@@ -234,8 +241,10 @@ TEST_F(TestRpcServer, ConstructorWithInvalidURI) {
 
 // Test to verify RpcServer construction fails with invalid PaylodFormat
 TEST_F(TestRpcServer, ConstructorWithInvalidPaylodFormat) {
+	constexpr uint16_t INVALID_PAYLOADFORMAT = 9999;
+
 	// Create an invalid PaylodFormat to simulate invalid input parameters
-	auto invalid_format = static_cast<uprotocol::v1::UPayloadFormat>(9999);
+	auto invalid_format = static_cast<uprotocol::v1::UPayloadFormat>(INVALID_PAYLOADFORMAT);
 
 	// Expecte error message
 	const std::string error_message = "Invalid payload format";

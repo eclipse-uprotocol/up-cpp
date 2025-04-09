@@ -13,15 +13,14 @@
 #include <gtest/gtest.h>
 #include <up-cpp/communication/Subscriber.h>
 
-#include <random>
 #include <string>
 
 #include "UTransportMock.h"
 #include "up-cpp/datamodel/validator/UUri.h"
 
-namespace {
+namespace uprotocol{
 using MsgDiff = google::protobuf::util::MessageDifferencer;
-using namespace uprotocol::communication;
+// using namespace uprotocol::communication;
 using namespace uprotocol::test;
 namespace UriValidator = uprotocol::datamodel::validator::uri;
 
@@ -203,4 +202,4 @@ TEST_F(SubscriberTest, SubscribeNullCallback) {
 	EXPECT_THROW(test_subscribe_empty(), callbacks::EmptyFunctionObject);
 }
 
-}  // namespace
+}  // namespace uprotocol
