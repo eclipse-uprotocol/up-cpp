@@ -18,26 +18,20 @@
 
 #include "UTransportMock.h"
 
-namespace {
+constexpr uint32_t WILDCARD = 0xFFFF;
+constexpr uint32_t RESOURCE_ID_F00D = 0xF00D;
 
-bool operator==(const uprotocol::v1::UUri& lhs,
-                const uprotocol::v1::UUri& rhs) {
-	using namespace google::protobuf::util;
-	return MessageDifferencer::Equals(lhs, rhs);
+namespace uprotocol{
+
+bool operator==(const v1::UUri& lhs,
+                const v1::UUri& rhs) {
+	return google::protobuf::util::MessageDifferencer::Equals(lhs, rhs);
 }
 
-bool operator==(const uprotocol::v1::UMessage& lhs,
-                const uprotocol::v1::UMessage& rhs) {
-	using namespace google::protobuf::util;
-	return MessageDifferencer::Equals(lhs, rhs);
+bool operator==(const v1::UMessage& lhs,
+                const v1::UMessage& rhs) {
+	return google::protobuf::util::MessageDifferencer::Equals(lhs, rhs);
 }
-
-#if 0
-bool operator==(const uprotocol::v1::UStatus& lhs,
-                const uprotocol::v1::UCode& rhs) {
-	return lhs.code() == rhs;
-}
-#endif
 
 class TestUTransport : public testing::Test {
 protected:
@@ -50,52 +44,56 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	TestUTransport() = default;
-	~TestUTransport() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
-	static std::shared_ptr<uprotocol::test::UTransportMock> makeMockTransport(
-	    const uprotocol::v1::UUri& uri) {
-		return std::make_shared<uprotocol::test::UTransportMock>(uri);
+	static std::shared_ptr<test::UTransportMock> makeMockTransport(
+	    const v1::UUri& uri) {
+		return std::make_shared<test::UTransportMock>(uri);
 	}
 
-	static std::shared_ptr<uprotocol::transport::UTransport> makeTransport(
-	    const uprotocol::v1::UUri& uri) {
+	static std::shared_ptr<transport::UTransport> makeTransport(
+	    const v1::UUri& uri) {
 		return makeMockTransport(uri);
 	}
 
-	static std::shared_ptr<uprotocol::transport::UTransport> makeTransport(
-	    std::shared_ptr<uprotocol::test::UTransportMock> mock) {
+	static std::shared_ptr<transport::UTransport> makeTransport(
+	    std::shared_ptr<test::UTransportMock> mock) {
 		return mock;
 	}
 
-	static uprotocol::v1::UUri getValidUri() {
-		uprotocol::v1::UUri uri;
+	static v1::UUri getValidUri() {
+		constexpr uint32_t RANDOM_UE_ID = 0xdeadbeef;
+		constexpr uint32_t RANDOM_VERSION_MAJOR = 16;
+		v1::UUri uri;
 		uri.set_authority_name("UTransportTest");
-		uri.set_ue_id(0xdeadbeef);
-		uri.set_ue_version_major(16);
+		uri.set_ue_id(RANDOM_UE_ID);
+		uri.set_ue_version_major(RANDOM_VERSION_MAJOR);
 		uri.set_resource_id(0);
 		return uri;
 	}
 
-	static uprotocol::v1::UUri getWildcardUri() {
-		uprotocol::v1::UUri uri;
+	static v1::UUri getWildcardUri() {
+		constexpr uint32_t WILDCARD_VERSION_MAJOR = 0xFF;
+		v1::UUri uri;
 		uri.set_authority_name("*");
-		uri.set_ue_id(0xFFFF);
-		uri.set_ue_version_major(0xFF);
-		uri.set_resource_id(0xFFFF);
+		uri.set_ue_id(WILDCARD);
+		uri.set_ue_version_major(WILDCARD_VERSION_MAJOR);
+		uri.set_resource_id(WILDCARD);
 		return uri;
 	}
+public:
+	~TestUTransport() override = default;
 };
 
 TEST_F(TestUTransport, CreateTransport) { // NOLINT
 	EXPECT_NO_THROW(auto transport = makeTransport(getValidUri())); // NOLINT
 }
 
-using InvalidUUri = uprotocol::datamodel::validator::uri::InvalidUUri;
+using InvalidUUri = datamodel::validator::uri::InvalidUUri;
 
 TEST_F(TestUTransport, CreateTransportInvalidUUri) { // NOLINT
 	auto uri = getValidUri();
@@ -103,40 +101,41 @@ TEST_F(TestUTransport, CreateTransportInvalidUUri) { // NOLINT
 	EXPECT_THROW({ auto transport = makeTransport(uri); }, InvalidUUri); // NOLINT
 }
 
-using UMessageBuilder = uprotocol::datamodel::builder::UMessageBuilder;
-using PayloadBuilder = uprotocol::datamodel::builder::Payload;
+using UMessageBuilder = datamodel::builder::UMessageBuilder;
+using PayloadBuilder = datamodel::builder::Payload;
 
 TEST_F(TestUTransport, SendOk) { // NOLINT
+	constexpr uint32_t RANDOM_RESOURCE_ID = 0xABBA;
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
 	auto topic = getValidUri();
-	topic.set_resource_id(0xABBA);
-	PayloadBuilder payload(std::string("[\"Arrival\", \"Waterloo\"]"),
-	                       uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON);
+	topic.set_resource_id(RANDOM_RESOURCE_ID);
+	PayloadBuilder payload(std::string(R"(["Arrival", "Waterloo"])"),
+	                       v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON);
 	auto message =
 	    UMessageBuilder::publish(std::move(topic)).build(std::move(payload));
 
 	decltype(transport->send(message)) result;
 	EXPECT_NO_THROW(result = transport->send(message)); // NOLINT
 
-	EXPECT_EQ(result.code(), uprotocol::v1::UCode::OK);
+	EXPECT_EQ(result.code(), v1::UCode::OK);
 	EXPECT_EQ(transport_mock->send_count_, 1);
 	EXPECT_TRUE(transport_mock->message_ == message);
 }
 
 using InvalidUMessge =
-    uprotocol::datamodel::validator::message::InvalidUMessage;
+    datamodel::validator::message::InvalidUMessage;
 
 TEST_F(TestUTransport, SendInvalidMessage) { // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
 	auto topic = getValidUri();
-	topic.set_resource_id(0xF00D);
+	topic.set_resource_id(RESOURCE_ID_F00D);
 	auto message = UMessageBuilder::publish(std::move(topic)).build();
 	message.mutable_attributes()->set_type(
-	    uprotocol::v1::UMessageType::UMESSAGE_TYPE_REQUEST);
+	    v1::UMessageType::UMESSAGE_TYPE_REQUEST);
 
 	decltype(transport->send(message)) result;
 	EXPECT_THROW({ result = transport->send(message); }, InvalidUMessge); // NOLINT
@@ -148,16 +147,16 @@ TEST_F(TestUTransport, SendImplStatus) { // NOLINT
 	auto transport = makeTransport(transport_mock);
 
 	transport_mock->send_status_.set_code(
-	    uprotocol::v1::UCode::PERMISSION_DENIED);
+	    v1::UCode::PERMISSION_DENIED);
 
 	auto topic = getValidUri();
-	topic.set_resource_id(0xF00D);
+	topic.set_resource_id(RESOURCE_ID_F00D);
 	auto message = UMessageBuilder::publish(std::move(topic)).build();
 
 	decltype(transport->send(message)) result;
 	EXPECT_NO_THROW(result = transport->send(message)); // NOLINT
 
-	EXPECT_EQ(result.code(), uprotocol::v1::UCode::PERMISSION_DENIED);
+	EXPECT_EQ(result.code(), v1::UCode::PERMISSION_DENIED);
 }
 
 TEST_F(TestUTransport, RegisterListenerOk) { // NOLINT
@@ -168,7 +167,7 @@ TEST_F(TestUTransport, RegisterListenerOk) { // NOLINT
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 
-	uprotocol::transport::UTransport::ListenHandle handle;
+	transport::UTransport::ListenHandle handle;
 	EXPECT_NO_THROW({ // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter);
@@ -188,7 +187,7 @@ TEST_F(TestUTransport, RegisterListenerOk) { // NOLINT
 		auto callable = transport_mock->listener_.value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
-		topic.set_resource_id(0xF00D);
+		topic.set_resource_id(RESOURCE_ID_F00D);
 		auto message = UMessageBuilder::publish(std::move(topic)).build();
 		callable(message);
 		EXPECT_TRUE(called);
@@ -222,13 +221,13 @@ TEST_F(TestUTransport, RegisterListenerImplStatus) { // NOLINT
 	auto transport = makeTransport(transport_mock);
 
 	transport_mock->registerListener_status_.set_code(
-	    uprotocol::v1::UCode::INTERNAL);
+	    v1::UCode::INTERNAL);
 
 	bool called = false;
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 
-	uprotocol::v1::UStatus status;
+	v1::UStatus status;
 	EXPECT_NO_THROW({ // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter);
@@ -245,7 +244,7 @@ TEST_F(TestUTransport, RegisterListenerImplStatus) { // NOLINT
 		auto callable = transport_mock->listener_.value();
 		EXPECT_FALSE(callable);
 		auto topic = getValidUri();
-		topic.set_resource_id(0xF00D);
+		topic.set_resource_id(RESOURCE_ID_F00D);
 		auto message = UMessageBuilder::publish(std::move(topic)).build();
 		callable(message);
 		EXPECT_FALSE(called);
@@ -260,9 +259,9 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterOk) { // NOLINT
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 	auto sink_filter = getValidUri();
-	sink_filter.set_resource_id(0xFFFF);
+	sink_filter.set_resource_id(WILDCARD);
 
-	uprotocol::transport::UTransport::ListenHandle handle;
+	transport::UTransport::ListenHandle handle;
 	EXPECT_NO_THROW({ // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter, sink_filter);
@@ -286,7 +285,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterOk) { // NOLINT
 		auto callable = transport_mock->listener_.value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
-		topic.set_resource_id(0xF00D);
+		topic.set_resource_id(RESOURCE_ID_F00D);
 		auto message = UMessageBuilder::publish(std::move(topic)).build();
 		callable(message);
 		EXPECT_TRUE(called);
@@ -301,10 +300,10 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSource) { // NOLINT
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 	auto sink_filter = getValidUri();
-	sink_filter.set_resource_id(0xFFFF);
+	sink_filter.set_resource_id(WILDCARD);
 
 	// Make source invalid
-	source_filter.set_ue_version_major(0xFFFF);
+	source_filter.set_ue_version_major(WILDCARD);
 
 	EXPECT_THROW( // NOLINT
 	    {
@@ -327,10 +326,10 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSink) { // NOLINT
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 	auto sink_filter = getValidUri();
-	sink_filter.set_resource_id(0xFFFF);
+	sink_filter.set_resource_id(WILDCARD);
 
 	// Make sink invalid
-	sink_filter.set_ue_version_major(0xFFFF);
+	sink_filter.set_ue_version_major(WILDCARD);
 
 	EXPECT_THROW( // NOLINT
 	    {
@@ -350,15 +349,15 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterImplStatus) { // NOLINT
 	auto transport = makeTransport(transport_mock);
 
 	transport_mock->registerListener_status_.set_code(
-	    uprotocol::v1::UCode::NOT_FOUND);
+	    v1::UCode::NOT_FOUND);
 
 	bool called = false;
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 	auto sink_filter = getValidUri();
-	sink_filter.set_resource_id(0xFFFF);
+	sink_filter.set_resource_id(WILDCARD);
 
-	uprotocol::v1::UStatus status;
+	v1::UStatus status;
 	EXPECT_NO_THROW({ // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter, sink_filter);
@@ -375,7 +374,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterImplStatus) { // NOLINT
 		auto callable = transport_mock->listener_.value();
 		EXPECT_FALSE(callable);
 		auto topic = getValidUri();
-		topic.set_resource_id(0xF00D);
+		topic.set_resource_id(RESOURCE_ID_F00D);
 		auto message = UMessageBuilder::publish(std::move(topic)).build();
 		callable(message);
 		EXPECT_FALSE(called);
@@ -390,10 +389,10 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) { // NOLINT
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 
-	uprotocol::transport::UTransport::ListenHandle handle;
+	transport::UTransport::ListenHandle handle;
 	EXPECT_NO_THROW({ // NOLINT
 		auto maybe_handle =
-		    transport->registerListener(callback, source_filter, 0xF00D);
+		    transport->registerListener(callback, source_filter, RESOURCE_ID_F00D);
 
 		EXPECT_TRUE(maybe_handle);
 		if (maybe_handle) {
@@ -406,7 +405,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) { // NOLINT
 	EXPECT_TRUE(transport_mock->sink_filter_);
 	if (transport_mock->sink_filter_) {
 		auto sink_filter = getValidUri();
-		sink_filter.set_resource_id(0xF00D);
+		sink_filter.set_resource_id(RESOURCE_ID_F00D);
 		EXPECT_TRUE(sink_filter == transport_mock->sink_filter_.value());
 	}
 
@@ -416,7 +415,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) { // NOLINT
 		auto callable = transport_mock->listener_.value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
-		topic.set_resource_id(0xF00D);
+		topic.set_resource_id(RESOURCE_ID_F00D);
 		auto message = UMessageBuilder::publish(std::move(topic)).build();
 		callable(message);
 		EXPECT_TRUE(called);
@@ -432,7 +431,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceInvalidSource) { // NOLIN
 	auto source_filter = getWildcardUri();
 
 	// Make source invalid
-	source_filter.set_ue_version_major(0xFFFF);
+	source_filter.set_ue_version_major(WILDCARD);
 
 	EXPECT_THROW( // NOLINT
 	    {
@@ -455,16 +454,16 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceImplStatus) { // NOLINT
 	auto transport = makeTransport(transport_mock);
 
 	transport_mock->registerListener_status_.set_code(
-	    uprotocol::v1::UCode::NOT_FOUND);
+	    v1::UCode::NOT_FOUND);
 
 	bool called = false;
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 
-	uprotocol::v1::UStatus status;
+	v1::UStatus status;
 	EXPECT_NO_THROW({ // NOLINT
 		auto maybe_handle =
-		    transport->registerListener(callback, source_filter, 0xFFFF);
+		    transport->registerListener(callback, source_filter, WILDCARD);
 
 		EXPECT_FALSE(maybe_handle);
 		if (!maybe_handle) {
@@ -480,7 +479,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceImplStatus) { // NOLINT
 		EXPECT_FALSE(callable);
 		// ...but we're still going to try to call it anyway
 		auto topic = getValidUri();
-		topic.set_resource_id(0xF00D);
+		topic.set_resource_id(RESOURCE_ID_F00D);
 		auto message = UMessageBuilder::publish(std::move(topic)).build();
 		callable(message);
 		EXPECT_FALSE(called);
@@ -495,7 +494,7 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerOk) { // NOLINT
 	auto callback = [&called](const auto&) { called = true; };
 	auto topic_source_filter = getWildcardUri();
 
-	uprotocol::transport::UTransport::ListenHandle handle;
+	transport::UTransport::ListenHandle handle;
 	EXPECT_NO_THROW({ // NOLINT
 		// When source_filter is omitted, sink_filter is treated as a publish
 		// topic.
@@ -517,7 +516,7 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerOk) { // NOLINT
 		auto callable = transport_mock->listener_.value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
-		topic.set_resource_id(0xF00D);
+		topic.set_resource_id(RESOURCE_ID_F00D);
 		auto message = UMessageBuilder::publish(std::move(topic)).build();
 		callable(message);
 		EXPECT_TRUE(called);
@@ -532,9 +531,9 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerWithSourceFilterOk) { // NOLINT
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 	auto sink_filter = getValidUri();
-	sink_filter.set_resource_id(0xFFFF);
+	sink_filter.set_resource_id(WILDCARD);
 
-	uprotocol::transport::UTransport::ListenHandle handle;
+	transport::UTransport::ListenHandle handle;
 	EXPECT_NO_THROW({ // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(sink_filter, callback, source_filter);
@@ -558,11 +557,11 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerWithSourceFilterOk) { // NOLINT
 		auto callable = transport_mock->listener_.value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
-		topic.set_resource_id(0xF00D);
+		topic.set_resource_id(RESOURCE_ID_F00D);
 		auto message = UMessageBuilder::publish(std::move(topic)).build();
 		callable(message);
 		EXPECT_TRUE(called);
 	}
 }
 
-}  // namespace
+}  // namespace uprotocol
