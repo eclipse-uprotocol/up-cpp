@@ -232,7 +232,7 @@ TEST_F(TestUuidSerializer, DeserializeFromBytes) {
 	};
 	uprotocol::v1::UUID uuid =
 	    AsBytes::deserialize(
-	        uuid_bytes);
+	        UUID_BYTES);
 
 	EXPECT_EQ(uuid.msb(), 0x1234567890ABCDEF);
 	EXPECT_EQ(uuid.lsb(), 0xFEDCBA0987654321);
