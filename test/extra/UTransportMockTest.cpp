@@ -67,7 +67,7 @@ protected:
 	static void TearDownTestSuite() {}
 };
 
-TEST_F(TestMockUTransport, Send) {
+TEST_F(TestMockUTransport, Send) { // NOLINT
 	using namespace std;
 
 	uprotocol::v1::UUri def_src_uuri;
@@ -117,7 +117,7 @@ TEST_F(TestMockUTransport, Send) {
 	}
 }
 
-TEST_F(TestMockUTransport, registerListener) {
+TEST_F(TestMockUTransport, registerListener) { // NOLINT
 	using namespace std;
 
 	uprotocol::v1::UUri def_src_uuri;

@@ -33,6 +33,6 @@ protected:
 };
 
 // TODO replace
-TEST_F(TestFixture, SomeTestName) {}
+TEST_F(TestFixture, SomeTestName) {} // NOLINT
 
 }  // namespace

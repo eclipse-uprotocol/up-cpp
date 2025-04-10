@@ -45,7 +45,7 @@ int get_rand() {
 	return dist(mt);
 }
 
-TEST_F(ExpectedTest, ExpectScalarScalar) {
+TEST_F(ExpectedTest, ExpectScalarScalar) { // NOLINT
 	auto sample = get_rand();
 	auto expected = Expected<int, int>(sample);
 	EXPECT_TRUE(bool(expected));
@@ -54,7 +54,7 @@ TEST_F(ExpectedTest, ExpectScalarScalar) {
 	EXPECT_EQ(sample, *expected);
 }
 
-TEST_F(ExpectedTest, UnexpectScalarScalar) {
+TEST_F(ExpectedTest, UnexpectScalarScalar) { // NOLINT
 	int sample = get_rand();
 	auto expected = Expected<int, int>(Unexpected(sample));
 	EXPECT_FALSE(bool(expected));
@@ -62,7 +62,7 @@ TEST_F(ExpectedTest, UnexpectScalarScalar) {
 	EXPECT_EQ(sample, expected.error());
 }
 
-TEST_F(ExpectedTest, ExpectScalar) {
+TEST_F(ExpectedTest, ExpectScalar) { // NOLINT
 	auto sample = get_rand();
 	auto expected = Expected<int, std::string>(sample);
 	EXPECT_TRUE(bool(expected));
@@ -71,7 +71,7 @@ TEST_F(ExpectedTest, ExpectScalar) {
 	EXPECT_EQ(sample, *expected);
 }
 
-TEST_F(ExpectedTest, UnexpectScalar) {
+TEST_F(ExpectedTest, UnexpectScalar) { // NOLINT
 	int sample = get_rand();
 	auto expected = Expected<std::string, int>(Unexpected(sample));
 	EXPECT_FALSE(bool(expected));
@@ -79,7 +79,7 @@ TEST_F(ExpectedTest, UnexpectScalar) {
 	EXPECT_EQ(sample, expected.error());
 }
 
-TEST_F(ExpectedTest, UnexpectValueOr) {
+TEST_F(ExpectedTest, UnexpectValueOr) { // NOLINT
 	int sample = get_rand();
 	auto expected =
 	    Expected<int, std::string>(Unexpected(std::string("hello")));
@@ -95,7 +95,7 @@ struct Pair {
 	Pair(int x, int y) : x(x), y(y) {}
 };
 
-TEST_F(ExpectedTest, ExpectUnique) {
+TEST_F(ExpectedTest, ExpectUnique) { // NOLINT
 	auto x = get_rand();
 	auto y = get_rand();
 	auto expected = Expected<std::unique_ptr<Pair>, std::string>(
@@ -107,7 +107,7 @@ TEST_F(ExpectedTest, ExpectUnique) {
 	EXPECT_EQ(y, p->y);
 }
 
-TEST_F(ExpectedTest, UnexpectUnique) {
+TEST_F(ExpectedTest, UnexpectUnique) { // NOLINT
 	auto x = get_rand();
 	auto y = get_rand();
 	auto expected = Expected<int, std::unique_ptr<Pair>>(
@@ -119,7 +119,7 @@ TEST_F(ExpectedTest, UnexpectUnique) {
 	EXPECT_EQ(y, p->y);
 }
 
-TEST_F(ExpectedTest, ExpectShared) {
+TEST_F(ExpectedTest, ExpectShared) { // NOLINT
 	auto x = get_rand();
 	auto y = get_rand();
 	auto expected = Expected<std::shared_ptr<Pair>, std::string>(
@@ -132,7 +132,7 @@ TEST_F(ExpectedTest, ExpectShared) {
 	EXPECT_EQ(y, (*expected)->y);
 }
 
-TEST_F(ExpectedTest, UnexpectShared) {
+TEST_F(ExpectedTest, UnexpectShared) { // NOLINT
 	auto x = get_rand();
 	auto y = get_rand();
 	auto expected = Expected<int, std::shared_ptr<Pair>>(
@@ -143,7 +143,7 @@ TEST_F(ExpectedTest, UnexpectShared) {
 	EXPECT_EQ(y, expected.error()->y);
 }
 
-TEST_F(ExpectedTest, ExpectStruct) {
+TEST_F(ExpectedTest, ExpectStruct) { // NOLINT
 	auto x = get_rand();
 	auto y = get_rand();
 	auto expected = Expected<Pair, std::string>(Pair(x, y));
@@ -155,7 +155,7 @@ TEST_F(ExpectedTest, ExpectStruct) {
 	EXPECT_EQ(y, expected->y);
 }
 
-TEST_F(ExpectedTest, UnexpectStruct) {
+TEST_F(ExpectedTest, UnexpectStruct) { // NOLINT
 	auto x = get_rand();
 	auto y = get_rand();
 	auto expected = Expected<int, Pair>(Unexpected(Pair(x, y)));
@@ -179,7 +179,7 @@ struct PairDestruct {
 
 int PairDestruct::cd_count = 0;
 
-TEST_F(ExpectedTest, ExpectStructDestruct) {
+TEST_F(ExpectedTest, ExpectStructDestruct) { // NOLINT
 	PairDestruct::cd_count = 0;
 	{
 		auto x = get_rand();
@@ -196,7 +196,7 @@ TEST_F(ExpectedTest, ExpectStructDestruct) {
 	EXPECT_EQ(0, PairDestruct::cd_count);
 }
 
-TEST_F(ExpectedTest, UnexpectStructDestruct) {
+TEST_F(ExpectedTest, UnexpectStructDestruct) { // NOLINT
 	PairDestruct::cd_count = 0;
 	{
 		auto x = get_rand();
@@ -212,10 +212,10 @@ TEST_F(ExpectedTest, UnexpectStructDestruct) {
 	EXPECT_EQ(0, PairDestruct::cd_count);
 }
 
-TEST_F(ExpectedTest, ExceptionValueCheckedWhenIsError) {
+TEST_F(ExpectedTest, ExceptionValueCheckedWhenIsError) { // NOLINT
 	auto expected =
 	    Expected<int, std::string>(Unexpected(std::string("hello")));
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    try {
 			    EXPECT_FALSE(bool(expected));
@@ -230,9 +230,9 @@ TEST_F(ExpectedTest, ExceptionValueCheckedWhenIsError) {
 	    BadExpectedAccess);
 }
 
-TEST_F(ExpectedTest, ExceptionErrorCheckedWhenNotError) {
+TEST_F(ExpectedTest, ExceptionErrorCheckedWhenNotError) { // NOLINT
 	auto expected = Expected<int, std::string>(5);
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    try {
 			    EXPECT_TRUE(bool(expected));
@@ -247,10 +247,10 @@ TEST_F(ExpectedTest, ExceptionErrorCheckedWhenNotError) {
 	    BadExpectedAccess);
 }
 
-TEST_F(ExpectedTest, ExceptionDerefValueWhenUnexpected) {
+TEST_F(ExpectedTest, ExceptionDerefValueWhenUnexpected) { // NOLINT
 	auto expected =
 	    Expected<const Pair, std::string>(Unexpected(std::string("hello")));
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    try {
 			    EXPECT_FALSE(bool(expected));
@@ -266,10 +266,10 @@ TEST_F(ExpectedTest, ExceptionDerefValueWhenUnexpected) {
 	    BadExpectedAccess);
 }
 
-TEST_F(ExpectedTest, ExceptionDerefPtrWhenUnexpected) {
+TEST_F(ExpectedTest, ExceptionDerefPtrWhenUnexpected) { // NOLINT
 	auto expected =
 	    Expected<Pair, std::string>(Unexpected(std::string("hello")));
-	EXPECT_THROW(
+	EXPECT_THROW( // NOLINT
 	    {
 		    try {
 			    EXPECT_FALSE(bool(expected));

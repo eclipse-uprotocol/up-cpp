@@ -40,15 +40,15 @@ protected:
 /// It should be possible to establish a connection without an exception
 /// being thrown. Exceptions that can be thrown at this stage would be a result
 /// of a system-level failure, such as running out of memory.
-TEST_F(CallbackTest, EstablishDoesNotThrow) {
+TEST_F(CallbackTest, EstablishDoesNotThrow) { // NOLINT
 	using namespace uprotocol::utils;
 
-	EXPECT_NO_THROW(callbacks::Connection<void>::establish([]() {}));
+	EXPECT_NO_THROW(callbacks::Connection<void>::establish([]() {})); // NOLINT
 }
 
 /// It should be possible to establish a connection and call the callback
 /// function via the CallerHandle (aka the callable).
-TEST_F(CallbackTest, EstablishLinkedPair) {
+TEST_F(CallbackTest, EstablishLinkedPair) { // NOLINT
 	using namespace uprotocol::utils;
 
 	int call_count{0};
@@ -62,7 +62,7 @@ TEST_F(CallbackTest, EstablishLinkedPair) {
 
 	// It's the first time we're calling the callback - check that it doesn't
 	// throw to stop the test here if something is wrong.
-	EXPECT_NO_THROW(callable());
+	EXPECT_NO_THROW(callable()); // NOLINT
 
 	EXPECT_TRUE(handle);
 	EXPECT_TRUE(callable);
@@ -78,7 +78,7 @@ TEST_F(CallbackTest, EstablishLinkedPair) {
 
 // When dropping a CalleeHandle or the last CallerHandle, the connection should
 // be broken.
-TEST_F(CallbackTest, DroppedHandlesBreakConnection) {
+TEST_F(CallbackTest, DroppedHandlesBreakConnection) { // NOLINT
 	int call_count{0};
 
 	// Utility to produce connected pairs that have been validated as connected
@@ -130,7 +130,7 @@ TEST_F(CallbackTest, DroppedHandlesBreakConnection) {
 		EXPECT_FALSE(callable_outside);
 		// Calling the callback after disconnect from the callee end should not
 		// result in an exception.
-		EXPECT_NO_THROW(callable_outside());
+		EXPECT_NO_THROW(callable_outside()); // NOLINT
 		EXPECT_EQ(call_count, 0);
 	}
 
@@ -168,13 +168,13 @@ TEST_F(CallbackTest, DroppedHandlesBreakConnection) {
 
 // CallerHandles cannot be used when default constructed or after reset is
 // called. Doing so will result in an exception being thrown.
-TEST_F(CallbackTest, CallerHandleThrowsBadCall) {
+TEST_F(CallbackTest, CallerHandleThrowsBadCall) { // NOLINT
 	using namespace uprotocol::utils;
 
 	// Default constructed CallerHandle cannot be called
 	{
 		callbacks::CallerHandle<void> callable;
-		EXPECT_THROW(callable(), callbacks::BadCallerAccess);
+		EXPECT_THROW(callable(), callbacks::BadCallerAccess); // NOLINT
 	}
 
 	// Freshly reset CallerHandle cannot be called
@@ -182,14 +182,14 @@ TEST_F(CallbackTest, CallerHandleThrowsBadCall) {
 		auto [handle, callable] =
 		    callbacks::Connection<void>::establish([]() {});
 		callable.reset();
-		EXPECT_THROW(callable(), callbacks::BadCallerAccess);
+		EXPECT_THROW(callable(), callbacks::BadCallerAccess); // NOLINT
 	}
 }
 
 // This connection system will be used for multiple connected callbacks
 // simultaneously. As such, it should be possible to have multiple handle pairs
 // in use and not have any unexpected interactions between them.
-TEST_F(CallbackTest, MultipleConnectionsCanCoexist) {
+TEST_F(CallbackTest, MultipleConnectionsCanCoexist) { // NOLINT
 	using namespace uprotocol::utils;
 
 	std::array<int, 3> call_count{0};
@@ -247,7 +247,7 @@ TEST_F(CallbackTest, MultipleConnectionsCanCoexist) {
 
 // Cleanup functions should be called when the connection is broken from the
 // callee end of the connection.
-TEST_F(CallbackTest, CleanupCalledWhenCalleeHandleDropped) {
+TEST_F(CallbackTest, CleanupCalledWhenCalleeHandleDropped) { // NOLINT
 	using namespace uprotocol::utils;
 
 	int cleanup_count{0};
@@ -262,7 +262,7 @@ TEST_F(CallbackTest, CleanupCalledWhenCalleeHandleDropped) {
 
 // Cleanup functions should not be called when the connection is broken from
 // the caller end of the connection.
-TEST_F(CallbackTest, CleanupNotCalledWhenCallerHandleDropped) {
+TEST_F(CallbackTest, CleanupNotCalledWhenCallerHandleDropped) { // NOLINT
 	using namespace uprotocol::utils;
 
 	{
@@ -295,7 +295,7 @@ TEST_F(CallbackTest, CleanupNotCalledWhenCallerHandleDropped) {
 // It is very likely that connections will be held in some sort of map. In
 // order to effectively make use of the cleanup function, it should be possible
 // to use the CallerHandle as a reverse-lookup key.
-TEST_F(CallbackTest, CleanupParameterCanLookUpCallable) {
+TEST_F(CallbackTest, CleanupParameterCanLookUpCallable) { // NOLINT
 	using namespace uprotocol::utils;
 
 	std::map<callbacks::Connection<void>::Callable, int> cleanup_count;
@@ -331,7 +331,7 @@ TEST_F(CallbackTest, CleanupParameterCanLookUpCallable) {
 // functions. However, this should be supported by the connection system. We
 // can verify the parameters are passed through by checking for the result of
 // known operations.
-TEST_F(CallbackTest, CallablesCanTakeArguments) {
+TEST_F(CallbackTest, CallablesCanTakeArguments) { // NOLINT
 	using namespace uprotocol::utils;
 
 	// Add a couple of numbers together, check the result
@@ -366,7 +366,7 @@ TEST_F(CallbackTest, CallablesCanTakeArguments) {
 // Until this point, the callback has not returned a value. This should be
 // supported by the connection system. Building on passing parameters, we can
 // return the result of an operation performed by the callback function.
-TEST_F(CallbackTest, CallablesCanReturnValues) {
+TEST_F(CallbackTest, CallablesCanReturnValues) { // NOLINT
 	using namespace uprotocol::utils;
 
 	// Multiply two numbers together, check the result
@@ -404,7 +404,7 @@ TEST_F(CallbackTest, CallablesCanReturnValues) {
 // inadvertently introduce a copy. We can detect this by a) using a non-
 // copyable type as the return and b) checking container objects for changes
 // in their data pointers.
-TEST_F(CallbackTest, ReturnValuesAreMoved) {
+TEST_F(CallbackTest, ReturnValuesAreMoved) { // NOLINT
 	using namespace uprotocol::utils;
 
 	// Checking with a non-copyable object (in this case, std::unique_ptr)
@@ -459,7 +459,7 @@ TEST_F(CallbackTest, ReturnValuesAreMoved) {
 // still exist. It is safe to call - nothing will happen. However, when the
 // callback is a returning callback, an empty optional will be returned to
 // indicate that the connection is not active.
-TEST_F(CallbackTest, DisconnectedCallablesReturnNothing) {
+TEST_F(CallbackTest, DisconnectedCallablesReturnNothing) { // NOLINT
 	using namespace uprotocol::utils;
 
 	{
@@ -496,7 +496,7 @@ TEST_F(CallbackTest, DisconnectedCallablesReturnNothing) {
 
 // The typical use case for these callbacks is to pass asynchronous events.
 // It should work with the caller executing from a separate context.
-TEST_F(CallbackTest, CanCallFromAnotherThread) {
+TEST_F(CallbackTest, CanCallFromAnotherThread) { // NOLINT
 	using namespace uprotocol::utils;
 
 	std::atomic<int> call_count{0};
@@ -562,7 +562,7 @@ private:
 // threads all blocking to acquire resources (via semaphore-like object). These
 // blocks are released one-by-one to check that the connection states remain
 // valid and the callee remains blocked throughout the process.
-TEST_F(CallbackTest, HandleResetBlocksWhileCallbacksRunning) {
+TEST_F(CallbackTest, HandleResetBlocksWhileCallbacksRunning) { // NOLINT
 	using namespace uprotocol::utils;
 	using namespace std::chrono_literals;
 
@@ -676,10 +676,10 @@ TEST_F(CallbackTest, HandleResetBlocksWhileCallbacksRunning) {
 // construct a CallerHandle then initialize it later. Check this works, that
 // the default-constructed object reports as disconnected, and that no
 // exception is thrown.
-TEST_F(CallbackTest, CallerHandleCanDefaultConstruct) {
+TEST_F(CallbackTest, CallerHandleCanDefaultConstruct) { // NOLINT
 	using namespace uprotocol::utils;
 
-	EXPECT_NO_THROW({
+	EXPECT_NO_THROW({ // NOLINT
 		callbacks::CallerHandle<void> x;
 		EXPECT_FALSE(x);
 	});
@@ -689,10 +689,10 @@ TEST_F(CallbackTest, CallerHandleCanDefaultConstruct) {
 // construct a CalleeHandle then initialize it later. Check this works, that
 // the default-constructed object reports as disconnected, and that no
 // exception is thrown.
-TEST_F(CallbackTest, CalleeHandleCanDefaultConstruct) {
+TEST_F(CallbackTest, CalleeHandleCanDefaultConstruct) { // NOLINT
 	using namespace uprotocol::utils;
 
-	EXPECT_NO_THROW({
+	EXPECT_NO_THROW({ // NOLINT
 		callbacks::CalleeHandle<void> x;
 		EXPECT_FALSE(x);
 	});
@@ -705,12 +705,12 @@ TEST_F(CallbackTest, CalleeHandleCanDefaultConstruct) {
 // function objects they receive
 
 // Tests invalid callback function objects
-TEST_F(CallbackTest, EstablishWithNonCallableCallback) {
+TEST_F(CallbackTest, EstablishWithNonCallableCallback) { // NOLINT
 	using namespace uprotocol::utils;
 
 	callbacks::Connection<bool>::ConnectedPair conn;
 
-	EXPECT_THROW(conn = callbacks::Connection<bool>::establish({}),
+	EXPECT_THROW(conn = callbacks::Connection<bool>::establish({}), // NOLINT
 	             callbacks::EmptyFunctionObject);
 
 	auto& [handle, callable] = conn;
@@ -720,19 +720,19 @@ TEST_F(CallbackTest, EstablishWithNonCallableCallback) {
 	// is broken. When that happens, the destructor will try to reset again.
 	// By resetting the callable second, there is no need to try the cleanup
 	// funciton again, so the destructor won't throw.
-	EXPECT_NO_THROW(handle.reset());
-	EXPECT_NO_THROW(callable.reset());
+	EXPECT_NO_THROW(handle.reset()); // NOLINT
+	EXPECT_NO_THROW(callable.reset()); // NOLINT
 }
 
 // Tests invalid cleanup function objects
-TEST_F(CallbackTest, EstablishWithNonCallableCleanup) {
+TEST_F(CallbackTest, EstablishWithNonCallableCleanup) { // NOLINT
 	using namespace uprotocol::utils;
 
 	auto cb = []() -> bool { return true; };
 	callbacks::Connection<bool>::Cleanup empty;
 	callbacks::Connection<bool>::ConnectedPair conn;
 
-	EXPECT_THROW(conn = callbacks::Connection<bool>::establish(cb, empty),
+	EXPECT_THROW(conn = callbacks::Connection<bool>::establish(cb, empty), // NOLINT
 	             callbacks::EmptyFunctionObject);
 
 	auto& [handle, callable] = conn;
@@ -742,18 +742,18 @@ TEST_F(CallbackTest, EstablishWithNonCallableCleanup) {
 	// is broken. When that happens, the destructor will try to reset again.
 	// By resetting the callable second, there is no need to try the cleanup
 	// funciton again, so the destructor won't throw.
-	EXPECT_NO_THROW(handle.reset());
-	EXPECT_NO_THROW(callable.reset());
+	EXPECT_NO_THROW(handle.reset()); // NOLINT
+	EXPECT_NO_THROW(callable.reset()); // NOLINT
 }
 
 // Tests both invalid cleanup and invalid callback function objects
-TEST_F(CallbackTest, EstablishWithNonCallableCallbackAndCleanup) {
+TEST_F(CallbackTest, EstablishWithNonCallableCallbackAndCleanup) { // NOLINT
 	using namespace uprotocol::utils;
 
 	callbacks::Connection<bool>::Cleanup empty;
 	callbacks::Connection<bool>::ConnectedPair conn;
 
-	EXPECT_THROW(conn = callbacks::Connection<bool>::establish({}, empty),
+	EXPECT_THROW(conn = callbacks::Connection<bool>::establish({}, empty), // NOLINT
 	             callbacks::EmptyFunctionObject);
 
 	auto& [handle, callable] = conn;
@@ -763,8 +763,8 @@ TEST_F(CallbackTest, EstablishWithNonCallableCallbackAndCleanup) {
 	// is broken. When that happens, the destructor will try to reset again.
 	// By resetting the callable second, there is no need to try the cleanup
 	// funciton again, so the destructor won't throw.
-	EXPECT_NO_THROW(handle.reset());
-	EXPECT_NO_THROW(callable.reset());
+	EXPECT_NO_THROW(handle.reset()); // NOLINT
+	EXPECT_NO_THROW(callable.reset()); // NOLINT
 }
 
 }  // namespace

@@ -67,7 +67,7 @@ protected:
 	std::optional<std::chrono::milliseconds> ttl_;
 };
 
-TEST_F(TestPublisherSubscriber, PubSubSuccess) {
+TEST_F(TestPublisherSubscriber, PubSubSuccess) { // NOLINT
 	// sub
 	auto transportSub =
 	    std::make_shared<uprotocol::test::UTransportMock>(source_);

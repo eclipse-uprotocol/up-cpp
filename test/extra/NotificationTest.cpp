@@ -63,7 +63,7 @@ protected:
 	return testTopic_;
 }
 
-TEST_F(NotificationTest, NotificationSuccess) {
+TEST_F(NotificationTest, NotificationSuccess) { // NOLINT
 	// Initialize
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
