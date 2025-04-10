@@ -35,7 +35,7 @@ protected:
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 public:
-	~TestUUriValidator() = default;
+	~TestUUriValidator() override = default;
 };
 
 TEST_F(TestUUriValidator, Valid) { // NOLINT

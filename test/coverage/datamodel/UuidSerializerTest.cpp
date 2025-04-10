@@ -108,7 +108,7 @@ TEST_F(TestUuidSerializer, // NOLINT
 }
 
 // Test string deserialization
-TEST(DeserializerTest, DeserializeUUID) {
+TEST(DeserializerTest, DeserializeUUID) { // NOLINT
 	// Define a UUID string in the traditional format
 	std::string uuid_str = "12345678-9abc-def0-fedc-ba9876543210";
 	// Deserialize the UUID string
@@ -133,7 +133,7 @@ TEST_F(TestUuidSerializer, // NOLINT
 }
 
 // Test invalid string deserialization
-TEST(DeserializerTest, InvalidUUIDFormat) {
+TEST(DeserializerTest, InvalidUUIDFormat) { // NOLINT
 	// Define an invalid UUID string (missing dashes)
 	std::string invalid_uuid_str = "123456789abcdef0123456789abcdef0";
 	// Assert that deserialization throws an invalid argument exception
@@ -143,7 +143,7 @@ TEST(DeserializerTest, InvalidUUIDFormat) {
 }
 
 // Test deserialization with correct length but incorrect placement of dashes
-TEST(DeserializerTest, DeserializeWithMissingOneCharacter) {
+TEST(DeserializerTest, DeserializeWithMissingOneCharacter) { // NOLINT
 	std::string invalid_uuid =
 	    "12345678-1234-5678-1234-56781234567";  // Missing one character
 	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
@@ -152,7 +152,7 @@ TEST(DeserializerTest, DeserializeWithMissingOneCharacter) {
 }
 
 // Test deserialization with UUIDs that have an extra character
-TEST(DeserializerTest, DeserializeWithExtraCharacter) {
+TEST(DeserializerTest, DeserializeWithExtraCharacter) { // NOLINT
 	std::string invalid_uuid1 =
 	    "12345678-1234-5678-1234-1234567890123";  // Extra character at the end
 	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
@@ -188,7 +188,7 @@ TEST(DeserializerTest, DeserializeWithIncorrectDashPlacement) {
 }
 
 // Test deserialization with a zero-length string
-TEST(DeserializerTest, DeserializeEmptyString) {
+TEST(DeserializerTest, DeserializeEmptyString) { // NOLINT
 	// Define an empty UUID string
 	std::string empty_uuid_str;
 	// Deserialize the empty UUID string
@@ -198,7 +198,7 @@ TEST(DeserializerTest, DeserializeEmptyString) {
 }
 
 // Test deserialization with an invalid character in the UUID string
-TEST(DeserializerTest, DeserializeInvalidCharacter) {
+TEST(DeserializerTest, DeserializeInvalidCharacter) { // NOLINT
 	// Define a UUID string with an invalid character ('x' instead of valid hex)
 	std::string invalid_uuid_str = "1234567890ab-cdef-1234-5678-90abcdefxabc";
 	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT

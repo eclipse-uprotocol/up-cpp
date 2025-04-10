@@ -329,7 +329,10 @@ TEST_F(CallbackTest, CleanupParameterCanLookUpCallable) { // NOLINT
 // can verify the parameters are passed through by checking for the result of
 // known operations.
 TEST_F(CallbackTest, CallablesCanTakeArguments) { // NOLINT
-	
+	constexpr uint16_t RANDOM_NUMBER_1 = 5;
+	constexpr uint16_t RANDOM_NUMBER_2 = 9;
+	constexpr int16_t RANDOM_NUMBER_3 = -80;
+	constexpr uint16_t RANDOM_NUMBER_4 = 79;
 
 	// Add a couple of numbers together, check the result
 	{
@@ -339,9 +342,9 @@ TEST_F(CallbackTest, CallablesCanTakeArguments) { // NOLINT
 		    callbacks::Connection<void, int, int>::establish(
 		        [&sum](int x, int y) { sum = x + y; });
 
-		callable(5, 9);
+		callable(RANDOM_NUMBER_1, RANDOM_NUMBER_2);
 		EXPECT_EQ(sum, 14);
-		callable(-80, 79);
+		callable(RANDOM_NUMBER_3, RANDOM_NUMBER_4);
 		EXPECT_EQ(sum, -1);
 	}
 
@@ -402,7 +405,7 @@ TEST_F(CallbackTest, CallablesCanReturnValues) { // NOLINT
 // copyable type as the return and b) checking container objects for changes
 // in their data pointers.
 TEST_F(CallbackTest, ReturnValuesAreMoved) { // NOLINT
-	
+	constexpr size_t RANDOM_NUMBER = 71;
 
 	// Checking with a non-copyable object (in this case, std::unique_ptr)
 	{
@@ -411,7 +414,7 @@ TEST_F(CallbackTest, ReturnValuesAreMoved) { // NOLINT
 		auto [handle, callable] =
 		    callbacks::Connection<std::unique_ptr<int>>::establish(
 		        [&original_location]() {
-			        auto p = std::make_unique<int>(71);
+			        auto p = std::make_unique<int>(RANDOM_NUMBER);
 			        original_location = p.get();
 			        return p;
 		        });

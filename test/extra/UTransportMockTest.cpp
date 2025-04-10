@@ -18,25 +18,33 @@
 
 #include <memory>
 #include <random>
-#include <sstream>
+
+constexpr uint16_t STR_MAX_LEN = 32;
+constexpr uint16_t PAYLOAD_STR_MAX_LEN = 1400;
+constexpr uint16_t RANDOM_INT_MAX = 100;
+constexpr uint32_t DEFAULT_UE_ID = 0x00010001;
+constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8000;
+constexpr uint16_t ATTR_TTL = 1000;
 
 using MsgDiff = google::protobuf::util::MessageDifferencer;
 
-static std::random_device random_dev;
-static std::mt19937 random_gen(random_dev());
-static std::uniform_int_distribution<int> char_dist('A', 'z');
-
-std::string get_random_string(size_t max_len = 32) {
+std::string get_random_string(size_t max_len = STR_MAX_LEN) {
+	std::random_device random_dev;
+	std::mt19937 random_gen(random_dev());
+	std::uniform_int_distribution<int> char_dist('A', 'z');
 	std::uniform_int_distribution<int> len_dist(1, static_cast<int>(max_len));
-	size_t len = len_dist(random_gen);
+	auto len = static_cast<size_t>(len_dist(random_gen));
 	std::string retval;
 	retval.reserve(len);
-	for (size_t i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++) {
 		retval += static_cast<char>(char_dist(random_gen));
+	}
 	return retval;
 }
 
-int get_random_int(int mn = 0, int mx = 100) {
+int get_random_int(int mn = 0, int mx = RANDOM_INT_MAX) {
+	std::random_device random_dev;
+	std::mt19937 random_gen(random_dev());
 	std::uniform_int_distribution<int> int_dist(mn, mx);
 	return int_dist(random_gen);
 }
@@ -59,20 +67,23 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	TestMockUTransport() = default;
-	~TestMockUTransport() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+public:
+	~TestMockUTransport() override = default;
 };
 
 TEST_F(TestMockUTransport, Send) { // NOLINT
-	using namespace std;
+	constexpr uint32_t DEF_SRC_UE_ID = 0x18000;
+	constexpr uint16_t CODE_MAX = 15;
+	constexpr uint16_t CODE_MOD = 16;
 
 	uprotocol::v1::UUri def_src_uuri;
 	def_src_uuri.set_authority_name(get_random_string());
-	def_src_uuri.set_ue_id(0x18000);
+	def_src_uuri.set_ue_id(DEF_SRC_UE_ID);
 	def_src_uuri.set_ue_version_major(1);
 	def_src_uuri.set_resource_id(0);
 
@@ -81,13 +92,13 @@ TEST_F(TestMockUTransport, Send) { // NOLINT
 	EXPECT_NE(nullptr, transport);
 	EXPECT_TRUE(MsgDiff::Equals(def_src_uuri, transport->getDefaultSource()));
 
-	const size_t max_count = 1000 * 100;
+	const size_t max_count = 100000;
 	for (size_t i = 0; i < max_count; i++) {
-		auto src = new uprotocol::v1::UUri();
+		auto *src = new uprotocol::v1::UUri();
 		src->set_authority_name("10.0.0.1");
-		src->set_ue_id(0x00010001);
+		src->set_ue_id(DEFAULT_UE_ID);
 		src->set_ue_version_major(1);
-		src->set_resource_id(0x8000);
+		src->set_resource_id(DEFAULT_RESOURCE_ID);
 
 		// auto sink = new uprotocol::v1::UUri();
 		// sink->set_authority_name("10.0.0.2");
@@ -101,13 +112,13 @@ TEST_F(TestMockUTransport, Send) { // NOLINT
 		attr->set_allocated_source(src);
 		// attr->set_allocated_sink(sink);
 		attr->set_payload_format(uprotocol::v1::UPAYLOAD_FORMAT_PROTOBUF);
-		attr->set_ttl(1000);
+		attr->set_ttl(ATTR_TTL);
 
 		uprotocol::v1::UMessage msg;
 		msg.set_allocated_attributes(attr);
-		msg.set_payload(get_random_string(1400));
+		msg.set_payload(get_random_string(PAYLOAD_STR_MAX_LEN));
 		transport->send_status_.set_code(
-		    static_cast<uprotocol::v1::UCode>(15 - (i % 16)));
+		    static_cast<uprotocol::v1::UCode>(CODE_MAX - (i % CODE_MOD)));
 		transport->send_status_.set_message(get_random_string());
 
 		auto result = transport->send(msg);
@@ -118,11 +129,10 @@ TEST_F(TestMockUTransport, Send) { // NOLINT
 }
 
 TEST_F(TestMockUTransport, registerListener) { // NOLINT
-	using namespace std;
-
+	constexpr uint32_t DEF_SRC_UE_ID = 0x18000;
 	uprotocol::v1::UUri def_src_uuri;
 	def_src_uuri.set_authority_name(get_random_string());
-	def_src_uuri.set_ue_id(0x18000);
+	def_src_uuri.set_ue_id(DEF_SRC_UE_ID);
 	def_src_uuri.set_ue_version_major(1);
 	def_src_uuri.set_resource_id(0);
 
@@ -133,15 +143,15 @@ TEST_F(TestMockUTransport, registerListener) { // NOLINT
 
 	uprotocol::v1::UUri sink_filter;
 	sink_filter.set_authority_name(get_random_string());
-	sink_filter.set_ue_id(0x00010001);
+	sink_filter.set_ue_id(DEFAULT_UE_ID);
 	sink_filter.set_ue_version_major(1);
-	sink_filter.set_resource_id(0x8000);
+	sink_filter.set_resource_id(DEFAULT_RESOURCE_ID);
 
 	uprotocol::v1::UUri source_filter;
 	source_filter.set_authority_name(get_random_string());
-	source_filter.set_ue_id(0x00010001);
+	source_filter.set_ue_id(DEFAULT_UE_ID);
 	source_filter.set_ue_version_major(1);
-	source_filter.set_resource_id(0x8000);
+	source_filter.set_resource_id(DEFAULT_RESOURCE_ID);
 
 	uprotocol::v1::UMessage capture_msg;
 	size_t capture_count = 0;
@@ -161,12 +171,12 @@ TEST_F(TestMockUTransport, registerListener) { // NOLINT
 	EXPECT_TRUE(MsgDiff::Equals(sink_filter, *transport->sink_filter_));
 	EXPECT_TRUE(MsgDiff::Equals(source_filter, transport->source_filter_));
 
-	const size_t max_count = 1000 * 100;
+	const size_t max_count = 100000;
 	for (size_t i = 0; i < max_count; i++) {
 		uprotocol::v1::UMessage msg;
 		auto attr = new uprotocol::v1::UAttributes();
 		msg.set_allocated_attributes(attr);
-		msg.set_payload(get_random_string(1400));
+		msg.set_payload(get_random_string(PAYLOAD_STR_MAX_LEN));
 		transport->mockMessage(msg);
 		EXPECT_EQ(i + 1, capture_count);
 		EXPECT_TRUE(MsgDiff::Equals(msg, capture_msg));

@@ -12,39 +12,56 @@
 #include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest.h>
 
+#include <utility>
+
 #include "UTransportMock.h"
 #include "up-cpp/communication/Publisher.h"
 #include "up-cpp/communication/Subscriber.h"
 #include "up-cpp/datamodel/serializer/UUri.h"
 
-using namespace uprotocol::communication;
-using namespace uprotocol::v1;
-using namespace uprotocol::datamodel::serializer::uri;
-using MsgDiff = google::protobuf::util::MessageDifferencer;
+constexpr uint32_t DEFAULT_SOURCE_UE_ID = 0x00011101;
+constexpr uint32_t DEFAULT_TOPIC_UE_ID = 0x10010001;
+constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8101;
+constexpr uint16_t DEFAULT_SOURCE_VERSION_MAJOR = 0xF1;
+constexpr uint16_t DEFAULT_TOPIC_VERSION_MAJOR = 0xF8;
+constexpr std::chrono::milliseconds THOUSAND_MILLISECONDS(1000);
 
-namespace {
-using namespace uprotocol::datamodel::builder;
+namespace uprotocol::v1{
 
 class TestPublisherSubscriber : public testing::Test {
+private:
+	std::shared_ptr<uprotocol::test::UTransportMock> transportMock_;
+	UUri source_;
+	UUri topic_;
+	UPayloadFormat format_ = UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
+	std::optional<UPriority> priority_;
+	std::optional<std::chrono::milliseconds> ttl_;
 protected:
+	std::shared_ptr<uprotocol::test::UTransportMock> getTransportMock() const { return transportMock_; }
+	UUri getSource() const { return source_; }
+	UUri getTopic() const { return topic_; }
+	UPayloadFormat getFormat() const { return format_; }
+	std::optional<UPriority>& getPriority() { return priority_; }
+	std::optional<std::chrono::milliseconds> getTTL() const { return ttl_; }
+
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
 	void SetUp() override {
 		source_.set_authority_name("10.0.0.1");
-		source_.set_ue_id(0x00011101);
-		source_.set_ue_version_major(0xF1);
+		source_.set_ue_id(DEFAULT_SOURCE_UE_ID);
+		source_.set_ue_version_major(DEFAULT_SOURCE_VERSION_MAJOR);
 		source_.set_resource_id(0x0);
 
 		topic_.set_authority_name("10.0.0.1");
-		topic_.set_ue_id(0x10010001);
-		topic_.set_ue_version_major(0xF8);
-		topic_.set_resource_id(0x8101);
+		topic_.set_ue_id(DEFAULT_TOPIC_UE_ID);
+		topic_.set_ue_version_major(DEFAULT_TOPIC_VERSION_MAJOR);
+		topic_.set_resource_id(DEFAULT_RESOURCE_ID);
 		transportMock_ =
 		    std::make_shared<uprotocol::test::UTransportMock>(source_);
 
 		format_ = UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 		priority_ = UPriority::UPRIORITY_CS2;
-		ttl_ = std::chrono::milliseconds(1000);
+		ttl_ = THOUSAND_MILLISECONDS;
 	}
 
 	void TearDown() override {}
@@ -52,58 +69,53 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	TestPublisherSubscriber() = default;
-	~TestPublisherSubscriber() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
-	std::shared_ptr<uprotocol::test::UTransportMock> transportMock_;
-	UUri source_;
-	UUri topic_;
-	UPayloadFormat format_;
-	std::optional<UPriority> priority_;
-	std::optional<std::chrono::milliseconds> ttl_;
+public:
+	~TestPublisherSubscriber() override = default;
 };
 
 TEST_F(TestPublisherSubscriber, PubSubSuccess) { // NOLINT
 	// sub
-	auto transportSub =
-	    std::make_shared<uprotocol::test::UTransportMock>(source_);
+	auto transport_sub =
+	    std::make_shared<uprotocol::test::UTransportMock>(getSource());
 
 	uprotocol::v1::UMessage captured_message;
 	auto callback = [&captured_message](auto message) {
-		captured_message = message;
+		captured_message = std::move(message);
 	};
 
 	auto result =
-	    Subscriber::subscribe(transportSub, topic_, std::move(callback));
+	    uprotocol::communication::Subscriber::subscribe(transport_sub, getTopic(), std::move(callback));
 
 	// pub
-	std::string testPayloadStr = "test_payload";
-	auto movableTopic = topic_;
-	Publisher publisher(transportMock_, std::move(movableTopic), format_,
-	                    priority_, ttl_);
+	std::string test_payload_str = "test_payload";
+	auto movable_topic = getTopic();
+	uprotocol::communication::Publisher publisher(getTransportMock(), std::move(movable_topic), getFormat(),
+	                    getPriority(), getTTL());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->send_status_ = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	uprotocol::datamodel::builder::Payload test_payload(test_payload_str, getFormat());
+	auto status = publisher.publish(std::move(test_payload));
 
 	// Test
 	EXPECT_EQ(
-	    AsString::serialize(transportMock_->message_.attributes().source()),
-	    AsString::serialize(transportSub->source_filter_));
+	    uprotocol::datamodel::serializer::uri::AsString::serialize(getTransportMock()->message_.attributes().source()),
+	    uprotocol::datamodel::serializer::uri::AsString::serialize(transport_sub->source_filter_));
 
 	// Manually bridge the two transports
-	transportSub->mockMessage(transportMock_->message_);
+	transport_sub->mockMessage(getTransportMock()->message_);
 
 	// Test
-	EXPECT_TRUE(MsgDiff::Equals(transportMock_->message_, captured_message));
-	EXPECT_EQ(testPayloadStr, captured_message.payload());
+	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(getTransportMock()->message_, captured_message));
+	EXPECT_EQ(test_payload_str, captured_message.payload());
 }
 
-}  // namespace
+}  // namespace uprotocol::v1

@@ -169,24 +169,24 @@ TEST_F(ExpectedTest, UnexpectStruct) { // NOLINT
 struct PairDestruct {
 	int x;
 	int y;
-	static int cd_count;
+	static int cd_count_;
 
-	PairDestruct(int x, int y) : x(x), y(y) { cd_count++; }
+	PairDestruct(int x, int y) : x(x), y(y) { cd_count_++; }
 
-	PairDestruct(const PairDestruct& arg) : x(arg.x), y(arg.y) { cd_count++; }
+	PairDestruct(const PairDestruct& arg) : x(arg.x), y(arg.y) { cd_count_++; }
 
-	~PairDestruct() { cd_count--; }
+	~PairDestruct() { cd_count_--; }
 };
 
-int PairDestruct::cd_count = 0;
+int PairDestruct::cd_count_ = 0;
 
 TEST_F(ExpectedTest, ExpectStructDestruct) { // NOLINT
-	PairDestruct::cd_count = 0;
+	PairDestruct::cd_count_ = 0;
 	{
 		auto x = get_rand();
 		auto y = get_rand();
 		auto expected = Expected<PairDestruct, std::string>(PairDestruct(x, y));
-		EXPECT_EQ(1, PairDestruct::cd_count);
+		EXPECT_EQ(1, PairDestruct::cd_count_);
 		EXPECT_TRUE(bool(expected));
 		EXPECT_TRUE(expected.has_value());
 		EXPECT_EQ(x, expected.value().x);
@@ -194,23 +194,23 @@ TEST_F(ExpectedTest, ExpectStructDestruct) { // NOLINT
 		EXPECT_EQ(x, expected->x);
 		EXPECT_EQ(y, expected->y);
 	}
-	EXPECT_EQ(0, PairDestruct::cd_count);
+	EXPECT_EQ(0, PairDestruct::cd_count_);
 }
 
 TEST_F(ExpectedTest, UnexpectStructDestruct) { // NOLINT
-	PairDestruct::cd_count = 0;
+	PairDestruct::cd_count_ = 0;
 	{
 		auto x = get_rand();
 		auto y = get_rand();
 		auto expected =
 		    Expected<int, PairDestruct>(Unexpected(PairDestruct(x, y)));
-		EXPECT_EQ(1, PairDestruct::cd_count);
+		EXPECT_EQ(1, PairDestruct::cd_count_);
 		EXPECT_FALSE(bool(expected));
 		EXPECT_FALSE(expected.has_value());
 		EXPECT_EQ(x, expected.error().x);
 		EXPECT_EQ(y, expected.error().y);
 	}
-	EXPECT_EQ(0, PairDestruct::cd_count);
+	EXPECT_EQ(0, PairDestruct::cd_count_);
 }
 
 TEST_F(ExpectedTest, ExceptionValueCheckedWhenIsError) { // NOLINT
