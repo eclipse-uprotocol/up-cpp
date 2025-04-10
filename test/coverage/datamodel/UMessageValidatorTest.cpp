@@ -581,8 +581,8 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) { // NOLINT
 }
 
 TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
-	constexpr uint32_t SOURCE_RESCOURCE_ID = 0x8000; 
-	getSource().set_resource_id(SOURCE_RESCOURCE_ID);
+	constexpr uint32_t SOURCE_RESOURCE_ID = 0x8000; 
+	getSource().set_resource_id(SOURCE_RESOURCE_ID);
 
 	{
 		// test common attributes for any message
@@ -621,9 +621,9 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 
 	{
 		// invalid source
-		constexpr uint32_t SOURCE_RESCOURCE_ID_INVALID = 0x7FFF; 
+		constexpr uint32_t SOURCE_RESOURCE_ID_INVALID = 0x7FFF; 
 		UUri source = getSource();
-		source.set_resource_id(SOURCE_RESCOURCE_ID_INVALID);  // should greater than 0x8000
+		source.set_resource_id(SOURCE_RESOURCE_ID_INVALID);  // should greater than 0x8000
 		auto attributes = fakePublish(source);
 		auto umessage = build(attributes);
 		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
@@ -684,8 +684,8 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 }
 
 TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
-	constexpr uint32_t SOURCE_RESCOURCE_ID = 0x8001;
-	getSource().set_resource_id(SOURCE_RESCOURCE_ID);
+	constexpr uint32_t SOURCE_RESOURCE_ID = 0x8001;
+	getSource().set_resource_id(SOURCE_RESOURCE_ID);
 	getSink().set_resource_id(0);
 
 	{
@@ -735,9 +735,9 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 
 	{
 		// invalid source
-		constexpr uint32_t LOCAL_SOURCE_RESCOURCE_ID = 0x7FFF;
+		constexpr uint32_t LOCAL_SOURCE_RESOURCE_ID = 0x7FFF;
 		UUri local_source = getSource();
-		local_source.set_resource_id(LOCAL_SOURCE_RESCOURCE_ID);  // should be greater than 0x8000
+		local_source.set_resource_id(LOCAL_SOURCE_RESOURCE_ID);  // should be greater than 0x8000
 		auto attributes = fakeNotification(local_source, getSink());
 		auto umessage = build(attributes);
 		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
@@ -747,9 +747,9 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 
 	{
 		// invalid sink
-		constexpr uint32_t LOCAL_SOURCE_RESCOURCE_ID = 0x7FFF;
+		constexpr uint32_t LOCAL_SOURCE_RESOURCE_ID = 0x7FFF;
 		UUri local_sink = getSink();
-		local_sink.set_resource_id(LOCAL_SOURCE_RESCOURCE_ID);  // should be greater than 0x8000
+		local_sink.set_resource_id(LOCAL_SOURCE_RESOURCE_ID);  // should be greater than 0x8000
 		auto attributes = fakeNotification(getSource(), local_sink);
 		auto umessage = build(attributes);
 		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
@@ -877,9 +877,9 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 	{
 		constexpr uint32_t ATTRIBUTES_INVALID_PRIORITY = 0xFFFF;
 		// valid publish
-		constexpr uint32_t PUBLISH_SOURCE_RESCOURCE_ID = 0x8000;
+		constexpr uint32_t PUBLISH_SOURCE_RESOURCE_ID = 0x8000;
 		auto source = getSource();
-		source.set_resource_id(PUBLISH_SOURCE_RESCOURCE_ID);
+		source.set_resource_id(PUBLISH_SOURCE_RESOURCE_ID);
 
 		auto attributes = fakePublish(source);
 		auto umessage = build(attributes);
@@ -899,10 +899,10 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 
 	{
 		// valid notification
-		constexpr uint32_t NOTIFICATION_SOURCE_RESCOURCE_ID = 0x8001;
+		constexpr uint32_t NOTIFICATION_SOURCE_RESOURCE_ID = 0x8001;
 		auto source = getSource();
 		auto sink = getSink();
-		source.set_resource_id(NOTIFICATION_SOURCE_RESCOURCE_ID);
+		source.set_resource_id(NOTIFICATION_SOURCE_RESOURCE_ID);
 		sink.set_resource_id(0);
 
 		auto attributes = fakeNotification(source, sink);

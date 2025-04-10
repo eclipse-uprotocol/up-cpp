@@ -17,7 +17,7 @@
 #include "up-cpp/datamodel/constants/UuidConstants.h"
 constexpr std::chrono::seconds HUNDRED_SECONDS(100);
 constexpr std::chrono::seconds SIXTY_SECONDS(60);
-constexpr std::chrono::seconds THIRTY_SECONDS(60);
+constexpr std::chrono::seconds THIRTY_SECONDS(30);
 
 
 namespace uprotocol::datamodel{
