@@ -46,7 +46,7 @@ v1::UUri buildValidTestURI(const std::string& authority = "192.168.1.10") {
 }
 
 // Positive test case - test serialization of UUri to string
-TEST_F(TestUUriSerializer, SerializeUUriToString) {
+TEST_F(TestUUriSerializer, SerializeUUriToString) { // NOLINT
 	auto testUUri = buildValidTestURI();
 	const std::string expectedUUri = "//192.168.1.10/10010001/FE/7500";
 	const std::string actualUUri = AsString::serialize(testUUri);
@@ -54,7 +54,7 @@ TEST_F(TestUUriSerializer, SerializeUUriToString) {
 }
 
 // Positive test case - test serialization of UUri with no authority to string
-TEST_F(TestUUriSerializer, SerializeUUriWithNoAuthorityToString) {
+TEST_F(TestUUriSerializer, SerializeUUriWithNoAuthorityToString) { // NOLINT
 	auto testUUri = buildValidTestURI("");
 	const std::string expectedUUri = "/10010001/FE/7500";
 	const std::string actualUUri = AsString::serialize(testUUri);
@@ -63,7 +63,7 @@ TEST_F(TestUUriSerializer, SerializeUUriWithNoAuthorityToString) {
 
 // Test authority name '*' to see if it serializes without an exception for
 // using wildcard
-TEST_F(TestUUriSerializer, SerializeUUriToStringWithAuthorityWildCard) {
+TEST_F(TestUUriSerializer, SerializeUUriToStringWithAuthorityWildCard) { // NOLINT
 	v1::UUri testUUri;
 	testUUri.set_authority_name("*");  // Wildcard
 	testUUri.set_ue_id(0x1FFFE);
@@ -76,7 +76,7 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithAuthorityWildCard) {
 
 // Test Service ID in uEID field as a 0xFFFF to see if it serializes without
 // an exception for using wildcard
-TEST_F(TestUUriSerializer, SerializeUUriToStringWithServiceIDWildCard) {
+TEST_F(TestUUriSerializer, SerializeUUriToStringWithServiceIDWildCard) { // NOLINT
 	v1::UUri testUUri;
 	testUUri.set_authority_name("testAuthority");
 	testUUri.set_ue_id(0x1FFFF);  // Wildcard
@@ -89,7 +89,7 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithServiceIDWildCard) {
 
 // Test Instance ID in uEID field as a 0x0 to see if it serializes without an
 // exception for using wildcard
-TEST_F(TestUUriSerializer, SerializeUUriToStringWithInstanceIDWildCard) {
+TEST_F(TestUUriSerializer, SerializeUUriToStringWithInstanceIDWildCard) { // NOLINT
 	v1::UUri testUUri;
 	testUUri.set_authority_name("testAuthority");
 	testUUri.set_ue_id(0x00001234);  // Wildcard
@@ -102,7 +102,7 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithInstanceIDWildCard) {
 
 // Test major version as 0xFF to see if it serializes without an exception for
 // using wildcard
-TEST_F(TestUUriSerializer, SerializeUUriToStringWithMajorVersionWildCard) {
+TEST_F(TestUUriSerializer, SerializeUUriToStringWithMajorVersionWildCard) { // NOLINT
 	v1::UUri testUUri;
 	testUUri.set_authority_name("testAuthority");
 	testUUri.set_ue_id(0x12340000);
@@ -115,7 +115,7 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithMajorVersionWildCard) {
 
 // Test resource id as 0xFFFF to see if it thorws an exception for using
 // wildcard
-TEST_F(TestUUriSerializer, SerializeUUriToStringWithResourceIDWildCard) {
+TEST_F(TestUUriSerializer, SerializeUUriToStringWithResourceIDWildCard) { // NOLINT
 	v1::UUri testUUri;
 	testUUri.set_authority_name("testAuthority");
 	testUUri.set_ue_id(0x12340000);
@@ -127,7 +127,7 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithResourceIDWildCard) {
 }
 
 // Attempt to serialize invalid UUris and verify exceptions are thrown
-TEST_F(TestUUriSerializer, SerializeUUriToStringWithInvalidUUri) {
+TEST_F(TestUUriSerializer, SerializeUUriToStringWithInvalidUUri) { // NOLINT
 	const v1::UUri baseUUri = []() {
 		v1::UUri uuri;
 		uuri.set_authority_name("testAuthority");
@@ -166,7 +166,7 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithInvalidUUri) {
 
 // Test deserialize by providing scheme "up:" which is allowed to have as per
 // spec
-TEST_F(TestUUriSerializer, DeSerializeUUriStringWithScheme) {
+TEST_F(TestUUriSerializer, DeSerializeUUriStringWithScheme) { // NOLINT
 	const std::string uuriAsString = "up://192.168.1.10/10010001/FE/7500";
 	const std::string expectedAuthority = "192.168.1.10";
 	const uint32_t expectedUEID = 0x10010001;
@@ -181,14 +181,14 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithScheme) {
 }
 
 // Test deserialize by providing incorrect scheme "uprotocol:"
-TEST_F(TestUUriSerializer, DeSerializeUUriStringWithIncorrectScheme) {
+TEST_F(TestUUriSerializer, DeSerializeUUriStringWithIncorrectScheme) { // NOLINT
 	const std::string uuriAsString =
 	    "uprotocol://192.168.1.10/10010001/FE/7500";
 	ASSERT_THROW(AsString::deserialize(uuriAsString), std::invalid_argument);
 }
 
 // Test deserialize without providing scheme "up:"
-TEST_F(TestUUriSerializer, DeSerializeUUriStringWithoutScheme) {
+TEST_F(TestUUriSerializer, DeSerializeUUriStringWithoutScheme) { // NOLINT
 	const std::string uuriAsString = "//192.168.1.10/10010001/FE/7500";
 	const std::string expectedAuthority = "192.168.1.10";
 	const uint32_t expectedUEID = 0x10010001;
@@ -203,13 +203,13 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithoutScheme) {
 }
 
 // Test deserializing empty string to check if it thorws an exception
-TEST_F(TestUUriSerializer, DeSerializeEmptyUUriString) {
+TEST_F(TestUUriSerializer, DeSerializeEmptyUUriString) { // NOLINT
 	const std::string uuriAsString = "";
 	ASSERT_THROW(AsString::deserialize(uuriAsString), std::invalid_argument);
 }
 
 // Test deserializing string with no authority
-TEST_F(TestUUriSerializer, DeSerializeUUriStringWithNoAuthority) {
+TEST_F(TestUUriSerializer, DeSerializeUUriStringWithNoAuthority) { // NOLINT
 	const std::string uuriAsString = "/10010001/FE/7500";
 	const std::string expectedAuthority = "";
 	const uint32_t expectedUEID = 0x10010001;
@@ -224,7 +224,7 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithNoAuthority) {
 }
 
 // Test deserializing string with invalid number of arguments
-TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidNumberOfArgument) {
+TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidNumberOfArgument) { // NOLINT
 	// Provided 5 arguments instead of 4 when authority exist
 	std::string uuriAsString = "//192.168.1.10/10010001/FE/FE/7500";
 
@@ -261,7 +261,7 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidNumberOfArgument) {
 }
 
 // Test deserializing string with invalid arguments
-TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidArgument) {
+TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidArgument) { // NOLINT
 	// UE ID provided is invalid. It should be hex numeric
 	std::string uuriAsString = "//192.168.1.10/testUE/FE/7500";
 	ASSERT_THROW(AsString::deserialize(uuriAsString), std::invalid_argument);
@@ -288,7 +288,7 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidArgument) {
 }
 
 // Test deserializing string with wildcard arguments to see if throws exception
-TEST_F(TestUUriSerializer, DeSerializeUUriStringWithWildcardArgument) {
+TEST_F(TestUUriSerializer, DeSerializeUUriStringWithWildcardArgument) { // NOLINT
 	uprotocol::v1::UUri uuri;
 
 	auto check_uri = [&uuri](auto auth, uint32_t ueid, uint32_t mv,
@@ -342,7 +342,7 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithWildcardArgument) {
 
 // Test deserializing string with invalid field values to verify exceptions are
 // thrown
-TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidUUri) {
+TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidUUri) { // NOLINT
 	uprotocol::v1::UUri uuri;
 
 	// Major Version reserved

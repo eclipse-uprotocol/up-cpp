@@ -37,7 +37,7 @@ public:
 };
 
 // Test string serialization
-TEST_F(TestUuidSerializer, SerializeToString) {
+TEST_F(TestUuidSerializer, SerializeToString) { // NOLINT
 	constexpr uint64_t UUID_MSB = 0x1234567890ABCDEF;
 	constexpr uint64_t UUID_LSB = 0xFEDCBA0987654321;
 	uprotocol::v1::UUID uuid;
@@ -51,7 +51,7 @@ TEST_F(TestUuidSerializer, SerializeToString) {
 }
 
 // Test serialization with leading zeros in each segment
-TEST_F(TestUuidSerializer, SerializeWithLeadingZeros) {
+TEST_F(TestUuidSerializer, SerializeWithLeadingZeros) { // NOLINT
 	constexpr uint64_t UUID_MSB = 0x00001234007800AB;
 	constexpr uint64_t UUID_LSB = 0x00FE00BA09876543;
 	uprotocol::v1::UUID uuid;
@@ -65,7 +65,7 @@ TEST_F(TestUuidSerializer, SerializeWithLeadingZeros) {
 }
 
 // Test serialization with mixed case letters
-TEST_F(TestUuidSerializer, SerializeWithMixedCaseLetters) {
+TEST_F(TestUuidSerializer, SerializeWithMixedCaseLetters) { // NOLINT
 	constexpr uint64_t UUID_MSB = 0x1234567890ABcDEF;
 	constexpr uint64_t UUID_LSB = 0x00dcbA0987654321;
 	uprotocol::v1::UUID uuid;
@@ -79,7 +79,7 @@ TEST_F(TestUuidSerializer, SerializeWithMixedCaseLetters) {
 }
 
 // Test serialization with leading zeros and mixed case letters
-TEST_F(TestUuidSerializer, SerializeWithLeadingZerosAndMixedCaseLetters) {
+TEST_F(TestUuidSerializer, SerializeWithLeadingZerosAndMixedCaseLetters) { // NOLINT
 	constexpr uint64_t UUID_MSB = 0x00001234567890AB;
 	constexpr uint64_t UUID_LSB = 0xFedcba0987654982;
 	uprotocol::v1::UUID uuid;
@@ -93,7 +93,7 @@ TEST_F(TestUuidSerializer, SerializeWithLeadingZerosAndMixedCaseLetters) {
 }
 
 // Test serialization with leading/trailing zeros and mixed case letters
-TEST_F(TestUuidSerializer,
+TEST_F(TestUuidSerializer, // NOLINT
        SerializeWithLeadingZerosAndTrailingZerosAndMixedCaseLetters) {
 	constexpr uint64_t UUID_MSB = 0x00001234567890AB;
 	constexpr uint64_t UUID_LSB = 0xFedcba0987600000;
@@ -120,7 +120,7 @@ TEST(DeserializerTest, DeserializeUUID) {
 }
 
 // Test deserialization with leading/trailing zeros and mixed case letters
-TEST_F(TestUuidSerializer,
+TEST_F(TestUuidSerializer, // NOLINT
        DeserializeWithLeadingZerosAndTrailingZerosAndMixedCaseLetters) {
 	std::string uuid_str = "00001234-5678-90ab-feDc-ba0987600000";
 
@@ -137,8 +137,8 @@ TEST(DeserializerTest, InvalidUUIDFormat) {
 	// Define an invalid UUID string (missing dashes)
 	std::string invalid_uuid_str = "123456789abcdef0123456789abcdef0";
 	// Assert that deserialization throws an invalid argument exception
-	EXPECT_THROW(AsString::deserialize(
-	                 invalid_uuid_str),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
+	                 invalid_uuid_str)),
 	             std::invalid_argument);
 }
 
@@ -146,8 +146,8 @@ TEST(DeserializerTest, InvalidUUIDFormat) {
 TEST(DeserializerTest, DeserializeWithMissingOneCharacter) {
 	std::string invalid_uuid =
 	    "12345678-1234-5678-1234-56781234567";  // Missing one character
-	EXPECT_THROW(AsString::deserialize(
-	                 invalid_uuid),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
+	                 invalid_uuid)),
 	             std::invalid_argument);
 }
 
@@ -155,8 +155,8 @@ TEST(DeserializerTest, DeserializeWithMissingOneCharacter) {
 TEST(DeserializerTest, DeserializeWithExtraCharacter) {
 	std::string invalid_uuid1 =
 	    "12345678-1234-5678-1234-1234567890123";  // Extra character at the end
-	EXPECT_THROW(AsString::deserialize(
-	                 invalid_uuid1),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
+	                 invalid_uuid1)),
 	             std::invalid_argument);
 }
 
@@ -164,26 +164,26 @@ TEST(DeserializerTest, DeserializeWithIncorrectDashPlacement) {
 	std::string invalid_uuid1 =
 	    "123456781-2345-6781-2345-67812345678";  // First Dash placement
 
-	EXPECT_THROW(AsString::deserialize(
-	                 invalid_uuid1),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
+	                 invalid_uuid1)),
 	             std::invalid_argument);
 	std::string invalid_uuid2 =
 	    "12345678-12345-6781-2345-67812345678";  // Second Dash placement
 
-	EXPECT_THROW(AsString::deserialize(
-	                 invalid_uuid2),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
+	                 invalid_uuid2)),
 	             std::invalid_argument);
 	std::string invalid_uuid3 =
 	    "12345678-1234-56781-2345-67812345678";  // Third Dash placement
 
-	EXPECT_THROW(AsString::deserialize(
-	                 invalid_uuid3),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
+	                 invalid_uuid3)),
 	             std::invalid_argument);
 	std::string invalid_uuid4 =
 	    "12345678-1234-5678-12345-67812345678";  // Fourth Dash placement
 
-	EXPECT_THROW(AsString::deserialize(	
-	                 invalid_uuid4),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize(	 // NOLINT
+	                 invalid_uuid4)),
 	             std::invalid_argument);
 }
 
@@ -192,8 +192,8 @@ TEST(DeserializerTest, DeserializeEmptyString) {
 	// Define an empty UUID string
 	std::string empty_uuid_str;
 	// Deserialize the empty UUID string
-	EXPECT_THROW(AsString::deserialize(
-	                 empty_uuid_str),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
+	                 empty_uuid_str)),
 	             std::invalid_argument);
 }
 
@@ -201,33 +201,37 @@ TEST(DeserializerTest, DeserializeEmptyString) {
 TEST(DeserializerTest, DeserializeInvalidCharacter) {
 	// Define a UUID string with an invalid character ('x' instead of valid hex)
 	std::string invalid_uuid_str = "1234567890ab-cdef-1234-5678-90abcdefxabc";
-	EXPECT_THROW(AsString::deserialize(
-	                 invalid_uuid_str),
+	EXPECT_THROW(static_cast<void>(AsString::deserialize( // NOLINT
+	                 invalid_uuid_str)),
 	             std::invalid_argument);
 }
 
 // Test byte serialization
-TEST_F(TestUuidSerializer, SerializeToBytes) {
+TEST_F(TestUuidSerializer, SerializeToBytes) { // NOLINT
 	uprotocol::v1::UUID uuid;
 	constexpr uint64_t UUID_MSB = 0x1234567890ABCDEF;
 	constexpr uint64_t UUID_LSB = 0xFEDCBA0987654321;
+	constexpr std::array<uint8_t, 16> EXPECTED_BYTES_ARRAY = {
+		0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF,
+		0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21
+	};
 	uuid.set_msb(UUID_MSB);
 	uuid.set_lsb(UUID_LSB);
 
 	std::vector<uint8_t> uuid_bytes =
 	    AsBytes::serialize(uuid);
-	std::vector<uint8_t> expected_bytes = {0x12, 0x34, 0x56, 0x78, 0x90, 0xAB,
-	                                       0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x09,
-	                                       0x87, 0x65, 0x43, 0x21};
+	std::vector<uint8_t> expected_bytes(EXPECTED_BYTES_ARRAY.begin(), EXPECTED_BYTES_ARRAY.end());
 
 	EXPECT_EQ(uuid_bytes, expected_bytes);
 }
 
 // Test byte deserialization
-TEST_F(TestUuidSerializer, DeserializeFromBytes) {
-	std::vector<uint8_t> uuid_bytes = {0x12, 0x34, 0x56, 0x78, 0x90, 0xAB,
-	                                   0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x09,
-	                                   0x87, 0x65, 0x43, 0x21};
+TEST_F(TestUuidSerializer, DeserializeFromBytes) { // NOLINT
+	constexpr std::array<uint8_t, 16> UUID_BYTES_ARRAY = {
+		0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF,
+		0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21
+	};
+	std::vector<uint8_t> uuid_bytes(UUID_BYTES_ARRAY.begin(), UUID_BYTES_ARRAY.end());
 	uprotocol::v1::UUID uuid =
 	    AsBytes::deserialize(
 	        uuid_bytes);
@@ -237,15 +241,17 @@ TEST_F(TestUuidSerializer, DeserializeFromBytes) {
 }
 
 // Test invalid byte deserialization
-TEST_F(TestUuidSerializer, DeserializeInvalidBytes) {
-	std::vector<uint8_t> invalid_bytes = {0x12, 0x34, 0x56};
-	EXPECT_THROW(AsBytes::deserialize(
-	                 invalid_bytes),
+TEST_F(TestUuidSerializer, DeserializeInvalidBytes) { // NOLINT
+	constexpr std::array<uint8_t, 3> INVALID_BYTES_ARRAY = {0x12, 0x34, 0x56};
+	std::vector<uint8_t> invalid_bytes(INVALID_BYTES_ARRAY.begin(), INVALID_BYTES_ARRAY.end());
+	EXPECT_THROW(static_cast<void>(AsBytes::deserialize( // NOLINT
+	                 invalid_bytes)),
 	             std::invalid_argument);
 }
 
 // Test edge case: minimum values for msb and lsb
-TEST_F(TestUuidSerializer, SerializeDeserializeMinValues) {
+TEST_F(TestUuidSerializer, SerializeDeserializeMinValues) { // NOLINT
+	constexpr uint16_t NUM_BYTES = 16;
 	uprotocol::v1::UUID uuid;
 	uuid.set_msb(0x0000000000000000);
 	uuid.set_lsb(0x0000000000000000);
@@ -261,7 +267,8 @@ TEST_F(TestUuidSerializer, SerializeDeserializeMinValues) {
 
 	std::vector<uint8_t> uuid_bytes =
 	    AsBytes::serialize(uuid);
-	std::vector<uint8_t> expected_bytes(16, 0x00);
+		
+	std::vector<uint8_t> expected_bytes(NUM_BYTES, 0x00);
 	EXPECT_EQ(uuid_bytes, expected_bytes);
 
 	deserialized_uuid =
@@ -272,7 +279,9 @@ TEST_F(TestUuidSerializer, SerializeDeserializeMinValues) {
 }
 
 // Test edge case: maximum values for msb and lsb
-TEST_F(TestUuidSerializer, SerializeDeserializeMaxValues) {
+TEST_F(TestUuidSerializer, SerializeDeserializeMaxValues) { // NOLINT
+	constexpr uint16_t NUM_BYTES = 16;
+	constexpr uint16_t VAL_BYTES = 0xFF;
 	uprotocol::v1::UUID uuid;
 	constexpr uint64_t UUID_MSB = 0xFFFFFFFFFFFFFFFF;
 	constexpr uint64_t UUID_LSB = 0xFFFFFFFFFFFFFFFF;
@@ -290,7 +299,7 @@ TEST_F(TestUuidSerializer, SerializeDeserializeMaxValues) {
 
 	std::vector<uint8_t> uuid_bytes =
 	    AsBytes::serialize(uuid);
-	std::vector<uint8_t> expected_bytes(16, 0xFF);
+	std::vector<uint8_t> expected_bytes(NUM_BYTES, VAL_BYTES);
 	EXPECT_EQ(uuid_bytes, expected_bytes);
 
 	deserialized_uuid =

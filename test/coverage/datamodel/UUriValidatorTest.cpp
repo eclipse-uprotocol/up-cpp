@@ -36,7 +36,7 @@ protected:
 	static void TearDownTestSuite() {}
 };
 
-TEST_F(TestUUriValidator, Valid) {
+TEST_F(TestUUriValidator, Valid) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -105,7 +105,7 @@ TEST_F(TestUUriValidator, Valid) {
 	}
 }
 
-TEST_F(TestUUriValidator, Wildcards) {
+TEST_F(TestUUriValidator, Wildcards) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -152,7 +152,7 @@ TEST_F(TestUUriValidator, Wildcards) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidRpcMethod) {
+TEST_F(TestUUriValidator, ValidRpcMethod) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -202,7 +202,7 @@ TEST_F(TestUUriValidator, ValidRpcMethod) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidRpcResponse) {
+TEST_F(TestUUriValidator, ValidRpcResponse) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -252,7 +252,7 @@ TEST_F(TestUUriValidator, ValidRpcResponse) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidPublishTopic) {
+TEST_F(TestUUriValidator, ValidPublishTopic) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -310,7 +310,7 @@ TEST_F(TestUUriValidator, ValidPublishTopic) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidNotificationSource) {
+TEST_F(TestUUriValidator, ValidNotificationSource) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -368,7 +368,7 @@ TEST_F(TestUUriValidator, ValidNotificationSource) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidNotificationSink) {
+TEST_F(TestUUriValidator, ValidNotificationSink) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -418,7 +418,7 @@ TEST_F(TestUUriValidator, ValidNotificationSink) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidSubscription) {
+TEST_F(TestUUriValidator, ValidSubscription) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -469,7 +469,7 @@ TEST_F(TestUUriValidator, ValidSubscription) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidDefaultSource) {
+TEST_F(TestUUriValidator, ValidDefaultSource) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -488,7 +488,7 @@ TEST_F(TestUUriValidator, ValidDefaultSource) {
 	}
 }
 
-TEST_F(TestUUriValidator, Empty) {
+TEST_F(TestUUriValidator, Empty) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name("");
@@ -546,7 +546,7 @@ TEST_F(TestUUriValidator, Empty) {
 	}
 }
 
-TEST_F(TestUUriValidator, ValidFilter) {
+TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
 	auto getUuri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name("ValidFilterTest");
@@ -627,7 +627,7 @@ TEST_F(TestUUriValidator, ValidFilter) {
 	}
 }
 
-TEST_F(TestUUriValidator, ReasonMessages) {
+TEST_F(TestUUriValidator, ReasonMessages) { // NOLINT
 	std::array all_reasons{Reason::EMPTY,
 	                       Reason::RESERVED_VERSION,
 	                       Reason::RESERVED_RESOURCE,
