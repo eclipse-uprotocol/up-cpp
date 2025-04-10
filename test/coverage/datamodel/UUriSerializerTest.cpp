@@ -137,8 +137,11 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithResourceIDWildCard) { // NOL
 
 // Attempt to serialize invalid UUris and verify exceptions are thrown
 TEST_F(TestUUriSerializer, SerializeUUriToStringWithInvalidUUri) { // NOLINT
+	constexpr uint32_t AUTHORITY_NAME_NUMBER = 129;
 	constexpr uint32_t TEST_UE_ID = 0x12340000;
 	constexpr uint32_t WILDCARD = 0xFFFE;
+	constexpr uint32_t INVALID_VERSION_MAJOR = 0x100;
+	constexpr uint32_t INVALID_RESOURCE_ID = 0x10000;
 	const uprotocol::v1::UUri base_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name("testAuthority");
@@ -156,12 +159,12 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithInvalidUUri) { // NOLINT
 
 	// Authority name too long
 	test_u_uri = base_u_uri;
-	test_u_uri.set_authority_name(std::string(129, 'b'));
+	test_u_uri.set_authority_name(std::string(AUTHORITY_NAME_NUMBER, 'b'));
 	ASSERT_THROW(serialized = AsString::serialize(test_u_uri), uprotocol::datamodel::validator::uri::InvalidUUri); // NOLINT
 
 	// Version out of uint8 range
 	test_u_uri = base_u_uri;
-	test_u_uri.set_ue_version_major(0x100);
+	test_u_uri.set_ue_version_major(INVALID_VERSION_MAJOR);
 	ASSERT_THROW(serialized = AsString::serialize(test_u_uri), uprotocol::datamodel::validator::uri::InvalidUUri); // NOLINT
 
 	// Version reserved
@@ -171,7 +174,7 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithInvalidUUri) { // NOLINT
 
 	// Resource ID out of uint16 range
 	test_u_uri = base_u_uri;
-	test_u_uri.set_resource_id(0x10000);
+	test_u_uri.set_resource_id(INVALID_RESOURCE_ID);
 	ASSERT_THROW(serialized = AsString::serialize(test_u_uri), uprotocol::datamodel::validator::uri::InvalidUUri); // NOLINT
 }
 
@@ -358,6 +361,7 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithWildcardArgument) { // NOLIN
 // Test deserializing string with invalid field values to verify exceptions are
 // thrown
 TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidUUri) { // NOLINT
+	constexpr uint32_t UURI_NUMBER = 129;
 	uprotocol::v1::UUri uuri;
 
 	// Major Version reserved
@@ -370,7 +374,7 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidUUri) { // NOLINT
 
 	// Major Version reserved
 	uuri_as_string = "//";
-	uuri_as_string += std::string(129, 'a');
+	uuri_as_string += std::string(UURI_NUMBER, 'a');
 	uuri_as_string += "/1FFFE/1/7500";
 	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string), uprotocol::datamodel::validator::uri::InvalidUUri); // NOLINT
 

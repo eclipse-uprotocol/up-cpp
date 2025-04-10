@@ -12,9 +12,10 @@
 #include <gtest/gtest.h>
 #include <up-cpp/datamodel/validator/UUri.h>
 
-namespace {
+constexpr uint32_t DEFAULT_UE_ID = 0x00010001;
+constexpr uint32_t WILDCARD = 0xFFFF;
 
-using namespace uprotocol::datamodel::validator::uri;
+namespace uprotocol::datamodel::validator::uri{
 
 constexpr const char* AUTHORITY_NAME = "test";
 
@@ -28,26 +29,27 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	TestUUriValidator() = default;
-	~TestUUriValidator() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+public:
+	~TestUUriValidator() = default;
 };
 
 TEST_F(TestUUriValidator, Valid) { // NOLINT
-	auto getUuri = []() {
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
 		uuri.set_resource_id(1);
 		return uuri;
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
@@ -55,7 +57,7 @@ TEST_F(TestUUriValidator, Valid) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_resource_id(0);
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
@@ -63,7 +65,7 @@ TEST_F(TestUUriValidator, Valid) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_resource_id(1);
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
@@ -71,32 +73,35 @@ TEST_F(TestUUriValidator, Valid) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0x7FFF);
+		constexpr uint32_t VALID_RESOURCE_ID = 0x7FFF;
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0x8000);
+		constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFE);
+		constexpr uint32_t VALID_RESOURCE_ID = 0xFFFE;
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFF);
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(WILDCARD);
 		EXPECT_TRUE(uses_wildcards(uuri));
 
 		auto [valid, reason] = isValid(uuri);
@@ -106,71 +111,74 @@ TEST_F(TestUUriValidator, Valid) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, Wildcards) { // NOLINT
-	auto getUuri = []() {
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
 		uuri.set_resource_id(1);
 		return uuri;
 	};
 
 	{  // Check for no wildcards
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		EXPECT_FALSE(uses_wildcards(uuri));
 	}
 
 	{  // Change Authority name to "hello*" (Any)
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("hello*");
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
 	{  // Set Service ID to FFFF (Any) and Instance ID to 1
-		auto uuri = getUuri();
-		uuri.set_ue_id(0x0001FFFF);
+		constexpr uint32_t WILDCARD_SERVICE_UE_ID = 0x0001FFFF;
+		auto uuri = get_u_uri();
+		uuri.set_ue_id(WILDCARD_SERVICE_UE_ID);
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
 	{  // Set Service ID to 1 and Instance ID to FFFF (Any)
+		constexpr uint32_t WILDCARD_INSTANCE_UE_ID = 0xFFFF0001;
 		// This changed in 581291f in up-spec
-		auto uuri = getUuri();
-		uuri.set_ue_id(0xFFFF0001);
+		auto uuri = get_u_uri();
+		uuri.set_ue_id(WILDCARD_INSTANCE_UE_ID);
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
 	{  // Set major version to FF (Any)
-		auto uuri = getUuri();
-		uuri.set_ue_version_major(0xFF);
+		constexpr uint32_t WILDCARD_VERSION_MAJOR = 0xFF;
+		auto uuri = get_u_uri();
+		uuri.set_ue_version_major(WILDCARD_VERSION_MAJOR);
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
 	{  // Set Resource ID to FFFF (any)
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFF);
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(WILDCARD);
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 }
 
 TEST_F(TestUUriValidator, ValidRpcMethod) { // NOLINT
-	auto getUuri = []() {
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
 		uuri.set_resource_id(1);
 		return uuri;
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValidRpcMethod(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -178,7 +186,7 @@ TEST_F(TestUUriValidator, ValidRpcMethod) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidRpcMethod(uuri);
 		EXPECT_TRUE(valid);
@@ -186,16 +194,17 @@ TEST_F(TestUUriValidator, ValidRpcMethod) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFF);
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(WILDCARD);
 		auto [valid, reason] = isValidRpcMethod(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0x8000);
+		constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		auto [valid, reason] = isValidRpcMethod(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
@@ -203,24 +212,24 @@ TEST_F(TestUUriValidator, ValidRpcMethod) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, ValidRpcResponse) { // NOLINT
-	auto getUuri = []() {
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
 		uuri.set_resource_id(0);
 		return uuri;
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValidRpcResponse(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -228,7 +237,7 @@ TEST_F(TestUUriValidator, ValidRpcResponse) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidRpcResponse(uuri);
 		EXPECT_TRUE(valid);
@@ -236,15 +245,15 @@ TEST_F(TestUUriValidator, ValidRpcResponse) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFF);
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(WILDCARD);
 		auto [valid, reason] = isValidRpcResponse(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_resource_id(1);
 		auto [valid, reason] = isValidRpcResponse(uuri);
 		EXPECT_FALSE(valid);
@@ -253,24 +262,25 @@ TEST_F(TestUUriValidator, ValidRpcResponse) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, ValidPublishTopic) { // NOLINT
-	auto getUuri = []() {
+	constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
-		uuri.set_resource_id(0x8000);
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		return uuri;
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValidPublishTopic(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -278,7 +288,7 @@ TEST_F(TestUUriValidator, ValidPublishTopic) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidPublishTopic(uuri);
 		EXPECT_TRUE(valid);
@@ -286,15 +296,15 @@ TEST_F(TestUUriValidator, ValidPublishTopic) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFF);
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(WILDCARD);
 		auto [valid, reason] = isValidPublishTopic(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_resource_id(1);
 		auto [valid, reason] = isValidPublishTopic(uuri);
 		EXPECT_FALSE(valid);
@@ -302,8 +312,9 @@ TEST_F(TestUUriValidator, ValidPublishTopic) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0x10000);
+		constexpr uint32_t VALID_RESOURCE_ID = 0x10000;
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		auto [valid, reason] = isValidPublishTopic(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
@@ -311,24 +322,25 @@ TEST_F(TestUUriValidator, ValidPublishTopic) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, ValidNotificationSource) { // NOLINT
-	auto getUuri = []() {
+	constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
-		uuri.set_resource_id(0x8000);
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		return uuri;
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -336,7 +348,7 @@ TEST_F(TestUUriValidator, ValidNotificationSource) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_TRUE(valid);
@@ -344,15 +356,15 @@ TEST_F(TestUUriValidator, ValidNotificationSource) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFF);
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(WILDCARD);
 		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_resource_id(1);
 		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_FALSE(valid);
@@ -360,8 +372,9 @@ TEST_F(TestUUriValidator, ValidNotificationSource) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0x10000);
+		constexpr uint32_t VALID_RESOURCE_ID = 0x10000;
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
@@ -369,24 +382,24 @@ TEST_F(TestUUriValidator, ValidNotificationSource) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, ValidNotificationSink) { // NOLINT
-	auto getUuri = []() {
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
 		uuri.set_resource_id(0);
 		return uuri;
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValidNotificationSink(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -394,7 +407,7 @@ TEST_F(TestUUriValidator, ValidNotificationSink) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidNotificationSink(uuri);
 		EXPECT_TRUE(valid);
@@ -402,15 +415,15 @@ TEST_F(TestUUriValidator, ValidNotificationSink) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFF);
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(WILDCARD);
 		auto [valid, reason] = isValidNotificationSink(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::DISALLOWED_WILDCARD);
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_resource_id(1);
 		auto [valid, reason] = isValidNotificationSink(uuri);
 		EXPECT_FALSE(valid);
@@ -419,17 +432,18 @@ TEST_F(TestUUriValidator, ValidNotificationSink) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, ValidSubscription) { // NOLINT
-	auto getUuri = []() {
+	constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
-		uuri.set_resource_id(0x8000);
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		return uuri;
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValidSubscription(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -437,7 +451,7 @@ TEST_F(TestUUriValidator, ValidSubscription) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidSubscription(uuri);
 		EXPECT_TRUE(valid);
@@ -445,7 +459,7 @@ TEST_F(TestUUriValidator, ValidSubscription) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_resource_id(1);
 		auto [valid, reason] = isValidSubscription(uuri);
 		EXPECT_FALSE(valid);
@@ -453,16 +467,17 @@ TEST_F(TestUUriValidator, ValidSubscription) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0x10000);
+		constexpr uint32_t VALID_RESOURCE_ID = 0x10000;
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		auto [valid, reason] = isValidSubscription(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_TRUE(reason == Reason::BAD_RESOURCE_ID);
 	}
 
 	{
-		auto uuri = getUuri();
-		uuri.set_resource_id(0xFFFF);
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(WILDCARD);
 		auto [valid, reason] = isValidSubscription(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -470,17 +485,18 @@ TEST_F(TestUUriValidator, ValidSubscription) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, ValidDefaultSource) { // NOLINT
-	auto getUuri = []() {
+	constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
-		uuri.set_ue_id(0x00010001);
+		uuri.set_ue_id(DEFAULT_UE_ID);
 		uuri.set_ue_version_major(1);
-		uuri.set_resource_id(0x8000);
+		uuri.set_resource_id(VALID_RESOURCE_ID);
 		return uuri;
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("");
 		auto [valid, reason] = isValidDefaultSource(uuri);
 		EXPECT_FALSE(valid);
@@ -489,7 +505,7 @@ TEST_F(TestUUriValidator, ValidDefaultSource) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, Empty) { // NOLINT
-	auto getUuri = []() {
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name("");
 		uuri.set_ue_id(0);
@@ -499,14 +515,14 @@ TEST_F(TestUUriValidator, Empty) { // NOLINT
 	};
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name("     bad    ");
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -514,7 +530,7 @@ TEST_F(TestUUriValidator, Empty) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_authority_name(AUTHORITY_NAME);
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -522,7 +538,7 @@ TEST_F(TestUUriValidator, Empty) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_ue_id(1);
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -530,7 +546,7 @@ TEST_F(TestUUriValidator, Empty) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_ue_version_major(1);
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -538,7 +554,7 @@ TEST_F(TestUUriValidator, Empty) { // NOLINT
 	}
 
 	{
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_resource_id(1);
 		auto [valid, reason] = isEmpty(uuri);
 		EXPECT_FALSE(valid);
@@ -547,10 +563,11 @@ TEST_F(TestUUriValidator, Empty) { // NOLINT
 }
 
 TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
-	auto getUuri = []() {
+	constexpr uint32_t VALID_UE_ID_FILTER = 10001;
+	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name("ValidFilterTest");
-		uuri.set_ue_id(10001);
+		uuri.set_ue_id(VALID_UE_ID_FILTER);
 		uuri.set_ue_version_major(1);
 		uuri.set_resource_id(1);
 		return uuri;
@@ -559,7 +576,7 @@ TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
 	////// GOOD //////
 	{
 		// Plain URI
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		auto [valid, reason] = isValidFilter(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -567,11 +584,12 @@ TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
 
 	{
 		// Wildcard URI
+		constexpr uint32_t WILDCARD_VERSION_MAJOR = 0xFF;
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name("*");
-		uuri.set_ue_id(0xFFFF);
-		uuri.set_ue_version_major(0xFF);
-		uuri.set_resource_id(0xFFFF);
+		uuri.set_ue_id(WILDCARD);
+		uuri.set_ue_version_major(WILDCARD_VERSION_MAJOR);
+		uuri.set_resource_id(WILDCARD);
 		auto [valid, reason] = isValidFilter(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
@@ -588,7 +606,7 @@ TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
 
 	{
 		// Reserved Version
-		auto uuri = getUuri();
+		auto uuri = get_u_uri();
 		uuri.set_ue_version_major(0);
 		auto [valid, reason] = isValidFilter(uuri);
 		EXPECT_FALSE(valid);
@@ -598,8 +616,9 @@ TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
 
 	{
 		// Overflow Version
-		auto uuri = getUuri();
-		uuri.set_ue_version_major(0x100);
+		constexpr uint32_t OVERFLOW_VERSION_MAJOR = 0x100;
+		auto uuri = get_u_uri();
+		uuri.set_ue_version_major(OVERFLOW_VERSION_MAJOR);
 		auto [valid, reason] = isValidFilter(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_EQ(reason.value_or(static_cast<Reason>(-1)),
@@ -608,8 +627,9 @@ TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
 
 	{
 		// Overflow Resource
-		auto uuri = getUuri();
-		uuri.set_resource_id(0x10000);
+		constexpr uint32_t OVERFLOW_RESOURCE_ID = 0x10000;
+		auto uuri = get_u_uri();
+		uuri.set_resource_id(OVERFLOW_RESOURCE_ID);
 		auto [valid, reason] = isValidFilter(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_EQ(reason.value_or(static_cast<Reason>(-1)),
@@ -618,8 +638,9 @@ TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
 
 	{
 		// Long Authority
-		auto uuri = getUuri();
-		uuri.set_authority_name(std::string(129, 'i'));
+		constexpr uint32_t AUTHORITY_NAME_NUMBER = 129;
+		auto uuri = get_u_uri();
+		uuri.set_authority_name(std::string(AUTHORITY_NAME_NUMBER, 'i'));
 		auto [valid, reason] = isValidFilter(uuri);
 		EXPECT_FALSE(valid);
 		EXPECT_EQ(reason.value_or(static_cast<Reason>(-1)),
@@ -687,4 +708,4 @@ TEST_F(TestUUriValidator, ReasonMessages) { // NOLINT
 	}
 }
 
-}  // namespace
+}  // namespace uprotocol::datamodel::validator::uri
