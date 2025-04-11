@@ -25,43 +25,7 @@ class TestUMessageBuilder : public testing::Test {
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
-	void SetUp() override {}
-	void TearDown() override {}
-
-	static datamodel::builder::UMessageBuilder createFakeRequest() {
-		v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
-		std::chrono::milliseconds ttl(TTL_TIME);
-		v1::UUri method = method_;
-		v1::UUri source = sink_;
-
-		return datamodel::builder::UMessageBuilder::request(
-		    std::move(method), std::move(source), priority, ttl);
-	}
-
-	static datamodel::builder::UMessageBuilder createFakeResponse() {
-		v1::UUri sink = sink_;
-		v1::UUri method = method_;
-		v1::UUID request_id = req_id_;
-
-		v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
-		return datamodel::builder::UMessageBuilder::response(
-		    std::move(sink), std::move(request_id), priority,
-		    std::move(method));
-	}
-
-	static bool urisAreEqual(const v1::UUri& uri1, const v1::UUri& uri2) {
-		return uri1.authority_name() == uri2.authority_name() &&
-		       uri1.ue_id() == uri2.ue_id() &&
-		       uri1.ue_version_major() == uri2.ue_version_major() &&
-		       uri1.resource_id() == uri2.resource_id();
-	}
-	// Run once per execution of the test application.
-	// Used for setup of all tests. Has access to this instance.
-	TestUMessageBuilder() = default;
-
-	// Run once per execution of the test application.
-	// Used only for global setup outside of tests.
-	static void SetUpTestSuite() {
+	void SetUp() override {
 		constexpr uint32_t SOURCE_UE_ID = 0x00011101;
 		constexpr uint32_t SINK_UE_ID = 0x00011102;
 		constexpr uint32_t METHOD_UE_ID = 0x00011103;
@@ -92,25 +56,71 @@ protected:
 
 		req_id_ = datamodel::builder::UuidBuilder::getBuilder().build();
 	}
+	void TearDown() override {}
+
+	datamodel::builder::UMessageBuilder createFakeRequest() {
+		v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
+		std::chrono::milliseconds ttl(TTL_TIME);
+		v1::UUri method = method_;
+		v1::UUri source = sink_;
+
+		return datamodel::builder::UMessageBuilder::request(
+		    std::move(method), std::move(source), priority, ttl);
+	}
+
+	datamodel::builder::UMessageBuilder createFakeResponse() {
+		v1::UUri sink = sink_;
+		v1::UUri method = method_;
+		v1::UUID request_id = req_id_;
+
+		v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
+		return datamodel::builder::UMessageBuilder::response(
+		    std::move(sink), std::move(request_id), priority,
+		    std::move(method));
+	}
+
+	static bool urisAreEqual(const v1::UUri& uri1, const v1::UUri& uri2) {
+		return uri1.authority_name() == uri2.authority_name() &&
+		       uri1.ue_id() == uri2.ue_id() &&
+		       uri1.ue_version_major() == uri2.ue_version_major() &&
+		       uri1.resource_id() == uri2.resource_id();
+	}
+	// Run once per execution of the test application.
+	// Used for setup of all tests. Has access to this instance.
+	TestUMessageBuilder() = default;
+
+	// Run once per execution of the test application.
+	// Used only for global setup outside of tests.
+	static void SetUpTestSuite() {
+	}
 	static void TearDownTestSuite() {}
 
-	static v1::UUri source_;
-	static v1::UUri sink_;
-	static v1::UUri method_;
-	static v1::UUID req_id_;
+	const v1::UUri& getSource() const { return source_; }
+    
+    const v1::UUri& getSink() const { return sink_; }
+    
+    const v1::UUri& getMethod() const { return method_; }
+    
+    const v1::UUID& getReqId() const { return req_id_; }
+
+private:
+	v1::UUri source_;
+	v1::UUri sink_;
+	v1::UUri method_;
+	v1::UUID req_id_;
 
 public:
 	~TestUMessageBuilder() override = default;
 };
 
-v1::UUri TestUMessageBuilder::source_;
-v1::UUri TestUMessageBuilder::sink_;
-v1::UUri TestUMessageBuilder::method_;
-v1::UUID TestUMessageBuilder::req_id_;
+// v1::UUri TestUMessageBuilder::source_;
+// v1::UUri TestUMessageBuilder::sink_;
+// v1::UUri TestUMessageBuilder::method_;
+// v1::UUID TestUMessageBuilder::req_id_;
 
 /// @brief  Test the publish function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) {  // NOLINT
-	v1::UUri topic = source_;
+	v1::UUri topic = getSource();
 	EXPECT_NO_THROW({  // NOLINT
 		auto builder =
 		    datamodel::builder::UMessageBuilder::publish(std::move(topic));
@@ -118,7 +128,7 @@ TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) {  // NOLINT
 		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_PUBLISH);
 		EXPECT_EQ(
 		    datamodel::serializer::uri::AsString::serialize(attr.source()),
-		    datamodel::serializer::uri::AsString::serialize(source_));
+		    datamodel::serializer::uri::AsString::serialize(getSource()));
 	});
 }
 
@@ -132,8 +142,8 @@ TEST_F(TestUMessageBuilder, PublishInvalidTopicUriThrows) {  // NOLINT
 /// @brief  Test the notification function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, NotificationTest) {  // NOLINT
 	// Call the notification function
-	v1::UUri source = source_;
-	v1::UUri sink = sink_;
+	v1::UUri source = getSource();
+	v1::UUri sink = getSink();
 
 	EXPECT_NO_THROW({  // NOLINT
 		auto builder = datamodel::builder::UMessageBuilder::notification(
@@ -143,9 +153,9 @@ TEST_F(TestUMessageBuilder, NotificationTest) {  // NOLINT
 		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_NOTIFICATION);
 		EXPECT_EQ(
 		    datamodel::serializer::uri::AsString::serialize(attr.source()),
-		    datamodel::serializer::uri::AsString::serialize(source_));
+		    datamodel::serializer::uri::AsString::serialize(getSource()));
 		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.sink()),
-		          datamodel::serializer::uri::AsString::serialize(sink_));
+		          datamodel::serializer::uri::AsString::serialize(getSink()));
 	});
 }
 
@@ -153,7 +163,7 @@ TEST_F(TestUMessageBuilder, NotificationInvalidSourceUriThrows) {  // NOLINT
 	v1::UUri source;
 	// Set the source Service Instance ID a wildcard (any)
 	source.set_ue_id(UI_ID_INVALID_TEST);
-	v1::UUri sink = sink_;
+	v1::UUri sink = getSink();
 	EXPECT_THROW(  // NOLINT
 	    {
 		    datamodel::builder::UMessageBuilder::notification(std::move(source),
@@ -163,7 +173,7 @@ TEST_F(TestUMessageBuilder, NotificationInvalidSourceUriThrows) {  // NOLINT
 }
 
 TEST_F(TestUMessageBuilder, NotificationInvalidSinkUriThrows) {  // NOLINT
-	v1::UUri source = source_;
+	v1::UUri source = getSource();
 	v1::UUri sink;
 	// Set the source Service Instance ID a wildcard (any)
 	sink.set_ue_id(UI_ID_INVALID_TEST);
@@ -179,8 +189,8 @@ TEST_F(TestUMessageBuilder, NotificationInvalidSinkUriThrows) {  // NOLINT
 TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) {  // NOLINT
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(TTL_TIME);
-	v1::UUri method = method_;
-	v1::UUri source = sink_;
+	v1::UUri method = getMethod();
+	v1::UUri source = getSink();
 
 	EXPECT_NO_THROW({  // NOLINT
 		auto builder = datamodel::builder::UMessageBuilder::request(
@@ -188,10 +198,10 @@ TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) {  // NOLINT
 		auto attr = builder.build().attributes();
 		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_REQUEST);
 		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.sink()),
-		          datamodel::serializer::uri::AsString::serialize(method_));
+		          datamodel::serializer::uri::AsString::serialize(getMethod()));
 		EXPECT_EQ(
 		    datamodel::serializer::uri::AsString::serialize(attr.source()),
-		    datamodel::serializer::uri::AsString::serialize(sink_));
+		    datamodel::serializer::uri::AsString::serialize(getSink()));
 		EXPECT_EQ(attr.priority(), priority);
 		EXPECT_EQ(attr.ttl(), TTL_TIME);
 	});
@@ -199,7 +209,7 @@ TEST_F(TestUMessageBuilder, RequestValidParametersSuccess) {  // NOLINT
 
 TEST_F(TestUMessageBuilder, RequestInvalidMethodUriThrows) {  // NOLINT
 	v1::UUri method;
-	v1::UUri source = source_;
+	v1::UUri source = getSource();
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(TTL_TIME);
 	EXPECT_THROW(  // NOLINT
@@ -214,7 +224,7 @@ TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {  // NOLINT
 	v1::UUri source;
 	// Set the source Service Instance ID a wildcard (any)
 	source.set_ue_id(UI_ID_INVALID_TEST);
-	v1::UUri method = method_;
+	v1::UUri method = getMethod();
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(TTL_TIME);
 	EXPECT_THROW(  // NOLINT
@@ -226,8 +236,8 @@ TEST_F(TestUMessageBuilder, RequestInvalidSourceUriThrows) {  // NOLINT
 }
 
 TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {  // NOLINT
-	v1::UUri method = method_;
-	v1::UUri source = sink_;
+	v1::UUri method = getMethod();
+	v1::UUri source = getSink();
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	std::chrono::milliseconds ttl(-1);  // Invalid TTL
 	EXPECT_THROW(                       // NOLINT
@@ -240,9 +250,9 @@ TEST_F(TestUMessageBuilder, RequestInvalidTtlThrows) {  // NOLINT
 
 /// @brief  Test the response function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, ResponseValidParametersSuccess) {  // NOLINT
-	v1::UUri sink = sink_;
-	v1::UUri method = method_;
-	v1::UUID request_id = req_id_;
+	v1::UUri sink = getSink();
+	v1::UUri method = getMethod();
+	v1::UUID request_id = getReqId();
 
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	EXPECT_NO_THROW({  // NOLINT
@@ -252,19 +262,19 @@ TEST_F(TestUMessageBuilder, ResponseValidParametersSuccess) {  // NOLINT
 		const v1::UAttributes& attr = builder.attributes();
 		EXPECT_EQ(attr.type(), v1::UMessageType::UMESSAGE_TYPE_RESPONSE);
 		EXPECT_EQ(datamodel::serializer::uri::AsString::serialize(attr.sink()),
-		          datamodel::serializer::uri::AsString::serialize(sink_));
+		          datamodel::serializer::uri::AsString::serialize(getSink()));
 		EXPECT_EQ(
 		    datamodel::serializer::uri::AsString::serialize(attr.source()),
-		    datamodel::serializer::uri::AsString::serialize(method_));
+		    datamodel::serializer::uri::AsString::serialize(getMethod()));
 		// EXPECT_EQ(attr.reqid(),  req_id_);
 		EXPECT_EQ(attr.priority(), priority);
 	});
 }
 
 TEST_F(TestUMessageBuilder, ResponseInvalidMethodUriThrows) {  // NOLINT
-	v1::UUri sink = sink_;
+	v1::UUri sink = getSink();
 	v1::UUri method;
-	v1::UUID request_id = req_id_;
+	v1::UUID request_id = getReqId();
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	EXPECT_THROW(  // NOLINT
 	    {
@@ -279,8 +289,8 @@ TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) {  // NOLINT
 	v1::UUri sink;
 	// Set the source Service Instance ID a wildcard (any)
 	sink.set_ue_id(UI_ID_INVALID_TEST);
-	v1::UUri method = method_;
-	v1::UUID request_id = req_id_;
+	v1::UUri method = getMethod();
+	v1::UUID request_id = getReqId();
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	EXPECT_THROW(  // NOLINT
 	    {
@@ -292,8 +302,8 @@ TEST_F(TestUMessageBuilder, ResponseInvalidSinkUriThrows) {  // NOLINT
 }
 
 TEST_F(TestUMessageBuilder, ResponseInvalidRequestIdThrows) {  // NOLINT
-	v1::UUri sink = sink_;
-	v1::UUri method = method_;
+	v1::UUri sink = getSink();
+	v1::UUri method = getMethod();
 	v1::UUID request_id;
 	v1::UPriority priority = v1::UPriority::UPRIORITY_CS4;
 	EXPECT_THROW(  // NOLINT
