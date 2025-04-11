@@ -16,7 +16,7 @@
 
 #include "UTransportMock.h"
 
-namespace uprotocol{
+namespace uprotocol {
 
 // namespace {
 // using namespace uprotocol::datamodel::builder;
@@ -30,8 +30,11 @@ private:
 	std::optional<v1::UPriority> priority_;
 	std::optional<std::chrono::milliseconds> ttl_;
 	uprotocol::v1::UMessage capture_msg_;
+
 protected:
-	std::shared_ptr<uprotocol::test::UTransportMock> getTransportMock() const { return transportMock_; }
+	std::shared_ptr<uprotocol::test::UTransportMock> getTransportMock() const {
+		return transportMock_;
+	}
 	v1::UUri getSource() const { return source_; }
 	v1::UUri getTopic() const { return topic_; }
 	v1::UPayloadFormat getFormat() const { return format_; }
@@ -39,13 +42,23 @@ protected:
 	std::optional<std::chrono::milliseconds> getTTL() const { return ttl_; }
 	uprotocol::v1::UMessage getCaptureMsg() const { return capture_msg_; }
 
-	void setTransportMock(const std::shared_ptr<uprotocol::test::UTransportMock>& transport_mock) { transportMock_ = transport_mock; }
+	void setTransportMock(
+	    const std::shared_ptr<uprotocol::test::UTransportMock>&
+	        transport_mock) {
+		transportMock_ = transport_mock;
+	}
 	void setSource(const v1::UUri& source) { source_ = source; }
 	void setTopic(const v1::UUri& topic) { topic_ = topic; }
 	void setFormat(const v1::UPayloadFormat& format) { format_ = format; }
-	void setPriority(const std::optional<v1::UPriority>& priority) { priority_ = priority; }
-	void setTTL(const std::optional<std::chrono::milliseconds>& ttl) { ttl_ = ttl; }
-	void setCaptureMsg(const uprotocol::v1::UMessage& capture_msg) { capture_msg_ = capture_msg; }
+	void setPriority(const std::optional<v1::UPriority>& priority) {
+		priority_ = priority;
+	}
+	void setTTL(const std::optional<std::chrono::milliseconds>& ttl) {
+		ttl_ = ttl;
+	}
+	void setCaptureMsg(const uprotocol::v1::UMessage& capture_msg) {
+		capture_msg_ = capture_msg;
+	}
 
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
@@ -70,7 +83,6 @@ protected:
 
 		priority_ = v1::UPriority::UPRIORITY_CS2;
 		ttl_ = std::chrono::milliseconds(DEFAULT_TTL_TIME);
-
 	}
 
 	void TearDown() override {}
@@ -83,14 +95,15 @@ protected:
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
 public:
 	~TestPublisher() override = default;
 };
 
-TEST_F(TestPublisher, PublisherSuccess) {	// NOLINT
+TEST_F(TestPublisher, PublisherSuccess) {  // NOLINT
 	std::string test_payload_str = "test_payload";
-	communication::Publisher publisher(getTransportMock(), getTopic(), getFormat(), getPriority(),
-	                    getTTL());
+	communication::Publisher publisher(getTransportMock(), getTopic(),
+	                                   getFormat(), getPriority(), getTTL());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
@@ -107,10 +120,10 @@ TEST_F(TestPublisher, PublisherSuccess) {	// NOLINT
 	EXPECT_EQ(valid, true);
 }
 
-TEST_F(TestPublisher, PublishFailure) {	// NOLINT
+TEST_F(TestPublisher, PublishFailure) {  // NOLINT
 	std::string test_payload_str = "test_payload";
-	communication::Publisher publisher(getTransportMock(), getTopic(), getFormat(), getPriority(),
-	                    getTTL());
+	communication::Publisher publisher(getTransportMock(), getTopic(),
+	                                   getFormat(), getPriority(), getTTL());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::DATA_LOSS);
@@ -122,9 +135,10 @@ TEST_F(TestPublisher, PublishFailure) {	// NOLINT
 	EXPECT_EQ(status.code(), retval.code());
 }
 
-TEST_F(TestPublisher, PublishSuccessWithoutTTL) {	// NOLINT
+TEST_F(TestPublisher, PublishSuccessWithoutTTL) {  // NOLINT
 	std::string test_payload_str = "test_payload";
-	communication::Publisher publisher(getTransportMock(), getTopic(), getFormat(), getPriority());
+	communication::Publisher publisher(getTransportMock(), getTopic(),
+	                                   getFormat(), getPriority());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
@@ -143,11 +157,11 @@ TEST_F(TestPublisher, PublishSuccessWithoutTTL) {	// NOLINT
 	EXPECT_EQ(getTransportMock()->getMessage().attributes().ttl(), 0);
 }
 
-TEST_F(TestPublisher, PublishSuccessWithoutPriority) {	// NOLINT
+TEST_F(TestPublisher, PublishSuccessWithoutPriority) {  // NOLINT
 	std::string test_payload_str = "test_payload";
 	getPriority().reset();
-	communication::Publisher publisher(getTransportMock(), getTopic(), getFormat(), getPriority(),
-	                    getTTL());
+	communication::Publisher publisher(getTransportMock(), getTopic(),
+	                                   getFormat(), getPriority(), getTTL());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
@@ -168,10 +182,11 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {	// NOLINT
 }
 
 // publisher with null transport
-TEST_F(TestPublisher, PublisherWithNullTransport) {	// NOLINT
+TEST_F(TestPublisher, PublisherWithNullTransport) {  // NOLINT
 	auto transport = nullptr;
-	EXPECT_THROW(communication::Publisher publisher(transport, getTopic(), getFormat(),	// NOLINT
-	                                 getPriority(), getTTL()),
+	EXPECT_THROW(communication::Publisher publisher(transport, getTopic(), // NOLINT
+	                                                getFormat(),  
+	                                                getPriority(), getTTL()),
 	             uprotocol::transport::NullTransport);
 }
 

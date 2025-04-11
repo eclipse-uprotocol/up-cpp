@@ -72,11 +72,12 @@ protected:
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
 public:
 	~TestMockUTransport() override = default;
 };
 
-TEST_F(TestMockUTransport, Send) { // NOLINT
+TEST_F(TestMockUTransport, Send) {  // NOLINT
 	constexpr uint32_t DEF_SRC_UE_ID = 0x18000;
 	constexpr uint16_t CODE_MAX = 15;
 	constexpr uint16_t CODE_MOD = 16;
@@ -128,7 +129,7 @@ TEST_F(TestMockUTransport, Send) { // NOLINT
 	}
 }
 
-TEST_F(TestMockUTransport, registerListener) { // NOLINT
+TEST_F(TestMockUTransport, registerListener) {  // NOLINT
 	constexpr uint32_t DEF_SRC_UE_ID = 0x18000;
 	uprotocol::v1::UUri def_src_uuri;
 	def_src_uuri.set_authority_name(get_random_string());

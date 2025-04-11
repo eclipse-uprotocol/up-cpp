@@ -21,58 +21,58 @@
 
 using namespace std::chrono_literals;
 
-namespace uprotocol::v1{
+namespace uprotocol::v1 {
 
-	struct UeDetails {
-		uint32_t ue_id;
-		uint32_t ue_version_major;
-	};
-	
-	struct MyUUri {
-		static constexpr uint32_t DEFAULT_UE_ID = 0x8000;
-	
-	public:
-		MyUUri(std::string auth_val, UeDetails ue_details, uint32_t resource_id_val)
-			: auth(std::move(auth_val)),
-			  ue_id(ue_details.ue_id),
-			  ue_version_major(ue_details.ue_version_major),
-			  resource_id(resource_id_val) {}
-	
-		void set_auth(const std::string& auth_val) { auth = auth_val; }
-		[[nodiscard]] const std::string& get_auth() const { return auth; }
-	
-		void set_ue_details(UeDetails ue_details) {
-			ue_id = ue_details.ue_id;
-			ue_version_major = ue_details.ue_version_major;
-		}
-	
-		[[nodiscard]] uint32_t get_ue_id() const { return ue_id; }
-		[[nodiscard]] uint32_t get_ue_version_major() const {
-			return ue_version_major;
-		}
-	
-		void set_resource_id(uint32_t resource) { resource_id = resource; }
-		[[nodiscard]] uint32_t get_resource_id() const { return resource_id; }
-	
-		explicit operator uprotocol::v1::UUri() const {
-			UUri ret;
-			ret.set_authority_name(auth);
-			ret.set_ue_id(ue_id);
-			ret.set_ue_version_major(ue_version_major);
-			ret.set_resource_id(resource_id);
-			return ret;
-		}
-	
-		[[nodiscard]] std::string to_string() const {
-			return std::string("<< ") + UUri(*this).ShortDebugString() + " >>";
-		}
-	
-	private:
-		std::string auth;
-		uint32_t ue_id = DEFAULT_UE_ID;
-		uint32_t ue_version_major = 1;
-		uint32_t resource_id = 1;
-	};
+struct UeDetails {
+	uint32_t ue_id;
+	uint32_t ue_version_major;
+};
+
+struct MyUUri {
+	static constexpr uint32_t DEFAULT_UE_ID = 0x8000;
+
+public:
+	MyUUri(std::string auth_val, UeDetails ue_details, uint32_t resource_id_val)
+	    : auth(std::move(auth_val)),
+	      ue_id(ue_details.ue_id),
+	      ue_version_major(ue_details.ue_version_major),
+	      resource_id(resource_id_val) {}
+
+	void set_auth(const std::string& auth_val) { auth = auth_val; }
+	[[nodiscard]] const std::string& get_auth() const { return auth; }
+
+	void set_ue_details(UeDetails ue_details) {
+		ue_id = ue_details.ue_id;
+		ue_version_major = ue_details.ue_version_major;
+	}
+
+	[[nodiscard]] uint32_t get_ue_id() const { return ue_id; }
+	[[nodiscard]] uint32_t get_ue_version_major() const {
+		return ue_version_major;
+	}
+
+	void set_resource_id(uint32_t resource) { resource_id = resource; }
+	[[nodiscard]] uint32_t get_resource_id() const { return resource_id; }
+
+	explicit operator uprotocol::v1::UUri() const {
+		UUri ret;
+		ret.set_authority_name(auth);
+		ret.set_ue_id(ue_id);
+		ret.set_ue_version_major(ue_version_major);
+		ret.set_resource_id(resource_id);
+		return ret;
+	}
+
+	[[nodiscard]] std::string to_string() const {
+		return std::string("<< ") + UUri(*this).ShortDebugString() + " >>";
+	}
+
+private:
+	std::string auth;
+	uint32_t ue_id = DEFAULT_UE_ID;
+	uint32_t ue_version_major = 1;
+	uint32_t resource_id = 1;
+};
 
 class RpcClientServerTest : public testing::Test {
 protected:
@@ -90,15 +90,18 @@ protected:
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
 public:
 	~RpcClientServerTest() override = default;
 };
 
 TEST_F(RpcClientServerTest, SimpleRoundTrip) {  // NOLINT
-	const MyUUri ident{"me_authority",{ 65538, 1}, 0};
+	const MyUUri ident{"me_authority", {65538, 1}, 0};
 	const MyUUri rpc_service_uuri{"me_authority", {65538, 1}, 32600};
-	auto server_transport = std::make_shared<uprotocol::test::UTransportMock>(static_cast<UUri>(ident));
-	auto client_transport = std::make_shared<uprotocol::test::UTransportMock>(static_cast<UUri>(ident));
+	auto server_transport = std::make_shared<uprotocol::test::UTransportMock>(
+	    static_cast<UUri>(ident));
+	auto client_transport = std::make_shared<uprotocol::test::UTransportMock>(
+	    static_cast<UUri>(ident));
 
 	// if the client and server try to share the transport handle, this test no
 	// longer works auto client_transport = server_transport;
@@ -128,11 +131,12 @@ TEST_F(RpcClientServerTest, SimpleRoundTrip) {  // NOLINT
 	ASSERT_NE(server_or_status.value(), nullptr);
 	EXPECT_TRUE(server_transport->getListener());
 
-	auto client = uprotocol::communication::RpcClient(client_transport, v1::UUri(rpc_service_uuri),
-	                        UPriority::UPRIORITY_CS4, 1000ms);
+	auto client = uprotocol::communication::RpcClient(
+	    client_transport, v1::UUri(rpc_service_uuri), UPriority::UPRIORITY_CS4,
+	    1000ms);
 
 	uprotocol::communication::RpcClient::InvokeHandle client_handle;  // NOLINT
-	EXPECT_NO_THROW( // NOLINT
+	EXPECT_NO_THROW(                                                  // NOLINT
 	    client_handle = client.invokeMethod(
 	        std::move(client_request_payload),
 	        [&client_called, &client_capture](auto maybe_response) {

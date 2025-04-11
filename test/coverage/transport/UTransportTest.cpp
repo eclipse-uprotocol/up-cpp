@@ -21,15 +21,13 @@
 constexpr uint32_t WILDCARD = 0xFFFF;
 constexpr uint32_t RESOURCE_ID_F00D = 0xF00D;
 
-namespace uprotocol{
+namespace uprotocol {
 
-bool operator==(const v1::UUri& lhs,
-                const v1::UUri& rhs) {
+bool operator==(const v1::UUri& lhs, const v1::UUri& rhs) {
 	return google::protobuf::util::MessageDifferencer::Equals(lhs, rhs);
 }
 
-bool operator==(const v1::UMessage& lhs,
-                const v1::UMessage& rhs) {
+bool operator==(const v1::UMessage& lhs, const v1::UMessage& rhs) {
 	return google::protobuf::util::MessageDifferencer::Equals(lhs, rhs);
 }
 
@@ -85,26 +83,28 @@ protected:
 		uri.set_resource_id(WILDCARD);
 		return uri;
 	}
+
 public:
 	~TestUTransport() override = default;
 };
 
-TEST_F(TestUTransport, CreateTransport) { // NOLINT
-	EXPECT_NO_THROW(auto transport = makeTransport(getValidUri())); // NOLINT
+TEST_F(TestUTransport, CreateTransport) {                            // NOLINT
+	EXPECT_NO_THROW(auto transport = makeTransport(getValidUri()));  // NOLINT
 }
 
 using InvalidUUri = datamodel::validator::uri::InvalidUUri;
 
-TEST_F(TestUTransport, CreateTransportInvalidUUri) { // NOLINT
+TEST_F(TestUTransport, CreateTransportInvalidUUri) {  // NOLINT
 	auto uri = getValidUri();
 	uri.set_authority_name("*");
-	EXPECT_THROW({ auto transport = makeTransport(uri); }, InvalidUUri); // NOLINT
+	EXPECT_THROW({ auto transport = makeTransport(uri); }, // NOLINT
+	             InvalidUUri);  
 }
 
 using UMessageBuilder = datamodel::builder::UMessageBuilder;
 using PayloadBuilder = datamodel::builder::Payload;
 
-TEST_F(TestUTransport, SendOk) { // NOLINT
+TEST_F(TestUTransport, SendOk) {  // NOLINT
 	constexpr uint32_t RANDOM_RESOURCE_ID = 0xABBA;
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
@@ -117,17 +117,16 @@ TEST_F(TestUTransport, SendOk) { // NOLINT
 	    UMessageBuilder::publish(std::move(topic)).build(std::move(payload));
 
 	decltype(transport->send(message)) result;
-	EXPECT_NO_THROW(result = transport->send(message)); // NOLINT
+	EXPECT_NO_THROW(result = transport->send(message));  // NOLINT
 
 	EXPECT_EQ(result.code(), v1::UCode::OK);
 	EXPECT_EQ(transport_mock->getSendCount(), 1);
 	EXPECT_TRUE(transport_mock->getMessage() == message);
 }
 
-using InvalidUMessge =
-    datamodel::validator::message::InvalidUMessage;
+using InvalidUMessge = datamodel::validator::message::InvalidUMessage;
 
-TEST_F(TestUTransport, SendInvalidMessage) { // NOLINT
+TEST_F(TestUTransport, SendInvalidMessage) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -138,28 +137,28 @@ TEST_F(TestUTransport, SendInvalidMessage) { // NOLINT
 	    v1::UMessageType::UMESSAGE_TYPE_REQUEST);
 
 	decltype(transport->send(message)) result;
-	EXPECT_THROW({ result = transport->send(message); }, InvalidUMessge); // NOLINT
+	EXPECT_THROW({ result = transport->send(message); }, // NOLINT
+	             InvalidUMessge);  
 	EXPECT_EQ(transport_mock->getSendCount(), 0);
 }
 
-TEST_F(TestUTransport, SendImplStatus) { // NOLINT
+TEST_F(TestUTransport, SendImplStatus) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
-	transport_mock->getSendStatus().set_code(
-	    v1::UCode::PERMISSION_DENIED);
+	transport_mock->getSendStatus().set_code(v1::UCode::PERMISSION_DENIED);
 
 	auto topic = getValidUri();
 	topic.set_resource_id(RESOURCE_ID_F00D);
 	auto message = UMessageBuilder::publish(std::move(topic)).build();
 
 	decltype(transport->send(message)) result;
-	EXPECT_NO_THROW(result = transport->send(message)); // NOLINT
+	EXPECT_NO_THROW(result = transport->send(message));  // NOLINT
 
 	EXPECT_EQ(result.code(), v1::UCode::PERMISSION_DENIED);
 }
 
-TEST_F(TestUTransport, RegisterListenerOk) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerOk) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -168,7 +167,7 @@ TEST_F(TestUTransport, RegisterListenerOk) { // NOLINT
 	auto source_filter = getWildcardUri();
 
 	transport::UTransport::ListenHandle handle;
-	EXPECT_NO_THROW({ // NOLINT
+	EXPECT_NO_THROW({  // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter);
 
@@ -194,7 +193,7 @@ TEST_F(TestUTransport, RegisterListenerOk) { // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, RegisterListenerInvalidSource) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerInvalidSource) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -203,7 +202,7 @@ TEST_F(TestUTransport, RegisterListenerInvalidSource) { // NOLINT
 	auto source_filter = getWildcardUri();
 	source_filter.set_resource_id(1);
 
-	EXPECT_THROW( // NOLINT
+	EXPECT_THROW(  // NOLINT
 	    {
 		    auto maybe_handle =
 		        transport->registerListener(callback, source_filter);
@@ -216,19 +215,18 @@ TEST_F(TestUTransport, RegisterListenerInvalidSource) { // NOLINT
 	EXPECT_FALSE(called);
 }
 
-TEST_F(TestUTransport, RegisterListenerImplStatus) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerImplStatus) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
-	transport_mock->getRegisterListenerStatus().set_code(
-	    v1::UCode::INTERNAL);
+	transport_mock->getRegisterListenerStatus().set_code(v1::UCode::INTERNAL);
 
 	bool called = false;
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 
 	v1::UStatus status;
-	EXPECT_NO_THROW({ // NOLINT
+	EXPECT_NO_THROW({  // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter);
 
@@ -251,7 +249,7 @@ TEST_F(TestUTransport, RegisterListenerImplStatus) { // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, RegisterListenerWithSinkFilterOk) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerWithSinkFilterOk) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -262,7 +260,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterOk) { // NOLINT
 	sink_filter.set_resource_id(WILDCARD);
 
 	transport::UTransport::ListenHandle handle;
-	EXPECT_NO_THROW({ // NOLINT
+	EXPECT_NO_THROW({  // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter, sink_filter);
 
@@ -292,7 +290,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterOk) { // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSource) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSource) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -305,7 +303,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSource) { // NOLINT
 	// Make source invalid
 	source_filter.set_ue_version_major(WILDCARD);
 
-	EXPECT_THROW( // NOLINT
+	EXPECT_THROW(  // NOLINT
 	    {
 		    auto maybe_handle = transport->registerListener(
 		        callback, source_filter, sink_filter);
@@ -318,7 +316,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSource) { // NOLINT
 	EXPECT_FALSE(called);
 }
 
-TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSink) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSink) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -331,7 +329,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSink) { // NOLINT
 	// Make sink invalid
 	sink_filter.set_ue_version_major(WILDCARD);
 
-	EXPECT_THROW( // NOLINT
+	EXPECT_THROW(  // NOLINT
 	    {
 		    auto maybe_handle = transport->registerListener(
 		        callback, source_filter, sink_filter);
@@ -344,12 +342,11 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSink) { // NOLINT
 	EXPECT_FALSE(called);
 }
 
-TEST_F(TestUTransport, RegisterListenerWithSinkFilterImplStatus) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerWithSinkFilterImplStatus) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
-	transport_mock->getRegisterListenerStatus().set_code(
-	    v1::UCode::NOT_FOUND);
+	transport_mock->getRegisterListenerStatus().set_code(v1::UCode::NOT_FOUND);
 
 	bool called = false;
 	auto callback = [&called](const auto&) { called = true; };
@@ -358,7 +355,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterImplStatus) { // NOLINT
 	sink_filter.set_resource_id(WILDCARD);
 
 	v1::UStatus status;
-	EXPECT_NO_THROW({ // NOLINT
+	EXPECT_NO_THROW({  // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter, sink_filter);
 
@@ -381,7 +378,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterImplStatus) { // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -390,9 +387,9 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) { // NOLINT
 	auto source_filter = getWildcardUri();
 
 	transport::UTransport::ListenHandle handle;
-	EXPECT_NO_THROW({ // NOLINT
-		auto maybe_handle =
-		    transport->registerListener(callback, source_filter, RESOURCE_ID_F00D);
+	EXPECT_NO_THROW({  // NOLINT
+		auto maybe_handle = transport->registerListener(callback, source_filter,
+		                                                RESOURCE_ID_F00D);
 
 		EXPECT_TRUE(maybe_handle);
 		if (maybe_handle) {
@@ -422,7 +419,8 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) { // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, RegisterListenerWithSinkResourceInvalidSource) { // NOLINT
+TEST_F(TestUTransport, // NOLINT
+       RegisterListenerWithSinkResourceInvalidSource) {  
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -433,7 +431,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceInvalidSource) { // NOLIN
 	// Make source invalid
 	source_filter.set_ue_version_major(WILDCARD);
 
-	EXPECT_THROW( // NOLINT
+	EXPECT_THROW(  // NOLINT
 	    {
 		    auto maybe_handle =
 		        transport->registerListener(callback, source_filter, 0xABBA);
@@ -449,19 +447,18 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceInvalidSource) { // NOLIN
 // NOTE: it is not possible to produce an invalid sink filter with this method
 // since it constrains the sink resource parameter to uint16_t
 
-TEST_F(TestUTransport, RegisterListenerWithSinkResourceImplStatus) { // NOLINT
+TEST_F(TestUTransport, RegisterListenerWithSinkResourceImplStatus) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
-	transport_mock->getRegisterListenerStatus().set_code(
-	    v1::UCode::NOT_FOUND);
+	transport_mock->getRegisterListenerStatus().set_code(v1::UCode::NOT_FOUND);
 
 	bool called = false;
 	auto callback = [&called](const auto&) { called = true; };
 	auto source_filter = getWildcardUri();
 
 	v1::UStatus status;
-	EXPECT_NO_THROW({ // NOLINT
+	EXPECT_NO_THROW({  // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(callback, source_filter, WILDCARD);
 
@@ -486,7 +483,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceImplStatus) { // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, DeprecatedRegisterListenerOk) { // NOLINT
+TEST_F(TestUTransport, DeprecatedRegisterListenerOk) {  // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -495,7 +492,7 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerOk) { // NOLINT
 	auto topic_source_filter = getWildcardUri();
 
 	transport::UTransport::ListenHandle handle;
-	EXPECT_NO_THROW({ // NOLINT
+	EXPECT_NO_THROW({  // NOLINT
 		// When source_filter is omitted, sink_filter is treated as a publish
 		// topic.
 		auto maybe_handle =
@@ -523,7 +520,8 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerOk) { // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, DeprecatedRegisterListenerWithSourceFilterOk) { // NOLINT
+TEST_F(TestUTransport, // NOLINT
+       DeprecatedRegisterListenerWithSourceFilterOk) {  
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -534,7 +532,7 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerWithSourceFilterOk) { // NOLINT
 	sink_filter.set_resource_id(WILDCARD);
 
 	transport::UTransport::ListenHandle handle;
-	EXPECT_NO_THROW({ // NOLINT
+	EXPECT_NO_THROW({  // NOLINT
 		auto maybe_handle =
 		    transport->registerListener(sink_filter, callback, source_filter);
 

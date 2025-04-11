@@ -33,33 +33,37 @@ private:
 	uprotocol::v1::UUri client_uuri;
 	uprotocol::v1::UUri server_uuri;
 	uprotocol::v1::UUri subcription_uuri;
+
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
-	
-	std::shared_ptr<uprotocol::test::UTransportMock> getMockTransportClient() const { return mockTransportClient_; }
-	std::shared_ptr<uprotocol::test::UTransportMock> getMockTransportServer() const { return mockTransportServer_; }
-	uprotocol::v1::UUri& getClientUUri() {
-        return client_uuri;
-    }
-	const uprotocol::v1::UUri& getServerUUri() const {
-        return server_uuri;
-    }
-	const uprotocol::v1::UUri& getSubcriptionUUri() const {
-        return subcription_uuri;
-    }
-    void setMockTransportClient(const std::shared_ptr<uprotocol::test::UTransportMock>& client) { mockTransportClient_ = client; }
-	void setMockTransportServer(const std::shared_ptr<uprotocol::test::UTransportMock>& server) { mockTransportClient_ = server; }
-	void setClientUUri(const uprotocol::v1::UUri& uuri) {
-        client_uuri = uuri;
-    }
-	void setServerUUri(const uprotocol::v1::UUri& uuri) {
-        server_uuri = uuri;
-    }
-	void setSubcriptionUUri(const uprotocol::v1::UUri& uuri) {
-        subcription_uuri = uuri;
-    }
 
+	std::shared_ptr<uprotocol::test::UTransportMock> getMockTransportClient()
+	    const {
+		return mockTransportClient_;
+	}
+	std::shared_ptr<uprotocol::test::UTransportMock> getMockTransportServer()
+	    const {
+		return mockTransportServer_;
+	}
+	uprotocol::v1::UUri& getClientUUri() { return client_uuri; }
+	const uprotocol::v1::UUri& getServerUUri() const { return server_uuri; }
+	const uprotocol::v1::UUri& getSubcriptionUUri() const {
+		return subcription_uuri;
+	}
+	void setMockTransportClient(
+	    const std::shared_ptr<uprotocol::test::UTransportMock>& client) {
+		mockTransportClient_ = client;
+	}
+	void setMockTransportServer(
+	    const std::shared_ptr<uprotocol::test::UTransportMock>& server) {
+		mockTransportClient_ = server;
+	}
+	void setClientUUri(const uprotocol::v1::UUri& uuri) { client_uuri = uuri; }
+	void setServerUUri(const uprotocol::v1::UUri& uuri) { server_uuri = uuri; }
+	void setSubcriptionUUri(const uprotocol::v1::UUri& uuri) {
+		subcription_uuri = uuri;
+	}
 
 	void SetUp() override {
 		constexpr uint32_t TEST_UE_ID = 0x18000;
@@ -103,12 +107,13 @@ protected:
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
 public:
 	~ConsumerTest() override = default;
 };
 
 // Negative test case with no source filter
-TEST_F(ConsumerTest, ConstructorTestSuccess) {	// NOLINT
+TEST_F(ConsumerTest, ConstructorTestSuccess) {  // NOLINT
 	constexpr int REQUEST_TTL_TIME = 0x8000;
 	auto subcription_callback = someCallBack;
 	auto subscribe_request_ttl = std::chrono::milliseconds(REQUEST_TTL_TIME);
@@ -119,8 +124,7 @@ TEST_F(ConsumerTest, ConstructorTestSuccess) {	// NOLINT
 	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
 	        getMockTransportClient(), getSubcriptionUUri(),
-	        subcription_callback, priority,
-	        subscribe_request_ttl, options);
+	        subcription_callback, priority, subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
 	ASSERT_TRUE(consumer_or_status.has_value());
@@ -133,7 +137,7 @@ TEST_F(ConsumerTest, ConstructorTestSuccess) {	// NOLINT
 	ASSERT_NE(consumer_ptr, nullptr);
 }
 
-TEST_F(ConsumerTest, SubscribeTestSuccess) { // NOLINT
+TEST_F(ConsumerTest, SubscribeTestSuccess) {  // NOLINT
 	constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8000;
 	constexpr int REQUEST_TTL_TIME = 0x8000;
 	auto subcription_callback = someCallBack;
@@ -145,8 +149,7 @@ TEST_F(ConsumerTest, SubscribeTestSuccess) { // NOLINT
 	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
 	        getMockTransportClient(), getSubcriptionUUri(),
-	        subcription_callback, priority,
-	        subscribe_request_ttl, options);
+	        subcription_callback, priority, subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
 	ASSERT_TRUE(consumer_or_status.has_value());
@@ -180,7 +183,7 @@ TEST_F(ConsumerTest, SubscribeTestSuccess) { // NOLINT
 	EXPECT_TRUE(getMockTransportClient()->getSendCount() == 1);
 }
 
-TEST_F(ConsumerTest, UnsubscribeTestSuccess) { 	// NOLINT
+TEST_F(ConsumerTest, UnsubscribeTestSuccess) {  // NOLINT
 	constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8000;
 	constexpr int REQUEST_TTL_TIME = 0x8000;
 	auto subcription_callback = someCallBack;
@@ -192,8 +195,7 @@ TEST_F(ConsumerTest, UnsubscribeTestSuccess) { 	// NOLINT
 	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
 	        getMockTransportClient(), getSubcriptionUUri(),
-	        subcription_callback, priority,
-	        subscribe_request_ttl, options);
+	        subcription_callback, priority, subscribe_request_ttl, options);
 
 	// Ensure that the consumer creation was successful
 	ASSERT_TRUE(consumer_or_status.has_value());

@@ -33,27 +33,39 @@ public:
 		(*listener_)(msg);
 	}
 
-	size_t getSendCount() const { return send_count_.load(); } 
+	size_t getSendCount() const { return send_count_.load(); }
 
-    uprotocol::v1::UStatus& getSendStatus() { return send_status_; }
+	uprotocol::v1::UStatus& getSendStatus() { return send_status_; }
 
-    uprotocol::v1::UStatus& getRegisterListenerStatus() { return registerListener_status_; }
+	uprotocol::v1::UStatus& getRegisterListenerStatus() {
+		return registerListener_status_;
+	}
 
-    std::optional<uprotocol::utils::callbacks::CallerHandle<void, uprotocol::v1::UMessage const&>> getListener() const { return listener_; }
+	std::optional<uprotocol::utils::callbacks::CallerHandle<
+	    void, uprotocol::v1::UMessage const&>>
+	getListener() const {
+		return listener_;
+	}
 
-    std::optional<uprotocol::utils::callbacks::CallerHandle<void, uprotocol::v1::UMessage const&>> getCleanupListener() const { return cleanup_listener_; }
+	std::optional<uprotocol::utils::callbacks::CallerHandle<
+	    void, uprotocol::v1::UMessage const&>>
+	getCleanupListener() const {
+		return cleanup_listener_;
+	}
 
-    std::optional<uprotocol::v1::UUri> getSinkFilter() const { return sink_filter_; }
+	std::optional<uprotocol::v1::UUri> getSinkFilter() const {
+		return sink_filter_;
+	}
 
-    v1::UUri getSourceFilter() const { return source_filter_; }
+	v1::UUri getSourceFilter() const { return source_filter_; }
 
-    std::mutex& getRegisterMtx() { return register_mtx_; }
+	std::mutex& getRegisterMtx() { return register_mtx_; }
 
-    v1::UMessage getMessage() const { return message_; }
+	v1::UMessage getMessage() const { return message_; }
 
-    std::mutex& getMessageMtx() { return message_mtx_; }
+	std::mutex& getMessageMtx() { return message_mtx_; }
 
-	~UTransportMock() override  = default;
+	~UTransportMock() override = default;
 
 private:
 	std::atomic<size_t> send_count_;
@@ -62,11 +74,11 @@ private:
 	uprotocol::v1::UStatus registerListener_status_;
 
 	std::optional<uprotocol::utils::callbacks::CallerHandle<
-		void, uprotocol::v1::UMessage const&>>
-		listener_;
+	    void, uprotocol::v1::UMessage const&>>
+	    listener_;
 	std::optional<uprotocol::utils::callbacks::CallerHandle<
-		void, uprotocol::v1::UMessage const&>>
-		cleanup_listener_;
+	    void, uprotocol::v1::UMessage const&>>
+	    cleanup_listener_;
 	std::optional<uprotocol::v1::UUri> sink_filter_;
 	v1::UUri source_filter_;
 	std::mutex register_mtx_;

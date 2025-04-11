@@ -15,7 +15,7 @@
 #include <up-cpp/datamodel/validator/UUri.h>
 #include <uprotocol/v1/uri.pb.h>
 
-namespace uprotocol::v1{
+namespace uprotocol::v1 {
 
 class TestUMessageValidator : public testing::Test {
 private:
@@ -23,6 +23,7 @@ private:
 	UUri sink_;
 	// Note: this is used when intentionally setting an unexpected request ID
 	UUID reqId_;
+
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
@@ -58,8 +59,8 @@ protected:
 	static void TearDownTestSuite() {}
 
 	UUri& getSource() { return source_; }
-	UUri& getSink() { return sink_;}
-	const UUID& getReqId() const { return reqId_;}
+	UUri& getSink() { return sink_; }
+	const UUID& getReqId() const { return reqId_; }
 
 public:
 	~TestUMessageValidator() override = default;
@@ -67,7 +68,7 @@ public:
 
 UAttributes fakeRequest(const UUri& source, const UUri& sink) {
 	constexpr uint16_t DEFAULT_TTL = 1000;
-	
+
 	UAttributes attributes;
 
 	static auto uuid_builder =
@@ -103,7 +104,7 @@ UAttributes fakeResponse(const UUri& sink, const UUri& source) {
 
 UAttributes fakePublish(const UUri& source) {
 	constexpr uint16_t DEFAULT_TTL = 1000;
-	
+
 	UAttributes attributes;
 
 	static auto uuid_builder =
@@ -140,88 +141,106 @@ UMessage build(UAttributes& attributes) {
 }
 
 void testValidWithTTL(UAttributes& attributes_in) {
-    auto attributes = UAttributes(attributes_in);
-    auto umessage = build(attributes);
-    auto [valid, reason] = uprotocol::datamodel::validator::message::areCommonAttributesValid(umessage);
-    EXPECT_TRUE(valid);
-    EXPECT_FALSE(reason.has_value());
+	auto attributes = UAttributes(attributes_in);
+	auto umessage = build(attributes);
+	auto [valid, reason] =
+	    uprotocol::datamodel::validator::message::areCommonAttributesValid(
+	        umessage);
+	EXPECT_TRUE(valid);
+	EXPECT_FALSE(reason.has_value());
 }
 
 void testValidWithoutTTL(UAttributes& attributes_in) {
-    auto attributes = UAttributes(attributes_in);
-    attributes.clear_ttl();
-    auto umessage = build(attributes);
-    auto [valid, reason] = uprotocol::datamodel::validator::message::areCommonAttributesValid(umessage);
-    EXPECT_TRUE(valid);
-    EXPECT_FALSE(reason.has_value());
+	auto attributes = UAttributes(attributes_in);
+	attributes.clear_ttl();
+	auto umessage = build(attributes);
+	auto [valid, reason] =
+	    uprotocol::datamodel::validator::message::areCommonAttributesValid(
+	        umessage);
+	EXPECT_TRUE(valid);
+	EXPECT_FALSE(reason.has_value());
 }
 
 void testMissingId(UAttributes& attributes_in) {
-    auto attributes = UAttributes(attributes_in);
-    attributes.clear_id();
-    auto umessage = build(attributes);
-    auto [valid, reason] = uprotocol::datamodel::validator::message::areCommonAttributesValid(umessage);
-    EXPECT_FALSE(valid);
-    EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_ID);
+	auto attributes = UAttributes(attributes_in);
+	attributes.clear_id();
+	auto umessage = build(attributes);
+	auto [valid, reason] =
+	    uprotocol::datamodel::validator::message::areCommonAttributesValid(
+	        umessage);
+	EXPECT_FALSE(valid);
+	EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_ID);
 }
 
 void testInvalidId(UAttributes& attributes_in) {
-    auto attributes = UAttributes(attributes_in);
-    UUID local_id(attributes.id());
-    local_id.set_lsb(0);
-    *attributes.mutable_id() = local_id;
-    auto umessage = build(attributes);
-    auto [valid, reason] = uprotocol::datamodel::validator::message::areCommonAttributesValid(umessage);
-    EXPECT_FALSE(valid);
-    EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_ID);
+	auto attributes = UAttributes(attributes_in);
+	UUID local_id(attributes.id());
+	local_id.set_lsb(0);
+	*attributes.mutable_id() = local_id;
+	auto umessage = build(attributes);
+	auto [valid, reason] =
+	    uprotocol::datamodel::validator::message::areCommonAttributesValid(
+	        umessage);
+	EXPECT_FALSE(valid);
+	EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_ID);
 }
 
 void testExpiredTTL(UAttributes& attributes_in) {
-    constexpr uint16_t SLEEP_TIME = 20000;
-    constexpr uint16_t DEFAULT_TTL = 10;
+	constexpr uint16_t SLEEP_TIME = 20000;
+	constexpr uint16_t DEFAULT_TTL = 10;
 
-    auto attributes = UAttributes(attributes_in);
-    attributes.set_ttl(DEFAULT_TTL);
-    usleep(SLEEP_TIME);  // sleep (id should be expired by now)
-    auto umessage = build(attributes);
-    auto [valid, reason] = uprotocol::datamodel::validator::message::areCommonAttributesValid(umessage);
-    EXPECT_FALSE(valid);
-    EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::ID_EXPIRED);
+	auto attributes = UAttributes(attributes_in);
+	attributes.set_ttl(DEFAULT_TTL);
+	usleep(SLEEP_TIME);  // sleep (id should be expired by now)
+	auto umessage = build(attributes);
+	auto [valid, reason] =
+	    uprotocol::datamodel::validator::message::areCommonAttributesValid(
+	        umessage);
+	EXPECT_FALSE(valid);
+	EXPECT_EQ(reason,
+	          uprotocol::datamodel::validator::message::Reason::ID_EXPIRED);
 }
 
 void testOutOfRangePriority(UAttributes& attributes_in) {
-    constexpr uint16_t DEFAULT_TTL = 10;
+	constexpr uint16_t DEFAULT_TTL = 10;
 
-    auto attributes = UAttributes(attributes_in);
-    attributes.set_priority(UPriority(UPriority_MAX + DEFAULT_TTL));
-    auto umessage = build(attributes);
-    auto [valid, reason] = uprotocol::datamodel::validator::message::areCommonAttributesValid(umessage);
-    EXPECT_FALSE(valid);
-    EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::PRIORITY_OUT_OF_RANGE);
+	auto attributes = UAttributes(attributes_in);
+	attributes.set_priority(UPriority(UPriority_MAX + DEFAULT_TTL));
+	auto umessage = build(attributes);
+	auto [valid, reason] =
+	    uprotocol::datamodel::validator::message::areCommonAttributesValid(
+	        umessage);
+	EXPECT_FALSE(valid);
+	EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+	                      PRIORITY_OUT_OF_RANGE);
 }
 
 void testOutOfRangePayloadFormat(UAttributes& attributes_in) {
-    constexpr uint16_t DEFAULT_TTL = 10;
+	constexpr uint16_t DEFAULT_TTL = 10;
 
-    auto attributes = UAttributes(attributes_in);
-    attributes.set_payload_format(UPayloadFormat(UPayloadFormat_MAX + DEFAULT_TTL));
-    auto umessage = build(attributes);
-    auto [valid, reason] = uprotocol::datamodel::validator::message::areCommonAttributesValid(umessage);
-    EXPECT_FALSE(valid);
-    EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::PAYLOAD_FORMAT_OUT_OF_RANGE);
+	auto attributes = UAttributes(attributes_in);
+	attributes.set_payload_format(
+	    UPayloadFormat(UPayloadFormat_MAX + DEFAULT_TTL));
+	auto umessage = build(attributes);
+	auto [valid, reason] =
+	    uprotocol::datamodel::validator::message::areCommonAttributesValid(
+	        umessage);
+	EXPECT_FALSE(valid);
+	EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+	                      PAYLOAD_FORMAT_OUT_OF_RANGE);
 }
 
 void testCommonAttributes(UAttributes& attributes_in) {
-    testValidWithTTL(attributes_in);
-    testValidWithoutTTL(attributes_in);
-    testMissingId(attributes_in);
-    testInvalidId(attributes_in);
-    testExpiredTTL(attributes_in);
-    testOutOfRangePriority(attributes_in);
-    testOutOfRangePayloadFormat(attributes_in);
+	testValidWithTTL(attributes_in);
+	testValidWithoutTTL(attributes_in);
+	testMissingId(attributes_in);
+	testInvalidId(attributes_in);
+	testExpiredTTL(attributes_in);
+	testOutOfRangePriority(attributes_in);
+	testOutOfRangePayloadFormat(attributes_in);
 }
 
-TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
+TEST_F(TestUMessageValidator, ValidRpcRequest) {  // NOLINT
 	getSource().set_resource_id(0);  // must be 0 for valid requests
 
 	{
@@ -234,7 +253,9 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		// valid
 		auto attributes = fakeRequest(getSource(), getSink());
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
@@ -244,9 +265,12 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		auto attributes = fakeRequest(getSource(), getSink());
 		attributes.set_type(UMESSAGE_TYPE_RESPONSE);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::WRONG_MESSAGE_TYPE);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      WRONG_MESSAGE_TYPE);
 	}
 
 	{
@@ -254,9 +278,13 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		auto attributes = fakeRequest(getSource(), getSink());
 		attributes.clear_source();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
@@ -264,9 +292,13 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		auto attributes = fakeRequest(getSource(), getSink());
 		attributes.clear_sink();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
 	}
 
 	{
@@ -275,9 +307,13 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		source.set_resource_id(1);  // should be zero
 		auto attributes = fakeRequest(source, getSink());
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
@@ -286,9 +322,13 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		sink.set_resource_id(0);  // should NOT be zero
 		auto attributes = fakeRequest(getSource(), sink);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
 	}
 
 	{
@@ -296,9 +336,12 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		auto attributes = fakeRequest(getSource(), getSink());
 		attributes.set_priority(UPRIORITY_CS3);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::PRIORITY_OUT_OF_RANGE);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      PRIORITY_OUT_OF_RANGE);
 	}
 
 	{
@@ -306,9 +349,13 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		auto attributes = fakeRequest(getSource(), getSink());
 		attributes.clear_ttl();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::INVALID_TTL);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::INVALID_TTL);
 	}
 
 	{
@@ -316,9 +363,13 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		auto attributes = fakeRequest(getSource(), getSink());
 		attributes.set_ttl(0);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::INVALID_TTL);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::INVALID_TTL);
 	}
 
 	{
@@ -326,9 +377,12 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		auto attributes = fakeRequest(getSource(), getSink());
 		attributes.set_commstatus(OK);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -336,13 +390,16 @@ TEST_F(TestUMessageValidator, ValidRpcRequest) { // NOLINT
 		auto attributes = fakeRequest(getSource(), getSink());
 		*attributes.mutable_reqid() = getReqId();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcRequest(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcRequest(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 }
 
-TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
+TEST_F(TestUMessageValidator, ValidRpcResponse) {  // NOLINT
 	getSource().set_resource_id(0);
 
 	{
@@ -355,7 +412,9 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		// valid
 		auto attributes = fakeResponse(getSource(), getSink());
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 		// Only for debugging a test - should only happen if test is already
@@ -370,9 +429,12 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		attributes.set_type(UMESSAGE_TYPE_REQUEST);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::WRONG_MESSAGE_TYPE);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      WRONG_MESSAGE_TYPE);
 	}
 
 	{
@@ -380,9 +442,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		attributes.clear_source();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
@@ -390,9 +456,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		attributes.clear_sink();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
 	}
 
 	{
@@ -401,9 +471,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		source.set_resource_id(1);  // should be zero
 		auto attributes = fakeResponse(source, getSink());
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
 	}
 
 	{
@@ -412,9 +486,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		sink.set_resource_id(0);  // should NOT be zero
 		auto attributes = fakeResponse(getSource(), sink);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
@@ -423,9 +501,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		attributes.clear_reqid();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::REQID_MISMATCH);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::REQID_MISMATCH);
 	}
 
 	{
@@ -436,9 +518,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		*attributes.mutable_reqid() = local_id;
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::REQID_MISMATCH);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::REQID_MISMATCH);
 	}
 
 	{
@@ -446,7 +532,9 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		attributes.clear_ttl();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
@@ -458,9 +546,12 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		attributes.set_ttl(1);
 		usleep(SLEEP_TIME);  // sleep (id should be expired by now)
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::ID_EXPIRED);
+		EXPECT_EQ(reason,
+		          uprotocol::datamodel::validator::message::Reason::ID_EXPIRED);
 	}
 
 	{
@@ -468,9 +559,12 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		attributes.set_priority(UPRIORITY_CS3);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::PRIORITY_OUT_OF_RANGE);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      PRIORITY_OUT_OF_RANGE);
 	}
 
 	{
@@ -479,9 +573,12 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		attributes.set_permission_level(ATTRIBUTES_PERMISSION_LEVEL);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -489,13 +586,16 @@ TEST_F(TestUMessageValidator, ValidRpcResponse) { // NOLINT
 		auto attributes = fakeResponse(getSource(), getSink());
 		attributes.set_token("token");
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponse(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponse(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 }
 
-TEST_F(TestUMessageValidator, ValidRpcResponseFor) { // NOLINT
+TEST_F(TestUMessageValidator, ValidRpcResponseFor) {  // NOLINT
 	getSource().set_resource_id(0);
 
 	{
@@ -505,7 +605,9 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) { // NOLINT
 		*res_attr.mutable_reqid() = req_attr.id();
 		auto request = build(req_attr);
 		auto response = build(res_attr);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponseFor(request, response);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponseFor(
+		        request, response);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 		// Only for debugging test - shows reason when test is already failing
@@ -521,9 +623,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) { // NOLINT
 		res_attr.clear_reqid();
 		auto request = build(req_attr);
 		auto response = build(res_attr);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponseFor(request, response);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponseFor(
+		        request, response);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::REQID_MISMATCH);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::REQID_MISMATCH);
 	}
 
 	{
@@ -533,9 +639,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) { // NOLINT
 		*res_attr.mutable_reqid() = res_attr.id();
 		auto request = build(req_attr);
 		auto response = build(res_attr);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponseFor(request, response);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponseFor(
+		        request, response);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::REQID_MISMATCH);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::REQID_MISMATCH);
 	}
 
 	{
@@ -546,9 +656,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) { // NOLINT
 		    res_attr.sink().ue_version_major() + 1);
 		auto request = build(req_attr);
 		auto response = build(res_attr);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponseFor(request, response);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponseFor(
+		        request, response);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::URI_MISMATCH);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::URI_MISMATCH);
 	}
 
 	{
@@ -559,9 +673,13 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) { // NOLINT
 		    res_attr.source().ue_version_major() + 1);
 		auto request = build(req_attr);
 		auto response = build(res_attr);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponseFor(request, response);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponseFor(
+		        request, response);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::URI_MISMATCH);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::URI_MISMATCH);
 	}
 
 	{
@@ -572,16 +690,21 @@ TEST_F(TestUMessageValidator, ValidRpcResponseFor) { // NOLINT
 		*res_attr.mutable_reqid() = req_attr.id();
 		auto request = build(req_attr);
 		auto response = build(res_attr);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidRpcResponseFor(request, response);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidRpcResponseFor(
+		        request, response);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::PRIORITY_MISMATCH);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      PRIORITY_MISMATCH);
 		// Test debugging
-		EXPECT_EQ(message(*reason), message(uprotocol::datamodel::validator::message::Reason::PRIORITY_MISMATCH));
+		EXPECT_EQ(message(*reason),
+		          message(uprotocol::datamodel::validator::message::Reason::
+		                      PRIORITY_MISMATCH));
 	}
 }
 
-TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
-	constexpr uint32_t SOURCE_RESOURCE_ID = 0x8000; 
+TEST_F(TestUMessageValidator, ValidPublish) {  // NOLINT
+	constexpr uint32_t SOURCE_RESOURCE_ID = 0x8000;
 	getSource().set_resource_id(SOURCE_RESOURCE_ID);
 
 	{
@@ -594,7 +717,8 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 		// valid
 		auto attributes = fakePublish(getSource());
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
@@ -604,9 +728,11 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 		auto attributes = fakePublish(getSource());
 		attributes.set_type(UMESSAGE_TYPE_REQUEST);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::WRONG_MESSAGE_TYPE);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      WRONG_MESSAGE_TYPE);
 	}
 
 	{
@@ -614,21 +740,28 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 		auto attributes = fakePublish(getSource());
 		attributes.clear_source();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
 		// invalid source
-		constexpr uint32_t SOURCE_RESOURCE_ID_INVALID = 0x7FFF; 
+		constexpr uint32_t SOURCE_RESOURCE_ID_INVALID = 0x7FFF;
 		UUri source = getSource();
-		source.set_resource_id(SOURCE_RESOURCE_ID_INVALID);  // should greater than 0x8000
+		source.set_resource_id(
+		    SOURCE_RESOURCE_ID_INVALID);  // should greater than 0x8000
 		auto attributes = fakePublish(source);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
@@ -636,9 +769,11 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 		auto attributes = fakePublish(getSource());
 		*attributes.mutable_sink() = getSink();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -646,9 +781,11 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 		auto attributes = fakePublish(getSource());
 		attributes.set_commstatus(OK);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -656,9 +793,11 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 		auto attributes = fakePublish(getSource());
 		*attributes.mutable_reqid() = getReqId();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -667,9 +806,11 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 		auto attributes = fakePublish(getSource());
 		attributes.set_permission_level(ATTRIBUTES_PERMISSION_LEVEL);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -677,13 +818,15 @@ TEST_F(TestUMessageValidator, ValidPublish) { // NOLINT
 		auto attributes = fakePublish(getSource());
 		attributes.set_token("token");
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidPublish(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidPublish(umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 }
 
-TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
+TEST_F(TestUMessageValidator, ValidNotification) {  // NOLINT
 	constexpr uint32_t SOURCE_RESOURCE_ID = 0x8001;
 	getSource().set_resource_id(SOURCE_RESOURCE_ID);
 	getSink().set_resource_id(0);
@@ -698,7 +841,9 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 		// valid
 		auto attributes = fakeNotification(getSource(), getSink());
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 	}
@@ -708,9 +853,12 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 		auto attributes = fakeNotification(getSource(), getSink());
 		attributes.set_type(UMESSAGE_TYPE_REQUEST);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::WRONG_MESSAGE_TYPE);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      WRONG_MESSAGE_TYPE);
 	}
 
 	{
@@ -718,9 +866,13 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 		auto attributes = fakeNotification(getSource(), getSink());
 		attributes.clear_source();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
@@ -728,33 +880,47 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 		auto attributes = fakeNotification(getSource(), getSink());
 		attributes.clear_sink();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
 	}
 
 	{
 		// invalid source
 		constexpr uint32_t LOCAL_SOURCE_RESOURCE_ID = 0x7FFF;
 		UUri local_source = getSource();
-		local_source.set_resource_id(LOCAL_SOURCE_RESOURCE_ID);  // should be greater than 0x8000
+		local_source.set_resource_id(
+		    LOCAL_SOURCE_RESOURCE_ID);  // should be greater than 0x8000
 		auto attributes = fakeNotification(local_source, getSink());
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
 		// invalid sink
 		constexpr uint32_t LOCAL_SOURCE_RESOURCE_ID = 0x7FFF;
 		UUri local_sink = getSink();
-		local_sink.set_resource_id(LOCAL_SOURCE_RESOURCE_ID);  // should be greater than 0x8000
+		local_sink.set_resource_id(
+		    LOCAL_SOURCE_RESOURCE_ID);  // should be greater than 0x8000
 		auto attributes = fakeNotification(getSource(), local_sink);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
+		EXPECT_EQ(
+		    reason,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SINK_URI);
 	}
 
 	{
@@ -762,9 +928,12 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 		auto attributes = fakeNotification(getSource(), getSink());
 		attributes.set_commstatus(OK);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -772,9 +941,12 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 		auto attributes = fakeNotification(getSource(), getSink());
 		*attributes.mutable_reqid() = getReqId();
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -783,9 +955,12 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 		auto attributes = fakeNotification(getSource(), getSink());
 		attributes.set_permission_level(ATTRIBUTES_PERMISSION_LEVEL);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 
 	{
@@ -793,13 +968,16 @@ TEST_F(TestUMessageValidator, ValidNotification) { // NOLINT
 		auto attributes = fakeNotification(getSource(), getSink());
 		attributes.set_token("token");
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValidNotification(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValidNotification(
+		        umessage);
 		EXPECT_FALSE(valid);
-		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+		                      DISALLOWED_FIELD_SET);
 	}
 }
 
-TEST_F(TestUMessageValidator, IsValid) { // NOLINT
+TEST_F(TestUMessageValidator, IsValid) {  // NOLINT
 	{
 		// valid request
 		auto source = getSource();
@@ -809,7 +987,8 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 		auto attributes = fakeRequest(source, sink);
 		auto umessage = build(attributes);
 		{
-			auto [valid, reason] = uprotocol::datamodel::validator::message::isValid(umessage);
+			auto [valid, reason] =
+			    uprotocol::datamodel::validator::message::isValid(umessage);
 			EXPECT_TRUE(valid);
 			EXPECT_FALSE(reason.has_value());
 		}
@@ -820,10 +999,12 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 		    uprotocol::v1::UMessageType::UMESSAGE_TYPE_UNSPECIFIED);
 		umessage = build(attributes);
 		{
-			auto [valid, reason] = uprotocol::datamodel::validator::message::isValid(umessage);
+			auto [valid, reason] =
+			    uprotocol::datamodel::validator::message::isValid(umessage);
 			EXPECT_FALSE(valid);
 			EXPECT_TRUE(reason.has_value());
-			EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::UNSPECIFIED_MESSAGE_TYPE);
+			EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+			                      UNSPECIFIED_MESSAGE_TYPE);
 		}
 
 		// Check with an invalid type
@@ -832,10 +1013,12 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 		    static_cast<uprotocol::v1::UMessageType>(max_type + 1));
 		umessage = build(attributes);
 		{
-			auto [valid, reason] = uprotocol::datamodel::validator::message::isValid(umessage);
+			auto [valid, reason] =
+			    uprotocol::datamodel::validator::message::isValid(umessage);
 			EXPECT_FALSE(valid);
 			EXPECT_TRUE(reason.has_value());
-			EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::INVALID_MESSAGE_TYPE);
+			EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::
+			                      INVALID_MESSAGE_TYPE);
 		}
 
 		// Restore the message type to finish out the test
@@ -845,10 +1028,13 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 		attributes.set_ttl(0);
 		umessage = build(attributes);
 		{
-			auto [valid, reason] = uprotocol::datamodel::validator::message::isValid(umessage);
+			auto [valid, reason] =
+			    uprotocol::datamodel::validator::message::isValid(umessage);
 			EXPECT_FALSE(valid);
 			EXPECT_TRUE(reason.has_value());
-			EXPECT_EQ(reason, uprotocol::datamodel::validator::message::Reason::INVALID_TTL);
+			EXPECT_EQ(
+			    reason,
+			    uprotocol::datamodel::validator::message::Reason::INVALID_TTL);
 		}
 	}
 
@@ -860,7 +1046,8 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 
 		auto attributes = fakeResponse(source, sink);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValid(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValid(umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 
@@ -868,10 +1055,13 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 		attributes = fakeResponse(sink, source);
 		umessage = build(attributes);
 
-		auto [valid2, reason2] = uprotocol::datamodel::validator::message::isValid(umessage);
+		auto [valid2, reason2] =
+		    uprotocol::datamodel::validator::message::isValid(umessage);
 		EXPECT_FALSE(valid2);
 		EXPECT_TRUE(reason2.has_value());
-		EXPECT_EQ(reason2, uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
+		EXPECT_EQ(
+		    reason2,
+		    uprotocol::datamodel::validator::message::Reason::BAD_SOURCE_URI);
 	}
 
 	{
@@ -883,18 +1073,22 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 
 		auto attributes = fakePublish(source);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValid(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValid(umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 
 		// Make the request invalid by making one change
-		attributes.set_priority(static_cast<uprotocol::v1::UPriority>(ATTRIBUTES_INVALID_PRIORITY));
+		attributes.set_priority(
+		    static_cast<uprotocol::v1::UPriority>(ATTRIBUTES_INVALID_PRIORITY));
 		umessage = build(attributes);
 
-		auto [valid2, reason2] = uprotocol::datamodel::validator::message::isValid(umessage);
+		auto [valid2, reason2] =
+		    uprotocol::datamodel::validator::message::isValid(umessage);
 		EXPECT_FALSE(valid2);
 		EXPECT_TRUE(reason2.has_value());
-		EXPECT_EQ(reason2, uprotocol::datamodel::validator::message::Reason::PRIORITY_OUT_OF_RANGE);
+		EXPECT_EQ(reason2, uprotocol::datamodel::validator::message::Reason::
+		                       PRIORITY_OUT_OF_RANGE);
 	}
 
 	{
@@ -907,7 +1101,8 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 
 		auto attributes = fakeNotification(source, sink);
 		auto umessage = build(attributes);
-		auto [valid, reason] = uprotocol::datamodel::validator::message::isValid(umessage);
+		auto [valid, reason] =
+		    uprotocol::datamodel::validator::message::isValid(umessage);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
 
@@ -915,10 +1110,12 @@ TEST_F(TestUMessageValidator, IsValid) { // NOLINT
 		*(attributes.mutable_reqid()) = attributes.id();
 		umessage = build(attributes);
 
-		auto [valid2, reason2] = uprotocol::datamodel::validator::message::isValid(umessage);
+		auto [valid2, reason2] =
+		    uprotocol::datamodel::validator::message::isValid(umessage);
 		EXPECT_FALSE(valid2);
 		EXPECT_TRUE(reason2.has_value());
-		EXPECT_EQ(reason2, uprotocol::datamodel::validator::message::Reason::DISALLOWED_FIELD_SET);
+		EXPECT_EQ(reason2, uprotocol::datamodel::validator::message::Reason::
+		                       DISALLOWED_FIELD_SET);
 	}
 }
 

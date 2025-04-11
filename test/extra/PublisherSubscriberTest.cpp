@@ -26,7 +26,7 @@ constexpr uint16_t DEFAULT_SOURCE_VERSION_MAJOR = 0xF1;
 constexpr uint16_t DEFAULT_TOPIC_VERSION_MAJOR = 0xF8;
 constexpr std::chrono::milliseconds THOUSAND_MILLISECONDS(1000);
 
-namespace uprotocol::v1{
+namespace uprotocol::v1 {
 
 class TestPublisherSubscriber : public testing::Test {
 private:
@@ -36,8 +36,11 @@ private:
 	UPayloadFormat format_ = UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 	std::optional<UPriority> priority_;
 	std::optional<std::chrono::milliseconds> ttl_;
+
 protected:
-	std::shared_ptr<uprotocol::test::UTransportMock> getTransportMock() const { return transportMock_; }
+	std::shared_ptr<uprotocol::test::UTransportMock> getTransportMock() const {
+		return transportMock_;
+	}
 	UUri getSource() const { return source_; }
 	UUri getTopic() const { return topic_; }
 	UPayloadFormat getFormat() const { return format_; }
@@ -79,7 +82,7 @@ public:
 	~TestPublisherSubscriber() override = default;
 };
 
-TEST_F(TestPublisherSubscriber, PubSubSuccess) { // NOLINT
+TEST_F(TestPublisherSubscriber, PubSubSuccess) {  // NOLINT
 	// sub
 	auto transport_sub =
 	    std::make_shared<uprotocol::test::UTransportMock>(getSource());
@@ -89,32 +92,36 @@ TEST_F(TestPublisherSubscriber, PubSubSuccess) { // NOLINT
 		captured_message = std::move(message);
 	};
 
-	auto result =
-	    uprotocol::communication::Subscriber::subscribe(transport_sub, getTopic(), std::move(callback));
+	auto result = uprotocol::communication::Subscriber::subscribe(
+	    transport_sub, getTopic(), std::move(callback));
 
 	// pub
 	std::string test_payload_str = "test_payload";
 	auto movable_topic = getTopic();
-	uprotocol::communication::Publisher publisher(getTransportMock(), std::move(movable_topic), getFormat(),
-	                    getPriority(), getTTL());
+	uprotocol::communication::Publisher publisher(
+	    getTransportMock(), std::move(movable_topic), getFormat(),
+	    getPriority(), getTTL());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
 	getTransportMock()->getSendStatus() = retval;
 
-	uprotocol::datamodel::builder::Payload test_payload(test_payload_str, getFormat());
+	uprotocol::datamodel::builder::Payload test_payload(test_payload_str,
+	                                                    getFormat());
 	auto status = publisher.publish(std::move(test_payload));
 
 	// Test
-	EXPECT_EQ(
-	    uprotocol::datamodel::serializer::uri::AsString::serialize(getTransportMock()->getMessage().attributes().source()),
-	    uprotocol::datamodel::serializer::uri::AsString::serialize(transport_sub->getSourceFilter()));
+	EXPECT_EQ(uprotocol::datamodel::serializer::uri::AsString::serialize(
+	              getTransportMock()->getMessage().attributes().source()),
+	          uprotocol::datamodel::serializer::uri::AsString::serialize(
+	              transport_sub->getSourceFilter()));
 
 	// Manually bridge the two transports
 	transport_sub->mockMessage(getTransportMock()->getMessage());
 
 	// Test
-	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(getTransportMock()->getMessage(), captured_message));
+	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
+	    getTransportMock()->getMessage(), captured_message));
 	EXPECT_EQ(test_payload_str, captured_message.payload());
 }
 

@@ -15,7 +15,7 @@
 #include "up-cpp/datamodel/constants/UuidConstants.h"
 
 // using namespace uprotocol::datamodel::builder::;
-namespace uprotocol::datamodel{
+namespace uprotocol::datamodel {
 
 class TestUuidBuilder : public testing::Test {
 protected:
@@ -26,12 +26,13 @@ protected:
 
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
 public:
 	~TestUuidBuilder() override = default;
 };
 
 // Test getBuilder
-TEST(UuidBuilderTest, GetBuilder) {	// NOLINT
+TEST(UuidBuilderTest, GetBuilder) {  // NOLINT
 	auto builder = builder::UuidBuilder::getBuilder();
 	auto uuid = builder.build();
 
@@ -40,7 +41,7 @@ TEST(UuidBuilderTest, GetBuilder) {	// NOLINT
 }
 
 // Test GetTestBuilder
-TEST(UuidBuilderTest, GetTestBuilder) { // NOLINT
+TEST(UuidBuilderTest, GetTestBuilder) {  // NOLINT
 	auto builder = builder::UuidBuilder::getTestBuilder();
 	auto uuid = builder.build();
 
@@ -49,7 +50,7 @@ TEST(UuidBuilderTest, GetTestBuilder) { // NOLINT
 }
 
 // Test TestBuilder with time source
-TEST(UuidBuilderTest, WithTimeSource) { // NOLINT
+TEST(UuidBuilderTest, WithTimeSource) {  // NOLINT
 	constexpr std::time_t FIXED_TIME_T = 1234567890;
 	auto fixed_time = std::chrono::system_clock::from_time_t(FIXED_TIME_T);
 	auto fixed_time_ms =
@@ -63,7 +64,7 @@ TEST(UuidBuilderTest, WithTimeSource) { // NOLINT
 }
 
 // Test RandomSource
-TEST(UuidBuilderTest, WithRandomSource) { // NOLINT
+TEST(UuidBuilderTest, WithRandomSource) {  // NOLINT
 	constexpr uint64_t FIXED_RANDOM_T = 0x1234567890ABCDEF;
 	uint64_t fixed_random = FIXED_RANDOM_T;
 	auto builder = builder::UuidBuilder::getTestBuilder().withRandomSource(
@@ -77,7 +78,7 @@ TEST(UuidBuilderTest, WithRandomSource) { // NOLINT
 }
 
 // Test independent state
-TEST(UuidBuilderTest, Unguessability) { // NOLINT
+TEST(UuidBuilderTest, Unguessability) {  // NOLINT
 	auto builder1 = builder::UuidBuilder::getBuilder();
 	auto builder2 = builder::UuidBuilder::getBuilder();
 
@@ -105,18 +106,19 @@ TEST(UuidBuilderTest, Unguessability) { // NOLINT
 }
 
 // Test exception thrown
-TEST(UuidBuilderTest, TestModeOnly) { // NOLINT
+TEST(UuidBuilderTest, TestModeOnly) {  // NOLINT
 	auto builder = builder::UuidBuilder::getBuilder();
 
-	EXPECT_THROW(builder.withTimeSource( // NOLINT
+	EXPECT_THROW(builder.withTimeSource(  // NOLINT
 	                 []() { return std::chrono::system_clock::now(); }),
 	             std::domain_error);
-	EXPECT_THROW(builder.withRandomSource([]() { return 0x1234567890ABCDEF; }), // NOLINT
+	EXPECT_THROW(builder.withRandomSource( // NOLINT
+	                 []() { return 0x1234567890ABCDEF; }),  
 	             std::domain_error);
 }
 
 // Test version and variant
-TEST_F(TestUuidBuilder, CheckVersionAndVariant) { // NOLINT
+TEST_F(TestUuidBuilder, CheckVersionAndVariant) {  // NOLINT
 	auto builder = builder::UuidBuilder::getBuilder();
 	auto uuid = builder.build();
 
@@ -127,7 +129,7 @@ TEST_F(TestUuidBuilder, CheckVersionAndVariant) { // NOLINT
 }
 
 // Test custom time and random source with builder
-TEST(UuidBuilderTest, CustomTimeAndRandomSource) { // NOLINT
+TEST(UuidBuilderTest, CustomTimeAndRandomSource) {  // NOLINT
 	constexpr std::time_t FIXED_TIME_T = 1623456789;
 	constexpr uint64_t FIXED_RANDOM_T = 0x1234567890ABCDEF;
 	// Create a custom time source that returns a fixed timestamp

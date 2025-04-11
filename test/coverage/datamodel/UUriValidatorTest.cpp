@@ -15,7 +15,7 @@
 constexpr uint32_t DEFAULT_UE_ID = 0x00010001;
 constexpr uint32_t WILDCARD = 0xFFFF;
 
-namespace uprotocol::datamodel::validator::uri{
+namespace uprotocol::datamodel::validator::uri {
 
 constexpr const char* AUTHORITY_NAME = "test";
 
@@ -34,11 +34,12 @@ protected:
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
 public:
 	~TestUUriValidator() override = default;
 };
 
-TEST_F(TestUUriValidator, Valid) { // NOLINT
+TEST_F(TestUUriValidator, Valid) {  // NOLINT
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -110,7 +111,7 @@ TEST_F(TestUUriValidator, Valid) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, Wildcards) { // NOLINT
+TEST_F(TestUUriValidator, Wildcards) {  // NOLINT
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -160,7 +161,7 @@ TEST_F(TestUUriValidator, Wildcards) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ValidRpcMethod) { // NOLINT
+TEST_F(TestUUriValidator, ValidRpcMethod) {  // NOLINT
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -211,7 +212,7 @@ TEST_F(TestUUriValidator, ValidRpcMethod) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ValidRpcResponse) { // NOLINT
+TEST_F(TestUUriValidator, ValidRpcResponse) {  // NOLINT
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -261,7 +262,7 @@ TEST_F(TestUUriValidator, ValidRpcResponse) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ValidPublishTopic) { // NOLINT
+TEST_F(TestUUriValidator, ValidPublishTopic) {  // NOLINT
 	constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
@@ -321,7 +322,7 @@ TEST_F(TestUUriValidator, ValidPublishTopic) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ValidNotificationSource) { // NOLINT
+TEST_F(TestUUriValidator, ValidNotificationSource) {  // NOLINT
 	constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
@@ -381,7 +382,7 @@ TEST_F(TestUUriValidator, ValidNotificationSource) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ValidNotificationSink) { // NOLINT
+TEST_F(TestUUriValidator, ValidNotificationSink) {  // NOLINT
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name(AUTHORITY_NAME);
@@ -431,7 +432,7 @@ TEST_F(TestUUriValidator, ValidNotificationSink) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ValidSubscription) { // NOLINT
+TEST_F(TestUUriValidator, ValidSubscription) {  // NOLINT
 	constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
@@ -484,7 +485,7 @@ TEST_F(TestUUriValidator, ValidSubscription) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ValidDefaultSource) { // NOLINT
+TEST_F(TestUUriValidator, ValidDefaultSource) {  // NOLINT
 	constexpr uint32_t VALID_RESOURCE_ID = 0x8000;
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
@@ -504,7 +505,7 @@ TEST_F(TestUUriValidator, ValidDefaultSource) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, Empty) { // NOLINT
+TEST_F(TestUUriValidator, Empty) {  // NOLINT
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
 		uuri.set_authority_name("");
@@ -562,7 +563,7 @@ TEST_F(TestUUriValidator, Empty) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
+TEST_F(TestUUriValidator, ValidFilter) {  // NOLINT
 	constexpr uint32_t VALID_UE_ID_FILTER = 10001;
 	auto get_u_uri = []() {
 		uprotocol::v1::UUri uuri;
@@ -648,7 +649,7 @@ TEST_F(TestUUriValidator, ValidFilter) { // NOLINT
 	}
 }
 
-TEST_F(TestUUriValidator, ReasonMessages) { // NOLINT
+TEST_F(TestUUriValidator, ReasonMessages) {  // NOLINT
 	std::array all_reasons{Reason::EMPTY,
 	                       Reason::RESERVED_VERSION,
 	                       Reason::RESERVED_RESOURCE,

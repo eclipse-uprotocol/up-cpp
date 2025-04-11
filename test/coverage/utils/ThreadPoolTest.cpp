@@ -29,11 +29,12 @@ protected:
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
 public:
 	~TestFixture() override = default;
 };
 
 // TODO(unknown)
-TEST_F(TestFixture, SomeTestName) {} // NOLINT
+TEST_F(TestFixture, SomeTestName) {}  // NOLINT
 
 }  // namespace

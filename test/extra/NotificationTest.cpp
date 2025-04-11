@@ -23,7 +23,7 @@ constexpr uint32_t DEFAULT_SOURCE_UE_ID = 0x18000;
 constexpr uint16_t DEFAULT_VERSION_MAJOR = 0xF8;
 constexpr std::chrono::milliseconds THOUSAND_MILLISECONDS(1000);
 
-namespace uprotocol::datamodel::serializer::uri{
+namespace uprotocol::datamodel::serializer::uri {
 
 class NotificationTest : public testing::Test {
 protected:
@@ -41,14 +41,15 @@ protected:
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
-	[[nodiscard]] static uprotocol::v1::UUri buildValidTestTopic() ;
-	[[nodiscard]] static uprotocol::v1::UUri buildValidDefaultSourceURI() ;
+	[[nodiscard]] static uprotocol::v1::UUri buildValidTestTopic();
+	[[nodiscard]] static uprotocol::v1::UUri buildValidDefaultSourceURI();
+
 public:
 	~NotificationTest() override = default;
 };
 
-[[nodiscard]] uprotocol::v1::UUri NotificationTest::buildValidDefaultSourceURI()
-     {
+[[nodiscard]] uprotocol::v1::UUri
+NotificationTest::buildValidDefaultSourceURI() {
 	uprotocol::v1::UUri test_default_source_uri;
 	test_default_source_uri.set_authority_name("10.0.0.1");
 	test_default_source_uri.set_ue_id(DEFAULT_SOURCE_UE_ID);
@@ -57,8 +58,7 @@ public:
 	return test_default_source_uri;
 }
 
-[[nodiscard]] uprotocol::v1::UUri NotificationTest::buildValidTestTopic()
-     {
+[[nodiscard]] uprotocol::v1::UUri NotificationTest::buildValidTestTopic() {
 	uprotocol::v1::UUri test_topic;
 	test_topic.set_authority_name("10.0.0.2");
 	test_topic.set_ue_id(DEFAULT_UE_ID);
@@ -67,7 +67,7 @@ public:
 	return test_topic;
 }
 
-TEST_F(NotificationTest, NotificationSuccess) { // NOLINT
+TEST_F(NotificationTest, NotificationSuccess) {  // NOLINT
 	// Initialize
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
@@ -80,20 +80,22 @@ TEST_F(NotificationTest, NotificationSuccess) { // NOLINT
 
 	// Notify Sink
 	auto transport_mock_notification_sink =
-	    std::make_shared<uprotocol::test::UTransportMock>(test_default_source_uri);
+	    std::make_shared<uprotocol::test::UTransportMock>(
+	        test_default_source_uri);
 
 	uprotocol::v1::UMessage capture_msg;
 	auto callback = [&capture_msg](const auto& message) {
 		capture_msg = message;
 	};
 
-	auto result = uprotocol::communication::NotificationSink::create(transport_mock_notification_sink,
-	                                       std::move(callback), test_topic);
+	auto result = uprotocol::communication::NotificationSink::create(
+	    transport_mock_notification_sink, std::move(callback), test_topic);
 
 	// Notify Source
 	std::string test_payload_str = "test_payload";
 	auto transport_mock_notification_source =
-	    std::make_shared<uprotocol::test::UTransportMock>(test_default_source_uri);
+	    std::make_shared<uprotocol::test::UTransportMock>(
+	        test_default_source_uri);
 
 	auto movable_topic = test_topic;
 
@@ -101,17 +103,21 @@ TEST_F(NotificationTest, NotificationSuccess) { // NOLINT
 	    transport_mock_notification_source, std::move(movable_topic),
 	    std::move(test_default_source_uri), format, priority, ttl);
 
-	uprotocol::datamodel::builder::Payload test_payload(test_payload_str, format);
+	uprotocol::datamodel::builder::Payload test_payload(test_payload_str,
+	                                                    format);
 	auto status = notification_source.notify(std::move(test_payload));
 
 	EXPECT_EQ(
+	    AsString::serialize(transport_mock_notification_source->getMessage()
+	                            .attributes()
+	                            .source()),
 	    AsString::serialize(
-	        transport_mock_notification_source->getMessage().attributes().source()),
-	    AsString::serialize(transport_mock_notification_sink->getSourceFilter()));
+	        transport_mock_notification_sink->getSourceFilter()));
 
 	EXPECT_EQ(
-	    AsString::serialize(
-	        transport_mock_notification_source->getMessage().attributes().sink()),
+	    AsString::serialize(transport_mock_notification_source->getMessage()
+	                            .attributes()
+	                            .sink()),
 	    AsString::serialize(
 	        transport_mock_notification_sink->getSinkFilter().value()));
 
@@ -120,8 +126,8 @@ TEST_F(NotificationTest, NotificationSuccess) { // NOLINT
 	    transport_mock_notification_source->getMessage());
 
 	// Test
-	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(transport_mock_notification_source->getMessage(),
-	                            capture_msg));
+	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
+	    transport_mock_notification_source->getMessage(), capture_msg));
 	EXPECT_EQ(test_payload_str, capture_msg.payload());
 }
 
