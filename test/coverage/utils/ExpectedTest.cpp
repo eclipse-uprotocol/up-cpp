@@ -39,11 +39,13 @@ public:
 	~ExpectedTest() override = default;
 };
 
+constexpr int MAX_BIT_SHIFT = 30;
+
 int get_rand() {
-	static std::random_device rd;
-	static std::mt19937 mt(rd());
-	static std::uniform_int_distribution<int> dist(0, 1 << 30);
-	return dist(mt);
+    static std::random_device rd;
+    static std::mt19937 mt(rd());
+    static std::uniform_int_distribution<int> dist(0, 1 << MAX_BIT_SHIFT);
+    return dist(mt);
 }
 
 TEST_F(ExpectedTest, ExpectScalarScalar) { // NOLINT
@@ -90,11 +92,14 @@ TEST_F(ExpectedTest, UnexpectValueOr) { // NOLINT
 }
 
 struct Pair {
-	int x;
-	int y;
-
-	Pair(int x, int y) : x(x), y(y) {}
-};
+	private:
+		int x;
+		int y;
+	public:
+		Pair(int x_value, int y_value) : x(x_value), y(y_value) {}
+		[[nodiscard]] int getX() const { return x; }
+		[[nodiscard]] int getY() const { return y; }
+	};
 
 TEST_F(ExpectedTest, ExpectUnique) { // NOLINT
 	auto x = get_rand();
@@ -104,8 +109,8 @@ TEST_F(ExpectedTest, ExpectUnique) { // NOLINT
 	EXPECT_TRUE(bool(expected));
 	EXPECT_TRUE(expected.has_value());
 	auto p = std::move(expected).value();
-	EXPECT_EQ(x, p->x);
-	EXPECT_EQ(y, p->y);
+	EXPECT_EQ(x, p->getX());
+	EXPECT_EQ(y, p->getY());
 }
 
 TEST_F(ExpectedTest, UnexpectUnique) { // NOLINT
@@ -116,8 +121,8 @@ TEST_F(ExpectedTest, UnexpectUnique) { // NOLINT
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
 	auto p = std::move(expected).error();
-	EXPECT_EQ(x, p->x);
-	EXPECT_EQ(y, p->y);
+	EXPECT_EQ(x, p->getX());
+	EXPECT_EQ(y, p->getY());
 }
 
 TEST_F(ExpectedTest, ExpectShared) { // NOLINT
@@ -127,10 +132,10 @@ TEST_F(ExpectedTest, ExpectShared) { // NOLINT
 	    std::make_shared<Pair>(x, y));
 	EXPECT_TRUE(bool(expected));
 	EXPECT_TRUE(expected.has_value());
-	EXPECT_EQ(x, expected.value()->x);
-	EXPECT_EQ(y, expected.value()->y);
-	EXPECT_EQ(x, (*expected)->x);
-	EXPECT_EQ(y, (*expected)->y);
+	EXPECT_EQ(x, expected.value()->getX());
+	EXPECT_EQ(y, expected.value()->getY());
+	EXPECT_EQ(x, (*expected)->getX());
+	EXPECT_EQ(y, (*expected)->getY());
 }
 
 TEST_F(ExpectedTest, UnexpectShared) { // NOLINT
@@ -140,8 +145,8 @@ TEST_F(ExpectedTest, UnexpectShared) { // NOLINT
 	    Unexpected(std::make_shared<Pair>(x, y)));
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
-	EXPECT_EQ(x, expected.error()->x);
-	EXPECT_EQ(y, expected.error()->y);
+	EXPECT_EQ(x, expected.error()->getX());
+	EXPECT_EQ(y, expected.error()->getY());
 }
 
 TEST_F(ExpectedTest, ExpectStruct) { // NOLINT
@@ -150,10 +155,10 @@ TEST_F(ExpectedTest, ExpectStruct) { // NOLINT
 	auto expected = Expected<Pair, std::string>(Pair(x, y));
 	EXPECT_TRUE(bool(expected));
 	EXPECT_TRUE(expected.has_value());
-	EXPECT_EQ(x, expected.value().x);
-	EXPECT_EQ(y, expected.value().y);
-	EXPECT_EQ(x, expected->x);
-	EXPECT_EQ(y, expected->y);
+	EXPECT_EQ(x, expected.value().getX());
+	EXPECT_EQ(y, expected.value().getY());
+	EXPECT_EQ(x, expected->getX());
+	EXPECT_EQ(y, expected->getY());
 }
 
 TEST_F(ExpectedTest, UnexpectStruct) { // NOLINT
@@ -162,21 +167,25 @@ TEST_F(ExpectedTest, UnexpectStruct) { // NOLINT
 	auto expected = Expected<int, Pair>(Unexpected(Pair(x, y)));
 	EXPECT_FALSE(bool(expected));
 	EXPECT_FALSE(expected.has_value());
-	EXPECT_EQ(x, expected.error().x);
-	EXPECT_EQ(y, expected.error().y);
+	EXPECT_EQ(x, expected.error().getX());
+	EXPECT_EQ(y, expected.error().getY());
 }
 
 struct PairDestruct {
+private:
 	int x;
 	int y;
+	
+public:
 	static int cd_count_;
-
-	PairDestruct(int x, int y) : x(x), y(y) { cd_count_++; }
-
-	PairDestruct(const PairDestruct& arg) : x(arg.x), y(arg.y) { cd_count_++; }
-
+	PairDestruct(int x_value, int y_value) : x(x_value), y(y_value) { cd_count_++; }
+	PairDestruct(const PairDestruct& arg) : x(arg.getX()), y(arg.getY()) { cd_count_++; }
 	~PairDestruct() { cd_count_--; }
+
+	[[nodiscard]] int getX() const { return x; }
+	[[nodiscard]] int getY() const { return y; }
 };
+	
 
 int PairDestruct::cd_count_ = 0;
 
@@ -189,10 +198,10 @@ TEST_F(ExpectedTest, ExpectStructDestruct) { // NOLINT
 		EXPECT_EQ(1, PairDestruct::cd_count_);
 		EXPECT_TRUE(bool(expected));
 		EXPECT_TRUE(expected.has_value());
-		EXPECT_EQ(x, expected.value().x);
-		EXPECT_EQ(y, expected.value().y);
-		EXPECT_EQ(x, expected->x);
-		EXPECT_EQ(y, expected->y);
+		EXPECT_EQ(x, expected.value().getX());
+		EXPECT_EQ(y, expected.value().getY());
+		EXPECT_EQ(x, expected->getX());
+		EXPECT_EQ(y, expected->getY());
 	}
 	EXPECT_EQ(0, PairDestruct::cd_count_);
 }
@@ -207,8 +216,8 @@ TEST_F(ExpectedTest, UnexpectStructDestruct) { // NOLINT
 		EXPECT_EQ(1, PairDestruct::cd_count_);
 		EXPECT_FALSE(bool(expected));
 		EXPECT_FALSE(expected.has_value());
-		EXPECT_EQ(x, expected.error().x);
-		EXPECT_EQ(y, expected.error().y);
+		EXPECT_EQ(x, expected.error().getX());
+		EXPECT_EQ(y, expected.error().getY());
 	}
 	EXPECT_EQ(0, PairDestruct::cd_count_);
 }
@@ -232,7 +241,8 @@ TEST_F(ExpectedTest, ExceptionValueCheckedWhenIsError) { // NOLINT
 }
 
 TEST_F(ExpectedTest, ExceptionErrorCheckedWhenNotError) { // NOLINT
-	auto expected = Expected<int, std::string>(5);
+	constexpr int DEFAULT_EXPECTED_VALUE = 5;
+	auto expected = Expected<int, std::string>(DEFAULT_EXPECTED_VALUE);
 	EXPECT_THROW( // NOLINT
 	    {
 		    try {
@@ -275,7 +285,7 @@ TEST_F(ExpectedTest, ExceptionDerefPtrWhenUnexpected) { // NOLINT
 		    try {
 			    EXPECT_FALSE(bool(expected));
 			    EXPECT_FALSE(expected.has_value());
-			    static_cast<void>(expected->x);
+			    static_cast<void>(expected->getX());
 		    } catch (const BadExpectedAccess& ex) {
 			    EXPECT_STREQ(
 			        "Attempt to dereference expected pointer when unexpected.",

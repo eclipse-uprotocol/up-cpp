@@ -405,8 +405,6 @@ TEST_F(CallbackTest, CallablesCanReturnValues) { // NOLINT
 // copyable type as the return and b) checking container objects for changes
 // in their data pointers.
 TEST_F(CallbackTest, ReturnValuesAreMoved) { // NOLINT
-	constexpr size_t RANDOM_NUMBER = 71;
-
 	// Checking with a non-copyable object (in this case, std::unique_ptr)
 	{
 		void* original_location{nullptr};
@@ -414,6 +412,7 @@ TEST_F(CallbackTest, ReturnValuesAreMoved) { // NOLINT
 		auto [handle, callable] =
 		    callbacks::Connection<std::unique_ptr<int>>::establish(
 		        [&original_location]() {
+					constexpr int RANDOM_NUMBER = 71;
 			        auto p = std::make_unique<int>(RANDOM_NUMBER);
 			        original_location = p.get();
 			        return p;
