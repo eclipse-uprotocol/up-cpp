@@ -1314,12 +1314,11 @@ TEST_F(RpcClientTest, ParallelAccessSingleClient) {  // NOLINT
 	std::array<std::vector<communication::RpcClient::InvokeHandle>,
 	           workers.size()>
 	    handles;
-	// size_t handle_counter = 0;
-	auto worker_handles = handles.begin(); // NOLINT
+	size_t handle_counter = 0;
 
 	for (auto& worker : workers) {
 		worker = std::thread(
-		    [&call_count, &client, &handles = *(worker_handles++)]() {
+		    [&call_count, &client, &handles = handles.at(handle_counter++)]() {
 			    for (auto remaining = NUM_REQUESTS_PER_WORKER; remaining > 0;
 			         --remaining) {
 				    handles.emplace_back(client.invokeMethod(

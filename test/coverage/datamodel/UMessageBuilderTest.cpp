@@ -103,10 +103,10 @@ public:
 	~TestUMessageBuilder() override = default;
 };
 
-v1::UUri TestUMessageBuilder::source_; // NOLINT
-v1::UUri TestUMessageBuilder::sink_; // NOLINT
-v1::UUri TestUMessageBuilder::method_; // NOLINT
-v1::UUID TestUMessageBuilder::req_id_; // NOLINT
+v1::UUri TestUMessageBuilder::source_;
+v1::UUri TestUMessageBuilder::sink_;
+v1::UUri TestUMessageBuilder::method_;
+v1::UUID TestUMessageBuilder::req_id_;
 
 /// @brief  Test the publish function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) {  // NOLINT
