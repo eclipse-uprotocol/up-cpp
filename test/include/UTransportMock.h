@@ -51,7 +51,7 @@ public:
 	v1::UMessage message_;
 	std::mutex message_mtx_;
 
-	virtual ~UTransportMock() = default;
+	virtual ~UTransportMock() override  = default;
 
 private:
 	[[nodiscard]] v1::UStatus sendImpl(const v1::UMessage& message) override {
