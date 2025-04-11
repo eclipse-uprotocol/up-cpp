@@ -328,8 +328,8 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadClientDestroyed) {  // NOLINT
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
-		EXPECT_NO_THROW( // NOLINT
-		    auto maybe_response = invoke_future.get();  
+		EXPECT_NO_THROW(  // NOLINT
+		    auto maybe_response = invoke_future.get();
 		    checkErrorResponse(maybe_response, v1::UCode::CANCELLED););
 	}
 }

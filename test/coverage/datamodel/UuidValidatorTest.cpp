@@ -111,8 +111,8 @@ TEST_F(TestUuidValidator, FromTheFuture) {  // NOLINT
 	auto [valid, reason] = validator::uuid::isUuid(uuid);
 	EXPECT_FALSE(valid);
 	EXPECT_EQ(reason.value(), validator::uuid::Reason::FROM_THE_FUTURE);
-	EXPECT_THROW( // NOLINT
-	    validator::uuid::getRemainingTime(uuid, SIXTY_SECONDS),  
+	EXPECT_THROW(  // NOLINT
+	    validator::uuid::getRemainingTime(uuid, SIXTY_SECONDS),
 	    validator::uuid::InvalidUuid);
 }
 

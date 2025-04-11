@@ -271,8 +271,8 @@ TEST_F(NotificationSinkTest, NullCallback) {  // NOLINT
 		    transport, transport->getEntityUri(), {}, getTestTopicUUri());
 	};
 
-	EXPECT_THROW(test_create_empty(), // NOLINT
-	             utils::callbacks::EmptyFunctionObject);  
+	EXPECT_THROW(test_create_empty(),  // NOLINT
+	             utils::callbacks::EmptyFunctionObject);
 }
 
 }  // namespace uprotocol::communication

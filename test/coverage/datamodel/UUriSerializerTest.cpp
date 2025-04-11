@@ -211,8 +211,8 @@ TEST_F(TestUUriSerializer,  // NOLINT
        DeSerializeUUriStringWithIncorrectScheme) {
 	const std::string uuri_as_string =
 	    "uprotocol://192.168.1.10/10010001/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 }
 
@@ -234,8 +234,8 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithoutScheme) {  // NOLINT
 // Test deserializing empty string to check if it thorws an exception
 TEST_F(TestUUriSerializer, DeSerializeEmptyUUriString) {  // NOLINT
 	const std::string uuri_as_string;
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 }
 
@@ -260,51 +260,51 @@ TEST_F(TestUUriSerializer,  // NOLINT
 	// Provided 5 arguments instead of 4 when authority exist
 	std::string uuri_as_string = "//192.168.1.10/10010001/FE/FE/7500";
 
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// UE ID is missing. Provided 3 arguments instead of 4 when authority exist.
 	uuri_as_string = "//192.168.1.10/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Provided 4 arguments instead of 3 when authority does not exist.
 	uuri_as_string = "/1102/FE/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// UE ID is missing. Provided 2 arguments instead of 3 when authority does
 	// not exist.
 	uuri_as_string = "/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Valid Uri but no leading /
 	uuri_as_string = "192.168.1.10/1102/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Valid Uri but no leading /
 	uuri_as_string = "1102/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Valid Uri but leading /// .
 	uuri_as_string = "///192.168.1.10/1102/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Valid Uri but additional trailing /
 	uuri_as_string = "//192.168.1.10/1102/FE/7500/";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 }
 
@@ -313,38 +313,38 @@ TEST_F(TestUUriSerializer,  // NOLINT
        DeSerializeUUriStringWithInvalidArgument) {
 	// UE ID provided is invalid. It should be hex numeric
 	std::string uuri_as_string = "//192.168.1.10/testUE/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Major Version provided is invalid. It should be hex numeric
 	uuri_as_string = "//192.168.1.10/10010001/^%/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Resource ID provided is invalid. It should be hex numeric
 	uuri_as_string = "//192.168.1.10/10010001/FE/xyz";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// UE ID is outside the 32-bit int range
 	uuri_as_string = "//192.168.1.10/110010001/FE/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Major Version is outside the 8-bit int range
 	uuri_as_string = "//192.168.1.10/10010001/100/7500";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 
 	// Resiource ID is outside the 16-bit int range
 	uuri_as_string = "//192.168.1.10/10010001/FE/10000";
-	ASSERT_THROW( // NOLINT
-	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	ASSERT_THROW(  // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),
 	    std::invalid_argument);
 }
 

@@ -184,10 +184,10 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {  // NOLINT
 // publisher with null transport
 TEST_F(TestPublisher, PublisherWithNullTransport) {  // NOLINT
 	auto transport = nullptr;
-	EXPECT_THROW(communication::Publisher publisher( // NOLINT
-	                 transport, getTopic(),  
-	                 getFormat(), getPriority(), getTTL()),
-	             uprotocol::transport::NullTransport);
+	EXPECT_THROW( // NOLINT
+	    communication::Publisher publisher(  
+	        transport, getTopic(), getFormat(), getPriority(), getTTL()),
+	    uprotocol::transport::NullTransport);
 }
 
 }  // namespace uprotocol
