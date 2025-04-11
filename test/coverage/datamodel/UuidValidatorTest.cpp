@@ -20,7 +20,6 @@ constexpr std::chrono::seconds SIXTY_SECONDS(60);
 constexpr std::chrono::seconds THIRTY_SECONDS(30);
 
 namespace uprotocol::datamodel {
-// using namespace uprotocol::datamodel::validator::uuid::;
 
 class TestUuidValidator : public testing::Test {
 protected:

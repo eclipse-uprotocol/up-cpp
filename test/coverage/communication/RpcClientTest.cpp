@@ -1315,7 +1315,7 @@ TEST_F(RpcClientTest, ParallelAccessSingleClient) {  // NOLINT
 	           workers.size()>
 	    handles;
 	// size_t handle_counter = 0;
-	auto worker_handles = handles.begin();
+	auto worker_handles = handles.begin(); // NOLINT
 
 	for (auto& worker : workers) {
 		worker = std::thread(

@@ -574,7 +574,7 @@ TEST_F(CallbackTest, HandleResetBlocksWhileCallbacksRunning) {  // NOLINT
 	auto [handle, callable] = callbacks::Connection<bool>::establish(
 	    [&fake_blocking_op]() { return fake_blocking_op.try_acquire_for(1s); });
 
-	auto caller_fn = ([callable, &callbacks_pending, &callbacks_released,
+	auto caller_fn = ([callable, &callbacks_pending, &callbacks_released, // NOLINT
 	                   &main_task_sync]() mutable {
 		++callbacks_pending;
 		main_task_sync.release();
