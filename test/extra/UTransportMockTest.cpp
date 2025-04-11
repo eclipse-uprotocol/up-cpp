@@ -94,7 +94,7 @@ TEST_F(TestMockUTransport, Send) { // NOLINT
 
 	const size_t max_count = 100000;
 	for (size_t i = 0; i < max_count; i++) {
-		auto *src = new uprotocol::v1::UUri();
+		auto src = std::make_unique<uprotocol::v1::UUri>();
 		src->set_authority_name("10.0.0.1");
 		src->set_ue_id(DEFAULT_UE_ID);
 		src->set_ue_version_major(1);
@@ -106,16 +106,16 @@ TEST_F(TestMockUTransport, Send) { // NOLINT
 		// sink->set_ue_version_major(2);
 		// sink->set_resource_id(2);
 
-		auto attr = new uprotocol::v1::UAttributes();
+		auto attr = std::make_unique<uprotocol::v1::UAttributes>();
 		attr->set_type(uprotocol::v1::UMESSAGE_TYPE_PUBLISH);
 		*attr->mutable_id() = make_uuid();
-		attr->set_allocated_source(src);
+		attr->set_allocated_source(src.release());
 		// attr->set_allocated_sink(sink);
 		attr->set_payload_format(uprotocol::v1::UPAYLOAD_FORMAT_PROTOBUF);
 		attr->set_ttl(ATTR_TTL);
 
 		uprotocol::v1::UMessage msg;
-		msg.set_allocated_attributes(attr);
+		msg.set_allocated_attributes(attr.release());
 		msg.set_payload(get_random_string(PAYLOAD_STR_MAX_LEN));
 		transport->getSendStatus().set_code(
 		    static_cast<uprotocol::v1::UCode>(CODE_MAX - (i % CODE_MOD)));
@@ -174,8 +174,8 @@ TEST_F(TestMockUTransport, registerListener) { // NOLINT
 	const size_t max_count = 100000;
 	for (size_t i = 0; i < max_count; i++) {
 		uprotocol::v1::UMessage msg;
-		auto attr = new uprotocol::v1::UAttributes();
-		msg.set_allocated_attributes(attr);
+		auto attr = std::make_unique<uprotocol::v1::UAttributes>();
+		msg.set_allocated_attributes(attr.release());
 		msg.set_payload(get_random_string(PAYLOAD_STR_MAX_LEN));
 		transport->mockMessage(msg);
 		EXPECT_EQ(i + 1, capture_count);

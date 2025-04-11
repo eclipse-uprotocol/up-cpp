@@ -121,7 +121,7 @@ TEST_F(CallbackTest, DroppedHandlesBreakConnection) { // NOLINT
 		{
 			auto [handle, callable] = get_pair();
 			callable_outside = std::move(callable);
-			EXPECT_FALSE(callable);
+			EXPECT_FALSE(callable); // NOLINT
 			EXPECT_TRUE(callable_outside);
 			// Handle dropped here
 		}
@@ -141,7 +141,7 @@ TEST_F(CallbackTest, DroppedHandlesBreakConnection) { // NOLINT
 		{
 			auto [handle, callable] = get_pair();
 			handle_outside = std::move(handle);
-			EXPECT_FALSE(handle);
+			EXPECT_FALSE(handle); // NOLINT
 			EXPECT_TRUE(handle_outside);
 			// Callable dropped here
 		}
