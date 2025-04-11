@@ -90,14 +90,14 @@ protected:
 		method_.set_ue_version_major(METHOD_UE_VERSION_MAJOR);
 		method_.set_resource_id(METHOD_RESOURCE_ID);
 
-		 req_id_ = datamodel::builder::UuidBuilder::getBuilder().build();
+		req_id_ = datamodel::builder::UuidBuilder::getBuilder().build();
 	}
 	static void TearDownTestSuite() {}
 
 	static v1::UUri source_;
 	static v1::UUri sink_;
 	static v1::UUri method_;
-	static v1::UUID  req_id_;
+	static v1::UUID req_id_;
 public:
 	~TestUMessageBuilder() override = default;
 };
@@ -105,7 +105,7 @@ public:
 v1::UUri TestUMessageBuilder::source_;
 v1::UUri TestUMessageBuilder::sink_;
 v1::UUri TestUMessageBuilder::method_;
-v1::UUID TestUMessageBuilder:: req_id_;
+v1::UUID TestUMessageBuilder::req_id_;
 
 /// @brief  Test the publish function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) { // NOLINT

@@ -160,7 +160,7 @@ TEST(DeserializerTest, DeserializeWithExtraCharacter) { // NOLINT
 	             std::invalid_argument);
 }
 
-TEST(DeserializerTest, DeserializeWithIncorrectDashPlacement) {
+TEST(DeserializerTest, DeserializeWithIncorrectDashPlacement) { //NOLINT
 	std::string invalid_uuid1 =
 	    "123456781-2345-6781-2345-67812345678";  // First Dash placement
 
