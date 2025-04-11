@@ -94,7 +94,7 @@ TEST_F(TestPublisher, PublisherSuccess) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	datamodel::builder::Payload test_payload(test_payload_str, getFormat());
 	auto status = publisher.publish(std::move(test_payload));
@@ -103,7 +103,7 @@ TEST_F(TestPublisher, PublisherSuccess) {	// NOLINT
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidPublish(
-	        getTransportMock()->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 }
 
@@ -114,7 +114,7 @@ TEST_F(TestPublisher, PublishFailure) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::DATA_LOSS);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	datamodel::builder::Payload test_payload(test_payload_str, getFormat());
 	auto status = publisher.publish(std::move(test_payload));
@@ -128,7 +128,7 @@ TEST_F(TestPublisher, PublishSuccessWithoutTTL) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	datamodel::builder::Payload test_payload(test_payload_str, getFormat());
 	auto status = publisher.publish(std::move(test_payload));
@@ -137,10 +137,10 @@ TEST_F(TestPublisher, PublishSuccessWithoutTTL) {	// NOLINT
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidPublish(
-	        getTransportMock()->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 
-	EXPECT_EQ(getTransportMock()->message_.attributes().ttl(), 0);
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().ttl(), 0);
 }
 
 TEST_F(TestPublisher, PublishSuccessWithoutPriority) {	// NOLINT
@@ -151,7 +151,7 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	datamodel::builder::Payload test_payload(test_payload_str, getFormat());
 	auto status = publisher.publish(std::move(test_payload));
@@ -160,10 +160,10 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {	// NOLINT
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidPublish(
-	        getTransportMock()->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 
-	EXPECT_EQ(getTransportMock()->message_.attributes().priority(),
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().priority(),
 	          v1::UPriority::UPRIORITY_CS1);
 }
 

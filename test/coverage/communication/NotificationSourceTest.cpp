@@ -95,7 +95,7 @@ TEST_F(TestNotificationSource, NotifyWithPayloadSuccess) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	auto status = notification_source.notify(std::move(test_payload));
 
@@ -103,7 +103,7 @@ TEST_F(TestNotificationSource, NotifyWithPayloadSuccess) {	// NOLINT
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidNotification(
-	        getTransportMock()->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 }
 
@@ -115,7 +115,7 @@ TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutTTL) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	auto status = notification_source.notify(std::move(test_payload));
 
@@ -123,10 +123,10 @@ TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutTTL) {	// NOLINT
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidNotification(
-	        getTransportMock()->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 
-	EXPECT_EQ(getTransportMock()->message_.attributes().ttl(), 0);
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().ttl(), 0);
 }
 
 TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutPriority) {	// NOLINT
@@ -138,7 +138,7 @@ TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutPriority) {	// NOL
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	auto status = notification_source.notify(std::move(test_payload));
 
@@ -146,10 +146,10 @@ TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutPriority) {	// NOL
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidNotification(
-	        getTransportMock()->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 
-	EXPECT_EQ(getTransportMock()->message_.attributes().priority(),
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().priority(),
 	uprotocol::v1::UPriority::UPRIORITY_CS1);
 }
 
@@ -162,7 +162,7 @@ TEST_F(TestNotificationSource, NotifyWithPayloadFailure) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::DATA_LOSS);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	auto status = notification_source.notify(std::move(test_payload));
 
@@ -175,14 +175,14 @@ TEST_F(TestNotificationSource, NotifyWithoutPayloadSuccess) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	auto status = notification_source.notify();
 
 	EXPECT_EQ(status.code(), retval.code());
 
-	EXPECT_EQ(getTransportMock()->message_.attributes().ttl(), 0);
-	EXPECT_EQ(getTransportMock()->message_.attributes().priority(),
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().ttl(), 0);
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().priority(),
 	uprotocol::v1::UPriority::UPRIORITY_CS1);
 }
 
@@ -192,7 +192,7 @@ TEST_F(TestNotificationSource, NotifyWithoutPayloadFailure) {	// NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::DATA_LOSS);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	auto status = notification_source.notify();
 

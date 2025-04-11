@@ -173,14 +173,14 @@ TEST_F(NotificationSinkTest, SuccessWithSourceFilter) {		// NOLINT
 	auto result = NotificationSink::create(transport, transport->getEntityUri(),
 	                                       std::move(callback), getTestTopicUUri());
 
-	EXPECT_TRUE(transport->listener_);
+	EXPECT_TRUE(transport->getListener());
 	EXPECT_TRUE(result.has_value());
 
 	auto handle = std::move(result).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(getTestTopicUUri(), transport->source_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(getTestTopicUUri(), transport->getSourceFilter()));
 	EXPECT_TRUE(
-	    MsgDiff::Equals(transport->getEntityUri(), *transport->sink_filter_));
+	    MsgDiff::Equals(transport->getEntityUri(), *transport->getSinkFilter()));
 
 	const size_t max_count = 100;
 	for (size_t i = 0; i < max_count; i++) {
@@ -205,7 +205,7 @@ TEST_F(NotificationSinkTest, FailWithErrorCode) {		// NOLINT
 
 	uprotocol::v1::UStatus expected_status;
 	expected_status.set_code(uprotocol::v1::UCode::ABORTED);
-	transport->registerListener_status_ = expected_status;
+	transport->getRegisterListenerStatus() = expected_status;
 
 	auto result = NotificationSink::create(transport, transport->getEntityUri(),
 	                                       std::move(callback), getTestTopicUUri());

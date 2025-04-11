@@ -289,7 +289,7 @@ TEST_F(TestRpcServer, ConnectwithValidHandle) {		// NOLINT
 	EXPECT_NE(handle, nullptr);
 
 	// Verify that the register listener uri mataches with input method uri
-	EXPECT_TRUE(MsgDiff::Equals(*getMethodUri(), *getMockTransport()->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(*getMethodUri(), *getMockTransport()->getSinkFilter()));
 }
 
 // Test case to verify RPC request handling with return payload and TTL
@@ -309,7 +309,7 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {		// NOLINT
 	const auto& handle = server_or_status.value();
 	EXPECT_NE(handle, nullptr);
 
-	EXPECT_TRUE(MsgDiff::Equals(*getMethodUri(), *getMockTransport()->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(*getMethodUri(), *getMockTransport()->getSinkFilter()));
 
 	// Create request umessage
 	auto builder = datamodel::builder::UMessageBuilder::request(
@@ -320,10 +320,10 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {		// NOLINT
 
 	// Ignore the return value
 	auto _ = getMockTransport()->send(msg);
-	EXPECT_TRUE(getMockTransport()->send_count_ == 1);
-	EXPECT_TRUE(getMockTransport()->listener_);
+	EXPECT_TRUE(getMockTransport()->getSendCount() == 1);
+	EXPECT_TRUE(getMockTransport()->getListener());
 	getMockTransport()->mockMessage(msg);
-	EXPECT_TRUE(getMockTransport()->send_count_ == 2);
+	EXPECT_TRUE(getMockTransport()->getSendCount() == 2);
 
 	// Compare expected reposen message with actual response message
 	auto expected_response_msg =
@@ -334,20 +334,20 @@ TEST_F(TestRpcServer, RPCRequestWithReturnPayloadAndTTL) {		// NOLINT
 
 	EXPECT_TRUE(
 	    MsgDiff::Equals(expected_response_msg.attributes().source(),
-	                    getMockTransport()->message_.attributes().source()));
+	                    getMockTransport()->getMessage().attributes().source()));
 	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().sink(),
-	                            getMockTransport()->message_.attributes().sink()));
+	                            getMockTransport()->getMessage().attributes().sink()));
 	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().reqid(),
-	                            getMockTransport()->message_.attributes().reqid()));
+	                            getMockTransport()->getMessage().attributes().reqid()));
 
 	EXPECT_EQ(static_cast<uint>(expected_response_msg.attributes().type()),
-	          static_cast<uint>(getMockTransport()->message_.attributes().type()));
+	          static_cast<uint>(getMockTransport()->getMessage().attributes().type()));
 	EXPECT_EQ(static_cast<uint>(expected_response_msg.attributes().ttl()),
-	          static_cast<uint>(getMockTransport()->message_.attributes().ttl()));
+	          static_cast<uint>(getMockTransport()->getMessage().attributes().ttl()));
 	EXPECT_EQ(
 	    static_cast<uint>(expected_response_msg.attributes().priority()),
-	    static_cast<uint>(getMockTransport()->message_.attributes().priority()));
-	EXPECT_EQ(getMockTransport()->message_.payload().data(),
+	    static_cast<uint>(getMockTransport()->getMessage().attributes().priority()));
+	EXPECT_EQ(getMockTransport()->getMessage().payload().data(),
 	          expected_response_payload);
 }
 
@@ -365,7 +365,7 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {		// NOLINT
 	const auto& handle = server_or_status.value();
 	EXPECT_NE(handle, nullptr);
 
-	EXPECT_TRUE(MsgDiff::Equals(*getMethodUri(), *getMockTransport()->sink_filter_));
+	EXPECT_TRUE(MsgDiff::Equals(*getMethodUri(), *getMockTransport()->getSinkFilter()));
 
 	// Create request umessage
 	auto builder = datamodel::builder::UMessageBuilder::request(
@@ -376,10 +376,10 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {		// NOLINT
 
 	// Ignore the return value
 	auto _ = getMockTransport()->send(msg);
-	EXPECT_TRUE(getMockTransport()->send_count_ == 1);
-	EXPECT_TRUE(getMockTransport()->listener_);
+	EXPECT_TRUE(getMockTransport()->getSendCount() == 1);
+	EXPECT_TRUE(getMockTransport()->getListener());
 	getMockTransport()->mockMessage(msg);
-	EXPECT_TRUE(getMockTransport()->send_count_ == 2);
+	EXPECT_TRUE(getMockTransport()->getSendCount() == 2);
 
 	// Compare expected reposen message with actual response message
 	auto expected_response_msg =
@@ -387,18 +387,18 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {		// NOLINT
 
 	EXPECT_TRUE(
 	    MsgDiff::Equals(expected_response_msg.attributes().source(),
-	                    getMockTransport()->message_.attributes().source()));
+	                    getMockTransport()->getMessage().attributes().source()));
 	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().sink(),
-	                            getMockTransport()->message_.attributes().sink()));
+	                            getMockTransport()->getMessage().attributes().sink()));
 	EXPECT_TRUE(MsgDiff::Equals(expected_response_msg.attributes().reqid(),
-	                            getMockTransport()->message_.attributes().reqid()));
+	                            getMockTransport()->getMessage().attributes().reqid()));
 
 	EXPECT_EQ(static_cast<uint>(expected_response_msg.attributes().type()),
-	          static_cast<uint>(getMockTransport()->message_.attributes().type()));
+	          static_cast<uint>(getMockTransport()->getMessage().attributes().type()));
 	EXPECT_EQ(
 	    static_cast<uint>(expected_response_msg.attributes().priority()),
-	    static_cast<uint>(getMockTransport()->message_.attributes().priority()));
-	EXPECT_FALSE(getMockTransport()->message_.has_payload());
+	    static_cast<uint>(getMockTransport()->getMessage().attributes().priority()));
+	EXPECT_FALSE(getMockTransport()->getMessage().has_payload());
 }
 
 // Test case to verify RPC request handling with invalid request
@@ -427,9 +427,9 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {		// NOLINT
 	msg.mutable_attributes()->mutable_sink()->set_resource_id(0);
 
 	// Check results when invalid request is received
-	EXPECT_TRUE(getMockTransport()->listener_);
+	EXPECT_TRUE(getMockTransport()->getListener());
 	getMockTransport()->mockMessage(msg);
-	EXPECT_TRUE(getMockTransport()->send_count_ == 0);
+	EXPECT_TRUE(getMockTransport()->getSendCount() == 0);
 }
 
 // Test case to verify RPC sever resets the listener when the server is
@@ -457,10 +457,10 @@ TEST_F(TestRpcServer, RestRPCServerHandle) {		// NOLINT
 
 	// Ignore the return value
 	auto _ = getMockTransport()->send(msg);
-	EXPECT_TRUE(getMockTransport()->send_count_ == 1);
+	EXPECT_TRUE(getMockTransport()->getSendCount() == 1);
 	getMockTransport()->mockMessage(msg);
 	// Check if the listener is reset
-	EXPECT_FALSE(getMockTransport()->send_count_ == 2);
+	EXPECT_FALSE(getMockTransport()->getSendCount() == 2);
 }
 
 }  // namespace uprotocol

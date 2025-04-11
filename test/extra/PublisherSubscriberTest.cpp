@@ -100,21 +100,21 @@ TEST_F(TestPublisherSubscriber, PubSubSuccess) { // NOLINT
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	getTransportMock()->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
 	uprotocol::datamodel::builder::Payload test_payload(test_payload_str, getFormat());
 	auto status = publisher.publish(std::move(test_payload));
 
 	// Test
 	EXPECT_EQ(
-	    uprotocol::datamodel::serializer::uri::AsString::serialize(getTransportMock()->message_.attributes().source()),
-	    uprotocol::datamodel::serializer::uri::AsString::serialize(transport_sub->source_filter_));
+	    uprotocol::datamodel::serializer::uri::AsString::serialize(getTransportMock()->getMessage().attributes().source()),
+	    uprotocol::datamodel::serializer::uri::AsString::serialize(transport_sub->getSourceFilter()));
 
 	// Manually bridge the two transports
-	transport_sub->mockMessage(getTransportMock()->message_);
+	transport_sub->mockMessage(getTransportMock()->getMessage());
 
 	// Test
-	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(getTransportMock()->message_, captured_message));
+	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(getTransportMock()->getMessage(), captured_message));
 	EXPECT_EQ(test_payload_str, captured_message.payload());
 }
 

@@ -138,12 +138,12 @@ TEST_F(SubscriberTest, SubscribeSuccess) {	// NOLINT
 	auto result =
 	    communication::Subscriber::subscribe(transport, getTestTopicUUri(), std::move(callback));
 
-	EXPECT_TRUE(transport->listener_);
+	EXPECT_TRUE(transport->getListener());
 	EXPECT_TRUE(result.has_value());
 	auto handle = std::move(result).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(MsgDiff::Equals(getTestTopicUUri(), transport->source_filter_));
-	EXPECT_FALSE(transport->sink_filter_);
+	EXPECT_TRUE(MsgDiff::Equals(getTestTopicUUri(), transport->getSourceFilter()));
+	EXPECT_FALSE(transport->getSinkFilter());
 
 	const size_t max_count = 100;
 	for (size_t i = 0; i < max_count; i++) {
@@ -183,7 +183,7 @@ TEST_F(SubscriberTest, SubscribeFailWithErrorCode) {	// NOLINT
 
 	uprotocol::v1::UStatus expected_status;
 	expected_status.set_code(uprotocol::v1::UCode::ABORTED);
-	transport->registerListener_status_ = expected_status;
+	transport->getRegisterListenerStatus() = expected_status;
 
 	auto result =
 	    communication::Subscriber::subscribe(transport, getTestTopicUUri(), std::move(callback));

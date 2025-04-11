@@ -117,14 +117,14 @@ TEST_F(TestMockUTransport, Send) { // NOLINT
 		uprotocol::v1::UMessage msg;
 		msg.set_allocated_attributes(attr);
 		msg.set_payload(get_random_string(PAYLOAD_STR_MAX_LEN));
-		transport->send_status_.set_code(
+		transport->getSendStatus().set_code(
 		    static_cast<uprotocol::v1::UCode>(CODE_MAX - (i % CODE_MOD)));
-		transport->send_status_.set_message(get_random_string());
+		transport->getSendStatus().set_message(get_random_string());
 
 		auto result = transport->send(msg);
-		EXPECT_EQ(i + 1, transport->send_count_);
-		EXPECT_TRUE(MsgDiff::Equals(result, transport->send_status_));
-		EXPECT_TRUE(MsgDiff::Equals(msg, transport->message_));
+		EXPECT_EQ(i + 1, transport->getSendCount());
+		EXPECT_TRUE(MsgDiff::Equals(result, transport->getSendStatus()));
+		EXPECT_TRUE(MsgDiff::Equals(msg, transport->getMessage()));
 	}
 }
 
@@ -161,15 +161,15 @@ TEST_F(TestMockUTransport, registerListener) { // NOLINT
 	};
 	auto lhandle =
 	    transport->registerListener(sink_filter, action, source_filter);
-	EXPECT_TRUE(transport->listener_);
+	EXPECT_TRUE(transport->getListener());
 	// EXPECT_EQ(*mock_info.listener, action); // need exposed target_type() to
 	// make comparable.
 	EXPECT_TRUE(lhandle.has_value());
 	auto handle = std::move(lhandle).value();
 	EXPECT_TRUE(handle);
-	EXPECT_TRUE(transport->sink_filter_);
-	EXPECT_TRUE(MsgDiff::Equals(sink_filter, *transport->sink_filter_));
-	EXPECT_TRUE(MsgDiff::Equals(source_filter, transport->source_filter_));
+	EXPECT_TRUE(transport->getSinkFilter());
+	EXPECT_TRUE(MsgDiff::Equals(sink_filter, *transport->getSinkFilter()));
+	EXPECT_TRUE(MsgDiff::Equals(source_filter, transport->getSourceFilter()));
 
 	const size_t max_count = 100000;
 	for (size_t i = 0; i < max_count; i++) {

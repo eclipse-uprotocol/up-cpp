@@ -176,8 +176,8 @@ TEST_F(ConsumerTest, SubscribeTestSuccess) { // NOLINT
 	notification_source.notify(std::move(payload));
 
 	// Check send count
-	EXPECT_TRUE(getMockTransportServer()->send_count_ == 1);
-	EXPECT_TRUE(getMockTransportClient()->send_count_ == 1);
+	EXPECT_TRUE(getMockTransportServer()->getSendCount() == 1);
+	EXPECT_TRUE(getMockTransportClient()->getSendCount() == 1);
 }
 
 TEST_F(ConsumerTest, UnsubscribeTestSuccess) { 	// NOLINT
@@ -223,12 +223,12 @@ TEST_F(ConsumerTest, UnsubscribeTestSuccess) { 	// NOLINT
 	notification_source.notify(std::move(payload));
 
 	// Check send count
-	EXPECT_TRUE(getMockTransportServer()->send_count_ == 1);
-	EXPECT_TRUE(getMockTransportClient()->send_count_ == 1);
+	EXPECT_TRUE(getMockTransportServer()->getSendCount() == 1);
+	EXPECT_TRUE(getMockTransportClient()->getSendCount() == 1);
 
 	consumer_ptr->unsubscribe(priority, subscribe_request_ttl);
 
-	EXPECT_TRUE(getMockTransportClient()->send_count_ == 2);
+	EXPECT_TRUE(getMockTransportClient()->getSendCount() == 2);
 }
 
 }  // namespace

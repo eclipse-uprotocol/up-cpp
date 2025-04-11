@@ -120,8 +120,8 @@ TEST_F(TestUTransport, SendOk) { // NOLINT
 	EXPECT_NO_THROW(result = transport->send(message)); // NOLINT
 
 	EXPECT_EQ(result.code(), v1::UCode::OK);
-	EXPECT_EQ(transport_mock->send_count_, 1);
-	EXPECT_TRUE(transport_mock->message_ == message);
+	EXPECT_EQ(transport_mock->getSendCount(), 1);
+	EXPECT_TRUE(transport_mock->getMessage() == message);
 }
 
 using InvalidUMessge =
@@ -139,14 +139,14 @@ TEST_F(TestUTransport, SendInvalidMessage) { // NOLINT
 
 	decltype(transport->send(message)) result;
 	EXPECT_THROW({ result = transport->send(message); }, InvalidUMessge); // NOLINT
-	EXPECT_EQ(transport_mock->send_count_, 0);
+	EXPECT_EQ(transport_mock->getSendCount(), 0);
 }
 
 TEST_F(TestUTransport, SendImplStatus) { // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
-	transport_mock->send_status_.set_code(
+	transport_mock->getSendStatus().set_code(
 	    v1::UCode::PERMISSION_DENIED);
 
 	auto topic = getValidUri();
@@ -180,11 +180,11 @@ TEST_F(TestUTransport, RegisterListenerOk) { // NOLINT
 
 	EXPECT_TRUE(handle);
 
-	EXPECT_FALSE(transport_mock->sink_filter_);
-	EXPECT_TRUE(source_filter == transport_mock->source_filter_);
-	EXPECT_TRUE(transport_mock->listener_);
-	if (transport_mock->listener_) {
-		auto callable = transport_mock->listener_.value();
+	EXPECT_FALSE(transport_mock->getSinkFilter());
+	EXPECT_TRUE(source_filter == transport_mock->getSourceFilter());
+	EXPECT_TRUE(transport_mock->getListener());
+	if (transport_mock->getListener()) {
+		auto callable = transport_mock->getListener().value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
 		topic.set_resource_id(RESOURCE_ID_F00D);
@@ -211,8 +211,8 @@ TEST_F(TestUTransport, RegisterListenerInvalidSource) { // NOLINT
 	    InvalidUUri);
 
 	// Did not attempt to register a callback
-	EXPECT_FALSE(transport_mock->sink_filter_);
-	EXPECT_FALSE(transport_mock->listener_);
+	EXPECT_FALSE(transport_mock->getSinkFilter());
+	EXPECT_FALSE(transport_mock->getListener());
 	EXPECT_FALSE(called);
 }
 
@@ -220,7 +220,7 @@ TEST_F(TestUTransport, RegisterListenerImplStatus) { // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
-	transport_mock->registerListener_status_.set_code(
+	transport_mock->getRegisterListenerStatus().set_code(
 	    v1::UCode::INTERNAL);
 
 	bool called = false;
@@ -239,9 +239,9 @@ TEST_F(TestUTransport, RegisterListenerImplStatus) { // NOLINT
 	});
 
 	// The listener that was sent to the impl is not connected
-	EXPECT_TRUE(transport_mock->listener_);
-	if (transport_mock->listener_) {
-		auto callable = transport_mock->listener_.value();
+	EXPECT_TRUE(transport_mock->getListener());
+	if (transport_mock->getListener()) {
+		auto callable = transport_mock->getListener().value();
 		EXPECT_FALSE(callable);
 		auto topic = getValidUri();
 		topic.set_resource_id(RESOURCE_ID_F00D);
@@ -274,15 +274,15 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterOk) { // NOLINT
 
 	EXPECT_TRUE(handle);
 
-	EXPECT_TRUE(transport_mock->sink_filter_);
-	if (transport_mock->sink_filter_) {
-		EXPECT_TRUE(sink_filter == transport_mock->sink_filter_.value());
+	EXPECT_TRUE(transport_mock->getSinkFilter());
+	if (transport_mock->getSinkFilter()) {
+		EXPECT_TRUE(sink_filter == transport_mock->getSinkFilter().value());
 	}
 
-	EXPECT_TRUE(source_filter == transport_mock->source_filter_);
-	EXPECT_TRUE(transport_mock->listener_);
-	if (transport_mock->listener_) {
-		auto callable = transport_mock->listener_.value();
+	EXPECT_TRUE(source_filter == transport_mock->getSourceFilter());
+	EXPECT_TRUE(transport_mock->getListener());
+	if (transport_mock->getListener()) {
+		auto callable = transport_mock->getListener().value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
 		topic.set_resource_id(RESOURCE_ID_F00D);
@@ -313,8 +313,8 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSource) { // NOLINT
 	    InvalidUUri);
 
 	// Did not attempt to register a callback
-	EXPECT_FALSE(transport_mock->sink_filter_);
-	EXPECT_FALSE(transport_mock->listener_);
+	EXPECT_FALSE(transport_mock->getSinkFilter());
+	EXPECT_FALSE(transport_mock->getListener());
 	EXPECT_FALSE(called);
 }
 
@@ -339,8 +339,8 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterInvalidSink) { // NOLINT
 	    InvalidUUri);
 
 	// Did not attempt to register a callback
-	EXPECT_FALSE(transport_mock->sink_filter_);
-	EXPECT_FALSE(transport_mock->listener_);
+	EXPECT_FALSE(transport_mock->getSinkFilter());
+	EXPECT_FALSE(transport_mock->getListener());
 	EXPECT_FALSE(called);
 }
 
@@ -348,7 +348,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterImplStatus) { // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
-	transport_mock->registerListener_status_.set_code(
+	transport_mock->getRegisterListenerStatus().set_code(
 	    v1::UCode::NOT_FOUND);
 
 	bool called = false;
@@ -369,9 +369,9 @@ TEST_F(TestUTransport, RegisterListenerWithSinkFilterImplStatus) { // NOLINT
 	});
 
 	// The listener that was sent to the impl is not connected
-	EXPECT_TRUE(transport_mock->listener_);
-	if (transport_mock->listener_) {
-		auto callable = transport_mock->listener_.value();
+	EXPECT_TRUE(transport_mock->getListener());
+	if (transport_mock->getListener()) {
+		auto callable = transport_mock->getListener().value();
 		EXPECT_FALSE(callable);
 		auto topic = getValidUri();
 		topic.set_resource_id(RESOURCE_ID_F00D);
@@ -402,17 +402,17 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) { // NOLINT
 
 	EXPECT_TRUE(handle);
 
-	EXPECT_TRUE(transport_mock->sink_filter_);
-	if (transport_mock->sink_filter_) {
+	EXPECT_TRUE(transport_mock->getSinkFilter());
+	if (transport_mock->getSinkFilter()) {
 		auto sink_filter = getValidUri();
 		sink_filter.set_resource_id(RESOURCE_ID_F00D);
-		EXPECT_TRUE(sink_filter == transport_mock->sink_filter_.value());
+		EXPECT_TRUE(sink_filter == transport_mock->getSinkFilter().value());
 	}
 
-	EXPECT_TRUE(source_filter == transport_mock->source_filter_);
-	EXPECT_TRUE(transport_mock->listener_);
-	if (transport_mock->listener_) {
-		auto callable = transport_mock->listener_.value();
+	EXPECT_TRUE(source_filter == transport_mock->getSourceFilter());
+	EXPECT_TRUE(transport_mock->getListener());
+	if (transport_mock->getListener()) {
+		auto callable = transport_mock->getListener().value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
 		topic.set_resource_id(RESOURCE_ID_F00D);
@@ -441,8 +441,8 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceInvalidSource) { // NOLIN
 	    InvalidUUri);
 
 	// Did not attempt to register a callback
-	EXPECT_FALSE(transport_mock->sink_filter_);
-	EXPECT_FALSE(transport_mock->listener_);
+	EXPECT_FALSE(transport_mock->getSinkFilter());
+	EXPECT_FALSE(transport_mock->getListener());
 	EXPECT_FALSE(called);
 }
 
@@ -453,7 +453,7 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceImplStatus) { // NOLINT
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
-	transport_mock->registerListener_status_.set_code(
+	transport_mock->getRegisterListenerStatus().set_code(
 	    v1::UCode::NOT_FOUND);
 
 	bool called = false;
@@ -472,9 +472,9 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceImplStatus) { // NOLINT
 	});
 
 	// The listener that was sent to the impl is not connected
-	EXPECT_TRUE(transport_mock->listener_);
-	if (transport_mock->listener_) {
-		auto callable = transport_mock->listener_.value();
+	EXPECT_TRUE(transport_mock->getListener());
+	if (transport_mock->getListener()) {
+		auto callable = transport_mock->getListener().value();
 		// The callback isn't connected...
 		EXPECT_FALSE(callable);
 		// ...but we're still going to try to call it anyway
@@ -509,11 +509,11 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerOk) { // NOLINT
 
 	EXPECT_TRUE(handle);
 
-	EXPECT_FALSE(transport_mock->sink_filter_);
-	EXPECT_TRUE(topic_source_filter == transport_mock->source_filter_);
-	EXPECT_TRUE(transport_mock->listener_);
-	if (transport_mock->listener_) {
-		auto callable = transport_mock->listener_.value();
+	EXPECT_FALSE(transport_mock->getSinkFilter());
+	EXPECT_TRUE(topic_source_filter == transport_mock->getSourceFilter());
+	EXPECT_TRUE(transport_mock->getListener());
+	if (transport_mock->getListener()) {
+		auto callable = transport_mock->getListener().value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
 		topic.set_resource_id(RESOURCE_ID_F00D);
@@ -546,15 +546,15 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerWithSourceFilterOk) { // NOLINT
 
 	EXPECT_TRUE(handle);
 
-	EXPECT_TRUE(transport_mock->sink_filter_);
-	if (transport_mock->sink_filter_) {
-		EXPECT_TRUE(sink_filter == transport_mock->sink_filter_.value());
+	EXPECT_TRUE(transport_mock->getSinkFilter());
+	if (transport_mock->getSinkFilter()) {
+		EXPECT_TRUE(sink_filter == transport_mock->getSinkFilter().value());
 	}
 
-	EXPECT_TRUE(source_filter == transport_mock->source_filter_);
-	EXPECT_TRUE(transport_mock->listener_);
-	if (transport_mock->listener_) {
-		auto callable = transport_mock->listener_.value();
+	EXPECT_TRUE(source_filter == transport_mock->getSourceFilter());
+	EXPECT_TRUE(transport_mock->getListener());
+	if (transport_mock->getListener()) {
+		auto callable = transport_mock->getListener().value();
 		EXPECT_FALSE(called);
 		auto topic = getValidUri();
 		topic.set_resource_id(RESOURCE_ID_F00D);

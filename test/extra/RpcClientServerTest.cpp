@@ -126,7 +126,7 @@ TEST_F(RpcClientServerTest, SimpleRoundTrip) {  // NOLINT
 	    UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
 	ASSERT_TRUE(server_or_status.has_value());
 	ASSERT_NE(server_or_status.value(), nullptr);
-	EXPECT_TRUE(server_transport->listener_);
+	EXPECT_TRUE(server_transport->getListener());
 
 	auto client = uprotocol::communication::RpcClient(client_transport, v1::UUri(rpc_service_uuri),
 	                        UPriority::UPRIORITY_CS4, 1000ms);
@@ -141,14 +141,14 @@ TEST_F(RpcClientServerTest, SimpleRoundTrip) {  // NOLINT
 			        client_capture = maybe_response.value();
 		        }
 	        }));
-	EXPECT_TRUE(client_transport->send_count_ == 1);
-	EXPECT_TRUE(client_transport->listener_);
+	EXPECT_TRUE(client_transport->getSendCount() == 1);
+	EXPECT_TRUE(client_transport->getListener());
 
-	(*server_transport->listener_)(client_transport->message_);
+	(*server_transport->getListener())(client_transport->getMessage());
 	EXPECT_TRUE(server_called);
 	EXPECT_EQ(client_request, server_capture.payload());
 
-	client_transport->mockMessage(server_transport->message_);
+	client_transport->mockMessage(server_transport->getMessage());
 	EXPECT_TRUE(client_called);
 	EXPECT_EQ(server_response, client_capture.payload());
 }

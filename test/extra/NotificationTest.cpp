@@ -106,21 +106,21 @@ TEST_F(NotificationTest, NotificationSuccess) { // NOLINT
 
 	EXPECT_EQ(
 	    AsString::serialize(
-	        transport_mock_notification_source->message_.attributes().source()),
-	    AsString::serialize(transport_mock_notification_sink->source_filter_));
+	        transport_mock_notification_source->getMessage().attributes().source()),
+	    AsString::serialize(transport_mock_notification_sink->getSourceFilter()));
 
 	EXPECT_EQ(
 	    AsString::serialize(
-	        transport_mock_notification_source->message_.attributes().sink()),
+	        transport_mock_notification_source->getMessage().attributes().sink()),
 	    AsString::serialize(
-	        transport_mock_notification_sink->sink_filter_.value()));
+	        transport_mock_notification_sink->getSinkFilter().value()));
 
 	// Manually bridge the two transports
 	transport_mock_notification_sink->mockMessage(
-	    transport_mock_notification_source->message_);
+	    transport_mock_notification_source->getMessage());
 
 	// Test
-	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(transport_mock_notification_source->message_,
+	EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(transport_mock_notification_source->getMessage(),
 	                            capture_msg));
 	EXPECT_EQ(test_payload_str, capture_msg.payload());
 }
