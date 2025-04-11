@@ -112,8 +112,8 @@ TEST(UuidBuilderTest, TestModeOnly) {  // NOLINT
 	EXPECT_THROW(builder.withTimeSource(  // NOLINT
 	                 []() { return std::chrono::system_clock::now(); }),
 	             std::domain_error);
-	EXPECT_THROW(builder.withRandomSource( // NOLINT
-	                 []() { return 0x1234567890ABCDEF; }),  
+	EXPECT_THROW(builder.withRandomSource(  // NOLINT
+	                 []() { return 0x1234567890ABCDEF; }),
 	             std::domain_error);
 }
 

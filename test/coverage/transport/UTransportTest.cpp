@@ -97,8 +97,8 @@ using InvalidUUri = datamodel::validator::uri::InvalidUUri;
 TEST_F(TestUTransport, CreateTransportInvalidUUri) {  // NOLINT
 	auto uri = getValidUri();
 	uri.set_authority_name("*");
-	EXPECT_THROW({ auto transport = makeTransport(uri); }, // NOLINT
-	             InvalidUUri);  
+	EXPECT_THROW({ auto transport = makeTransport(uri); },  // NOLINT
+	             InvalidUUri);
 }
 
 using UMessageBuilder = datamodel::builder::UMessageBuilder;
@@ -137,8 +137,8 @@ TEST_F(TestUTransport, SendInvalidMessage) {  // NOLINT
 	    v1::UMessageType::UMESSAGE_TYPE_REQUEST);
 
 	decltype(transport->send(message)) result;
-	EXPECT_THROW({ result = transport->send(message); }, // NOLINT
-	             InvalidUMessge);  
+	EXPECT_THROW({ result = transport->send(message); },  // NOLINT
+	             InvalidUMessge);
 	EXPECT_EQ(transport_mock->getSendCount(), 0);
 }
 
@@ -419,8 +419,8 @@ TEST_F(TestUTransport, RegisterListenerWithSinkResourceOk) {  // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, // NOLINT
-       RegisterListenerWithSinkResourceInvalidSource) {  
+TEST_F(TestUTransport,  // NOLINT
+       RegisterListenerWithSinkResourceInvalidSource) {
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 
@@ -520,8 +520,8 @@ TEST_F(TestUTransport, DeprecatedRegisterListenerOk) {  // NOLINT
 	}
 }
 
-TEST_F(TestUTransport, // NOLINT
-       DeprecatedRegisterListenerWithSourceFilterOk) {  
+TEST_F(TestUTransport,  // NOLINT
+       DeprecatedRegisterListenerWithSourceFilterOk) {
 	auto transport_mock = makeMockTransport(getValidUri());
 	auto transport = makeTransport(transport_mock);
 

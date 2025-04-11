@@ -145,7 +145,7 @@ TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutTTL) {  // NOLINT
 }
 
 TEST_F(TestNotificationSource,  // NOLINT
-       NotifyWithPayloadSuccessWithoutPriority) { 
+       NotifyWithPayloadSuccessWithoutPriority) {
 	std::string test_payload_str = "test_payload";
 	getPriority().reset();
 	NotificationSource notification_source(

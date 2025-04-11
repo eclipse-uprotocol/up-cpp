@@ -716,8 +716,8 @@ TEST_F(CallbackTest, EstablishWithNonCallableCleanup) {  // NOLINT
 	callbacks::Connection<bool>::Cleanup empty;
 	callbacks::Connection<bool>::ConnectedPair conn;
 
-	EXPECT_THROW( // NOLINT
-	    conn = callbacks::Connection<bool>::establish(cb, empty),  
+	EXPECT_THROW(  // NOLINT
+	    conn = callbacks::Connection<bool>::establish(cb, empty),
 	    callbacks::EmptyFunctionObject);
 
 	auto& [handle, callable] = conn;
@@ -737,8 +737,8 @@ TEST_F(CallbackTest, EstablishWithNonCallableCallbackAndCleanup) {  // NOLINT
 	callbacks::Connection<bool>::Cleanup empty;
 	callbacks::Connection<bool>::ConnectedPair conn;
 
-	EXPECT_THROW( // NOLINT
-	    conn = callbacks::Connection<bool>::establish({}, empty),  
+	EXPECT_THROW(  // NOLINT
+	    conn = callbacks::Connection<bool>::establish({}, empty),
 	    callbacks::EmptyFunctionObject);
 
 	auto& [handle, callable] = conn;

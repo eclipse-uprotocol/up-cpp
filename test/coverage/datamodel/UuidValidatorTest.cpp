@@ -80,8 +80,8 @@ TEST_F(TestUuidValidator, WrongVersion) {  // NOLINT
 	auto [valid, reason] = validator::uuid::isUuid(uuid);
 	EXPECT_FALSE(valid);
 	EXPECT_EQ(reason.value(), validator::uuid::Reason::WRONG_VERSION);
-	EXPECT_THROW(validator::uuid::getVersion(uuid), // NOLINT
-	             validator::uuid::InvalidUuid);  
+	EXPECT_THROW(validator::uuid::getVersion(uuid),  // NOLINT
+	             validator::uuid::InvalidUuid);
 }
 
 // Test UUID with unsupported variant
@@ -93,8 +93,8 @@ TEST_F(TestUuidValidator, UnsupportedVariant) {  // NOLINT
 	auto [valid, reason] = validator::uuid::isUuid(uuid);
 	EXPECT_FALSE(valid);
 	EXPECT_EQ(reason.value(), validator::uuid::Reason::UNSUPPORTED_VARIANT);
-	EXPECT_THROW(validator::uuid::getVariant(uuid), // NOLINT
-	             validator::uuid::InvalidUuid);  
+	EXPECT_THROW(validator::uuid::getVariant(uuid),  // NOLINT
+	             validator::uuid::InvalidUuid);
 }
 
 // Test UUID from the future
@@ -111,8 +111,9 @@ TEST_F(TestUuidValidator, FromTheFuture) {  // NOLINT
 	auto [valid, reason] = validator::uuid::isUuid(uuid);
 	EXPECT_FALSE(valid);
 	EXPECT_EQ(reason.value(), validator::uuid::Reason::FROM_THE_FUTURE);
-	EXPECT_THROW(validator::uuid::getRemainingTime(uuid, SIXTY_SECONDS), // NOLINT
-	             validator::uuid::InvalidUuid);  
+	EXPECT_THROW( // NOLINT
+	    validator::uuid::getRemainingTime(uuid, SIXTY_SECONDS),  
+	    validator::uuid::InvalidUuid);
 }
 
 // Test expired UUID
@@ -240,7 +241,7 @@ TEST_F(TestUuidValidator, InvalidUuidElapsedTime) {  // NOLINT
 
 	auto uuid = createFakeUuid(static_cast<uint64_t>(future_timestamp));
 	EXPECT_THROW(validator::uuid::getElapsedTime(uuid),  // NOLINT
-	             validator::uuid::InvalidUuid); 
+	             validator::uuid::InvalidUuid);
 }
 
 }  // namespace uprotocol::datamodel

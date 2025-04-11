@@ -77,8 +77,8 @@ TEST_F(TestUuidSerializer, SerializeWithMixedCaseLetters) {  // NOLINT
 }
 
 // Test serialization with leading zeros and mixed case letters
-TEST_F(TestUuidSerializer, // NOLINT
-       SerializeWithLeadingZerosAndMixedCaseLetters) {  
+TEST_F(TestUuidSerializer,  // NOLINT
+       SerializeWithLeadingZerosAndMixedCaseLetters) {
 	constexpr uint64_t UUID_MSB = 0x00001234567890AB;
 	constexpr uint64_t UUID_LSB = 0xFedcba0987654982;
 	uprotocol::v1::UUID uuid;

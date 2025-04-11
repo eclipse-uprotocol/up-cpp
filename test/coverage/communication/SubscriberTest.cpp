@@ -213,9 +213,8 @@ TEST_F(SubscriberTest, SubscribeNullTransport) {  // NOLINT
 	auto callback = [this](const auto& arg1) {
 		return this->handleCallbackMessage(arg1);
 	};
-	EXPECT_THROW(auto result = communication::Subscriber::subscribe( // NOLINT
-	                 transport, getTestTopicUUri(),  
-	                 std::move(callback)),
+	EXPECT_THROW(auto result = communication::Subscriber::subscribe(  // NOLINT
+	                 transport, getTestTopicUUri(), std::move(callback)),
 	             std::invalid_argument);
 }
 // subscribe to a topic with null callback
@@ -229,8 +228,8 @@ TEST_F(SubscriberTest, SubscribeNullCallback) {  // NOLINT
 		    transport, getTestTopicUUri(), nullptr);
 	};
 
-	EXPECT_THROW(test_subscribe_nullptr(), // NOLINT
-	             utils::callbacks::EmptyFunctionObject);  
+	EXPECT_THROW(test_subscribe_nullptr(),  // NOLINT
+	             utils::callbacks::EmptyFunctionObject);
 
 	// Default construct a function object
 	auto test_subscribe_empty = [transport, this]() {
@@ -238,8 +237,8 @@ TEST_F(SubscriberTest, SubscribeNullCallback) {  // NOLINT
 		    transport, getTestTopicUUri(), {});
 	};
 
-	EXPECT_THROW(test_subscribe_empty(), // NOLINT
-	             utils::callbacks::EmptyFunctionObject);  
+	EXPECT_THROW(test_subscribe_empty(),  // NOLINT
+	             utils::callbacks::EmptyFunctionObject);
 }
 
 }  // namespace uprotocol

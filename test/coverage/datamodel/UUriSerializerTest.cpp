@@ -67,8 +67,8 @@ TEST_F(TestUUriSerializer, SerializeUUriWithNoAuthorityToString) {  // NOLINT
 
 // Test authority name '*' to see if it serializes without an exception for
 // using wildcard
-TEST_F(TestUUriSerializer, // NOLINT
-       SerializeUUriToStringWithAuthorityWildCard) {  
+TEST_F(TestUUriSerializer,  // NOLINT
+       SerializeUUriToStringWithAuthorityWildCard) {
 	constexpr uint32_t WILDCARD = 0x1FFFE;
 	uprotocol::v1::UUri test_u_uri;
 	test_u_uri.set_authority_name("*");  // Wildcard
@@ -82,8 +82,8 @@ TEST_F(TestUUriSerializer, // NOLINT
 
 // Test Service ID in uEID field as a 0xFFFF to see if it serializes without
 // an exception for using wildcard
-TEST_F(TestUUriSerializer, // NOLINT
-       SerializeUUriToStringWithServiceIDWildCard) {  
+TEST_F(TestUUriSerializer,  // NOLINT
+       SerializeUUriToStringWithServiceIDWildCard) {
 	constexpr uint32_t WILDCARD = 0x1FFFF;
 	uprotocol::v1::UUri test_u_uri;
 	test_u_uri.set_authority_name("testAuthority");
@@ -97,8 +97,8 @@ TEST_F(TestUUriSerializer, // NOLINT
 
 // Test Instance ID in uEID field as a 0x0 to see if it serializes without an
 // exception for using wildcard
-TEST_F(TestUUriSerializer, // NOLINT
-       SerializeUUriToStringWithInstanceIDWildCard) {  
+TEST_F(TestUUriSerializer,  // NOLINT
+       SerializeUUriToStringWithInstanceIDWildCard) {
 	constexpr uint32_t WILDCARD = 0x00001234;
 	uprotocol::v1::UUri test_u_uri;
 	test_u_uri.set_authority_name("testAuthority");
@@ -112,8 +112,8 @@ TEST_F(TestUUriSerializer, // NOLINT
 
 // Test major version as 0xFF to see if it serializes without an exception for
 // using wildcard
-TEST_F(TestUUriSerializer, // NOLINT
-       SerializeUUriToStringWithMajorVersionWildCard) {  
+TEST_F(TestUUriSerializer,  // NOLINT
+       SerializeUUriToStringWithMajorVersionWildCard) {
 	constexpr uint32_t TEST_UE_ID = 0x12340000;
 	constexpr uint32_t WILDCARD = 0xFF;
 	uprotocol::v1::UUri test_u_uri;
@@ -128,8 +128,8 @@ TEST_F(TestUUriSerializer, // NOLINT
 
 // Test resource id as 0xFFFF to see if it thorws an exception for using
 // wildcard
-TEST_F(TestUUriSerializer, // NOLINT
-       SerializeUUriToStringWithResourceIDWildCard) {  
+TEST_F(TestUUriSerializer,  // NOLINT
+       SerializeUUriToStringWithResourceIDWildCard) {
 	constexpr uint32_t TEST_UE_ID = 0x12340000;
 	constexpr uint32_t WILDCARD = 0xFFFF;
 	uprotocol::v1::UUri test_u_uri;
@@ -162,32 +162,32 @@ TEST_F(TestUUriSerializer, SerializeUUriToStringWithInvalidUUri) {  // NOLINT
 
 	// Empty UUri
 	uprotocol::v1::UUri test_u_uri;
-	ASSERT_THROW(serialized = AsString::serialize(test_u_uri), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(serialized = AsString::serialize(test_u_uri),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 
 	// Authority name too long
 	test_u_uri = base_u_uri;
 	test_u_uri.set_authority_name(std::string(AUTHORITY_NAME_NUMBER, 'b'));
-	ASSERT_THROW(serialized = AsString::serialize(test_u_uri), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(serialized = AsString::serialize(test_u_uri),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 
 	// Version out of uint8 range
 	test_u_uri = base_u_uri;
 	test_u_uri.set_ue_version_major(INVALID_VERSION_MAJOR);
-	ASSERT_THROW(serialized = AsString::serialize(test_u_uri), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(serialized = AsString::serialize(test_u_uri),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 
 	// Version reserved
 	test_u_uri = base_u_uri;
 	test_u_uri.set_ue_version_major(0);
-	ASSERT_THROW(serialized = AsString::serialize(test_u_uri), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(serialized = AsString::serialize(test_u_uri),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 
 	// Resource ID out of uint16 range
 	test_u_uri = base_u_uri;
 	test_u_uri.set_resource_id(INVALID_RESOURCE_ID);
-	ASSERT_THROW(serialized = AsString::serialize(test_u_uri), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(serialized = AsString::serialize(test_u_uri),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 }
 
 // Test deserialize by providing scheme "up:" which is allowed to have as per
@@ -207,12 +207,13 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithScheme) {  // NOLINT
 }
 
 // Test deserialize by providing incorrect scheme "uprotocol:"
-TEST_F(TestUUriSerializer, // NOLINT
-       DeSerializeUUriStringWithIncorrectScheme) {  
+TEST_F(TestUUriSerializer,  // NOLINT
+       DeSerializeUUriStringWithIncorrectScheme) {
 	const std::string uuri_as_string =
 	    "uprotocol://192.168.1.10/10010001/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 }
 
 // Test deserialize without providing scheme "up:"
@@ -233,8 +234,9 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithoutScheme) {  // NOLINT
 // Test deserializing empty string to check if it thorws an exception
 TEST_F(TestUUriSerializer, DeSerializeEmptyUUriString) {  // NOLINT
 	const std::string uuri_as_string;
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 }
 
 // Test deserializing string with no authority
@@ -253,88 +255,102 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithNoAuthority) {  // NOLINT
 }
 
 // Test deserializing string with invalid number of arguments
-TEST_F(TestUUriSerializer, // NOLINT
-       DeSerializeUUriStringWithInvalidNumberOfArgument) {  
+TEST_F(TestUUriSerializer,  // NOLINT
+       DeSerializeUUriStringWithInvalidNumberOfArgument) {
 	// Provided 5 arguments instead of 4 when authority exist
 	std::string uuri_as_string = "//192.168.1.10/10010001/FE/FE/7500";
 
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// UE ID is missing. Provided 3 arguments instead of 4 when authority exist.
 	uuri_as_string = "//192.168.1.10/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Provided 4 arguments instead of 3 when authority does not exist.
 	uuri_as_string = "/1102/FE/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// UE ID is missing. Provided 2 arguments instead of 3 when authority does
 	// not exist.
 	uuri_as_string = "/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Valid Uri but no leading /
 	uuri_as_string = "192.168.1.10/1102/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Valid Uri but no leading /
 	uuri_as_string = "1102/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Valid Uri but leading /// .
 	uuri_as_string = "///192.168.1.10/1102/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Valid Uri but additional trailing /
 	uuri_as_string = "//192.168.1.10/1102/FE/7500/";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 }
 
 // Test deserializing string with invalid arguments
-TEST_F(TestUUriSerializer, // NOLINT
-       DeSerializeUUriStringWithInvalidArgument) {  
+TEST_F(TestUUriSerializer,  // NOLINT
+       DeSerializeUUriStringWithInvalidArgument) {
 	// UE ID provided is invalid. It should be hex numeric
 	std::string uuri_as_string = "//192.168.1.10/testUE/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Major Version provided is invalid. It should be hex numeric
 	uuri_as_string = "//192.168.1.10/10010001/^%/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Resource ID provided is invalid. It should be hex numeric
 	uuri_as_string = "//192.168.1.10/10010001/FE/xyz";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// UE ID is outside the 32-bit int range
 	uuri_as_string = "//192.168.1.10/110010001/FE/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Major Version is outside the 8-bit int range
 	uuri_as_string = "//192.168.1.10/10010001/100/7500";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 
 	// Resiource ID is outside the 16-bit int range
 	uuri_as_string = "//192.168.1.10/10010001/FE/10000";
-	ASSERT_THROW(static_cast<void>(AsString::deserialize(uuri_as_string)), // NOLINT
-	             std::invalid_argument);  
+	ASSERT_THROW( // NOLINT
+	    static_cast<void>(AsString::deserialize(uuri_as_string)),  
+	    std::invalid_argument);
 }
 
 // Test deserializing string with wildcard arguments to see if throws exception
 TEST_F(TestUUriSerializer,  // NOLINT
-       DeSerializeUUriStringWithWildcardArgument) { 
+       DeSerializeUUriStringWithWildcardArgument) {
 	constexpr uint32_t UE_SERVICE_ID_WILDCARD = 0x1FFFF;
 	constexpr uint32_t UE_INSTANCE_ID_WILDCARD = 0x1234;
 	constexpr uint32_t VERSION_MAJOR_WILDCARD = 0xFF;
@@ -403,20 +419,20 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidUUri) {  // NOLINT
 
 	// Major Version reserved
 	std::string uuri_as_string = "//192.168.1.10/1FFFE/0/7500";
-	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 
 	// Empty UUri
 	uuri_as_string = "// /0/0/0";
-	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 
 	// Major Version reserved
 	uuri_as_string = "//";
 	uuri_as_string += std::string(UURI_NUMBER, 'a');
 	uuri_as_string += "/1FFFE/1/7500";
-	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 
 	// NOTE These are also checked earlier against the std::invalid_argument
 	// exception. They can be caught either way. These can be checked against
@@ -424,13 +440,13 @@ TEST_F(TestUUriSerializer, DeSerializeUUriStringWithInvalidUUri) {  // NOLINT
 
 	// Major Version outside the uint8 range
 	uuri_as_string = "//192.168.1.10/1FFFE/FFFE/7500";
-	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 
 	// Resource ID outside the uint8 range
 	uuri_as_string = "//192.168.1.10/1FFFE/FE/C0FFEEEE";
-	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string), // NOLINT
-	             uprotocol::datamodel::validator::uri::InvalidUUri);  
+	ASSERT_THROW(uuri = AsString::deserialize(uuri_as_string),  // NOLINT
+	             uprotocol::datamodel::validator::uri::InvalidUUri);
 }
 
 }  // namespace uprotocol::datamodel::serializer::uri
