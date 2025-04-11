@@ -184,9 +184,9 @@ TEST_F(TestPublisher, PublishSuccessWithoutPriority) {  // NOLINT
 // publisher with null transport
 TEST_F(TestPublisher, PublisherWithNullTransport) {  // NOLINT
 	auto transport = nullptr;
-	EXPECT_THROW( // NOLINT
-	    communication::Publisher publisher(  
-	        transport, getTopic(), getFormat(), getPriority(), getTTL()),
+	EXPECT_THROW(  // NOLINT
+	    communication::Publisher publisher(transport, getTopic(), getFormat(),
+	                                       getPriority(), getTTL()),
 	    uprotocol::transport::NullTransport);
 }
 

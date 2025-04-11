@@ -91,17 +91,16 @@ protected:
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
-	static void SetUpTestSuite() {
-	}
+	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
 	const v1::UUri& getSource() const { return source_; }
-    
-    const v1::UUri& getSink() const { return sink_; }
-    
-    const v1::UUri& getMethod() const { return method_; }
-    
-    const v1::UUID& getReqId() const { return req_id_; }
+
+	const v1::UUri& getSink() const { return sink_; }
+
+	const v1::UUri& getMethod() const { return method_; }
+
+	const v1::UUID& getReqId() const { return req_id_; }
 
 private:
 	v1::UUri source_;
