@@ -34,35 +34,26 @@ public:
 	}
 
 	size_t getSendCount() const { return send_count_.load(); }
-
 	uprotocol::v1::UStatus& getSendStatus() { return send_status_; }
-
 	uprotocol::v1::UStatus& getRegisterListenerStatus() {
 		return registerListener_status_;
 	}
-
 	std::optional<uprotocol::utils::callbacks::CallerHandle<
 	    void, uprotocol::v1::UMessage const&>>
 	getListener() const {
 		return listener_;
 	}
-
 	std::optional<uprotocol::utils::callbacks::CallerHandle<
 	    void, uprotocol::v1::UMessage const&>>
 	getCleanupListener() const {
 		return cleanup_listener_;
 	}
-
 	std::optional<uprotocol::v1::UUri> getSinkFilter() const {
 		return sink_filter_;
 	}
-
 	v1::UUri getSourceFilter() const { return source_filter_; }
-
 	std::mutex& getRegisterMtx() { return register_mtx_; }
-
 	v1::UMessage getMessage() const { return message_; }
-
 	std::mutex& getMessageMtx() { return message_mtx_; }
 
 	~UTransportMock() override = default;

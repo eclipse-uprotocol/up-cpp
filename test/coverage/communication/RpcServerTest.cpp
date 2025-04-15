@@ -81,19 +81,6 @@ protected:
 	[[nodiscard]] std::chrono::milliseconds getTTL() const { return ttl_; }
 	[[nodiscard]] v1::UPayloadFormat getFormat() const { return format; }
 
-	void setMockTransport(
-	    const std::shared_ptr<test::UTransportMock>& mock_transport) {
-		mockTransport_ = mock_transport;
-	}
-	void setMethodUri(const std::shared_ptr<v1::UUri>& method_uri) {
-		method_uri_ = method_uri;
-	}
-	void setRequestUri(const std::shared_ptr<v1::UUri>& request_uri) {
-		request_uri_ = request_uri;
-	}
-	void setTTL(const std::chrono::milliseconds& ttl) { ttl_ = ttl; }
-	void setFormat(v1::UPayloadFormat format) { this->format = format; }
-
 	void SetUp() override {
 		constexpr uint32_t DEF_UE_ID = 0x18000;
 		constexpr uint32_t METHOD_UE_ID = 0x00010002;

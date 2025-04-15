@@ -38,7 +38,6 @@ public:
 	      ue_version_major(ue_details.ue_version_major),
 	      resource_id(resource_id_val) {}
 
-	void set_auth(const std::string& auth_val) { auth = auth_val; }
 	[[nodiscard]] const std::string& get_auth() const { return auth; }
 
 	void set_ue_details(UeDetails ue_details) {

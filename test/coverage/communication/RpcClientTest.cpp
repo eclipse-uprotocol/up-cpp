@@ -121,9 +121,6 @@ protected:
 	[[nodiscard]] std::shared_ptr<test::UTransportMock> getTransport() const {
 		return transport_;
 	}
-	void setTransport(const std::shared_ptr<test::UTransportMock>& transport) {
-		transport_ = transport;
-	}
 
 public:
 	~RpcClientTest() override = default;

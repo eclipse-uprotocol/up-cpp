@@ -95,11 +95,8 @@ protected:
 	static void TearDownTestSuite() {}
 
 	const v1::UUri& getSource() const { return source_; }
-
 	const v1::UUri& getSink() const { return sink_; }
-
 	const v1::UUri& getMethod() const { return method_; }
-
 	const v1::UUID& getReqId() const { return req_id_; }
 
 private:
@@ -111,11 +108,6 @@ private:
 public:
 	~TestUMessageBuilder() override = default;
 };
-
-// v1::UUri TestUMessageBuilder::source_;
-// v1::UUri TestUMessageBuilder::sink_;
-// v1::UUri TestUMessageBuilder::method_;
-// v1::UUID TestUMessageBuilder::req_id_;
 
 /// @brief  Test the publish function of the UMessageBuilder
 TEST_F(TestUMessageBuilder, PublishValidTopicUriSuccess) {  // NOLINT

@@ -78,23 +78,6 @@ protected:
 	std::optional<uprotocol::v1::UPriority>& getPriority() { return priority_; }
 	std::optional<std::chrono::milliseconds> getTTL() const { return ttl_; }
 
-	void setTransportMock(
-	    const std::shared_ptr<uprotocol::test::UTransportMock>&
-	        transport_mock) {
-		transportMock_ = transport_mock;
-	}
-	void setSource(const uprotocol::v1::UUri& source) { source_ = source; }
-	void setSink(const uprotocol::v1::UUri& sink) { sink_ = sink; }
-	void setFormat(const uprotocol::v1::UPayloadFormat& format) {
-		format_ = format;
-	}
-	void setPriority(const std::optional<uprotocol::v1::UPriority>& priority) {
-		priority_ = priority;
-	}
-	void setTTL(const std::optional<std::chrono::milliseconds>& ttl) {
-		ttl_ = ttl;
-	}
-
 public:
 	~TestNotificationSource() override = default;
 };

@@ -59,20 +59,6 @@ protected:
 	size_t getCaptureCount() const { return capture_count_; }
 	uprotocol::v1::UMessage getCaptureMsg() const { return capture_msg_; }
 
-	void setTestTopicUUri(const uprotocol::v1::UUri& uri) {
-		testTopicUUri_ = uri;
-	}
-	void setTestInvalidTopicUUri(const uprotocol::v1::UUri& uri) {
-		testInvalidTopicUUri_ = uri;
-	}
-	void setTestDefaultSourceUUri(const uprotocol::v1::UUri& uri) {
-		testDefaultSourceUUri_ = uri;
-	}
-	void setCaptureCount(size_t count) { capture_count_ = count; }
-	void setCaptureMsg(const uprotocol::v1::UMessage& msg) {
-		capture_msg_ = msg;
-	}
-
 public:
 	void handleCallbackMessage(const uprotocol::v1::UMessage& message);
 	~SubscriberTest() override = default;

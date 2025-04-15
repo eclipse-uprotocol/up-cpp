@@ -50,20 +50,6 @@ protected:
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
-	void setTestTopicUUri(const uprotocol::v1::UUri& uuri) {
-		testTopicUUri_ = uuri;
-	}
-	void setTestInvalidTopicUUri(const uprotocol::v1::UUri& uuri) {
-		testInvalidTopicUUri_ = uuri;
-	}
-	void setTestDefaultSourceUUri(const uprotocol::v1::UUri& uuri) {
-		testDefaultSourceUUri_ = uuri;
-	}
-	void setCaptureCount(size_t count) { capture_count_ = count; }
-	void setCaptureMsg(const uprotocol::v1::UMessage& msg) {
-		capture_msg_ = msg;
-	}
-
 	const uprotocol::v1::UUri& getTestTopicUUri() const {
 		return testTopicUUri_;
 	}

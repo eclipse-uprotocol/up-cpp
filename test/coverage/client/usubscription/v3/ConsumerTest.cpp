@@ -51,19 +51,6 @@ protected:
 	const uprotocol::v1::UUri& getSubscriptionUUri() const {
 		return subscription_uuri;
 	}
-	void setMockTransportClient(
-	    const std::shared_ptr<uprotocol::test::UTransportMock>& client) {
-		mockTransportClient_ = client;
-	}
-	void setMockTransportServer(
-	    const std::shared_ptr<uprotocol::test::UTransportMock>& server) {
-		mockTransportClient_ = server;
-	}
-	void setClientUUri(const uprotocol::v1::UUri& uuri) { client_uuri = uuri; }
-	void setServerUUri(const uprotocol::v1::UUri& uuri) { server_uuri = uuri; }
-	void setSubscriptionUUri(const uprotocol::v1::UUri& uuri) {
-		subscription_uuri = uuri;
-	}
 
 	void SetUp() override {
 		constexpr uint32_t TEST_UE_ID = 0x18000;

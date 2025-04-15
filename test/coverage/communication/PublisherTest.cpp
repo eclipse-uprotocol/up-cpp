@@ -18,9 +18,6 @@
 
 namespace uprotocol {
 
-// namespace {
-// using namespace uprotocol::datamodel::builder;
-
 class TestPublisher : public testing::Test {
 private:
 	std::shared_ptr<uprotocol::test::UTransportMock> transportMock_;
@@ -41,24 +38,6 @@ protected:
 	std::optional<v1::UPriority>& getPriority() { return priority_; }
 	std::optional<std::chrono::milliseconds> getTTL() const { return ttl_; }
 	uprotocol::v1::UMessage getCaptureMsg() const { return capture_msg_; }
-
-	void setTransportMock(
-	    const std::shared_ptr<uprotocol::test::UTransportMock>&
-	        transport_mock) {
-		transportMock_ = transport_mock;
-	}
-	void setSource(const v1::UUri& source) { source_ = source; }
-	void setTopic(const v1::UUri& topic) { topic_ = topic; }
-	void setFormat(const v1::UPayloadFormat& format) { format_ = format; }
-	void setPriority(const std::optional<v1::UPriority>& priority) {
-		priority_ = priority;
-	}
-	void setTTL(const std::optional<std::chrono::milliseconds>& ttl) {
-		ttl_ = ttl;
-	}
-	void setCaptureMsg(const uprotocol::v1::UMessage& capture_msg) {
-		capture_msg_ = capture_msg;
-	}
 
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
