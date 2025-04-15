@@ -19,7 +19,6 @@
 namespace uprotocol::datamodel::validator::message {
 
 using uprotocol::v1::UPRIORITY_CS4;
-// using uprotocol::datamodel::validator;
 
 std::string_view message(Reason reason) {
 	switch (reason) {

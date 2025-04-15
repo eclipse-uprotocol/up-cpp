@@ -14,7 +14,6 @@
 #include "up-cpp/datamodel/builder/Uuid.h"
 #include "up-cpp/datamodel/constants/UuidConstants.h"
 
-// using namespace uprotocol::datamodel::builder::;
 namespace uprotocol::datamodel {
 
 class TestUuidBuilder : public testing::Test {
