@@ -219,6 +219,7 @@ TEST_F(TestUuidValidator, RetrieveRemainingTime) {  // NOLINT
 
 // Test remaining time of 0ms
 TEST_F(TestUuidValidator, ExpiredUuidRemainingTime) {  // NOLINT
+	constexpr std::chrono::milliseconds ZERO_MILLISECONDS(0);
 	auto past_time = std::chrono::system_clock::now() - HUNDRED_SECONDS;
 	auto past_timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
 	                          past_time.time_since_epoch())
@@ -227,7 +228,7 @@ TEST_F(TestUuidValidator, ExpiredUuidRemainingTime) {  // NOLINT
 	auto uuid = createFakeUuid(static_cast<uint64_t>(past_timestamp));
 	auto remaining_time =
 	    validator::uuid::getRemainingTime(uuid, SIXTY_SECONDS);
-	EXPECT_EQ(remaining_time, std::chrono::milliseconds(0));
+	EXPECT_EQ(remaining_time, ZERO_MILLISECONDS);
 }
 
 // Future timestamp to test exception thrown on getElapsedTime()

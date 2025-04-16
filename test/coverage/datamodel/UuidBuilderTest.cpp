@@ -64,8 +64,8 @@ TEST(UuidBuilderTest, WithTimeSource) {  // NOLINT
 
 // Test RandomSource
 TEST(UuidBuilderTest, WithRandomSource) {  // NOLINT
-	constexpr uint64_t FIXED_RANDOM_T = 0x1234567890ABCDEF;
-	uint64_t fixed_random = FIXED_RANDOM_T;
+	constexpr uint64_t FIXED_RANDOM_UINT = 0x1234567890ABCDEF;
+	uint64_t fixed_random = FIXED_RANDOM_UINT;
 	auto builder = builder::UuidBuilder::getTestBuilder().withRandomSource(
 	    [fixed_random]() { return fixed_random; });
 	auto uuid = builder.build();
@@ -130,13 +130,13 @@ TEST_F(TestUuidBuilder, CheckVersionAndVariant) {  // NOLINT
 // Test custom time and random source with builder
 TEST(UuidBuilderTest, CustomTimeAndRandomSource) {  // NOLINT
 	constexpr std::time_t FIXED_TIME_T = 1623456789;
-	constexpr uint64_t FIXED_RANDOM_T = 0x1234567890ABCDEF;
+	constexpr uint64_t FIXED_RANDOM_UINT = 0x1234567890ABCDEF;
 	// Create a custom time source that returns a fixed timestamp
 	auto fixed_time = std::chrono::system_clock::from_time_t(FIXED_TIME_T);
 	auto time_source = [fixed_time]() { return fixed_time; };
 
 	// Create a custom random source that returns a fixed random value
-	uint64_t fixed_random = FIXED_RANDOM_T;
+	uint64_t fixed_random = FIXED_RANDOM_UINT;
 	auto random_source = [fixed_random]() { return fixed_random; };
 
 	// Create a UuidBuilder with the custom time and random sources

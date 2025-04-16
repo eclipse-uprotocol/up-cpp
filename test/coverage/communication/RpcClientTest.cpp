@@ -23,6 +23,7 @@
 
 #include "UTransportMock.h"
 
+constexpr std::chrono::milliseconds ZERO_MILLISECONDS(0);
 constexpr std::chrono::milliseconds TEN_MILLISECONDS(10);
 constexpr std::chrono::milliseconds ONE_HUNDRED_FIFTY_MILLISECONDS(150);
 constexpr uint32_t SHIFT_AMOUNT = 16;
@@ -190,7 +191,7 @@ TEST_F(RpcClientTest,  // NOLINT
 	// Bad ttl
 	EXPECT_THROW(auto client = communication::RpcClient(  // NOLINT
 	                 getTransport(), methodUri(), v1::UPriority::UPRIORITY_CS4,
-	                 std::chrono::milliseconds(0));
+	                 ZERO_MILLISECONDS);
 	             , std::out_of_range);
 
 	// Bad payload format
@@ -221,7 +222,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayload) {  // NOLINT
 	auto response = response_builder.build();
 	EXPECT_NO_THROW(getTransport()->mockMessage(response));  // NOLINT
 
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -280,7 +281,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadListenFail) {  // NOLINT
 
 	EXPECT_EQ(getTransport()->getSendCount(), 0);
 	EXPECT_TRUE(invoke_future.valid());
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -300,7 +301,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadSendFail) {  // NOLINT
 	EXPECT_NO_THROW(invoke_future = client.invokeMethod());  // NOLINT
 
 	EXPECT_TRUE(invoke_future.valid());
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -321,7 +322,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadClientDestroyed) {  // NOLINT
 	}
 
 	EXPECT_TRUE(invoke_future.valid());
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -347,7 +348,7 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayloadCommstatus) {  // NOLINT
 	EXPECT_NO_THROW(getTransport()->mockMessage(response));  // NOLINT
 
 	EXPECT_TRUE(invoke_future.valid());
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -384,7 +385,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayload) {  // NOLINT
 	auto response = response_builder.build();
 	EXPECT_NO_THROW(getTransport()->mockMessage(response));  // NOLINT
 
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -420,7 +421,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadAndFormatSet) {  // NOLINT
 	auto response = response_builder.build();
 	EXPECT_NO_THROW(getTransport()->mockMessage(response));  // NOLINT
 
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -481,7 +482,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadListenFail) {  // NOLINT
 
 	EXPECT_EQ(getTransport()->getSendCount(), 0);
 	EXPECT_TRUE(invoke_future.valid());
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -502,7 +503,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadSendFail) {  // NOLINT
 	                client.invokeMethod(fakePayload()));
 
 	EXPECT_TRUE(invoke_future.valid());
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -524,7 +525,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadClientDestroyed) {  // NOLINT
 	}
 
 	EXPECT_TRUE(invoke_future.valid());
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -550,7 +551,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadCommstatus) {  // NOLINT
 	EXPECT_NO_THROW(getTransport()->mockMessage(response));  // NOLINT
 
 	EXPECT_TRUE(invoke_future.valid());
-	auto is_ready = invoke_future.wait_for(std::chrono::milliseconds(0));
+	auto is_ready = invoke_future.wait_for(ZERO_MILLISECONDS);
 
 	EXPECT_EQ(is_ready, std::future_status::ready);
 	if (is_ready == std::future_status::ready) {
@@ -995,7 +996,7 @@ TEST_F(RpcClientTest, MultiplePendingInvocationsOnOneClient) {  // NOLINT
 	auto ready_futures = [&futures]() {
 		size_t ready = 0;
 		for (auto& future : futures) {
-			auto is_ready = future.wait_for(std::chrono::milliseconds(0));
+			auto is_ready = future.wait_for(ZERO_MILLISECONDS);
 			if (is_ready == std::future_status::ready) {
 				++ready;
 			}
@@ -1019,7 +1020,7 @@ TEST_F(RpcClientTest, MultiplePendingInvocationsOnOneClient) {  // NOLINT
 
 	EXPECT_EQ(callback_count, 1);
 	EXPECT_EQ(ready_futures(), 1);
-	EXPECT_EQ(futures.front().wait_for(std::chrono::milliseconds(0)),
+	EXPECT_EQ(futures.front().wait_for(ZERO_MILLISECONDS),
 	          std::future_status::ready);
 
 	requests.pop_front();
@@ -1208,7 +1209,7 @@ TEST_F(RpcClientTest, MultipleClientInstances) {  // NOLINT
 	size_t num_ready = 0;
 	for (auto& request : pending) {
 		auto& future = std::get<1>(request);
-		const bool is_ready = future.wait_for(std::chrono::milliseconds(0)) ==
+		const bool is_ready = future.wait_for(ZERO_MILLISECONDS) ==
 		                      std::future_status::ready;
 		if (is_ready) {
 			++num_ready;
@@ -1229,7 +1230,7 @@ TEST_F(RpcClientTest, MultipleClientInstances) {  // NOLINT
 	for (auto& request : pending) {
 		auto& future = std::get<1>(request);
 		// Ignoring the futures we have already used
-		if (future.valid() && (future.wait_for(std::chrono::milliseconds(0)) ==
+		if (future.valid() && (future.wait_for(ZERO_MILLISECONDS) ==
 		                       std::future_status::ready)) {
 			auto maybe_response = future.get();
 			checkErrorResponse(maybe_response, v1::UCode::CANCELLED);

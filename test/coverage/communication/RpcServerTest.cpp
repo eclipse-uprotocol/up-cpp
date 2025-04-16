@@ -408,6 +408,7 @@ TEST_F(TestRpcServer, RPCRequestWithoutReturnPayload) {  // NOLINT
 
 // Test case to verify RPC request handling with invalid request
 TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {  // NOLINT
+	constexpr std::chrono::milliseconds THREEHOUNDRED_MILLISECONDS(300);
 	// Create a callback to be called when request is received
 	communication::RpcServer::RpcCallback callback = RpcCallbackWithReturn;
 
@@ -424,7 +425,7 @@ TEST_F(TestRpcServer, RPCRequestWithInValidRequest) {  // NOLINT
 	using namespace std::chrono_literals;
 	auto builder = datamodel::builder::UMessageBuilder::request(
 	    std::move(*getMethodUri()), std::move(*getRequestUri()),
-	    v1::UPriority::UPRIORITY_CS5, 300ms);
+	    v1::UPriority::UPRIORITY_CS5, THREEHOUNDRED_MILLISECONDS);
 
 	auto msg = builder.build();
 
