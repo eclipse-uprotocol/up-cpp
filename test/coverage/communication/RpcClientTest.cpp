@@ -1209,8 +1209,8 @@ TEST_F(RpcClientTest, MultipleClientInstances) {  // NOLINT
 	size_t num_ready = 0;
 	for (auto& request : pending) {
 		auto& future = std::get<1>(request);
-		const bool is_ready = future.wait_for(ZERO_MILLISECONDS) ==
-		                      std::future_status::ready;
+		const bool is_ready =
+		    future.wait_for(ZERO_MILLISECONDS) == std::future_status::ready;
 		if (is_ready) {
 			++num_ready;
 			auto maybe_response = future.get();
@@ -1230,8 +1230,8 @@ TEST_F(RpcClientTest, MultipleClientInstances) {  // NOLINT
 	for (auto& request : pending) {
 		auto& future = std::get<1>(request);
 		// Ignoring the futures we have already used
-		if (future.valid() && (future.wait_for(ZERO_MILLISECONDS) ==
-		                       std::future_status::ready)) {
+		if (future.valid() &&
+		    (future.wait_for(ZERO_MILLISECONDS) == std::future_status::ready)) {
 			auto maybe_response = future.get();
 			checkErrorResponse(maybe_response, v1::UCode::CANCELLED);
 			++num_cancelled;
