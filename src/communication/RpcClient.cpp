@@ -265,7 +265,6 @@ namespace detail {
 
 using uprotocol::v1::UCode;
 using uprotocol::v1::UStatus;
-// using namespace std::chrono_literals;
 using ListenHandle = uprotocol::transport::UTransport::ListenHandle;
 
 auto PendingRequest::operator>(const PendingRequest& other) const {

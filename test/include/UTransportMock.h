@@ -9,8 +9,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef UP_CPP_TEST_UTRANSPORTMOCK_H
-#define UP_CPP_TEST_UTRANSPORTMOCK_H
+#ifndef UTRANSPORTMOCK_H
+#define UTRANSPORTMOCK_H
 
 #include <gmock/gmock.h>
 #include <up-cpp/transport/UTransport.h>
@@ -33,6 +33,32 @@ public:
 		(*listener_)(msg);
 	}
 
+	size_t getSendCount() const { return send_count_.load(); }
+	uprotocol::v1::UStatus& getSendStatus() { return send_status_; }
+	uprotocol::v1::UStatus& getRegisterListenerStatus() {
+		return registerListener_status_;
+	}
+	std::optional<uprotocol::utils::callbacks::CallerHandle<
+	    void, uprotocol::v1::UMessage const&>>
+	getListener() const {
+		return listener_;
+	}
+	std::optional<uprotocol::utils::callbacks::CallerHandle<
+	    void, uprotocol::v1::UMessage const&>>
+	getCleanupListener() const {
+		return cleanup_listener_;
+	}
+	std::optional<uprotocol::v1::UUri> getSinkFilter() const {
+		return sink_filter_;
+	}
+	v1::UUri getSourceFilter() const { return source_filter_; }
+	std::mutex& getRegisterMtx() { return register_mtx_; }
+	v1::UMessage getMessage() const { return message_; }
+	std::mutex& getMessageMtx() { return message_mtx_; }
+
+	~UTransportMock() override = default;
+
+private:
 	std::atomic<size_t> send_count_;
 
 	uprotocol::v1::UStatus send_status_;
@@ -50,10 +76,6 @@ public:
 
 	v1::UMessage message_;
 	std::mutex message_mtx_;
-
-	virtual ~UTransportMock() = default;
-
-private:
 	[[nodiscard]] v1::UStatus sendImpl(const v1::UMessage& message) override {
 		{
 			std::lock_guard lock(message_mtx_);
@@ -80,4 +102,4 @@ private:
 
 };  // namespace uprotocol::test
 
-#endif  // UP_CPP_TEST_UTRANSPORTMOCK_H
+#endif  // UTRANSPORTMOCK_H

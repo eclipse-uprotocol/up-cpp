@@ -14,8 +14,7 @@
 
 #include <chrono>
 
-namespace {
-using namespace uprotocol::datamodel::builder;
+namespace uprotocol::datamodel::builder {
 
 struct TimeAsPayloadSerializer {
 	static Payload::Serialized serialize(std::chrono::milliseconds t) {
@@ -33,6 +32,14 @@ struct TimeAsPayloadSerializer {
 };
 
 class PayloadTest : public testing::Test {
+private:
+	// Note : Need to make the std::string version longer to avoid SSO (small
+	// string optimization) as it will interfere with the move tests
+	const std::string testStringPayload_ =
+	    "Testttttttttttttttttttttttttttttttttttttttttttttttttttttttttt";
+	const std::vector<uint8_t> testBytesPayload_{'T', 'e', 's', 't',
+	                                             '0', '1', '2', '3'};
+
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
@@ -42,107 +49,111 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	PayloadTest() = default;
-	~PayloadTest() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
-	// Note : Need to make the std::string version longer to avoid SSO (small
-	// string optimization) as it will interfere with the move tests
-	const std::string testStringPayload_ =
-	    "Testttttttttttttttttttttttttttttttttttttttttttttttttttttttttt";
-	const std::vector<uint8_t> testBytesPayload_{'T', 'e', 's', 't',
-	                                             '0', '1', '2', '3'};
+	[[nodiscard]] std::string getTestStringPayload() const {
+		return testStringPayload_;
+	}
+	[[nodiscard]] std::vector<uint8_t> getTestBytesPayload() const {
+		return testBytesPayload_;
+	}
+
+public:
+	~PayloadTest() override = default;
 };
 
 /////////////////Serialized Protobuf Tests/////////////////////////
 
 // Create serialized protobuf payload and verify build payload
-TEST_F(PayloadTest, CreateSerializedProtobufPayloadAndBuildTest) {
+TEST_F(PayloadTest, CreateSerializedProtobufPayloadAndBuildTest) {  // NOLINT
 	// Arrange
-	uprotocol::v1::UUri uriObject;
-	uriObject.set_authority_name(testStringPayload_);
-	auto expectedPayloadData = uriObject.SerializeAsString();
+	uprotocol::v1::UUri uri_object;
+	uri_object.set_authority_name(getTestStringPayload());
+	auto expected_payload_data = uri_object.SerializeAsString();
 
 	// Act
-	Payload payload(uriObject);
+	Payload payload(uri_object);
 
 	// Assert
 	auto [payloadData, payloadFormat] = payload.buildCopy();
 	EXPECT_EQ(payloadFormat,
 	          uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
-	EXPECT_EQ(payloadData, expectedPayloadData);
+	EXPECT_EQ(payloadData, expected_payload_data);
 }
 
 // Create serialized protobuf payload with empty message
-TEST_F(PayloadTest, CreateEmptySerializedProtobufPayloadTest) {
+TEST_F(PayloadTest, CreateEmptySerializedProtobufPayloadTest) {  // NOLINT
 	// Arrange
-	uprotocol::v1::UUri uriObject;
-	uriObject.set_authority_name("");
+	uprotocol::v1::UUri uri_object;
+	uri_object.set_authority_name("");
 
 	// Act
-	Payload payload(uriObject);
+	Payload payload(uri_object);
 
 	// Assert
 	auto [payloadData, payloadFormat] = payload.buildCopy();
 	EXPECT_EQ(payloadFormat,
 	          uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
-	EXPECT_EQ(payloadData, uriObject.SerializeAsString());
+	EXPECT_EQ(payloadData, uri_object.SerializeAsString());
 }
 
 // Create serialized protobuf payload and verify moved payload
-TEST_F(PayloadTest, CreateSerializedProtobufPayloadAndMoveTest) {
+TEST_F(PayloadTest, CreateSerializedProtobufPayloadAndMoveTest) {  // NOLINT
 	// Arrange
-	uprotocol::v1::UUri uriObject;
-	uriObject.set_authority_name(testStringPayload_);
-	auto expectedPayloadData = uriObject.SerializeAsString();
+	uprotocol::v1::UUri uri_object;
+	uri_object.set_authority_name(getTestStringPayload());
+	auto expected_payload_data = uri_object.SerializeAsString();
 
 	// Act
-	Payload payload(uriObject);
-	auto& [payload_reference, payload_format] = payload.buildCopy();
+	Payload payload(uri_object);
+	const auto& [payload_reference, payload_format] = payload.buildCopy();
 	const void* original_address = payload_reference.data();
 
 	// Assert
 	auto [payloadData, payloadFormat] = std::move(payload).buildMove();
 	EXPECT_EQ(payloadFormat,
 	          uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
-	EXPECT_EQ(payloadData, expectedPayloadData);
+	EXPECT_EQ(payloadData, expected_payload_data);
 
-	EXPECT_THROW(auto result = payload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_THROW(static_cast<void>(payload.buildCopy()),  // NOLINT
+	             Payload::PayloadMoved);
 	EXPECT_EQ(original_address, payloadData.data());
 }
 
 // Create serialized protobuf payload. Verify exception for move paylod twice
-TEST_F(PayloadTest, CreateSerializedProtobufPayloadAndMoveTwiceExceptionTest) {
+TEST_F(PayloadTest,  // NOLINT
+       CreateSerializedProtobufPayloadAndMoveTwiceExceptionTest) {
 	// Arrange
-	uprotocol::v1::UUri uriObject;
-	uriObject.set_authority_name(testStringPayload_);
+	uprotocol::v1::UUri uri_object;
+	uri_object.set_authority_name(getTestStringPayload());
 
 	// Act
-	Payload payload(uriObject);
+	Payload payload(uri_object);
 
 	// Assert
 	auto [payloadData, payloadFormat] = std::move(payload).buildMove();
 
 	EXPECT_EQ(payloadFormat,
 	          uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
-	EXPECT_EQ(payloadData, uriObject.SerializeAsString());
+	EXPECT_EQ(payloadData, uri_object.SerializeAsString());
 
-	EXPECT_THROW({ auto _ = std::move(payload).buildMove(); },
+	EXPECT_THROW({ auto _ = std::move(payload).buildMove(); },  // NOLINT
 	             Payload::PayloadMoved);
 }
 
 // Create serialized protobuf payload. Call build after move.
-TEST_F(PayloadTest,
+TEST_F(PayloadTest,  // NOLINT
        CreateSerializedProtobufPayloadAndCallBuildAfterMoveExceptionTest) {
 	// Arrange
-	uprotocol::v1::UUri uriObject;
-	uriObject.set_authority_name(testStringPayload_);
+	uprotocol::v1::UUri uri_object;
+	uri_object.set_authority_name(getTestStringPayload());
 
 	// Act
-	Payload payload(uriObject);
+	Payload payload(uri_object);
 	// Call move on payload first
 	auto [payloadData, payloadFormat] = std::move(payload).buildMove();
 
@@ -150,106 +161,124 @@ TEST_F(PayloadTest,
 
 	EXPECT_EQ(payloadFormat,
 	          uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
-	EXPECT_EQ(payloadData, uriObject.SerializeAsString());
+	EXPECT_EQ(payloadData, uri_object.SerializeAsString());
 
 	// Call build on payload after move
-	EXPECT_THROW(auto _ = payload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_THROW(auto _ = payload.buildCopy(),  // NOLINT
+	             Payload::PayloadMoved);
 }
 
 /////////////Serializer Payload  Protobuf Tests/////////////////
 
 // Create a serializer payload and verify build payload
-TEST_F(PayloadTest, CreateSerializerPayloadAndBuildTest) {
+TEST_F(PayloadTest, CreateSerializerPayloadAndBuildTest) {  // NOLINT
+	constexpr uint16_t RANDOM_TIME = 1234;
 	// Arrange
-	std::chrono::milliseconds t(1234);
-	TimeAsPayloadSerializer timeSerializer;
-	timeSerializer.setFormat(
+	std::chrono::milliseconds t(RANDOM_TIME);
+	TimeAsPayloadSerializer time_serializer;
+	uprotocol::datamodel::builder::TimeAsPayloadSerializer::setFormat(
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_RAW);
-	auto expectedSerializedObject = timeSerializer.serialize(
-	    std::chrono::duration_cast<std::chrono::milliseconds>(t));
+	auto expected_serialized_object =
+	    uprotocol::datamodel::builder::TimeAsPayloadSerializer::serialize(
+	        std::chrono::duration_cast<std::chrono::milliseconds>(t));
 
 	// Act
-	Payload payload(timeSerializer, t);
+	Payload payload(time_serializer, t);
 
 	// Assert
 	auto [payloadData, payloadFormat] = payload.buildCopy();
 	EXPECT_EQ(payloadData,
-	          std::get<Payload::PayloadType::Data>(expectedSerializedObject));
-	EXPECT_EQ(payloadFormat,
-	          std::get<Payload::PayloadType::Format>(expectedSerializedObject));
+	          std::get<Payload::PayloadType::Data>(expected_serialized_object));
+	EXPECT_EQ(payloadFormat, std::get<Payload::PayloadType::Format>(
+	                             expected_serialized_object));
 }
 
 // Create a serializer payload with invalid format
-TEST_F(PayloadTest, CreateSerializerPayloadWithInvalidFormat) {
-	// Arrange
-	std::chrono::milliseconds t(1234);
-	TimeAsPayloadSerializer timeSerializer;
-	auto invalidFormat = static_cast<uprotocol::v1::UPayloadFormat>(9999);
-	// Ovreide the format with invalid value
-	timeSerializer.setFormat(invalidFormat);
+TEST_F(PayloadTest, CreateSerializerPayloadWithInvalidFormat) {  // NOLINT
+	constexpr uint16_t RANDOM_TIME = 1234;
+	constexpr uint16_t INVALID_PAYLOAD_FORMAT = 9999;
 
-	auto expectedSerializedObject = timeSerializer.serialize(
-	    std::chrono::duration_cast<std::chrono::milliseconds>(t));
+	// Arrange
+	std::chrono::milliseconds t(RANDOM_TIME);
+	TimeAsPayloadSerializer time_serializer;
+	auto invalid_format =
+	    static_cast<uprotocol::v1::UPayloadFormat>(INVALID_PAYLOAD_FORMAT);
+	// Ovreide the format with invalid value
+	uprotocol::datamodel::builder::TimeAsPayloadSerializer::setFormat(
+	    invalid_format);
+
+	auto expected_serialized_object =
+	    uprotocol::datamodel::builder::TimeAsPayloadSerializer::serialize(
+	        std::chrono::duration_cast<std::chrono::milliseconds>(t));
 
 	// Act
-	EXPECT_THROW(Payload payload(timeSerializer, t), std::out_of_range);
+	EXPECT_THROW(Payload payload(time_serializer, t),  // NOLINT
+	             std::out_of_range);
 }
 
 // Create a serializer payload and verify moved payload
-TEST_F(PayloadTest, CreateSerializerPayloadAndMoveTest) {
+TEST_F(PayloadTest, CreateSerializerPayloadAndMoveTest) {  // NOLINT
+	constexpr uint16_t RANDOM_TIME = 12345;
+
 	// Arrange
-	std::chrono::milliseconds t(12345);
-	TimeAsPayloadSerializer timeSerializer;
-	timeSerializer.setFormat(
+	std::chrono::milliseconds t(RANDOM_TIME);
+	TimeAsPayloadSerializer time_serializer;
+	uprotocol::datamodel::builder::TimeAsPayloadSerializer::setFormat(
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_RAW);
-	auto expectedSerializedObject = timeSerializer.serialize(
-	    std::chrono::duration_cast<std::chrono::milliseconds>(t));
+	auto expected_serialized_object =
+	    uprotocol::datamodel::builder::TimeAsPayloadSerializer::serialize(
+	        std::chrono::duration_cast<std::chrono::milliseconds>(t));
 
 	// Act
-	Payload payload(timeSerializer, t);
+	Payload payload(time_serializer, t);
 
 	// Assert
 	auto [payloadData, payloadFormat] = std::move(payload).buildMove();
 	EXPECT_EQ(payloadData,
-	          std::get<Payload::PayloadType::Data>(expectedSerializedObject));
-	EXPECT_EQ(payloadFormat,
-	          std::get<Payload::PayloadType::Format>(expectedSerializedObject));
+	          std::get<Payload::PayloadType::Data>(expected_serialized_object));
+	EXPECT_EQ(payloadFormat, std::get<Payload::PayloadType::Format>(
+	                             expected_serialized_object));
 
-	EXPECT_THROW(auto _ = payload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_THROW(auto _ = payload.buildCopy(),  // NOLINT
+	             Payload::PayloadMoved);
 }
 
 ////////////////////////Byte Array Payload Tests////////////////////////
 
 // Create payload of Byte array and check if the payload is created correctly
-TEST_F(PayloadTest, ByteArrayPayloadTest) {
+TEST_F(PayloadTest, ByteArrayPayloadTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_RAW;
 
 	// Act
-	Payload payload(testBytesPayload_, format);
+	Payload payload(getTestBytesPayload(), format);
 
 	// Assert
-	auto [serializedData, payloadFormat] = payload.buildCopy();
+	auto [serialized_data, payloadFormat] = payload.buildCopy();
 
-	EXPECT_EQ(serializedData, "Test0123");
+	EXPECT_EQ(serialized_data, "Test0123");
 	EXPECT_EQ(payloadFormat, format);
 }
 
 // Create payload of Byte array with invalid format and check if it throws
 // exception
-TEST_F(PayloadTest, ConstructorInvalidFormatForByteArrayPayloadTest) {
+TEST_F(PayloadTest,  // NOLINT
+       ConstructorInvalidFormatForByteArrayPayloadTest) {
+	constexpr uint16_t INVALID_PAYLOAD_FORMAT = 9999;
+
 	// Arrange
-	uprotocol::v1::UPayloadFormat invalid_format =
-	    static_cast<uprotocol::v1::UPayloadFormat>(9999);
+	auto invalid_format =
+	    static_cast<uprotocol::v1::UPayloadFormat>(INVALID_PAYLOAD_FORMAT);
 
 	// Act and Assert
-	EXPECT_THROW(Payload payload(testBytesPayload_, invalid_format),
-	             std::out_of_range);
+	EXPECT_THROW(  // NOLINT
+	    Payload payload(getTestBytesPayload(), invalid_format),
+	    std::out_of_range);
 }
 
 // Create empty byte array payload
-TEST_F(PayloadTest, EmptyByteArrayPayloadTest) {
+TEST_F(PayloadTest, EmptyByteArrayPayloadTest) {  // NOLINT
 	// Arrange
 	std::vector<uint8_t> value_bytes = {};
 	uprotocol::v1::UPayloadFormat format =
@@ -259,60 +288,64 @@ TEST_F(PayloadTest, EmptyByteArrayPayloadTest) {
 	Payload payload(value_bytes, format);
 
 	// Assert
-	auto [serializedData, payloadFormat] = payload.buildCopy();
+	auto [serialized_data, payloadFormat] = payload.buildCopy();
 
-	EXPECT_TRUE(serializedData.empty());
+	EXPECT_TRUE(serialized_data.empty());
 	EXPECT_EQ(payloadFormat, format);
 }
 
 // Create byte array payload and call buildMove()
-TEST_F(PayloadTest, MoveByteArrayPayloadTest) {
+TEST_F(PayloadTest, MoveByteArrayPayloadTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_RAW;
 
 	// Act
-	Payload payload(testBytesPayload_, format);
-	auto [serializedData, payloadFormat] = std::move(payload).buildMove();
+	Payload payload(getTestBytesPayload(), format);
+	auto [serialized_data, payloadFormat] = std::move(payload).buildMove();
 
 	// Assert
-	EXPECT_EQ(serializedData, "Test0123");
+	EXPECT_EQ(serialized_data, "Test0123");
 	EXPECT_EQ(payloadFormat, format);
-	EXPECT_THROW(auto _ = payload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_THROW(auto _ = payload.buildCopy(),  // NOLINT
+	             Payload::PayloadMoved);
 }
 
 //////////////String Payload Tests//////////////
 
 // Create payload of std::string and check if the payload is created
-TEST_F(PayloadTest, StringPayloadTest) {
+TEST_F(PayloadTest, StringPayloadTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 
 	// Act
-	Payload payload(testStringPayload_, format);
+	Payload payload(getTestStringPayload(), format);
 
 	// Assert
-	auto [serializedData, payloadFormat] = payload.buildCopy();
-	EXPECT_EQ(serializedData, testStringPayload_);
+	auto [serialized_data, payloadFormat] = payload.buildCopy();
+	EXPECT_EQ(serialized_data, getTestStringPayload());
 	EXPECT_EQ(payloadFormat, format);
 }
 
 // Create payload of std::string with invalid format
-TEST_F(PayloadTest, ConstructorInvalidFormatForStringPayloadTest) {
+TEST_F(PayloadTest, ConstructorInvalidFormatForStringPayloadTest) {  // NOLINT
+	constexpr uint16_t INVALID_PAYLOAD_FORMAT = 9999;
+
 	// Arrange
-	uprotocol::v1::UPayloadFormat invalid_format =
-	    static_cast<uprotocol::v1::UPayloadFormat>(9999);
+	auto invalid_format =
+	    static_cast<uprotocol::v1::UPayloadFormat>(INVALID_PAYLOAD_FORMAT);
 
 	// Act and Assert
-	EXPECT_THROW(Payload payload(testStringPayload_, invalid_format),
-	             std::out_of_range);
+	EXPECT_THROW(  // NOLINT
+	    Payload payload(getTestStringPayload(), invalid_format),
+	    std::out_of_range);
 }
 
 // Create empty string payload
-TEST_F(PayloadTest, EmptyStringPayloadTest) {
+TEST_F(PayloadTest, EmptyStringPayloadTest) {  // NOLINT
 	// Arrange
-	std::string value_string = "";
+	std::string value_string;
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 
@@ -320,32 +353,33 @@ TEST_F(PayloadTest, EmptyStringPayloadTest) {
 	Payload payload(value_string, format);
 
 	// Assert
-	auto [serializedData, payloadFormat] = payload.buildCopy();
-	EXPECT_TRUE(serializedData.empty());
+	auto [serialized_data, payloadFormat] = payload.buildCopy();
+	EXPECT_TRUE(serialized_data.empty());
 	EXPECT_EQ(payloadFormat, format);
 }
 
 // Create std::string payload and call move on payload object test
-TEST_F(PayloadTest, StringMovePayloadTest) {
+TEST_F(PayloadTest, StringMovePayloadTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 
 	// Act
-	Payload payload(testStringPayload_, format);
-	auto [serializedData, payloadFormat] = std::move(payload).buildMove();
+	Payload payload(getTestStringPayload(), format);
+	auto [serialized_data, payloadFormat] = std::move(payload).buildMove();
 
 	// Assert
-	EXPECT_EQ(serializedData, testStringPayload_);
+	EXPECT_EQ(serialized_data, getTestStringPayload());
 	EXPECT_EQ(payloadFormat, format);
-	EXPECT_THROW(auto _ = payload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_THROW(auto _ = payload.buildCopy(),  // NOLINT
+	             Payload::PayloadMoved);
 }
 
 // Create Any and move payload object test
 TEST_F(PayloadTest, AnyMovePayloadTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UUri uri_object;  // NOLINT
-	uri_object.set_authority_name(testStringPayload_);
+	uri_object.set_authority_name(getTestStringPayload());
 	google::protobuf::Any any;
 	any.PackFrom(uri_object, "hello_world");
 
@@ -363,15 +397,15 @@ TEST_F(PayloadTest, AnyMovePayloadTest) {  // NOLINT
 
 	uprotocol::v1::UUri parsed_uri_object;
 	EXPECT_TRUE(parsed_uri_object.ParseFromString(parsed_any.value()));
-	EXPECT_EQ(parsed_uri_object.authority_name(), testStringPayload_);
+	EXPECT_EQ(parsed_uri_object.authority_name(), getTestStringPayload());
 }
 
 /////////////////////RValue String Payload Tests/////////////////////
 
 // Create RValue String Payload
-TEST_F(PayloadTest, RValueStringPayloadTest) {
+TEST_F(PayloadTest, RValueStringPayloadTest) {  // NOLINT
 	// Arrange
-	std::string value_string = testStringPayload_;
+	std::string value_string = getTestStringPayload();
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 	const void* original_address = value_string.data();
@@ -380,28 +414,32 @@ TEST_F(PayloadTest, RValueStringPayloadTest) {
 	Payload payload(std::move(value_string), format);
 
 	// Assert
-	auto [serializedData, payloadFormat] = std::move(payload).buildMove();
-	EXPECT_EQ(serializedData, testStringPayload_);
+	auto [serialized_data, payloadFormat] = std::move(payload).buildMove();
+	EXPECT_EQ(serialized_data, getTestStringPayload());
 	EXPECT_EQ(payloadFormat, format);
-	EXPECT_EQ(serializedData.data(), original_address);
+	EXPECT_EQ(serialized_data.data(), original_address);
 }
 
 // Create payload of RValue String with invalid format
-TEST_F(PayloadTest, ConstructorInvalidFormatForRValueStringPayloadTest) {
+TEST_F(PayloadTest,  // NOLINT
+       ConstructorInvalidFormatForRValueStringPayloadTest) {
+	constexpr uint16_t INVALID_PAYLOAD_FORMAT = 9999;
+
 	// Arrange
-	std::string value_string = testStringPayload_;
-	uprotocol::v1::UPayloadFormat invalid_format =
-	    static_cast<uprotocol::v1::UPayloadFormat>(9999);
+	std::string value_string = getTestStringPayload();
+	auto invalid_format =
+	    static_cast<uprotocol::v1::UPayloadFormat>(INVALID_PAYLOAD_FORMAT);
 
 	// Act and Assert
-	EXPECT_THROW(Payload payload(std::move(value_string), invalid_format),
-	             std::out_of_range);
+	EXPECT_THROW(  // NOLINT
+	    Payload payload(std::move(value_string), invalid_format),
+	    std::out_of_range);
 }
 
 // Create empty RValue String payload
-TEST_F(PayloadTest, EmptyRValueStringPayloadTest) {
+TEST_F(PayloadTest, EmptyRValueStringPayloadTest) {  // NOLINT
 	// Arrange
-	std::string value_string = "";
+	std::string value_string;
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 
@@ -409,42 +447,43 @@ TEST_F(PayloadTest, EmptyRValueStringPayloadTest) {
 	Payload payload(std::move(value_string), format);
 
 	// Assert
-	auto [serializedData, payloadFormat] = payload.buildCopy();
-	EXPECT_TRUE(serializedData.empty());
+	auto [serialized_data, payloadFormat] = payload.buildCopy();
+	EXPECT_TRUE(serialized_data.empty());
 	EXPECT_EQ(payloadFormat, format);
 }
 
 // Create RValue String and move payload object test
-TEST_F(PayloadTest, RValueStringMovePayloadTest) {
+TEST_F(PayloadTest, RValueStringMovePayloadTest) {  // NOLINT
 	// Arrange
-	std::string value_string = testStringPayload_;
-	const void* originalAddress = value_string.data();
+	std::string value_string = getTestStringPayload();
+	const void* original_address = value_string.data();
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 
 	// Act
 	Payload payload(std::move(value_string), format);
-	auto [serializedData, payloadFormat] = std::move(payload).buildMove();
-	const void* movedAddress = serializedData.data();
+	auto [serialized_data, payloadFormat] = std::move(payload).buildMove();
+	const void* moved_address = serialized_data.data();
 
 	// Assert
-	EXPECT_EQ(serializedData, testStringPayload_);
+	EXPECT_EQ(serialized_data, getTestStringPayload());
 	EXPECT_EQ(payloadFormat, format);
 
-	EXPECT_EQ(originalAddress, movedAddress);
-	EXPECT_THROW(auto _ = payload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_EQ(original_address, moved_address);
+	EXPECT_THROW(auto _ = payload.buildCopy(),  // NOLINT
+	             Payload::PayloadMoved);
 }
 
 ///////////////////////RValue Serialized Payload Tests//////////////////////
 
 // Create RValue Serialized payload
-TEST_F(PayloadTest, RvalueSerializedConstructorTest) {
+TEST_F(PayloadTest, RvalueSerializedConstructorTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_RAW;
 	Payload::Serialized serialized =
-	    std::make_tuple(testStringPayload_, format);
-	const void* originalAddress =
+	    std::make_tuple(getTestStringPayload(), format);
+	const void* original_address =
 	    std::get<Payload::PayloadType::Data>(serialized).data();
 
 	// Act
@@ -452,30 +491,34 @@ TEST_F(PayloadTest, RvalueSerializedConstructorTest) {
 
 	// Assert
 	auto [payloadData, payloadFormat] = std::move(payload).buildMove();
-	EXPECT_EQ(payloadData, testStringPayload_);
+	EXPECT_EQ(payloadData, getTestStringPayload());
 	EXPECT_EQ(payloadFormat, format);
-	EXPECT_EQ(payloadData.data(), originalAddress);
+	EXPECT_EQ(payloadData.data(), original_address);
 }
 
 // Create payload of RValue Serialized with invalid format
-TEST_F(PayloadTest, ConstructorInvalidFormatForRValueSerializedPayloadTest) {
+TEST_F(PayloadTest,  // NOLINT
+       ConstructorInvalidFormatForRValueSerializedPayloadTest) {
+	constexpr uint16_t INVALID_PAYLOAD_FORMAT = 9999;
+
 	// Arrange
-	uprotocol::v1::UPayloadFormat format =
-	    static_cast<uprotocol::v1::UPayloadFormat>(9999);
+	auto format =
+	    static_cast<uprotocol::v1::UPayloadFormat>(INVALID_PAYLOAD_FORMAT);
 	Payload::Serialized serialized =
-	    std::make_tuple(testStringPayload_, format);
+	    std::make_tuple(getTestStringPayload(), format);
 
 	// Act
-	EXPECT_THROW(Payload payload(std::move(serialized));, std::out_of_range);
+	EXPECT_THROW(Payload payload(std::move(serialized));  // NOLINT
+	             , std::out_of_range);
 }
 
 // Create empty RValue Serialized payload and build.
-TEST_F(PayloadTest, EmptyRValueSerializedPayloadTest) {
+TEST_F(PayloadTest, EmptyRValueSerializedPayloadTest) {  // NOLINT
 	// Arrange
-	std::string serializedData = "";
+	std::string serialized_data;
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_RAW;
-	Payload::Serialized serialized = std::make_tuple(serializedData, format);
+	Payload::Serialized serialized = std::make_tuple(serialized_data, format);
 
 	// Act
 	Payload payload(std::move(serialized));
@@ -487,103 +530,105 @@ TEST_F(PayloadTest, EmptyRValueSerializedPayloadTest) {
 }
 
 // Create RValue Serialized and move payload object test
-TEST_F(PayloadTest, RValueSerializedMovePayloadTest) {
+TEST_F(PayloadTest, RValueSerializedMovePayloadTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_RAW;
 	Payload::Serialized serialized =
-	    std::make_tuple(testStringPayload_, format);
+	    std::make_tuple(getTestStringPayload(), format);
 
-	const void* originalAddress =
+	const void* original_address =
 	    std::get<Payload::PayloadType::Data>(serialized).data();
 
 	// Act
 	Payload payload(std::move(serialized));
 	auto [payloadData, payloadFormat] = std::move(payload).buildMove();
-	const void* movedAddress = payloadData.data();
+	const void* moved_address = payloadData.data();
 
 	// Assert
-	EXPECT_EQ(payloadData, testStringPayload_);
+	EXPECT_EQ(payloadData, getTestStringPayload());
 	EXPECT_EQ(payloadFormat, format);
 
-	EXPECT_EQ(originalAddress, movedAddress);
-	EXPECT_THROW(auto _ = payload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_EQ(original_address, moved_address);
+	EXPECT_THROW(auto _ = payload.buildCopy(),  // NOLINT
+	             Payload::PayloadMoved);
 }
 
 //////////////////////Other Constructor Tests///////////////////////
 
 // Move Constructor Test
-TEST_F(PayloadTest, MoveConstructorTest) {
+TEST_F(PayloadTest, MoveConstructorTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
-	Payload originalPayload(testStringPayload_, format);
+	Payload original_payload(getTestStringPayload(), format);
 
 	// Act
-	Payload movedPayload(std::move(originalPayload).buildMove());
+	Payload moved_payload(std::move(original_payload).buildMove());
 
 	// Assert
-	auto [movedData, movedFormat] = movedPayload.buildCopy();
-	EXPECT_EQ(movedData, testStringPayload_);
+	auto [movedData, movedFormat] = moved_payload.buildCopy();
+	EXPECT_EQ(movedData, getTestStringPayload());
 	EXPECT_EQ(movedFormat, format);
 
-	EXPECT_THROW(auto _ = originalPayload.buildCopy(), Payload::PayloadMoved);
+	EXPECT_THROW(auto _ = original_payload.buildCopy(),  // NOLINT
+	             Payload::PayloadMoved);
 }
 
 // Cppy Constructor Test
-TEST_F(PayloadTest, CopyConstructorTest) {
+TEST_F(PayloadTest, CopyConstructorTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
-	Payload originalPayload(testStringPayload_, format);
+	Payload original_payload(getTestStringPayload(), format);
 
 	// Act
-	Payload copiedPayload(originalPayload);
+	const Payload& copied_payload(original_payload);
 
 	// Assert
-	auto [originalData, originalFormat] = originalPayload.buildCopy();
-	auto [copiedData, copiedFormat] = copiedPayload.buildCopy();
+	auto [originalData, originalFormat] = original_payload.buildCopy();
+	auto [copiedData, copiedFormat] = copied_payload.buildCopy();
 	EXPECT_EQ(copiedData, originalData);
 	EXPECT_EQ(copiedFormat, originalFormat);
 }
 
 // Move Assignment Operator Test
-TEST_F(PayloadTest, MoveAssignmentOperatorTest) {
+TEST_F(PayloadTest, MoveAssignmentOperatorTest) {  // NOLINT
 	// Arrange
-	uprotocol::v1::UUri uriObject1;
-	uriObject1.set_authority_name("test1");
-	Payload payload1(uriObject1);
+	uprotocol::v1::UUri uri_object1;
+	uri_object1.set_authority_name("test1");
+	Payload payload1(uri_object1);
 
-	uprotocol::v1::UUri uriObject2;
-	uriObject2.set_authority_name("test2");
-	Payload payload2(uriObject2);
+	uprotocol::v1::UUri uri_object2;
+	uri_object2.set_authority_name("test2");
+	Payload payload2(uri_object2);
 
 	// Act
 	payload1 = std::move(payload2);
 
 	// Assert
 	auto [payloadData, payloadFormat] = payload1.buildCopy();
-	EXPECT_EQ(payloadData, uriObject2.SerializeAsString());
+	EXPECT_EQ(payloadData, uri_object2.SerializeAsString());
 	EXPECT_EQ(payloadFormat,
 	          uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
 }
 
 // Copy Assignment Operator Test
-TEST_F(PayloadTest, CopyAssignmentOperatorTest) {
+TEST_F(PayloadTest, CopyAssignmentOperatorTest) {  // NOLINT
 	// Arrange
 	uprotocol::v1::UPayloadFormat format =
 	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
-	Payload originalPayload(testStringPayload_, format);
-	Payload copiedPayload(testStringPayload_, format);
+	Payload original_payload(getTestStringPayload(), format);
+	Payload copied_payload(getTestStringPayload(), format);
 
 	// Act
-	copiedPayload = originalPayload;
+	copied_payload = original_payload;
 
 	// Assert
-	auto [originalData, originalFormat] = originalPayload.buildCopy();
-	auto [copiedData, copiedFormat] = copiedPayload.buildCopy();
+	auto [originalData, originalFormat] = original_payload.buildCopy();
+	auto [copiedData, copiedFormat] = copied_payload.buildCopy();
 	EXPECT_EQ(copiedData, originalData);
 	EXPECT_EQ(copiedFormat, originalFormat);
 }
 
-}  // namespace
+}  // namespace uprotocol::datamodel::builder
