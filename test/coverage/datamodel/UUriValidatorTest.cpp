@@ -97,6 +97,7 @@ TEST_F(TestUUriValidator, Valid) {
 	{
 		auto uuri = getUuri();
 		uuri.set_resource_id(0xFFFF);
+		EXPECT_TRUE(has_wildcard_resource_id(uuri));
 		EXPECT_TRUE(uses_wildcards(uuri));
 
 		auto [valid, reason] = isValid(uuri);
@@ -117,18 +118,25 @@ TEST_F(TestUUriValidator, Wildcards) {
 
 	{  // Check for no wildcards
 		auto uuri = getUuri();
+		EXPECT_FALSE(has_wildcard_authority(uuri));
+		EXPECT_FALSE(has_wildcard_service_id(uuri));
+		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
+		EXPECT_FALSE(has_wildcard_version(uuri));
+		EXPECT_FALSE(has_wildcard_resource_id(uuri));
 		EXPECT_FALSE(uses_wildcards(uuri));
 	}
 
 	{  // Change Authority name to "hello*" (Any)
 		auto uuri = getUuri();
 		uuri.set_authority_name("hello*");
+		EXPECT_TRUE(has_wildcard_authority(uuri));
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
 	{  // Set Service ID to FFFF (Any) and Instance ID to 1
 		auto uuri = getUuri();
 		uuri.set_ue_id(0x0001FFFF);
+		EXPECT_TRUE(has_wildcard_service_id(uuri));
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
@@ -136,18 +144,21 @@ TEST_F(TestUUriValidator, Wildcards) {
 		// This changed in 581291f in up-spec
 		auto uuri = getUuri();
 		uuri.set_ue_id(0xFFFF0001);
+		EXPECT_TRUE(has_wildcard_service_instance_id(uuri));
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
 	{  // Set major version to FF (Any)
 		auto uuri = getUuri();
 		uuri.set_ue_version_major(0xFF);
+		EXPECT_TRUE(has_wildcard_version(uuri));
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 
 	{  // Set Resource ID to FFFF (any)
 		auto uuri = getUuri();
 		uuri.set_resource_id(0xFFFF);
+		EXPECT_TRUE(has_wildcard_resource_id(uuri));
 		EXPECT_TRUE(uses_wildcards(uuri));
 	}
 }
@@ -174,6 +185,11 @@ TEST_F(TestUUriValidator, ValidRpcMethod) {
 		auto [valid, reason] = isValidRpcMethod(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(has_wildcard_authority(uuri));
+		EXPECT_FALSE(has_wildcard_service_id(uuri));
+		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
+		EXPECT_FALSE(has_wildcard_version(uuri));
+		EXPECT_FALSE(has_wildcard_resource_id(uuri));
 		EXPECT_FALSE(uses_wildcards(uuri));
 	}
 
@@ -274,6 +290,11 @@ TEST_F(TestUUriValidator, ValidPublishTopic) {
 		auto [valid, reason] = isValidPublishTopic(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(has_wildcard_authority(uuri));
+		EXPECT_FALSE(has_wildcard_service_id(uuri));
+		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
+		EXPECT_FALSE(has_wildcard_version(uuri));
+		EXPECT_FALSE(has_wildcard_resource_id(uuri));
 		EXPECT_FALSE(uses_wildcards(uuri));
 	}
 
@@ -332,6 +353,11 @@ TEST_F(TestUUriValidator, ValidNotificationSource) {
 		auto [valid, reason] = isValidNotificationSource(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(has_wildcard_authority(uuri));
+		EXPECT_FALSE(has_wildcard_service_id(uuri));
+		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
+		EXPECT_FALSE(has_wildcard_version(uuri));
+		EXPECT_FALSE(has_wildcard_resource_id(uuri));
 		EXPECT_FALSE(uses_wildcards(uuri));
 	}
 
@@ -390,6 +416,11 @@ TEST_F(TestUUriValidator, ValidNotificationSink) {
 		auto [valid, reason] = isValidNotificationSink(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(has_wildcard_authority(uuri));
+		EXPECT_FALSE(has_wildcard_service_id(uuri));
+		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
+		EXPECT_FALSE(has_wildcard_version(uuri));
+		EXPECT_FALSE(has_wildcard_resource_id(uuri));
 		EXPECT_FALSE(uses_wildcards(uuri));
 	}
 
@@ -433,6 +464,11 @@ TEST_F(TestUUriValidator, ValidSubscription) {
 		auto [valid, reason] = isValidSubscription(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
+		EXPECT_FALSE(has_wildcard_authority(uuri));
+		EXPECT_FALSE(has_wildcard_service_id(uuri));
+		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
+		EXPECT_FALSE(has_wildcard_version(uuri));
+		EXPECT_FALSE(has_wildcard_resource_id(uuri));
 		EXPECT_FALSE(uses_wildcards(uuri));
 	}
 

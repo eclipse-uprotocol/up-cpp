@@ -67,22 +67,27 @@ std::string_view message(Reason reason) {
 	}
 }
 
+bool has_wildcard_authority(const v1::UUri& uuri){
+	return false;
+}
+
+bool has_wildcard_service_id(const v1::UUri& uuri){
+	return false;
+}
+
+bool has_wildcard_service_instance_id(const v1::UUri& uuri){
+	return false;
+}
+
+bool has_wildcard_version(const v1::UUri& uuri){
+	return false;
+}
+
+bool has_wildcard_resource_id(const v1::UUri& uuri){
+	return false;
+}
+
 bool uses_wildcards(const v1::UUri& uuri) {
-	if (uuri.authority_name().find("*") != std::string::npos) {
-		return true;
-	}
-	if ((uuri.ue_id() & 0xFFFF) == 0xFFFF) {  // service ID
-		return true;
-	}
-	if ((uuri.ue_id() & 0xFFFF0000) == 0xFFFF0000) {  // service instance ID
-		return true;
-	}
-	if (uuri.ue_version_major() == 0xFF) {
-		return true;
-	}
-	if (uuri.resource_id() == 0xFFFF) {
-		return true;
-	}
 	return false;
 }
 
