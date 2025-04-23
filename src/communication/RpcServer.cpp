@@ -20,7 +20,7 @@ RpcServer::RpcServer(std::shared_ptr<transport::UTransport> transport,
                      std::optional<std::chrono::milliseconds> ttl)
     : transport_(std::move(transport)),
       ttl_(ttl),
-      expected_payload_format_(std::move(format)) {
+      expected_payload_format_(format) {
 	if (!transport_) {
 		throw transport::NullTransport("transport cannot be null");
 	}
@@ -43,7 +43,7 @@ RpcServer::ServerOrStatus RpcServer::create(
 		v1::UStatus status;
 		status.set_code(v1::UCode::INVALID_ARGUMENT);
 		status.set_message("Invalid rpc URI");
-		return uprotocol::utils::Unexpected(status);
+		return ServerOrStatus(utils::Unexpected<v1::UStatus>(status));
 	}
 
 	// Validate the payload format, if provided.
@@ -53,7 +53,7 @@ RpcServer::ServerOrStatus RpcServer::create(
 			v1::UStatus status;
 			status.set_code(v1::UCode::OUT_OF_RANGE);
 			status.set_message("Invalid payload format");
-			return uprotocol::utils::Unexpected(status);
+			return ServerOrStatus(utils::Unexpected<v1::UStatus>(status));
 		}
 	}
 
@@ -67,11 +67,10 @@ RpcServer::ServerOrStatus RpcServer::create(
 	auto status = server->connect(method_name, std::move(callback));
 	if (status.code() == v1::UCode::OK) {
 		// If connection is successful, return the server instance.
-		return server;
-	} else {
-		// If connection fails, return the error status.
-		return uprotocol::utils::Unexpected(std::move(status));
+		return ServerOrStatus(std::move(server));
 	}
+	// If connection fails, return the error status.
+	return ServerOrStatus(utils::Unexpected<v1::UStatus>(status));
 }
 
 v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
@@ -96,7 +95,7 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 		        datamodel::builder::UMessageBuilder::response(request);
 
 		    // Call the RPC callback method with the request message.
-		    auto payloadData = callback_(request);
+		    auto payload_data = callback_(request);
 
 		    if (ttl_.has_value()) {
 			    builder.withTtl(ttl_.value());
@@ -108,7 +107,7 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 
 		    // Check for payload data requirement based on expected format
 		    // presence
-		    if (!payloadData.has_value()) {
+		    if (!payload_data.has_value()) {
 			    // builder.build() verifies if payload format is required
 			    auto response = builder.build();
 			    // Ignoring status code for transport send
@@ -116,7 +115,7 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 		    } else {
 			    // builder.build(payloadData) verifies if payload format
 			    // matches the expected
-			    auto response = builder.build(std::move(payloadData).value());
+			    auto response = builder.build(std::move(payload_data).value());
 			    // Ignoring status code for transport send
 			    std::ignore = transport_->send(response);
 		    }
@@ -126,9 +125,13 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 		    v1::UUri any_uri;
 		    any_uri.set_authority_name("*");
 		    // Instance ID 0 and UE ID FFFF for wildcard
-		    any_uri.set_ue_id(0x0000FFFF);
-		    any_uri.set_ue_version_major(0xFF);
-		    any_uri.set_resource_id(0xFFFF);
+		    constexpr auto DEFAULT_INSTANCE_ID_WITH_WILDCARD_SERVICE_ID =
+		        0x0000FFFF;
+		    constexpr auto VERSION_MAJOR_WILDCARD = 0xFF;
+		    constexpr auto RESOURCE_ID_WILDCARD = 0xFFFF;
+		    any_uri.set_ue_id(DEFAULT_INSTANCE_ID_WITH_WILDCARD_SERVICE_ID);
+		    any_uri.set_ue_version_major(VERSION_MAJOR_WILDCARD);
+		    any_uri.set_resource_id(RESOURCE_ID_WILDCARD);
 		    return any_uri;
 	    }(),
 	    // sink_filter=
@@ -141,9 +144,8 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 		v1::UStatus status;
 		status.set_code(v1::UCode::OK);
 		return status;
-	} else {
-		return result.error();
 	}
+	return result.error();
 }
 
 }  // namespace uprotocol::communication

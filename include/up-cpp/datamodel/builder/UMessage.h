@@ -244,11 +244,11 @@ struct UMessageBuilder {
 private:
 	/// @brief Constructs a UMessageBuilder with the provided attributes.
 	///
-	/// @param msgType
+	/// @param msg_type
 	/// @param source
 	/// @param sink
 	/// @param request_id
-	UMessageBuilder(v1::UMessageType msgType, v1::UUri&& source,
+	UMessageBuilder(v1::UMessageType msg_type, v1::UUri&& source,
 	                std::optional<v1::UUri>&& sink = {},
 	                std::optional<v1::UUID>&& request_id = {});
 

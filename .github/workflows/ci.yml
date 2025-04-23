@@ -12,19 +12,19 @@ permissions:
 jobs:
   build:
     name: Build up-cpp and dependencies
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
+      - name: Fetch up-cpp
+        uses: actions/checkout@v4
+        with:
+          path: up-cpp
+
       - name: Install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
         with:
           version: 2.3.2
-
-      - name: Fetch up-cpp
-        uses: actions/checkout@v4
-        with:
-          path: up-cpp
 
       - name: Install conan CI profile
         shell: bash
@@ -42,7 +42,7 @@ jobs:
       - name: Build up-core-api conan package
         shell: bash
         run: |
-          conan create --version 1.6.0-alpha3 up-conan-recipes/up-core-api/release
+          conan create --version 1.6.0-alpha4 up-conan-recipes/up-core-api/release
 
       - name: Build up-cpp with tests
         shell: bash
@@ -78,7 +78,7 @@ jobs:
 
   test:
     name: Run up-cpp tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
 
     steps:
@@ -105,7 +105,7 @@ jobs:
 # NOTE: Run dynamic analysis in unit tests
   memcheck:
     name: Run Valgrind Memcheck
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
 
     steps:
@@ -173,7 +173,7 @@ jobs:
 
   threadcheck:
     name: Run Valgrind ThreadCheck
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
 
     steps:
@@ -242,7 +242,7 @@ jobs:
 
   helgrind:
     name: Run Valgrind Helgrind
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
 
     steps:
@@ -311,7 +311,7 @@ jobs:
 
   dhat:
     name: Run Valgrind DHAT
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
 
     steps:
@@ -380,17 +380,17 @@ jobs:
 
   lint:
     name: Lint C++ sources
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
     permissions:
       contents: write
       pull-requests: read
 
     steps:
-      - name: Get build commands
-        uses: actions/download-artifact@v4
+      - name: Fetch up-cpp
+        uses: actions/checkout@v4
         with:
-          name: compile-commands
+          path: up-cpp
 
       - name: Install Conan
         id: conan
@@ -398,29 +398,30 @@ jobs:
         with:
           version: 2.3.2
 
-      - name: Create default Conan profile
-        run: conan profile detect
-
-      - name: Get conan cache
-        uses: actions/download-artifact@v4
-        with:
-          name: conan-cache
-
-      - name: Restore conan cache from archive
+      - name: Install conan CI profile
         shell: bash
         run: |
-          conan cache restore conan-cache.tgz
+          conan profile detect
+          cp up-cpp/.github/workflows/ci_conan_profile "$(conan profile path default)"
+          conan profile show
 
-      - name: Fetch up-cpp
+      - name: Fetch up-core-api conan recipe
         uses: actions/checkout@v4
         with:
-          path: up-cpp
+          path: up-conan-recipes
+          repository: eclipse-uprotocol/up-conan-recipes
 
-      - name: Get build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: up-cpp/build/Release
+      - name: Build up-core-api conan package
+        shell: bash
+        run: |
+          conan create --version 1.6.0-alpha4 up-conan-recipes/up-core-api/release
+
+      - name: Build up-cpp with tests
+        shell: bash
+        run: |
+          cd up-cpp
+          conan install --build=missing .
+          cmake --preset conan-release -DCMAKE_EXPORT_COMPILE_COMMANDS=yes
 
       - name: Run linters on source
         continue-on-error: true
@@ -434,7 +435,9 @@ jobs:
           style: 'file' # read .clang-format for configuration
           tidy-checks: '' # Read .clang-tidy for configuration
           database: build/Release/compile_commands.json
+          version: 13
 
+          
       - name: Run linters on tests
         continue-on-error: true
         id: test-linter
@@ -447,6 +450,8 @@ jobs:
           style: 'file' # read .clang-format for configuration
           tidy-checks: '' # Read .clang-tidy for configuration
           database: build/Release/compile_commands.json
+          version: 13
+
 
       - name: Report lint failure
         if: steps.source-linter.outputs.checks-failed > 0 || steps.test-linter.outputs.checks-failed > 0
@@ -460,9 +465,10 @@ jobs:
   # job to signal whether all CI checks have passed.
   ci:
     name: CI status checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [build, test, memcheck, threadcheck, helgrind, dhat]
     if: always()
     steps:
       - name: Check whether all jobs pass
         run: echo '${{ toJson(needs) }}' | jq -e 'all(.result == "success")'
+

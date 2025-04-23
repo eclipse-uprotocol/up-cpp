@@ -16,183 +16,198 @@
 #include <uprotocol/v1/uri.pb.h>
 
 #include "UTransportMock.h"
-#include "up-cpp/datamodel/builder/UMessage.h"
 #include "up-cpp/datamodel/validator/UMessage.h"
 #include "up-cpp/transport/UTransport.h"
 
-using namespace uprotocol::communication;
-using namespace uprotocol::datamodel::builder;
-using namespace uprotocol::v1;
-using ::testing::_;
-using ::testing::Return;
-
-namespace {
+namespace uprotocol::communication {
 
 class TestNotificationSource : public testing::Test {
+private:
+	std::shared_ptr<uprotocol::test::UTransportMock> transportMock_;
+	uprotocol::v1::UUri source_;
+	uprotocol::v1::UUri sink_;
+	uprotocol::v1::UPayloadFormat format_ =
+	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
+	std::optional<uprotocol::v1::UPriority> priority_;
+	std::optional<std::chrono::milliseconds> ttl_;
+
 protected:
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
 	void SetUp() override {
+		constexpr uint32_t DEFAULT_UE_ID = 0x00011101;
+		constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8101;
+		constexpr uint32_t SOURCE_VERSION_MAJOR = 0xF1;
+		constexpr uint32_t TOPIC_VERSION_MAJOR = 0xF8;
+		constexpr uint16_t DEFAULT_TTL_TIME = 1000;
+
 		source_.set_authority_name("10.0.0.1");
-		source_.set_ue_id(0x00011101);
-		source_.set_ue_version_major(0xF1);
+		source_.set_ue_id(DEFAULT_UE_ID);
+		source_.set_ue_version_major(SOURCE_VERSION_MAJOR);
 		source_.set_resource_id(0x0);
 
 		sink_.set_authority_name("10.0.0.1");
-		sink_.set_ue_id(0x00011101);
-		sink_.set_ue_version_major(0xF8);
-		sink_.set_resource_id(0x8101);
+		sink_.set_ue_id(DEFAULT_UE_ID);
+		sink_.set_ue_version_major(TOPIC_VERSION_MAJOR);
+		sink_.set_resource_id(DEFAULT_RESOURCE_ID);
 		transportMock_ =
 		    std::make_shared<uprotocol::test::UTransportMock>(source_);
 
-		source_.set_resource_id(0x8101);
+		source_.set_resource_id(DEFAULT_RESOURCE_ID);
 		sink_.set_resource_id(0x0);
-
-		format_ = UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
-		priority_ = UPriority::UPRIORITY_CS1;
-		ttl_ = std::chrono::milliseconds(1000);
+		priority_ = uprotocol::v1::UPriority::UPRIORITY_CS1;
+		ttl_ = std::chrono::milliseconds(DEFAULT_TTL_TIME);
 	}
 	void TearDown() override {}
 
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	TestNotificationSource() = default;
-	~TestNotificationSource() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
-	std::shared_ptr<uprotocol::test::UTransportMock> transportMock_;
-	UUri source_;
-	UUri sink_;
-	UPayloadFormat format_;
-	std::optional<UPriority> priority_;
-	std::optional<std::chrono::milliseconds> ttl_;
+	std::shared_ptr<uprotocol::test::UTransportMock> getTransportMock() const {
+		return transportMock_;
+	}
+	uprotocol::v1::UUri getSource() const { return source_; }
+	uprotocol::v1::UUri getSink() const { return sink_; }
+	uprotocol::v1::UPayloadFormat getFormat() const { return format_; }
+	std::optional<uprotocol::v1::UPriority>& getPriority() { return priority_; }
+	std::optional<std::chrono::milliseconds> getTTL() const { return ttl_; }
+
+public:
+	~TestNotificationSource() override = default;
 };
 
-TEST_F(TestNotificationSource, NotifyWithPayloadSuccess) {
-	std::string testPayloadStr = "test_payload";
-	NotificationSource notificationSource(transportMock_, std::move(source_),
-	                                      std::move(sink_), format_, priority_,
-	                                      ttl_);
-	Payload testPayload(testPayloadStr, format_);
+TEST_F(TestNotificationSource, NotifyWithPayloadSuccess) {  // NOLINT
+	std::string test_payload_str = "test_payload";
+	NotificationSource notification_source(getTransportMock(), getSource(),
+	                                       getSink(), getFormat(),
+	                                       getPriority(), getTTL());
+	uprotocol::datamodel::builder::Payload test_payload(test_payload_str,
+	                                                    getFormat());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	auto status = notificationSource.notify(std::move(testPayload));
+	auto status = notification_source.notify(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidNotification(
-	        transportMock_->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 }
 
-TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutTTL) {
-	std::string testPayloadStr = "test_payload";
-	NotificationSource notificationSource(transportMock_, std::move(source_),
-	                                      std::move(sink_), format_, priority_);
-	Payload testPayload(testPayloadStr, format_);
+TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutTTL) {  // NOLINT
+	std::string test_payload_str = "test_payload";
+	NotificationSource notification_source(
+	    getTransportMock(), getSource(), getSink(), getFormat(), getPriority());
+	uprotocol::datamodel::builder::Payload test_payload(test_payload_str,
+	                                                    getFormat());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	auto status = notificationSource.notify(std::move(testPayload));
+	auto status = notification_source.notify(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidNotification(
-	        transportMock_->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 
-	EXPECT_EQ(transportMock_->message_.attributes().ttl(), 0);
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().ttl(), 0);
 }
 
-TEST_F(TestNotificationSource, NotifyWithPayloadSuccessWithoutPriority) {
-	std::string testPayloadStr = "test_payload";
-	priority_.reset();
-	NotificationSource notificationSource(transportMock_, std::move(source_),
-	                                      std::move(sink_), format_, priority_);
-	Payload testPayload(testPayloadStr, format_);
+TEST_F(TestNotificationSource,  // NOLINT
+       NotifyWithPayloadSuccessWithoutPriority) {
+	std::string test_payload_str = "test_payload";
+	getPriority().reset();
+	NotificationSource notification_source(
+	    getTransportMock(), getSource(), getSink(), getFormat(), getPriority());
+	uprotocol::datamodel::builder::Payload test_payload(test_payload_str,
+	                                                    getFormat());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	auto status = notificationSource.notify(std::move(testPayload));
+	auto status = notification_source.notify(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidNotification(
-	        transportMock_->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 
-	EXPECT_EQ(transportMock_->message_.attributes().priority(),
-	          UPriority::UPRIORITY_CS1);
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().priority(),
+	          uprotocol::v1::UPriority::UPRIORITY_CS1);
 }
 
-TEST_F(TestNotificationSource, NotifyWithPayloadFailure) {
-	std::string testPayloadStr = "test_payload";
-	NotificationSource notificationSource(transportMock_, std::move(source_),
-	                                      std::move(sink_), format_, priority_,
-	                                      ttl_);
-	Payload testPayload(testPayloadStr, format_);
+TEST_F(TestNotificationSource, NotifyWithPayloadFailure) {  // NOLINT
+	std::string test_payload_str = "test_payload";
+	NotificationSource notification_source(getTransportMock(), getSource(),
+	                                       getSink(), getFormat(),
+	                                       getPriority(), getTTL());
+	uprotocol::datamodel::builder::Payload test_payload(test_payload_str,
+	                                                    getFormat());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::DATA_LOSS);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	auto status = notificationSource.notify(std::move(testPayload));
+	auto status = notification_source.notify(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 }
 
-TEST_F(TestNotificationSource, NotifyWithoutPayloadSuccess) {
-	NotificationSource notificationSource(transportMock_, std::move(source_),
-	                                      std::move(sink_));
+TEST_F(TestNotificationSource, NotifyWithoutPayloadSuccess) {  // NOLINT
+	NotificationSource notification_source(getTransportMock(), getSource(),
+	                                       getSink());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	auto status = notificationSource.notify();
+	auto status = notification_source.notify();
 
 	EXPECT_EQ(status.code(), retval.code());
 
-	EXPECT_EQ(transportMock_->message_.attributes().ttl(), 0);
-	EXPECT_EQ(transportMock_->message_.attributes().priority(),
-	          UPriority::UPRIORITY_CS1);
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().ttl(), 0);
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().priority(),
+	          uprotocol::v1::UPriority::UPRIORITY_CS1);
 }
 
-TEST_F(TestNotificationSource, NotifyWithoutPayloadFailure) {
-	NotificationSource notificationSource(transportMock_, std::move(source_),
-	                                      std::move(sink_));
+TEST_F(TestNotificationSource, NotifyWithoutPayloadFailure) {  // NOLINT
+	NotificationSource notification_source(getTransportMock(), getSource(),
+	                                       getSink());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::DATA_LOSS);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	auto status = notificationSource.notify();
+	auto status = notification_source.notify();
 
 	EXPECT_EQ(status.code(), retval.code());
 }
 
 // Test with Null transport
-TEST_F(TestNotificationSource, NullTransport) {
+TEST_F(TestNotificationSource, NullTransport) {  // NOLINT
 	auto transport = nullptr;
 
-	EXPECT_THROW(NotificationSource notificationSource(
-	                 transport, std::move(source_), std::move(sink_), format_,
-	                 priority_, ttl_),
+	EXPECT_THROW(NotificationSource notification_source(  // NOLINT
+	                 transport, getSource(), getSink(), getFormat(),
+	                 getPriority(), getTTL()),
 	             uprotocol::transport::NullTransport);
 }
 
-}  // namespace
+}  // namespace uprotocol::communication

@@ -81,6 +81,9 @@ add_coverage_test("SubscriberTest" coverage/communication/SubscriberTest.cpp)
 add_coverage_test("NotificationSinkTest" coverage/communication/NotificationSinkTest.cpp)
 add_coverage_test("NotificationSourceTest" coverage/communication/NotificationSourceTest.cpp)
 
+# client
+add_coverage_test("ConsumerTest" coverage/client/usubscription/v3/ConsumerTest.cpp)
+
 ########################## EXTRAS #############################################
 add_extra_test("PublisherSubscriberTest" extra/PublisherSubscriberTest.cpp)
 add_extra_test("NotificationTest" extra/NotificationTest.cpp)

@@ -32,7 +32,7 @@ public:
 	ThreadPool& operator=(const ThreadPool&) = delete;
 	ThreadPool& operator=(ThreadPool&&) = delete;
 
-	ThreadPool(const size_t max_queue_size, const size_t max_num_of_threads,
+	ThreadPool(size_t max_queue_size, size_t max_num_of_threads,
 	           std::chrono::milliseconds task_timeout);
 
 	~ThreadPool();

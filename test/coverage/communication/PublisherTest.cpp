@@ -16,32 +16,52 @@
 
 #include "UTransportMock.h"
 
-using namespace uprotocol::communication;
-using namespace uprotocol;
-
-namespace {
-using namespace uprotocol::datamodel::builder;
+namespace uprotocol {
 
 class TestPublisher : public testing::Test {
+private:
+	std::shared_ptr<uprotocol::test::UTransportMock> transportMock_;
+	v1::UUri source_;
+	v1::UUri topic_;
+	v1::UPayloadFormat format_ = v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
+	std::optional<v1::UPriority> priority_;
+	std::optional<std::chrono::milliseconds> ttl_;
+	uprotocol::v1::UMessage capture_msg_;
+
 protected:
+	std::shared_ptr<uprotocol::test::UTransportMock> getTransportMock() const {
+		return transportMock_;
+	}
+	v1::UUri getSource() const { return source_; }
+	v1::UUri getTopic() const { return topic_; }
+	v1::UPayloadFormat getFormat() const { return format_; }
+	std::optional<v1::UPriority>& getPriority() { return priority_; }
+	std::optional<std::chrono::milliseconds> getTTL() const { return ttl_; }
+	uprotocol::v1::UMessage getCaptureMsg() const { return capture_msg_; }
+
 	// Run once per TEST_F.
 	// Used to set up clean environments per test.
 	void SetUp() override {
+		constexpr uint32_t DEFAULT_UE_ID = 0x00011101;
+		constexpr uint32_t DEFAULT_RESOURCE_ID = 0x8101;
+		constexpr uint32_t SOURCE_VERSION_MAJOR = 0xF1;
+		constexpr uint32_t TOPIC_VERSION_MAJOR = 0xF8;
+		constexpr uint16_t DEFAULT_TTL_TIME = 1000;
+
 		source_.set_authority_name("10.0.0.1");
-		source_.set_ue_id(0x00011101);
-		source_.set_ue_version_major(0xF1);
+		source_.set_ue_id(DEFAULT_UE_ID);
+		source_.set_ue_version_major(SOURCE_VERSION_MAJOR);
 		source_.set_resource_id(0x0);
 
 		topic_.set_authority_name("10.0.0.1");
-		topic_.set_ue_id(0x00011101);
-		topic_.set_ue_version_major(0xF8);
-		topic_.set_resource_id(0x8101);
+		topic_.set_ue_id(DEFAULT_UE_ID);
+		topic_.set_ue_version_major(TOPIC_VERSION_MAJOR);
+		topic_.set_resource_id(DEFAULT_RESOURCE_ID);
 		transportMock_ =
 		    std::make_shared<uprotocol::test::UTransportMock>(source_);
 
-		format_ = v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT;
 		priority_ = v1::UPriority::UPRIORITY_CS2;
-		ttl_ = std::chrono::milliseconds(1000);
+		ttl_ = std::chrono::milliseconds(DEFAULT_TTL_TIME);
 	}
 
 	void TearDown() override {}
@@ -49,108 +69,104 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	TestPublisher() = default;
-	~TestPublisher() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
 
-	std::shared_ptr<uprotocol::test::UTransportMock> transportMock_;
-	v1::UUri source_;
-	v1::UUri topic_;
-	v1::UPayloadFormat format_;
-	std::optional<v1::UPriority> priority_;
-	std::optional<std::chrono::milliseconds> ttl_;
-	uprotocol::v1::UMessage capture_msg_;
+public:
+	~TestPublisher() override = default;
 };
 
-TEST_F(TestPublisher, PublisherSuccess) {
-	std::string testPayloadStr = "test_payload";
-	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
-	                    ttl_);
+TEST_F(TestPublisher, PublisherSuccess) {  // NOLINT
+	std::string test_payload_str = "test_payload";
+	communication::Publisher publisher(getTransportMock(), getTopic(),
+	                                   getFormat(), getPriority(), getTTL());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	datamodel::builder::Payload test_payload(test_payload_str, getFormat());
+	auto status = publisher.publish(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidPublish(
-	        transportMock_->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 }
 
-TEST_F(TestPublisher, PublishFailure) {
-	std::string testPayloadStr = "test_payload";
-	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
-	                    ttl_);
+TEST_F(TestPublisher, PublishFailure) {  // NOLINT
+	std::string test_payload_str = "test_payload";
+	communication::Publisher publisher(getTransportMock(), getTopic(),
+	                                   getFormat(), getPriority(), getTTL());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::DATA_LOSS);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	datamodel::builder::Payload test_payload(test_payload_str, getFormat());
+	auto status = publisher.publish(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 }
 
-TEST_F(TestPublisher, PublishSuccessWithoutTTL) {
-	std::string testPayloadStr = "test_payload";
-	Publisher publisher(transportMock_, std::move(topic_), format_, priority_);
+TEST_F(TestPublisher, PublishSuccessWithoutTTL) {  // NOLINT
+	std::string test_payload_str = "test_payload";
+	communication::Publisher publisher(getTransportMock(), getTopic(),
+	                                   getFormat(), getPriority());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	datamodel::builder::Payload test_payload(test_payload_str, getFormat());
+	auto status = publisher.publish(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidPublish(
-	        transportMock_->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 
-	EXPECT_EQ(transportMock_->message_.attributes().ttl(), 0);
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().ttl(), 0);
 }
 
-TEST_F(TestPublisher, PublishSuccessWithoutPriority) {
-	std::string testPayloadStr = "test_payload";
-	priority_.reset();
-	Publisher publisher(transportMock_, std::move(topic_), format_, priority_,
-	                    ttl_);
+TEST_F(TestPublisher, PublishSuccessWithoutPriority) {  // NOLINT
+	std::string test_payload_str = "test_payload";
+	getPriority().reset();
+	communication::Publisher publisher(getTransportMock(), getTopic(),
+	                                   getFormat(), getPriority(), getTTL());
 
 	uprotocol::v1::UStatus retval;
 	retval.set_code(uprotocol::v1::UCode::OK);
-	transportMock_->send_status_ = retval;
+	getTransportMock()->getSendStatus() = retval;
 
-	Payload testPayload(testPayloadStr, format_);
-	auto status = publisher.publish(std::move(testPayload));
+	datamodel::builder::Payload test_payload(test_payload_str, getFormat());
+	auto status = publisher.publish(std::move(test_payload));
 
 	EXPECT_EQ(status.code(), retval.code());
 
 	auto [valid, reason] =
 	    uprotocol::datamodel::validator::message::isValidPublish(
-	        transportMock_->message_);
+	        getTransportMock()->getMessage());
 	EXPECT_EQ(valid, true);
 
-	EXPECT_EQ(transportMock_->message_.attributes().priority(),
+	EXPECT_EQ(getTransportMock()->getMessage().attributes().priority(),
 	          v1::UPriority::UPRIORITY_CS1);
 }
 
 // publisher with null transport
-TEST_F(TestPublisher, PublisherWithNullTransport) {
+TEST_F(TestPublisher, PublisherWithNullTransport) {  // NOLINT
 	auto transport = nullptr;
-	EXPECT_THROW(Publisher publisher(transport, std::move(topic_), format_,
-	                                 priority_, ttl_),
-	             uprotocol::transport::NullTransport);
+	EXPECT_THROW(  // NOLINT
+	    communication::Publisher publisher(transport, getTopic(), getFormat(),
+	                                       getPriority(), getTTL()),
+	    uprotocol::transport::NullTransport);
 }
 
-}  // namespace
+}  // namespace uprotocol

@@ -2,11 +2,11 @@
 
 PROJECT_ROOT="$(realpath "$(dirname "$0")/../")"
 
-if [ -n "$(which clang-tidy-12)" ]; then
-    # NOTE: Using clang-tidy-12 in CI system, too
-    LINTER=clang-tidy-12
+if [ -n "$(which clang-tidy-13)" ]; then
+    # NOTE: Using clang-tidy-13 in CI system, too
+    LINTER=clang-tidy-13
 elif [ -n "$(which clang-tidy)" ]; then
-    echo "Did not find clang-tidy-12. Trying clang-tidy. Results may not"
+    echo "Did not find clang-tidy-13. Trying clang-tidy. Results may not"
     echo "match formatting in GitHub CI process."
     LINTER=clang-tidy
 else
@@ -58,7 +58,7 @@ if [ -z "$target_source" ]; then
 	shopt -s globstar
 
 	pushd "$PROJECT_ROOT" > /dev/null
-	for f in **/*.h **/*.cpp; do
+	for f in include/**/*.h src/**/*.cpp test/coverage/**/*.cpp test/extra/**/*.cpp test/include/**/*.h; do
 		if [[ ! ("$f" =~ "build/") ]]; then
 			echo
 			echo "Checking file '$f'"

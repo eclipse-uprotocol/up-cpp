@@ -24,15 +24,17 @@ protected:
 	// Run once per execution of the test application.
 	// Used for setup of all tests. Has access to this instance.
 	TestFixture() = default;
-	~TestFixture() = default;
 
 	// Run once per execution of the test application.
 	// Used only for global setup outside of tests.
 	static void SetUpTestSuite() {}
 	static void TearDownTestSuite() {}
+
+public:
+	~TestFixture() override = default;
 };
 
-// TODO replace
-TEST_F(TestFixture, SomeTestName) {}
+// TODO(unknown)
+TEST_F(TestFixture, SomeTestName) {}  // NOLINT
 
 }  // namespace

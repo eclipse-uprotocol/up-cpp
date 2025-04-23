@@ -15,17 +15,16 @@
 
 using namespace std::chrono_literals;
 
-namespace {
+namespace uprotocol::datamodel {
 
-using namespace uprotocol::datamodel;
-using milliseconds = std::chrono::milliseconds;
+using Milliseconds = std::chrono::milliseconds;
 
 std::chrono::system_clock::time_point getUuidTimestamp(
     const uprotocol::v1::UUID& uuid) {
 	uint64_t msb = uuid.msb();
 	uint64_t timestamp = (msb >> UUID_TIMESTAMP_SHIFT) & UUID_TIMESTAMP_MASK;
 
-	return std::chrono::system_clock::time_point(milliseconds(timestamp));
+	return std::chrono::system_clock::time_point(Milliseconds(timestamp));
 }
 
 uint8_t internalGetVersion(const uprotocol::v1::UUID& uuid) {
@@ -36,7 +35,7 @@ uint8_t internalGetVariant(const uprotocol::v1::UUID& uuid) {
 	return (uuid.lsb() >> UUID_VARIANT_SHIFT) & UUID_VARIANT_MASK;
 }
 
-}  // namespace
+}  // namespace uprotocol::datamodel
 
 namespace uprotocol::datamodel::validator::uuid {
 
@@ -55,7 +54,7 @@ std::string_view message(Reason reason) {
 	}
 }
 
-ValidationResult isUuid(const uprotocol::v1::UUID uuid) {
+ValidationResult isUuid(const uprotocol::v1::UUID& uuid) {
 	uint8_t version = internalGetVersion(uuid);
 	if (version != UUID_VERSION_7) {
 		return {false, Reason::WRONG_VERSION};
@@ -76,7 +75,7 @@ ValidationResult isUuid(const uprotocol::v1::UUID uuid) {
 	return {true, std::nullopt};
 }
 
-ValidationResult isExpired(const uprotocol::v1::UUID uuid,
+ValidationResult isExpired(const uprotocol::v1::UUID& uuid,
                            std::chrono::milliseconds ttl) {
 	auto [valid, reason] = isUuid(uuid);
 	if (!valid) {
@@ -93,7 +92,7 @@ ValidationResult isExpired(const uprotocol::v1::UUID uuid,
 	return {false, std::nullopt};
 }
 
-uint8_t getVersion(const uprotocol::v1::UUID uuid) {
+uint8_t getVersion(const uprotocol::v1::UUID& uuid) {
 	auto [valid, reason] = isUuid(uuid);
 	if (!valid) {
 		throw InvalidUuid(message(reason.value()));
@@ -101,7 +100,7 @@ uint8_t getVersion(const uprotocol::v1::UUID uuid) {
 	return internalGetVersion(uuid);
 }
 
-uint8_t getVariant(const uprotocol::v1::UUID uuid) {
+uint8_t getVariant(const uprotocol::v1::UUID& uuid) {
 	auto [valid, reason] = isUuid(uuid);
 	if (!valid) {
 		throw InvalidUuid(message(reason.value()));
@@ -109,7 +108,7 @@ uint8_t getVariant(const uprotocol::v1::UUID uuid) {
 	return internalGetVariant(uuid);
 }
 
-std::chrono::system_clock::time_point getTime(const uprotocol::v1::UUID uuid) {
+std::chrono::system_clock::time_point getTime(const uprotocol::v1::UUID& uuid) {
 	auto [valid, reason] = isUuid(uuid);
 	if (!valid) {
 		throw InvalidUuid(message(reason.value()));
@@ -117,7 +116,7 @@ std::chrono::system_clock::time_point getTime(const uprotocol::v1::UUID uuid) {
 	return getUuidTimestamp(uuid);
 }
 
-std::chrono::milliseconds getElapsedTime(const uprotocol::v1::UUID uuid) {
+std::chrono::milliseconds getElapsedTime(const uprotocol::v1::UUID& uuid) {
 	auto [valid, reason] = isUuid(uuid);
 	if (!valid) {
 		throw InvalidUuid(message(reason.value()));
@@ -126,10 +125,10 @@ std::chrono::milliseconds getElapsedTime(const uprotocol::v1::UUID uuid) {
 	auto current_time = std::chrono::system_clock::now();
 	auto uuid_time = getTime(uuid);
 
-	return std::chrono::duration_cast<milliseconds>(current_time - uuid_time);
+	return std::chrono::duration_cast<Milliseconds>(current_time - uuid_time);
 }
 
-std::chrono::milliseconds getRemainingTime(const uprotocol::v1::UUID uuid,
+std::chrono::milliseconds getRemainingTime(const uprotocol::v1::UUID& uuid,
                                            std::chrono::milliseconds ttl) {
 	auto elapsed_time = getElapsedTime(uuid);
 	return std::max(ttl - elapsed_time, 0ms);

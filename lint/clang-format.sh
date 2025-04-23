@@ -2,11 +2,11 @@
 
 PROJECT_ROOT="$(realpath "$(dirname "$0")/../")"
 
-if [ -n "$(which clang-format-12)" ]; then
-    # NOTE: Using clang-format-12 in CI system, too
-    FORMATTER=clang-format-12
+if [ -n "$(which clang-format-13)" ]; then
+    # NOTE: Using clang-format-13 in CI system, too
+    FORMATTER=clang-format-13
 elif [ -n "$(which clang-format)" ]; then
-    echo "Did not find clang-format-12. Trying clang-format. Results may not"
+    echo "Did not find clang-format-13. Trying clang-format. Results may not"
     echo "match formatting in GitHub CI process."
     FORMATTER=clang-format
 else
