@@ -104,7 +104,7 @@ TEST_F(TestUUriValidator, Valid) {  // NOLINT
 		auto uuri = get_u_uri();
 		uuri.set_resource_id(WILDCARD);
 		EXPECT_TRUE(has_wildcard_resource_id(uuri));
-		EXPECT_TRUE(uses_wildcards(uuri));
+		EXPECT_FALSE(verify_no_wildcards(uuri));
 
 		auto [valid, reason] = isValid(uuri);
 		EXPECT_FALSE(valid);
@@ -129,14 +129,14 @@ TEST_F(TestUUriValidator, Wildcards) {  // NOLINT
 		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
 		EXPECT_FALSE(has_wildcard_version(uuri));
 		EXPECT_FALSE(has_wildcard_resource_id(uuri));
-		EXPECT_FALSE(uses_wildcards(uuri));
+		EXPECT_TRUE(verify_no_wildcards(uuri));
 	}
 
 	{  // Change Authority name to "hello*" (Any)
 		auto uuri = get_u_uri();
-		uuri.set_authority_name("hello*");
+		uuri.set_authority_name("*");
 		EXPECT_TRUE(has_wildcard_authority(uuri));
-		EXPECT_TRUE(uses_wildcards(uuri));
+		EXPECT_FALSE(verify_no_wildcards(uuri));
 	}
 
 	{  // Set Service ID to FFFF (Any) and Instance ID to 1
@@ -144,7 +144,7 @@ TEST_F(TestUUriValidator, Wildcards) {  // NOLINT
 		auto uuri = get_u_uri();
 		uuri.set_ue_id(WILDCARD_SERVICE_UE_ID);
 		EXPECT_TRUE(has_wildcard_service_id(uuri));
-		EXPECT_TRUE(uses_wildcards(uuri));
+		EXPECT_FALSE(verify_no_wildcards(uuri));
 	}
 
 	{  // Set Service ID to 1 and Instance ID to FFFF (Any)
@@ -152,7 +152,7 @@ TEST_F(TestUUriValidator, Wildcards) {  // NOLINT
 		auto uuri = get_u_uri();
 		uuri.set_ue_id(WILDCARD_INSTANCE_UE_ID);
 		EXPECT_TRUE(has_wildcard_service_instance_id(uuri));
-		EXPECT_TRUE(uses_wildcards(uuri));
+		EXPECT_FALSE(verify_no_wildcards(uuri));
 	}
 
 	{  // Set major version to FF (Any)
@@ -160,14 +160,14 @@ TEST_F(TestUUriValidator, Wildcards) {  // NOLINT
 		auto uuri = get_u_uri();
 		uuri.set_ue_version_major(WILDCARD_VERSION_MAJOR);
 		EXPECT_TRUE(has_wildcard_version(uuri));
-		EXPECT_TRUE(uses_wildcards(uuri));
+		EXPECT_FALSE(verify_no_wildcards(uuri));
 	}
 
 	{  // Set Resource ID to FFFF (any)
 		auto uuri = get_u_uri();
 		uuri.set_resource_id(WILDCARD);
 		EXPECT_TRUE(has_wildcard_resource_id(uuri));
-		EXPECT_TRUE(uses_wildcards(uuri));
+		EXPECT_FALSE(verify_no_wildcards(uuri));
 	}
 }
 
@@ -198,7 +198,7 @@ TEST_F(TestUUriValidator, ValidRpcMethod) {  // NOLINT
 		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
 		EXPECT_FALSE(has_wildcard_version(uuri));
 		EXPECT_FALSE(has_wildcard_resource_id(uuri));
-		EXPECT_FALSE(uses_wildcards(uuri));
+		EXPECT_TRUE(verify_no_wildcards(uuri));
 	}
 
 	{
@@ -249,7 +249,7 @@ TEST_F(TestUUriValidator, ValidRpcResponse) {  // NOLINT
 		auto [valid, reason] = isValidRpcResponse(uuri);
 		EXPECT_TRUE(valid);
 		EXPECT_FALSE(reason.has_value());
-		EXPECT_FALSE(uses_wildcards(uuri));
+		EXPECT_TRUE(verify_no_wildcards(uuri));
 	}
 
 	{
@@ -305,7 +305,7 @@ TEST_F(TestUUriValidator, ValidPublishTopic) {  // NOLINT
 		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
 		EXPECT_FALSE(has_wildcard_version(uuri));
 		EXPECT_FALSE(has_wildcard_resource_id(uuri));
-		EXPECT_FALSE(uses_wildcards(uuri));
+		EXPECT_TRUE(verify_no_wildcards(uuri));
 	}
 
 	{
@@ -370,7 +370,7 @@ TEST_F(TestUUriValidator, ValidNotificationSource) {  // NOLINT
 		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
 		EXPECT_FALSE(has_wildcard_version(uuri));
 		EXPECT_FALSE(has_wildcard_resource_id(uuri));
-		EXPECT_FALSE(uses_wildcards(uuri));
+		EXPECT_TRUE(verify_no_wildcards(uuri));
 	}
 
 	{
@@ -434,7 +434,7 @@ TEST_F(TestUUriValidator, ValidNotificationSink) {  // NOLINT
 		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
 		EXPECT_FALSE(has_wildcard_version(uuri));
 		EXPECT_FALSE(has_wildcard_resource_id(uuri));
-		EXPECT_FALSE(uses_wildcards(uuri));
+		EXPECT_TRUE(verify_no_wildcards(uuri));
 	}
 
 	{
@@ -483,7 +483,7 @@ TEST_F(TestUUriValidator, ValidSubscription) {  // NOLINT
 		EXPECT_FALSE(has_wildcard_service_instance_id(uuri));
 		EXPECT_FALSE(has_wildcard_version(uuri));
 		EXPECT_FALSE(has_wildcard_resource_id(uuri));
-		EXPECT_FALSE(uses_wildcards(uuri));
+		EXPECT_TRUE(verify_no_wildcards(uuri));
 	}
 
 	{

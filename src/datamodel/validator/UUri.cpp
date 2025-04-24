@@ -96,10 +96,8 @@ bool has_wildcard_resource_id(const v1::UUri& uuri) {
 	return uuri.resource_id() == LOWER_16_BIT_MASK;
 }
 
-bool uses_wildcards(const v1::UUri& uuri) {
-	return has_wildcard_authority(uuri) || has_wildcard_service_id(uuri) ||
-	       has_wildcard_service_instance_id(uuri) ||
-	       has_wildcard_version(uuri) || has_wildcard_resource_id(uuri);
+bool verify_no_wildcards(const v1::UUri& uuri){
+	return false;
 }
 
 ValidationResult isValid(const v1::UUri& uuri) {
@@ -150,7 +148,7 @@ ValidationResult isValidFilter(const v1::UUri& uuri) {
 
 ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
@@ -164,7 +162,7 @@ ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
 
 ValidationResult isValidRpcResponse(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
@@ -188,7 +186,7 @@ ValidationResult isValidDefaultSource(const v1::UUri& uuri) {
 
 ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
@@ -202,7 +200,7 @@ ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 
 ValidationResult isValidNotificationSource(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
@@ -216,7 +214,7 @@ ValidationResult isValidNotificationSource(const v1::UUri& uuri) {
 
 ValidationResult isValidNotificationSink(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
