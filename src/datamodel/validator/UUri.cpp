@@ -96,8 +96,10 @@ bool has_wildcard_resource_id(const v1::UUri& uuri) {
 	return uuri.resource_id() == LOWER_16_BIT_MASK;
 }
 
-bool verify_no_wildcards(const v1::UUri& uuri){
-	return false;
+bool verify_no_wildcards(const v1::UUri& uuri) {
+	return !has_wildcard_authority(uuri) && !has_wildcard_service_id(uuri) &&
+	       !has_wildcard_service_instance_id(uuri) &&
+	       !has_wildcard_version(uuri) && !has_wildcard_resource_id(uuri);
 }
 
 ValidationResult isValid(const v1::UUri& uuri) {
