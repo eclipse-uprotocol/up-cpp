@@ -93,6 +93,9 @@ add_coverage_test("NotificationSourceTest" coverage/communication/NotificationSo
 # client
 add_coverage_test("ConsumerTest" coverage/client/usubscription/v3/ConsumerTest.cpp)
 
+# core
+add_coverage_test("RpcClientUSubscriptionTest" coverage/client/usubscription/v3/RpcClientUSubscriptionTest.cpp)
+
 ########################## EXTRAS #############################################
 add_extra_test("PublisherSubscriberTest" extra/PublisherSubscriberTest.cpp)
 add_extra_test("NotificationTest" extra/NotificationTest.cpp)
