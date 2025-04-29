@@ -132,7 +132,7 @@ TEST_F(TestUUriValidator, Wildcards) {  // NOLINT
 		EXPECT_TRUE(verify_no_wildcards(uuri));
 	}
 
-	{  // Change Authority name to "hello*" (Any)
+	{  // Change Authority name to "*" (Any)
 		auto uuri = get_u_uri();
 		uuri.set_authority_name("*");
 		EXPECT_TRUE(has_wildcard_authority(uuri));
