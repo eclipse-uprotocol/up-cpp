@@ -73,7 +73,7 @@ std::string_view message(Reason reason) {
 }
 
 bool has_wildcard_authority(const v1::UUri& uuri) {
-	return uuri.authority_name()== "*";
+	return uuri.authority_name() == "*";
 }
 
 bool has_wildcard_service_id(const v1::UUri& uuri) {
