@@ -150,10 +150,35 @@ isValidDefaultSource(const v1::UUri&);
 /// This is just a check for a zero-length authority name string.
 [[nodiscard]] bool isLocal(const v1::UUri&);
 
-/// @brief  Checks if a UUri uses wildcards
+/// @brief Checks if a UUri has a wildcard authority name.
 ///
-/// Checks for all types of wildcards, returns true if any are found.
-[[nodiscard]] bool uses_wildcards(const v1::UUri&);
+/// Checks if a UUri has a wildcard authority name, returns true if yes.
+[[nodiscard]] bool has_wildcard_authority(const v1::UUri& uuri);
+
+/// @brief Checks if a UUri has a wildcard service id.
+///
+/// Checks if a UUri has a wildcard service id, returns true if yes.
+[[nodiscard]] bool has_wildcard_service_id(const v1::UUri& uuri);
+
+/// @brief Checks if a UUri has a wildcard service instance id.
+///
+/// Checks if a UUri has a wildcard service instance id, returns true if yes.
+[[nodiscard]] bool has_wildcard_service_instance_id(const v1::UUri& uuri);
+
+/// @brief Checks if a UUri has a wildcard version.
+///
+/// Checks if a UUri has a wildcard version, returns true if yes.
+[[nodiscard]] bool has_wildcard_version(const v1::UUri& uuri);
+
+/// @brief Checks if a UUri has a wildcard resoruce id.
+///
+/// Checks if a UUri has a wildcard resoruce id, returns true if yes.
+[[nodiscard]] bool has_wildcard_resource_id(const v1::UUri& uuri);
+
+/// @brief  Checks if a UUri uses no wildcards
+///
+/// Checks for all types of wildcards, returns true if no wildcards are found.
+[[nodiscard]] bool verify_no_wildcards(const v1::UUri&);
 
 /// @brief This exception indicates that a UUri object was provided that
 ///        did not contain valid UUri data.

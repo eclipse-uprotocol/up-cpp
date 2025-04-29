@@ -72,29 +72,34 @@ std::string_view message(Reason reason) {
 	}
 }
 
-bool uses_wildcards(const v1::UUri& uuri) {
-	constexpr auto LOWER_8_BIT_MASK = 0xFF;
-	constexpr auto LOWER_16_BIT_MASK = 0xFFFF;
-	constexpr auto UPPER_16_BIT_MASK = 0xFFFF0000;
+bool has_wildcard_authority(const v1::UUri& uuri) {
+	return uuri.authority_name() == "*";
+}
 
-	if (uuri.authority_name().find_first_of('*') != std::string::npos) {
-		return true;
-	}
-	if ((uuri.ue_id() & LOWER_16_BIT_MASK) ==
-	    LOWER_16_BIT_MASK) {  // service ID
-		return true;
-	}
-	if ((uuri.ue_id() & UPPER_16_BIT_MASK) ==
-	    UPPER_16_BIT_MASK) {  // service instance ID
-		return true;
-	}
-	if (uuri.ue_version_major() == LOWER_8_BIT_MASK) {
-		return true;
-	}
-	if (uuri.resource_id() == LOWER_16_BIT_MASK) {
-		return true;
-	}
-	return false;
+bool has_wildcard_service_id(const v1::UUri& uuri) {
+	constexpr auto LOWER_16_BIT_MASK = 0xFFFF;
+	return (uuri.ue_id() & LOWER_16_BIT_MASK) == LOWER_16_BIT_MASK;
+}
+
+bool has_wildcard_service_instance_id(const v1::UUri& uuri) {
+	constexpr auto UPPER_16_BIT_MASK = 0xFFFF0000;
+	return (uuri.ue_id() & UPPER_16_BIT_MASK) == UPPER_16_BIT_MASK;
+}
+
+bool has_wildcard_version(const v1::UUri& uuri) {
+	constexpr auto LOWER_8_BIT_MASK = 0xFF;
+	return uuri.ue_version_major() == LOWER_8_BIT_MASK;
+}
+
+bool has_wildcard_resource_id(const v1::UUri& uuri) {
+	constexpr auto LOWER_16_BIT_MASK = 0xFFFF;
+	return uuri.resource_id() == LOWER_16_BIT_MASK;
+}
+
+bool verify_no_wildcards(const v1::UUri& uuri) {
+	return !has_wildcard_authority(uuri) && !has_wildcard_service_id(uuri) &&
+	       !has_wildcard_service_instance_id(uuri) &&
+	       !has_wildcard_version(uuri) && !has_wildcard_resource_id(uuri);
 }
 
 ValidationResult isValid(const v1::UUri& uuri) {
@@ -145,7 +150,7 @@ ValidationResult isValidFilter(const v1::UUri& uuri) {
 
 ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
@@ -159,7 +164,7 @@ ValidationResult isValidRpcMethod(const v1::UUri& uuri) {
 
 ValidationResult isValidRpcResponse(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
@@ -183,7 +188,7 @@ ValidationResult isValidDefaultSource(const v1::UUri& uuri) {
 
 ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
@@ -197,7 +202,7 @@ ValidationResult isValidPublishTopic(const v1::UUri& uuri) {
 
 ValidationResult isValidNotificationSource(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
@@ -211,7 +216,7 @@ ValidationResult isValidNotificationSource(const v1::UUri& uuri) {
 
 ValidationResult isValidNotificationSink(const v1::UUri& uuri) {
 	// disallow wildcards
-	if (uses_wildcards(uuri)) {
+	if (!verify_no_wildcards(uuri)) {
 		return {false, Reason::DISALLOWED_WILDCARD};
 	}
 
