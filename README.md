@@ -78,6 +78,72 @@ cd build/Debug
 cmake --build . -- -j
 ```
 
+### With Conan for QNX
+
+Before building **up-cpp** we need to build all dependencies from **up-conan-recipes**:
+
+Pre-requisite:
+
+* Install venv
+  - https://docs.python.org/3/library/venv.html
+* Install Conan2
+  - https://docs.conan.io/2/installation.html
+* Install QNX license and SDP installation (~/.qnx and ~/qnx800 by default)
+  - https://www.qnx.com/products/everywhere/ (**Non-Commercial Use**)
+
+```bash
+mkdir workspace
+cd workspace
+# setup python virtual environment
+# python -m venv /path/to/new/virtual/environment
+# for example:
+python -m venv vpy
+# source local venv
+source vpy/bin/activate
+# install conan
+pip install conan
+# setup conan linux build profile
+conan profile detect
+# clone conan recipes
+git clone https://github.com/qnx-ports/up-conan-recipes.git
+# clone up-cpp
+git clone https://github.com/qnx-ports/up-cpp.git
+# source QNX SDP
+source <QNX_SDP>/qnxsdp-env.sh
+# build protobuf v3.21.12 for Linux build system
+conan create --version=3.21.12 --build=missing up-conan-recipes/protobuf
+# build protobuf for QNX host
+# for example QNX7.1 arch=aarch64le
+conan create -pr:h=up-conan-recipes/tools/profiles/nto-7.1-aarch64-le --version=3.21.12 up-conan-recipes/protobuf
+# build up-core-api for QNX host
+conan create -pr:h=up-conan-recipes/tools/profiles/nto-7.1-aarch64-le --version 1.6.0-alpha2 up-conan-recipes/up-core-api/release
+# build all requirements for up-cpp
+conan create -pr:h=up-conan-recipes/tools/profiles/nto-7.1-aarch64-le --version=10.2.1 up-conan-recipes/fmt/all
+conan create -pr:h=up-conan-recipes/tools/profiles/nto-7.1-aarch64-le --version=1.13.0 up-conan-recipes/spdlog/all
+conan create -pr:h=up-conan-recipes/tools/profiles/nto-7.1-aarch64-le  --version=1.13.0 up-conan-recipes/gtest
+# build local up-cpp as a static lib
+conan install -pr:h=up-conan-recipes/tools/profiles/nto-7.1-aarch64-le --version 1.0.1 up-cpp
+# or as a shared lib
+conan install -pr:h=up-conan-recipes/tools/profiles/nto-7.1-aarch64-le --version 1.0.1 -o shared=True  up-cpp
+cd up-cpp
+cmake --preset conan-release
+cd build/Release
+cmake --build . -- -j
+# all tests you can find under build/Release/bin/
+# if you build as a shared lib you can find it under build/Release/lib/
+# you just need to scp whem to the QNX target
+# define target IP address
+TARGET_HOST=<target-ip-address-or-hostname>
+# copy test binaries to your QNX target
+scp -r up-cpp/build/Release/bin qnxuser@$TARGET_HOST:/data/home/qnxuser/
+scp -r up-cpp/build/Release/lib qnxuser@$TARGET_HOST:/data/home/qnxuser/
+# ssh into the target
+ssh qnxuser@$TARGET_HOST
+# Run tests
+# Don't forget to add path for *.so lib to LD_LIBRARY_PATH
+cd /data/home/qnxuser/
+```
+
 ### Generate UT Coverage
 
 To get code coverage, perform the steps above, but replace `cmake --preset...` with
