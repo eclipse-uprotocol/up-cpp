@@ -135,8 +135,8 @@ cmake --build . -- -j
 # define target IP address
 TARGET_HOST=<target-ip-address-or-hostname>
 # copy test binaries to your QNX target
-scp -r up-cpp/build/Release/bin qnxuser@$TARGET_HOST:/data/home/qnxuser/
-scp -r up-cpp/build/Release/lib qnxuser@$TARGET_HOST:/data/home/qnxuser/
+scp -r bin qnxuser@$TARGET_HOST:/data/home/qnxuser/
+scp -r lib qnxuser@$TARGET_HOST:/data/home/qnxuser/
 # ssh into the target
 ssh qnxuser@$TARGET_HOST
 # Run tests
