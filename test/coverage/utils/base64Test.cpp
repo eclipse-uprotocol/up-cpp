@@ -35,6 +35,6 @@ public:
 };
 
 // TODO(unknown)
-TEST_F(TestFixture, SomeTestName) {}  // NOLINT
+TEST_F(TestFixture, SomeTestName0) {}  // NOLINT
 
 }  // namespace
