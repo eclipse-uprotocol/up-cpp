@@ -124,9 +124,9 @@ v1::UStatus RpcServer::connect(const v1::UUri& method, RpcCallback&& callback) {
 	    []() {
 		    v1::UUri any_uri;
 		    any_uri.set_authority_name("*");
-		    // Instance ID 0 and UE ID FFFF for wildcard
+		    // Instance ID FFFF and UE ID FFFF for wildcard
 		    constexpr auto DEFAULT_INSTANCE_ID_WITH_WILDCARD_SERVICE_ID =
-		        0x0000FFFF;
+		        0xFFFFFFFF;
 		    constexpr auto VERSION_MAJOR_WILDCARD = 0xFF;
 		    constexpr auto RESOURCE_ID_WILDCARD = 0xFFFF;
 		    any_uri.set_ue_id(DEFAULT_INSTANCE_ID_WITH_WILDCARD_SERVICE_ID);
