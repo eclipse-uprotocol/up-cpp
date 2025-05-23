@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
+// SPDX-FileCopyrightText: 2025 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -10,59 +10,43 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "up-cpp/client/usubscription/v3/RequestBuilder.h"
+
 #include <uprotocol/core/usubscription/v3/usubscription.pb.h>
 
 namespace uprotocol::core::usubscription::v3 {
 
 SubscriptionRequest RequestBuilder::buildSubscriptionRequest(
-    const v1::UUri& topic) const {
+    const v1::UUri& topic, const USubscriptionOptions& options) {
 	auto attributes = utils::ProtoConverter::BuildSubscribeAttributes(
-	    options_.when_expire, options_.subscription_details,
-	    options_.sample_period_ms);
+	    options.when_expire, options.subscription_details,
+	    options.sample_period_ms);
 
 	return utils::ProtoConverter::BuildSubscriptionRequest(topic, attributes);
 }
 
 UnsubscribeRequest RequestBuilder::buildUnsubscribeRequest(
     const v1::UUri& topic) {
-	// auto attributes = utils::ProtoConverter::BuildSubscribeAttributes(
-	// 	options_.when_expire,
-	// 	options_.subscription_details,
-	// 	options_.sample_period_ms);
-
 	return utils::ProtoConverter::BuildUnSubscribeRequest(topic);
 }
 
 FetchSubscriptionsRequest RequestBuilder::buildFetchSubscriptionsRequest(
     const v1::UUri& topic) {
-	FetchSubscriptionsRequest fetch_subscriptions_request;
-	*fetch_subscriptions_request.mutable_topic() = topic;
-
-	return fetch_subscriptions_request;
+	return utils::ProtoConverter::BuildFetchSubscriptionsRequest(topic);
 }
 
 FetchSubscriptionsRequest RequestBuilder::buildFetchSubscriptionsRequest(
     const SubscriberInfo& subscriber) {
-	FetchSubscriptionsRequest fetch_subscriptions_request;
-	*fetch_subscriptions_request.mutable_subscriber() = subscriber;
-
-	return fetch_subscriptions_request;
+	return utils::ProtoConverter::BuildFetchSubscriptionsRequest(subscriber);
 }
 
 FetchSubscribersRequest RequestBuilder::buildFetchSubscribersRequest(
     const v1::UUri& topic) {
-	FetchSubscribersRequest fetch_subscribers_request;
-	*fetch_subscribers_request.mutable_topic() = topic;
-
-	return fetch_subscribers_request;
+	return utils::ProtoConverter::BuildFetchSubscribersRequest(topic);
 }
 
-NotificationsRequest RequestBuilder::buildNotificationRequest(
+NotificationsRequest RequestBuilder::buildNotificationsRequest(
     const v1::UUri& topic) {
-	NotificationsRequest notification_request;
-	*notification_request.mutable_topic() = topic;
-
-	return notification_request;
+	return utils::ProtoConverter::BuildNotificationsRequest(topic);
 }
 
 }  // namespace uprotocol::core::usubscription::v3

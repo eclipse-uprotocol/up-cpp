@@ -173,41 +173,37 @@ struct RpcClient {
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] InvokeFuture invokeMethod(const v1::UUri&);
 
-	template<typename T, typename R>
-	ResponseOrStatus<T>	invokeProtoMethod(const v1::UUri& method, const R& request_message){
+	template <typename T, typename R>
+	ResponseOrStatus<T> invokeProtoMethod(const v1::UUri& method, const R& request_message) {
 		auto payload_or_status =
-			uprotocol::utils::ProtoConverter::protoToPayload(request_message);
+		    uprotocol::utils::ProtoConverter::protoToPayload(request_message);
 
 		if (!payload_or_status.has_value()) {
 			return ResponseOrStatus<T>(
-				UnexpectedStatus(payload_or_status.error()));
+			    UnexpectedStatus(payload_or_status.error()));
 		}
-		datamodel::builder::Payload payload(payload_or_status.value());
 
-		auto message_or_status = this->invokeMethod(method, std::move(payload)).get();
+		datamodel::builder::Payload tmp_payload(payload_or_status.value());
+
+		auto message_or_status =
+		    this->invokeMethod(method, std::move(tmp_payload)).get();
 
 		if (!message_or_status.has_value()) {
 			return ResponseOrStatus<T>(
-				UnexpectedStatus(message_or_status.error()));
+			    UnexpectedStatus(message_or_status.error()));
 		}
 
-		T response_message;
-
-		auto response_or_status =
-			utils::ProtoConverter::extractFromProtobuf<T>(
-				message_or_status.value());
+		auto response_or_status = utils::ProtoConverter::extractFromProtobuf<T>(
+		    message_or_status.value());
 
 		if (!response_or_status.has_value()) {
 			spdlog::error(
-				"invokeProtoMethod: Error when extracting response from protobuf.");
-			return ResponseOrStatus<T>(
-				UnexpectedStatus(response_or_status.error()));
+			    "invokeProtoMethod: Error when extracting response from "
+			    "protobuf.");
+			return response_or_status;
 		}
 
-		response_message = response_or_status.value();
-
-		return ResponseOrStatus<T>(
-			std::move(response_message));
+		return ResponseOrStatus<T>(response_or_status.value());
 	}
 
 	/// @brief Default move constructor (defined in RpcClient.cpp)

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Contributors to the Eclipse Foundation
+// SPDX-FileCopyrightText: 2025 Contributors to the Eclipse Foundation
 //
 // See the NOTICE file(s) distributed with this work for additional
 // information regarding copyright ownership.
@@ -19,29 +19,61 @@
 
 namespace uprotocol::core::usubscription::v3 {
 
+/// @brief Interface for uEntities to create subscriptions.
+///
+/// Like all L3 client APIs, the RpcClientUSubscription is a wrapper on top of
+/// the L2 Communication APIs and USubscription service.
 struct USubscription {
 	template <typename R>
 	using ResponseOrStatus = utils::Expected<R, v1::UStatus>;
 
 	virtual ~USubscription() = default;
 
+	/// @brief sends a subscription request to a USubscription backend and a
+	/// response on success or else a status code
+	///
+	/// @param subscription_request containing a topic to subscribe to
+	/// @return SubscriptionReponse on success and UStatus else
 	virtual ResponseOrStatus<SubscriptionResponse> subscribe(
 	    const SubscriptionRequest& subscription_request) = 0;
 
+	/// @brief sends an unsubscribe request to a USubscription backend and a
+	/// response on success or else a status code
+	///
+	/// @param unsubscribe_request containing a topic to unsubscribe
+	/// @return UnsubscribeResponse on success and UStatus else
 	virtual ResponseOrStatus<UnsubscribeResponse> unsubscribe(
 	    const UnsubscribeRequest& unsubscribe_request) = 0;
 
-	virtual ResponseOrStatus<FetchSubscriptionsResponse> fetch_subscriptions(const
-	FetchSubscriptionsRequest& fetch_subscribers_request) = 0;
+	/// @brief fetches all topics the client is subscribed to from the backend
+	///
+	/// @param fetch_subscriptions_request
+	/// @return FetchSubscriptionsResponse on success and UStatus else
+	virtual ResponseOrStatus<FetchSubscriptionsResponse> fetch_subscriptions(
+	    const FetchSubscriptionsRequest& fetch_subscriptions_request) = 0;
 
-	virtual ResponseOrStatus<NotificationsResponse> register_for_notifications(const
-	NotificationsRequest& register_notifications_request) =0 ;
+	/// @brief registers for notifications to a USubscription backend
+	///
+	/// @param register_notifications_request
+	/// @return NotificationResponse on success and UStatus else
+	virtual ResponseOrStatus<NotificationsResponse> register_for_notifications(
+	    const NotificationsRequest& register_notifications_request) = 0;
 
-	virtual ResponseOrStatus<NotificationsResponse> unregister_for_notifications(const
-	NotificationsRequest& unregister_notifications_request) = 0;
+	/// @brief unregisters for notifications to a USubscription backend
+	///
+	/// @param unregister_notifications_request
+	/// @return NotificationResponse on success and UStatus else
+	virtual ResponseOrStatus<NotificationsResponse>
+	unregister_for_notifications(
+	    const NotificationsRequest& unregister_notifications_request) = 0;
 
-	virtual ResponseOrStatus<FetchSubscribersResponse> fetch_subscribers(const
-	FetchSubscribersRequest& fetch_subscribers_request) = 0;
+	/// @brief fetches all subscribers for a given topic from the backend
+	///
+	/// @param fetch_subscriptions_request containing the topic for which the
+	/// subscribers are fetched
+	/// @return FetchSubscriptionsResponse on success and UStatus else
+	virtual ResponseOrStatus<FetchSubscribersResponse> fetch_subscribers(
+	    const FetchSubscribersRequest& fetch_subscribers_request) = 0;
 };
 
 }  // namespace uprotocol::core::usubscription::v3

@@ -84,4 +84,36 @@ UnsubscribeRequest ProtoConverter::BuildUnSubscribeRequest(
 	return unsubscribe_request;
 }
 
+FetchSubscriptionsRequest ProtoConverter::BuildFetchSubscriptionsRequest(
+    const v1::UUri& topic) {
+	FetchSubscriptionsRequest fetch_subscriptions_request;
+	*fetch_subscriptions_request.mutable_topic() = topic;
+
+	return fetch_subscriptions_request;
+}
+
+FetchSubscriptionsRequest ProtoConverter::BuildFetchSubscriptionsRequest(
+    const SubscriberInfo& subscriber) {
+	FetchSubscriptionsRequest fetch_subscriptions_request;
+	*fetch_subscriptions_request.mutable_subscriber() = subscriber;
+
+	return fetch_subscriptions_request;
+}
+
+FetchSubscribersRequest ProtoConverter::BuildFetchSubscribersRequest(
+    const v1::UUri& topic) {
+	FetchSubscribersRequest fetch_subscribers_request;
+	*fetch_subscribers_request.mutable_topic() = topic;
+
+	return fetch_subscribers_request;
+}
+
+NotificationsRequest ProtoConverter::BuildNotificationsRequest(
+    const v1::UUri& topic) {
+	NotificationsRequest notifications_request;
+	*notifications_request.mutable_topic() = topic;
+
+	return notifications_request;
+}
+
 }  // namespace uprotocol::utils
