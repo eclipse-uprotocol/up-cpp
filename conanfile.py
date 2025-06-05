@@ -20,13 +20,6 @@ class upCoreApiRecipe(ConanFile):
         self.requires("up-core-api/[~1.6, include_prerelease]")
         self.test_requires("gtest/1.14.0")
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.23]")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def layout(self):
         cmake_layout(self)
 
