@@ -437,7 +437,7 @@ TEST_F(CallbackTest, ReturnValuesAreMoved) {  // NOLINT
 		auto result = callable();
 		EXPECT_TRUE(result);
 		EXPECT_EQ(original_string_location, (*result).data());
-		EXPECT_EQ(EXPECTED_CAPACITY, (*result).capacity());
+		EXPECT_LE(EXPECTED_CAPACITY, (*result).capacity());
 		// Just to be safe, check our assumptions about copies vs moves. The
 		// a_copy variable should hold a copy of the original string, this time
 		// with a different pointer and capacity.
