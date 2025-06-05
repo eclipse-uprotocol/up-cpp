@@ -82,58 +82,26 @@ cmake --build . -- -j
 
 Before building **up-cpp** we need to build all dependencies from **up-conan-recipes**:
 
+Please follow instruction for QNX build in file up-conan-recipes/README.md
+
 Pre-requisite:
 
-* Install venv - recomended by conan documentation - OPTIONAL
-  - https://docs.python.org/3/library/venv.html
-* Install Conan2
-  - https://docs.conan.io/2/installation.html
-* Install QNX license and SDP installation (~/.qnx and ~/qnx800 by default)
-  - https://www.qnx.com/products/everywhere/ (**Non-Commercial Use**)
+* Build and install all **QNX build** dependencies from up-conan-recipes
+  - https://github.com/eclipse-uprotocol/up-conan-recipes/blob/main/README.md
 
 ```bash
-# clone up-conan-recipes
-git clone https://github.com/qnx-ports/up-conan-recipes.git
+# setup path to up-conan-recipes
+export QNX_CONAN_ROOT=<path_to_up-conan-recipes>
 
-cd up-conan-recipes
-
-# source QNX SDP
-source <QNX_SDP>/qnxsdp-env.sh
-
-# build protobuf for Linux build machine
-conan create --version=3.21.12 --build=missing protobuf
-
-# IMPORTANT
-# update conan settings for QNX8.0 support
-conan config install tools/qnx-8.0-extension/settings_user.yml
-
-# build protobuf for QNX host
+# Install conan toolchain for QNX target
 #
-# <profile-name> could be one of: nto-7.1-aarch64-le, nto-7.1-x86_64, nto-8.0-aarch64-le, nto-8.0-x86_64
+# <profile-name>: nto-7.1-aarch64-le, nto-7.1-x86_64, nto-8.0-aarch64-le, nto-8.0-x86_64
+# <version-number>: 1.0.0-rc0, 1.0.0, 1.0.1-rc1, 1.0.1
 #
-conan create -pr:h=tools/profiles/<profile-name> --version=3.21.12 protobuf
+conan install -pr:h=$QNX_CONAN_ROOT/tools/profiles/<profile-name> --version=<version-number> --build=missing .
 
-# build up-core-api
-conan create -pr:h=tools/profiles/<profile-name> --version 1.6.0-alpha2 up-core-api/release/
-
-# build all dependencies for up-cpp
-conan create -pr:h=tools/profiles/<profile-name> --version=10.2.1 fmt/all
-conan create -pr:h=tools/profiles/<profile-name> --version=1.13.0 spdlog/all
-conan create -pr:h=tools/profiles/<profile-name> --version=1.13.0 gtest
-
-cd ..
-
-# clone up-cpp
-git clone https://github.com/qnx-ports/up-cpp.git
-cd up-cpp
-
-# setup cmake generator and preset for up-cpp
-conan install -pr:h=../up-conan-recipes/tools/profiles/<profile-name> --version 1.0.1 .
-
-# setup cmake configuration
 cmake --preset conan-release
 
-# build up-cpp libary and tests
 cmake --build build/Release -- -j
 
 # all tests you can find under build/Release/bin/

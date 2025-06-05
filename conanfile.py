@@ -13,21 +13,12 @@ class upCoreApiRecipe(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     def requirements(self):
         self.requires("protobuf/3.21.12")
         self.requires("spdlog/1.13.0")
         self.requires("up-core-api/[~1.6, include_prerelease]")
-        self.test_requires("gtest/1.13.0")
+        self.test_requires("gtest/1.14.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23]")
@@ -45,13 +36,4 @@ class upCoreApiRecipe(ConanFile):
         tc = CMakeToolchain(self)
         #all warnings have to be fixed
         tc.cache_variables["CMAKE_CXX_FLAGS_INIT"] = "-Wno-error=unused-but-set-variable -Wno-error=pedantic -Wno-error=conversion"
-        if self.settings.os == "Neutrino":
-            tc.cache_variables["CMAKE_SYSTEM_NAME"] = "QNX"
-            tc.cache_variables["CMAKE_CXX_COMPILER"] = "q++"
-            if   self.settings.arch == "armv8": #aarch64le
-                tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = "aarch64le"
-                tc.cache_variables["CMAKE_CXX_COMPILER_TARGET"] = "gcc_ntoaarch64le"
-            elif self.settings.arch == "x86_64": #x86_64
-                tc.cache_variables["CMAKE_SYSTEM_PROCESSOR"] = "x86_64"
-                tc.cache_variables["CMAKE_CXX_COMPILER_TARGET"] = "gcc_ntox86_64"
         tc.generate()
