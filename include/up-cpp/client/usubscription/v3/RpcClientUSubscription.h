@@ -52,15 +52,13 @@ struct RpcClientUSubscription : USubscription {
 	using ListenCallback = transport::UTransport::ListenCallback;
 	using ListenHandle = transport::UTransport::ListenHandle;
 
-	template <typename Response>
-	Response invokeResponse(communication::RpcClient rpc_client);
-
 	/// @brief Subscribes from a given topic
 	///
 	/// @param subscription_request The request object containing the topic to
 	/// subscribe to
-	/// @return Returns a SubscriptionResponse on success and a UStatus else
-	utils::Expected<SubscriptionResponse, v1::UStatus> subscribe(
+	/// @return Returns a future that reslves to a SubscriptionResponse on
+	/// success and a UStatus else
+	communication::RpcClient::InvokeProtoFuture<SubscriptionResponse> subscribe(
 	    const SubscriptionRequest& subscription_request) override;
 
 	/// @brief Unsubscribes from a given topic
@@ -68,15 +66,15 @@ struct RpcClientUSubscription : USubscription {
 	/// @param unsubscribe_request The request object containing the topic to
 	/// unsubscribe from
 	/// @return Returns an UnsubscribeResponse on success and a UStatus else
-	utils::Expected<UnsubscribeResponse, v1::UStatus> unsubscribe(
-	    const UnsubscribeRequest& unsubscribe_request) override;
+	communication::RpcClient::InvokeProtoFuture<UnsubscribeResponse>
+	unsubscribe(const UnsubscribeRequest& unsubscribe_request) override;
 
 	/// @brief Fetches the list of topics the client is subscribed to
 	///
 	/// @param fetch_subscriptions_request The request object
-	/// @return Returns a FetchSubscriptionsResponse on success and a UStatus
-	/// else
-	utils::Expected<FetchSubscriptionsResponse, v1::UStatus>
+	/// @return Returns a future that reslves to a FetchSubscriptionsResponse on
+	/// success and a UStatus else
+	communication::RpcClient::InvokeProtoFuture<FetchSubscriptionsResponse>
 	fetch_subscriptions(
 	    const FetchSubscriptionsRequest& fetch_subscriptions_request) override;
 
@@ -85,15 +83,17 @@ struct RpcClientUSubscription : USubscription {
 	/// @param fetch_subscribers_request The request object containing the topic
 	/// for which the subscribers are to be fetched
 	/// @return Returns a FetchSubscribersResponse on success and a UStatus else
-	utils::Expected<FetchSubscribersResponse, v1::UStatus> fetch_subscribers(
+	communication::RpcClient::InvokeProtoFuture<FetchSubscribersResponse>
+	fetch_subscribers(
 	    const FetchSubscribersRequest& fetch_subscribers_request) override;
 
 	/// @brief Registers to receive notifications
 	///
 	/// @param register_notifications_request The request object containing
 	///	       the details to register for notifications
-	/// @return Returns a NotificationResponse on success and a UStatus else
-	utils::Expected<NotificationsResponse, v1::UStatus>
+	/// @return Returns a future that resolves to a NotificationResponse on
+	/// success and a UStatus else
+	communication::RpcClient::InvokeProtoFuture<NotificationsResponse>
 	register_for_notifications(
 	    const NotificationsRequest& register_notifications_request) override;
 
@@ -101,8 +101,9 @@ struct RpcClientUSubscription : USubscription {
 	///
 	/// @param unregister_notifications_request The request object containing
 	///        the details needed to stop receiving notifications.
-	/// @return Returns a NotificationResponse on success and a UStatus else
-	utils::Expected<NotificationsResponse, v1::UStatus>
+	/// @return Returns future that resolves to a NotificationResponse on
+	/// success and a UStatus else
+	communication::RpcClient::InvokeProtoFuture<NotificationsResponse>
 	unregister_for_notifications(
 	    const NotificationsRequest& unregister_notifications_request) override;
 
@@ -110,13 +111,24 @@ struct RpcClientUSubscription : USubscription {
 	///
 	/// @param transport Transport used to send messages
 	explicit RpcClientUSubscription(
-	    std::shared_ptr<transport::UTransport> transport)
-	    : transport_(std::move(transport)) {}
+	    std::shared_ptr<transport::UTransport> transport);
 
 	~RpcClientUSubscription() override = default;
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
+	// Currently a single RpcClient can only send messages to a fixed UUri.
+	// This forces us to use different RpcClients for different resource ids.
+	// The alternative would be to create a new RpcClient for each request and
+	// return a pointer to the client together with the InvokeProtoFuture to
+	// keep it alive
+	std::shared_ptr<communication::RpcClient> subscribe_client_;
+	std::shared_ptr<communication::RpcClient> unsubscribe_client_;
+	std::shared_ptr<communication::RpcClient> fetch_subscriptions_client_;
+	std::shared_ptr<communication::RpcClient> fetch_subscribers_client_;
+	std::shared_ptr<communication::RpcClient> register_for_notification_client_;
+	std::shared_ptr<communication::RpcClient>
+	    unregister_for_notification_client_;
 
 	USubscriptionUUriBuilder uuri_builder_;
 };

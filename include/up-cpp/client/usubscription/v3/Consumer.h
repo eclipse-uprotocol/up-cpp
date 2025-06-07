@@ -16,9 +16,7 @@
 #include <up-cpp/communication/RpcClient.h>
 #include <up-cpp/communication/Subscriber.h>
 #include <up-cpp/datamodel/builder/Payload.h>
-#include <up-cpp/utils/ProtoConverter.h>
 #include <uprotocol/core/usubscription/v3/usubscription.pb.h>
-#include <uprotocol/v1/umessage.pb.h>
 
 #include "RequestBuilder.h"
 #include "USubscriptionUUriBuilder.h"

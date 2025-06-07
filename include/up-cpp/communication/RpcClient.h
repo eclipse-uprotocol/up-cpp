@@ -75,17 +75,22 @@ struct RpcClient {
 	///        for the duration of an RPC call.
 	using InvokeHandle = Connection::Handle;
 
-	/// @brief Extension to std::future that also holds a callback handle
-	class InvokeFuture {
+	/// @brief Extension to std::future with template type that also holds a
+	/// callback handle
+	template <typename T>
+	class InvokeProtoFuture {
 		InvokeHandle callback_handle_;
-		std::future<MessageOrStatus> future_;
+		std::future<utils::Expected<T, v1::UStatus>> future_;
 
 	public:
-		InvokeFuture();
-		InvokeFuture(InvokeFuture&&) noexcept;
-		InvokeFuture(std::future<MessageOrStatus>&&, InvokeHandle&&) noexcept;
+		InvokeProtoFuture() = default;
+		InvokeProtoFuture(InvokeProtoFuture&& other) noexcept = default;
+		InvokeProtoFuture& operator=(InvokeProtoFuture&& other) noexcept =
+		    default;
 
-		InvokeFuture& operator=(InvokeFuture&&) noexcept;
+		InvokeProtoFuture(std::future<utils::Expected<T, v1::UStatus>>&& future,
+		                  InvokeHandle&& handle) noexcept
+		    : callback_handle_(std::move(handle)), future_(std::move(future)) {}
 
 		/// @name Passthroughs for std::future
 		/// @{
@@ -102,6 +107,8 @@ struct RpcClient {
 		}
 		/// @}
 	};
+
+	using InvokeFuture = InvokeProtoFuture<v1::UMessage>;
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
@@ -174,36 +181,47 @@ struct RpcClient {
 	[[nodiscard]] InvokeFuture invokeMethod(const v1::UUri&);
 
 	template <typename T, typename R>
-	ResponseOrStatus<T> invokeProtoMethod(const v1::UUri& method, const R& request_message) {
+	InvokeProtoFuture<T> invokeProtoMethod(const v1::UUri& method, const R& request_message) {
+		auto result_promise =
+		    std::make_shared<std::promise<ResponseOrStatus<T>>>();
+		auto future = result_promise->get_future();
 		auto payload_or_status =
 		    uprotocol::utils::ProtoConverter::protoToPayload(request_message);
 
 		if (!payload_or_status.has_value()) {
-			return ResponseOrStatus<T>(
-			    UnexpectedStatus(payload_or_status.error()));
+			result_promise->set_value(ResponseOrStatus<T>(
+			    UnexpectedStatus(payload_or_status.error())));
+			return {std::move(future), InvokeHandle()};
 		}
 
 		datamodel::builder::Payload tmp_payload(payload_or_status.value());
 
-		auto message_or_status =
-		    this->invokeMethod(method, std::move(tmp_payload)).get();
+		auto handle = invokeMethod(
+		    builder_.build(std::move(tmp_payload)),
+		    [result_promise](const MessageOrStatus& message_or_status) {
+			    if (!message_or_status.has_value()) {
+				    result_promise->set_value(ResponseOrStatus<T>(
+				        UnexpectedStatus(message_or_status.error())));
+				    return;
+			    }
+			    auto response_or_status =
+			        utils::ProtoConverter::extractFromProtobuf<T>(
+			            message_or_status.value());
 
-		if (!message_or_status.has_value()) {
-			return ResponseOrStatus<T>(
-			    UnexpectedStatus(message_or_status.error()));
-		}
+			    if (!response_or_status.has_value()) {
+				    spdlog::error(
+				        "invokeProtoMethod: Error when extracting response "
+				        "from "
+				        "protobuf.");
+				    result_promise->set_value(response_or_status);
+				    return;
+			    }
 
-		auto response_or_status = utils::ProtoConverter::extractFromProtobuf<T>(
-		    message_or_status.value());
+			    result_promise->set_value(
+			        ResponseOrStatus<T>(response_or_status.value()));
+		    });
 
-		if (!response_or_status.has_value()) {
-			spdlog::error(
-			    "invokeProtoMethod: Error when extracting response from "
-			    "protobuf.");
-			return response_or_status;
-		}
-
-		return ResponseOrStatus<T>(response_or_status.value());
+		return {std::move(future), std::move(handle)};
 	}
 
 	/// @brief Default move constructor (defined in RpcClient.cpp)

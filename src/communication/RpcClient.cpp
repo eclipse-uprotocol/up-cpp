@@ -253,15 +253,6 @@ RpcClient::InvokeFuture RpcClient::invokeMethod(const v1::UUri& method) {
 RpcClient::RpcClient(RpcClient&&) noexcept = default;
 RpcClient::~RpcClient() = default;
 
-RpcClient::InvokeFuture::InvokeFuture() = default;
-RpcClient::InvokeFuture::InvokeFuture(InvokeFuture&& other) noexcept = default;
-RpcClient::InvokeFuture& RpcClient::InvokeFuture::operator=(
-    InvokeFuture&& other) noexcept = default;
-
-RpcClient::InvokeFuture::InvokeFuture(std::future<MessageOrStatus>&& future,
-                                      InvokeHandle&& handle) noexcept
-    : callback_handle_(std::move(handle)), future_(std::move(future)) {}
-
 }  // namespace uprotocol::communication
 
 ///////////////////////////////////////////////////////////////////////////////

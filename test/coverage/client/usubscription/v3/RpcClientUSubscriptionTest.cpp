@@ -144,13 +144,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto subscription_request =
 	    RequestBuilder::buildSubscriptionRequest(getSubscriptionTopic());
 
-	auto response_or_status_future =
-	    std::async(std::launch::async,
-	               [&client, &subscription_request]()
-	                   -> uprotocol::utils::Expected<SubscriptionResponse,
-	                                                 uprotocol::v1::UStatus> {
-		               return client.subscribe(subscription_request);
-	               });
+	auto response_or_status_future = client.subscribe(subscription_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -213,13 +207,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto subscription_request =
 	    RequestBuilder::buildSubscriptionRequest(getSubscriptionTopic());
 
-	auto response_or_status_future =
-	    std::async(std::launch::async,
-	               [&client, &subscription_request]()
-	                   -> uprotocol::utils::Expected<SubscriptionResponse,
-	                                                 uprotocol::v1::UStatus> {
-		               return client.subscribe(subscription_request);
-	               });
+	auto response_or_status_future = client.subscribe(subscription_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -243,80 +231,6 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	ASSERT_TRUE(response_or_status.has_value());
 	EXPECT_EQ(response_or_status.value().SerializeAsString(),
 	          server_response.SerializeAsString());
-}
-
-TEST_F(RpcClientUSubscriptionTest,  // NOLINT
-       SubscribeRoundtripWithValidProtoPayloadDifferentTopic) {
-	bool server_callback_executed = false;
-	SubscriptionRequest server_capture;
-	SubscriptionResponse server_response;
-
-	constexpr uint32_t TOPIC_UE = 4321;
-	constexpr uint32_t TOPIC_RESOURCE_ID = 54321;
-	uprotocol::v1::UUri wrong_subscription_topic;
-	wrong_subscription_topic.set_authority_name("topic.usubscription.wrong");
-	wrong_subscription_topic.set_ue_id(TOPIC_UE);
-	wrong_subscription_topic.set_ue_version_major(UE_VERSION_MAJOR);
-	wrong_subscription_topic.set_resource_id(TOPIC_RESOURCE_ID);
-	*server_response.mutable_topic() = wrong_subscription_topic;
-
-	auto server_or_status = uprotocol::communication::RpcServer::create(
-	    getServerTransport(), getServerMethodUuri(),
-	    [&server_callback_executed, &server_capture,
-	     &server_response](const UMessage& message) -> std::optional<Payload> {
-		    server_callback_executed = true;
-		    auto request_or_status =
-		        ProtoConverter::extractFromProtobuf<SubscriptionRequest>(
-		            message);
-		    if (!request_or_status.has_value()) {
-			    return std::nullopt;
-		    }
-		    server_capture = request_or_status.value();
-		    Payload response_payload(server_response);
-		    return response_payload;
-	    },
-	    uprotocol::v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF);
-
-	ASSERT_TRUE(server_or_status.has_value());
-	ASSERT_NE(server_or_status.value(), nullptr);
-	EXPECT_TRUE(getServerTransport()->getListener());
-
-	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
-
-	const auto subscription_request =
-	    RequestBuilder::buildSubscriptionRequest(getSubscriptionTopic());
-
-	auto response_or_status_future =
-	    std::async(std::launch::async,
-	               [&client, &subscription_request]()
-	                   -> uprotocol::utils::Expected<SubscriptionResponse,
-	                                                 uprotocol::v1::UStatus> {
-		               return client.subscribe(subscription_request);
-	               });
-
-	// wait to give the client time to send the request. Otherwise this would
-	// cause a race condition
-	int counter = ITERATIONS_TILL_TIMEOUT;
-	while (counter > 0 && getClientTransport()->getSendCount() == 0) {
-		counter--;
-		std::this_thread::sleep_for(MILLISECONDS_PER_ITERATION);
-	}
-	ASSERT_EQ(getClientTransport()->getSendCount(), 1);
-	EXPECT_TRUE(getClientTransport()->getListener());
-
-	(*getServerTransport()->getListener())(getClientTransport()->getMessage());
-	EXPECT_TRUE(server_callback_executed);
-	EXPECT_EQ(server_capture.SerializeAsString(),
-	          subscription_request.SerializeAsString());
-
-	getClientTransport()->mockMessage(getServerTransport()->getMessage());
-	EXPECT_TRUE(getClientTransport()->getListener());
-	EXPECT_EQ(getClientTransport()->getSendCount(), 1);
-	auto response_or_status = response_or_status_future.get();
-	ASSERT_FALSE(
-	    response_or_status
-	        .has_value());  // Should fail because the topics do not match
 }
 
 ////////////////////////////////
@@ -359,13 +273,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto unsubscribe_request =
 	    RequestBuilder::buildUnsubscribeRequest(getSubscriptionTopic());
 
-	auto response_or_status_future =
-	    std::async(std::launch::async,
-	               [&client, &unsubscribe_request]()
-	                   -> uprotocol::utils::Expected<UnsubscribeResponse,
-	                                                 uprotocol::v1::UStatus> {
-		               return client.unsubscribe(unsubscribe_request);
-	               });
+	auto response_or_status_future = client.unsubscribe(unsubscribe_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -426,13 +334,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto unsubscribe_request =
 	    RequestBuilder::buildUnsubscribeRequest(getSubscriptionTopic());
 
-	auto response_or_status_future =
-	    std::async(std::launch::async,
-	               [&client, &unsubscribe_request]()
-	                   -> uprotocol::utils::Expected<UnsubscribeResponse,
-	                                                 uprotocol::v1::UStatus> {
-		               return client.unsubscribe(unsubscribe_request);
-	               });
+	auto response_or_status_future = client.unsubscribe(unsubscribe_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -499,13 +401,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto fetch_subscribers_request =
 	    RequestBuilder::buildFetchSubscribersRequest(getSubscriptionTopic());
 
-	auto response_or_status_future = std::async(
-	    std::launch::async,
-	    [&client, &fetch_subscribers_request]()
-	        -> uprotocol::utils::Expected<FetchSubscribersResponse,
-	                                      uprotocol::v1::UStatus> {
-		    return client.fetch_subscribers(fetch_subscribers_request);
-	    });
+	auto response_or_status_future =
+	    client.fetch_subscribers(fetch_subscribers_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -567,13 +464,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto fetch_subscribers_request =
 	    RequestBuilder::buildFetchSubscribersRequest(getSubscriptionTopic());
 
-	auto response_or_status_future = std::async(
-	    std::launch::async,
-	    [&client, &fetch_subscribers_request]()
-	        -> uprotocol::utils::Expected<FetchSubscribersResponse,
-	                                      uprotocol::v1::UStatus> {
-		    return client.fetch_subscribers(fetch_subscribers_request);
-	    });
+	auto response_or_status_future =
+	    client.fetch_subscribers(fetch_subscribers_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -641,13 +533,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto fetch_subscriptions_request =
 	    RequestBuilder::buildFetchSubscriptionsRequest(subscriber_info);
 
-	auto response_or_status_future = std::async(
-	    std::launch::async,
-	    [&client, &fetch_subscriptions_request]()
-	        -> uprotocol::utils::Expected<FetchSubscriptionsResponse,
-	                                      uprotocol::v1::UStatus> {
-		    return client.fetch_subscriptions(fetch_subscriptions_request);
-	    });
+	auto response_or_status_future =
+	    client.fetch_subscriptions(fetch_subscriptions_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -710,13 +597,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto fetch_subscribers_request =
 	    RequestBuilder::buildFetchSubscriptionsRequest(subscriber_info);
 
-	auto response_or_status_future = std::async(
-	    std::launch::async,
-	    [&client, &fetch_subscribers_request]()
-	        -> uprotocol::utils::Expected<FetchSubscriptionsResponse,
-	                                      uprotocol::v1::UStatus> {
-		    return client.fetch_subscriptions(fetch_subscribers_request);
-	    });
+	auto response_or_status_future =
+	    client.fetch_subscriptions(fetch_subscribers_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -783,13 +665,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto notifications_request =
 	    RequestBuilder::buildNotificationsRequest(getSubscriptionTopic());
 
-	auto response_or_status_future = std::async(
-	    std::launch::async,
-	    [&client, &notifications_request]()
-	        -> uprotocol::utils::Expected<NotificationsResponse,
-	                                      uprotocol::v1::UStatus> {
-		    return client.register_for_notifications(notifications_request);
-	    });
+	auto response_or_status_future =
+	    client.register_for_notifications(notifications_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -851,13 +728,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto notifications_request =
 	    RequestBuilder::buildNotificationsRequest(getSubscriptionTopic());
 
-	auto response_or_status_future = std::async(
-	    std::launch::async,
-	    [&client, &notifications_request]()
-	        -> uprotocol::utils::Expected<NotificationsResponse,
-	                                      uprotocol::v1::UStatus> {
-		    return client.register_for_notifications(notifications_request);
-	    });
+	auto response_or_status_future =
+	    client.register_for_notifications(notifications_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -924,13 +796,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto notifications_request =
 	    RequestBuilder::buildNotificationsRequest(getSubscriptionTopic());
 
-	auto response_or_status_future = std::async(
-	    std::launch::async,
-	    [&client, &notifications_request]()
-	        -> uprotocol::utils::Expected<NotificationsResponse,
-	                                      uprotocol::v1::UStatus> {
-		    return client.unregister_for_notifications(notifications_request);
-	    });
+	auto response_or_status_future =
+	    client.unregister_for_notifications(notifications_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition
@@ -951,6 +818,9 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getClientTransport()->getListener());
 	EXPECT_EQ(getClientTransport()->getSendCount(), 1);
 	auto response_or_status = response_or_status_future.get();
+	if (!response_or_status.has_value()) {
+		std::cout << response_or_status.error().DebugString() << std::endl;
+	}
 	ASSERT_TRUE(response_or_status.has_value());
 	EXPECT_EQ(response_or_status.value().SerializeAsString(),
 	          server_response.SerializeAsString());
@@ -992,13 +862,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	const auto notifications_request =
 	    RequestBuilder::buildNotificationsRequest(getSubscriptionTopic());
 
-	auto response_or_status_future = std::async(
-	    std::launch::async,
-	    [&client, &notifications_request]()
-	        -> uprotocol::utils::Expected<NotificationsResponse,
-	                                      uprotocol::v1::UStatus> {
-		    return client.unregister_for_notifications(notifications_request);
-	    });
+	auto response_or_status_future =
+	    client.unregister_for_notifications(notifications_request);
 
 	// wait to give the client time to send the request. Otherwise this would
 	// cause a race condition

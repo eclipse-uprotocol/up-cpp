@@ -12,9 +12,9 @@
 #ifndef UP_CPP_CLIENT_USUBSCRIPTION_V3_USUBSCRIPTION_H
 #define UP_CPP_CLIENT_USUBSCRIPTION_V3_USUBSCRIPTION_H
 #include <uprotocol/core/usubscription/v3/usubscription.pb.h>
-#include <uprotocol/v1/umessage.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 
+#include "up-cpp/communication/RpcClient.h"
 #include "up-cpp/utils/Expected.h"
 
 namespace uprotocol::core::usubscription::v3 {
@@ -33,37 +33,45 @@ struct USubscription {
 	/// response on success or else a status code
 	///
 	/// @param subscription_request containing a topic to subscribe to
-	/// @return SubscriptionReponse on success and UStatus else
-	virtual ResponseOrStatus<SubscriptionResponse> subscribe(
-	    const SubscriptionRequest& subscription_request) = 0;
+	/// @return future that resolves to a SubscriptionReponse on success and
+	/// UStatus else
+	virtual communication::RpcClient::InvokeProtoFuture<SubscriptionResponse>
+	subscribe(const SubscriptionRequest& subscription_request) = 0;
 
 	/// @brief sends an unsubscribe request to a USubscription backend and a
 	/// response on success or else a status code
 	///
 	/// @param unsubscribe_request containing a topic to unsubscribe
-	/// @return UnsubscribeResponse on success and UStatus else
-	virtual ResponseOrStatus<UnsubscribeResponse> unsubscribe(
-	    const UnsubscribeRequest& unsubscribe_request) = 0;
+	/// @return future that resolves to UnsubscribeResponse on success and
+	/// UStatus else
+	virtual communication::RpcClient::InvokeProtoFuture<UnsubscribeResponse>
+	unsubscribe(const UnsubscribeRequest& unsubscribe_request) = 0;
 
 	/// @brief fetches all topics the client is subscribed to from the backend
 	///
 	/// @param fetch_subscriptions_request
-	/// @return FetchSubscriptionsResponse on success and UStatus else
-	virtual ResponseOrStatus<FetchSubscriptionsResponse> fetch_subscriptions(
+	/// @return future that resolves to FetchSubscriptionsResponse on success
+	/// and UStatus else
+	virtual communication::RpcClient::InvokeProtoFuture<
+	    FetchSubscriptionsResponse>
+	fetch_subscriptions(
 	    const FetchSubscriptionsRequest& fetch_subscriptions_request) = 0;
 
 	/// @brief registers for notifications to a USubscription backend
 	///
 	/// @param register_notifications_request
-	/// @return NotificationResponse on success and UStatus else
-	virtual ResponseOrStatus<NotificationsResponse> register_for_notifications(
+	/// @return future that resolves to NotificationResponse on success and
+	/// UStatus else
+	virtual communication::RpcClient::InvokeProtoFuture<NotificationsResponse>
+	register_for_notifications(
 	    const NotificationsRequest& register_notifications_request) = 0;
 
 	/// @brief unregisters for notifications to a USubscription backend
 	///
 	/// @param unregister_notifications_request
-	/// @return NotificationResponse on success and UStatus else
-	virtual ResponseOrStatus<NotificationsResponse>
+	/// @return future that resolves to NotificationResponse on success and
+	/// UStatus else
+	virtual communication::RpcClient::InvokeProtoFuture<NotificationsResponse>
 	unregister_for_notifications(
 	    const NotificationsRequest& unregister_notifications_request) = 0;
 
@@ -71,8 +79,11 @@ struct USubscription {
 	///
 	/// @param fetch_subscriptions_request containing the topic for which the
 	/// subscribers are fetched
-	/// @return FetchSubscriptionsResponse on success and UStatus else
-	virtual ResponseOrStatus<FetchSubscribersResponse> fetch_subscribers(
+	/// @return future that resolves to FetchSubscriptionsResponse on success
+	/// and UStatus else
+	virtual communication::RpcClient::InvokeProtoFuture<
+	    FetchSubscribersResponse>
+	fetch_subscribers(
 	    const FetchSubscribersRequest& fetch_subscribers_request) = 0;
 };
 
