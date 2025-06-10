@@ -82,12 +82,12 @@ cmake --build . -- -j
 
 Before building **up-cpp** we need to build all dependencies from **up-conan-recipes**:
 
-Please follow instruction for QNX build in file up-conan-recipes/README.md
+Please follow instruction for QNX build in file [up-conan-recipes/README.md](https://github.com/eclipse-uprotocol/up-conan-recipes/blob/main/README.md)
 
 Pre-requisite:
 
 * Build and install all **QNX build** dependencies from up-conan-recipes
-  - https://github.com/eclipse-uprotocol/up-conan-recipes/blob/main/README.md
+  - https://github.com/eclipse-uprotocol/up-conan-recipes
 
 ```bash
 # setup path to up-conan-recipes
