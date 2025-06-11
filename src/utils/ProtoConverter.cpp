@@ -1,5 +1,13 @@
 #include "up-cpp/utils/ProtoConverter.h"
 
+#include <spdlog/spdlog.h>
+#include <uprotocol/v1/ustatus.pb.h>
+
+#include <optional>
+
+#include "up-cpp/datamodel/builder/Payload.h"
+#include "up-cpp/utils/Expected.h"
+
 namespace uprotocol::utils {
 google::protobuf::Timestamp ProtoConverter::ConvertToProtoTimestamp(
     const std::chrono::system_clock::time_point& tp) {
@@ -74,6 +82,38 @@ UnsubscribeRequest ProtoConverter::BuildUnSubscribeRequest(
 	*unsubscribe_request.mutable_topic() = subscription_topic;
 
 	return unsubscribe_request;
+}
+
+FetchSubscriptionsRequest ProtoConverter::BuildFetchSubscriptionsRequest(
+    const v1::UUri& topic) {
+	FetchSubscriptionsRequest fetch_subscriptions_request;
+	*fetch_subscriptions_request.mutable_topic() = topic;
+
+	return fetch_subscriptions_request;
+}
+
+FetchSubscriptionsRequest ProtoConverter::BuildFetchSubscriptionsRequest(
+    const SubscriberInfo& subscriber) {
+	FetchSubscriptionsRequest fetch_subscriptions_request;
+	*fetch_subscriptions_request.mutable_subscriber() = subscriber;
+
+	return fetch_subscriptions_request;
+}
+
+FetchSubscribersRequest ProtoConverter::BuildFetchSubscribersRequest(
+    const v1::UUri& topic) {
+	FetchSubscribersRequest fetch_subscribers_request;
+	*fetch_subscribers_request.mutable_topic() = topic;
+
+	return fetch_subscribers_request;
+}
+
+NotificationsRequest ProtoConverter::BuildNotificationsRequest(
+    const v1::UUri& topic) {
+	NotificationsRequest notifications_request;
+	*notifications_request.mutable_topic() = topic;
+
+	return notifications_request;
 }
 
 }  // namespace uprotocol::utils

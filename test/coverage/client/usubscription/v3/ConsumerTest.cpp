@@ -17,6 +17,7 @@
 #include <string>
 
 #include "UTransportMock.h"
+#include "up-cpp/client/usubscription/v3/RequestBuilder.h"
 
 namespace {
 using MsgDiff = google::protobuf::util::MessageDifferencer;
@@ -106,7 +107,7 @@ TEST_F(ConsumerTest, ConstructorTestSuccess) {  // NOLINT
 	auto subscribe_request_ttl = std::chrono::milliseconds(REQUEST_TTL_TIME);
 	auto priority = uprotocol::v1::UPriority::UPRIORITY_CS4;
 
-	auto options = uprotocol::client::usubscription::v3::ConsumerOptions();
+	auto options = uprotocol::core::usubscription::v3::USubscriptionOptions();
 
 	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
@@ -131,7 +132,7 @@ TEST_F(ConsumerTest, SubscribeTestSuccess) {  // NOLINT
 	auto subscribe_request_ttl = std::chrono::milliseconds(REQUEST_TTL_TIME);
 	auto priority = uprotocol::v1::UPriority::UPRIORITY_CS4;
 
-	auto options = uprotocol::client::usubscription::v3::ConsumerOptions();
+	auto options = uprotocol::core::usubscription::v3::USubscriptionOptions();
 
 	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
@@ -177,7 +178,7 @@ TEST_F(ConsumerTest, UnsubscribeTestSuccess) {  // NOLINT
 	auto subscribe_request_ttl = std::chrono::milliseconds(REQUEST_TTL_TIME);
 	auto priority = uprotocol::v1::UPriority::UPRIORITY_CS4;
 
-	auto options = uprotocol::client::usubscription::v3::ConsumerOptions();
+	auto options = uprotocol::core::usubscription::v3::USubscriptionOptions();
 
 	auto consumer_or_status =
 	    uprotocol::client::usubscription::v3::Consumer::create(
