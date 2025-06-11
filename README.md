@@ -78,6 +78,36 @@ cd build/Debug
 cmake --build . -- -j
 ```
 
+### With Conan for QNX
+
+Before building **up-cpp** we need to build all dependencies from **up-conan-recipes**:
+
+Please follow instruction for QNX build in file [up-conan-recipes/README.md](https://github.com/eclipse-uprotocol/up-conan-recipes/blob/main/README.md)
+
+Pre-requisite:
+
+* Build and install all **QNX build** dependencies from up-conan-recipes
+  - https://github.com/eclipse-uprotocol/up-conan-recipes
+
+```bash
+# setup path to up-conan-recipes
+export QNX_CONAN_ROOT=<path_to_up-conan-recipes>
+
+# Install conan toolchain for QNX target
+#
+# <profile-name>: nto-7.1-aarch64-le, nto-7.1-x86_64, nto-8.0-aarch64-le, nto-8.0-x86_64
+# <version-number>: 1.0.0-rc0, 1.0.0, 1.0.1-rc1, 1.0.1
+#
+conan install -pr:h=$QNX_CONAN_ROOT/tools/profiles/<profile-name> --version=<version-number> --build=missing .
+
+cmake --preset conan-release
+
+cmake --build build/Release -- -j
+
+# all tests you can find under build/Release/bin/
+# copy test binaries to your QNX target
+```
+
 ### Generate UT Coverage
 
 To get code coverage, perform the steps above, but replace `cmake --preset...` with
