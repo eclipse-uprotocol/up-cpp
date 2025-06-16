@@ -97,11 +97,20 @@ protected:
 
 	uprotocol::v1::UUri getSubscriptionTopic() { return subscription_topic_; }
 
+	uprotocol::core::usubscription::v3::USubscriptionOptions
+	getUSubscriptionOptions() {
+		return options_;
+	}
+
 private:
 	std::shared_ptr<uprotocol::test::UTransportMock> client_transport_;
 	std::shared_ptr<uprotocol::test::UTransportMock> server_transport_;
 	uprotocol::v1::UUri server_method_uuri_;
 	uprotocol::v1::UUri subscription_topic_;
+	uprotocol::core::usubscription::v3::USubscriptionOptions options_ = {
+	    "core.usubscription",
+	    0x0000,
+	};
 
 public:
 	~RpcClientUSubscriptionTest() override = default;
@@ -139,7 +148,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto subscription_request =
 	    RequestBuilder::buildSubscriptionRequest(getSubscriptionTopic());
@@ -202,7 +211,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto subscription_request =
 	    RequestBuilder::buildSubscriptionRequest(getSubscriptionTopic());
@@ -268,7 +277,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto unsubscribe_request =
 	    RequestBuilder::buildUnsubscribeRequest(getSubscriptionTopic());
@@ -329,7 +338,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto unsubscribe_request =
 	    RequestBuilder::buildUnsubscribeRequest(getSubscriptionTopic());
@@ -396,7 +405,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto fetch_subscribers_request =
 	    RequestBuilder::buildFetchSubscribersRequest(getSubscriptionTopic());
@@ -459,7 +468,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto fetch_subscribers_request =
 	    RequestBuilder::buildFetchSubscribersRequest(getSubscriptionTopic());
@@ -527,7 +536,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const uprotocol::core::usubscription::v3::SubscriberInfo subscriber_info;
 	const auto fetch_subscriptions_request =
@@ -591,7 +600,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const uprotocol::core::usubscription::v3::SubscriberInfo subscriber_info;
 	const auto fetch_subscribers_request =
@@ -660,7 +669,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto notifications_request =
 	    RequestBuilder::buildNotificationsRequest(getSubscriptionTopic());
@@ -723,7 +732,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto notifications_request =
 	    RequestBuilder::buildNotificationsRequest(getSubscriptionTopic());
@@ -791,7 +800,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto notifications_request =
 	    RequestBuilder::buildNotificationsRequest(getSubscriptionTopic());
@@ -857,7 +866,7 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	EXPECT_TRUE(getServerTransport()->getListener());
 
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
-	    getClientTransport());
+	    getClientTransport(), getUSubscriptionOptions());
 
 	const auto notifications_request =
 	    RequestBuilder::buildNotificationsRequest(getSubscriptionTopic());

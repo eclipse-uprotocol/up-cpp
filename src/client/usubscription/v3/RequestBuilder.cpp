@@ -16,7 +16,7 @@
 namespace uprotocol::core::usubscription::v3 {
 
 SubscriptionRequest RequestBuilder::buildSubscriptionRequest(
-    const v1::UUri& topic, const USubscriptionOptions& options) {
+    const v1::UUri& topic, const CallOptions& options) {
 	auto attributes = utils::ProtoConverter::BuildSubscribeAttributes(
 	    options.when_expire, options.subscription_details,
 	    options.sample_period_ms);

@@ -17,10 +17,9 @@
 
 namespace uprotocol::client::usubscription::v3 {
 
-Consumer::Consumer(
-    std::shared_ptr<uprotocol::transport::UTransport> transport,
-    v1::UUri subscription_topic,
-    core::usubscription::v3::USubscriptionOptions consumer_options)
+Consumer::Consumer(std::shared_ptr<uprotocol::transport::UTransport> transport,
+                   v1::UUri subscription_topic,
+                   core::usubscription::v3::CallOptions consumer_options)
     : transport_(std::move(transport)),
       subscription_topic_(std::move(subscription_topic)),
       consumer_options_(std::move(consumer_options)),
@@ -34,12 +33,11 @@ Consumer::Consumer(
     std::shared_ptr<transport::UTransport> transport,
     const v1::UUri& subscription_topic, ListenCallback&& callback,
     v1::UPriority priority, std::chrono::milliseconds subscription_request_ttl,
-    core::usubscription::v3::USubscriptionOptions consumer_options) {
+    core::usubscription::v3::CallOptions consumer_options) {
 	auto consumer = std::make_unique<Consumer>(
 	    std::forward<std::shared_ptr<transport::UTransport>>(transport),
 	    std::forward<const v1::UUri>(subscription_topic),
-	    std::forward<core::usubscription::v3::USubscriptionOptions>(
-	        consumer_options));
+	    std::forward<core::usubscription::v3::CallOptions>(consumer_options));
 
 	// Attempt to connect create notification sink for updates.
 	auto status = consumer->createNotificationSink();

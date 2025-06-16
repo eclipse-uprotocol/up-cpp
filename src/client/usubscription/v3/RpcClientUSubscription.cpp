@@ -21,8 +21,12 @@ auto priority = uprotocol::v1::UPriority::UPRIORITY_CS4;  // MUST be >= 4
 namespace uprotocol::core::usubscription::v3 {
 
 RpcClientUSubscription::RpcClientUSubscription(
-    std::shared_ptr<transport::UTransport> transport)
+    std::shared_ptr<transport::UTransport> transport,
+    const USubscriptionOptions& options)
     : transport_(std::move(transport)) {
+	uuri_builder_.setAuthorityName(options.authority_name)
+	    .setInstanceId(options.instance_id);
+
 	subscribe_client_ = std::make_shared<communication::RpcClient>(
 	    transport_,
 	    uuri_builder_.getServiceUriWithResourceId(RESOURCE_ID_SUBSCRIBE),

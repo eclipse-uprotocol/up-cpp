@@ -51,7 +51,7 @@ struct Consumer {
 	    const v1::UUri& subscription_topic, ListenCallback&& callback,
 	    v1::UPriority priority,
 	    std::chrono::milliseconds subscription_request_ttl,
-	    core::usubscription::v3::USubscriptionOptions consumer_options);
+	    core::usubscription::v3::CallOptions consumer_options);
 
 	/// @brief Unsubscribe from the topic and call uSubscription service to
 	/// close the subscription.
@@ -76,10 +76,9 @@ protected:
 	///
 	/// @param transport Transport to register with.
 	/// @param subscriber_details Additional details about the subscriber.
-	Consumer(
-	    std::shared_ptr<transport::UTransport> transport,
-	    v1::UUri subscription_topic,
-	    core::usubscription::v3::USubscriptionOptions consumer_options = {});
+	Consumer(std::shared_ptr<transport::UTransport> transport,
+	         v1::UUri subscription_topic,
+	         core::usubscription::v3::CallOptions consumer_options = {});
 
 private:
 	// Transport
@@ -88,7 +87,7 @@ private:
 	// Topic to subscribe to
 	const v1::UUri subscription_topic_;
 	// Additional details about uSubscription service
-	core::usubscription::v3::USubscriptionOptions consumer_options_;
+	core::usubscription::v3::CallOptions consumer_options_;
 
 	// URI info about the uSubscription service
 	core::usubscription::v3::USubscriptionUUriBuilder uSubscriptionUUriBuilder_;
@@ -110,10 +109,10 @@ private:
 	friend std::unique_ptr<Consumer>
 	std::make_unique<Consumer, std::shared_ptr<transport::UTransport>,
 	                 const uprotocol::v1::UUri,
-	                 uprotocol::core::usubscription::v3::USubscriptionOptions>(
+	                 uprotocol::core::usubscription::v3::CallOptions>(
 	    std::shared_ptr<uprotocol::transport::UTransport>&&,
 	    const uprotocol::v1::UUri&&,
-	    uprotocol::core::usubscription::v3::USubscriptionOptions&&);
+	    uprotocol::core::usubscription::v3::CallOptions&&);
 
 	/// @brief Build SubscriptionRequest for subscription request
 	SubscriptionRequest buildSubscriptionRequest();

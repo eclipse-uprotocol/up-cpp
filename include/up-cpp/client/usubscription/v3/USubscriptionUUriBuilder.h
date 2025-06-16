@@ -33,6 +33,16 @@ public:
 	/// @brief Constructor for uSubscriptionUUriBuilder.
 	USubscriptionUUriBuilder();
 
+	USubscriptionUUriBuilder& setAuthorityName(
+	    const std::string& authority_name);
+
+	USubscriptionUUriBuilder& setUEntityId(u_int32_t ue_id);
+
+	USubscriptionUUriBuilder& setInstanceId(u_int16_t instance_id);
+
+	USubscriptionUUriBuilder& setServiceId(u_int16_t service_id);
+
+	USubscriptionUUriBuilder& setResourceId(u_int32_t resource_id);
 	/// @brief Get the URI with a specific resource ID.
 	///
 	/// @param resource_id The resource ID to set in the URI.

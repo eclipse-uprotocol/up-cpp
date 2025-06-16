@@ -45,6 +45,11 @@ namespace uprotocol::core::usubscription::v3 {
 using v3::SubscriptionRequest;
 using v3::UnsubscribeRequest;
 
+struct USubscriptionOptions {
+	std::string authority_name;
+	uint16_t instance_id = 0x0000;
+};
+
 /// @brief Client which implements the USubscription interface
 struct RpcClientUSubscription : USubscription {
 	using RpcClientUSubscriptionOrStatus =
@@ -110,8 +115,11 @@ struct RpcClientUSubscription : USubscription {
 	/// @brief Constructor
 	///
 	/// @param transport Transport used to send messages
+	/// @param options Struct containing all options for the USubscription
+	/// client
 	explicit RpcClientUSubscription(
-	    std::shared_ptr<transport::UTransport> transport);
+	    std::shared_ptr<transport::UTransport> transport,
+	    const USubscriptionOptions& options);
 
 	~RpcClientUSubscription() override = default;
 

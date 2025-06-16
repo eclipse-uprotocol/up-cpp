@@ -27,11 +27,11 @@ namespace uprotocol::core::usubscription::v3 {
 class RequestBuilderTest : public ::testing::Test {
 private:
 	v1::UUri source_;
-	USubscriptionOptions options_;
+	CallOptions options_;
 
 protected:
 	const v1::UUri& getSource() const { return source_; }
-	const USubscriptionOptions& getOptions() const { return options_; }
+	const CallOptions& getOptions() const { return options_; }
 
 	void SetUp() override {
 		// Create a UUri object for testing

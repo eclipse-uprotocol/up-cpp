@@ -18,11 +18,11 @@
 
 namespace uprotocol::core::usubscription::v3 {
 
-/// @struct USubscriptionOptions
+/// @struct CallOptions
 /// @brief Additional details for uSubscription service.
 ///
 /// Each member represents an optional parameter for the uSubscription service.
-struct USubscriptionOptions {
+struct CallOptions {
 	/// Permission level of the subscription request
 	std::optional<uint32_t> permission_level;
 	/// TAP token for access.
@@ -48,7 +48,7 @@ struct RequestBuilder {
 	///
 	/// @return A `SubscriptionRequest` configured for the specified topic.
 	static SubscriptionRequest buildSubscriptionRequest(
-	    const v1::UUri& topic, const USubscriptionOptions& options = {});
+	    const v1::UUri& topic, const CallOptions& options = {});
 
 	/// @brief Builds an unsubscription request for a given topic.
 	///

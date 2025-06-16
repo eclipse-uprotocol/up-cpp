@@ -16,6 +16,8 @@
 
 constexpr uint16_t RESOURCE_ID_TEST = 0x0001;
 constexpr uint16_t RESOURCE_ID_NOTIFICATION_ID = 0x8000;
+// test ue id with instance id 1 and service id 2
+constexpr uint32_t TEST_UE_ID = 0x00010002;
 
 namespace uprotocol::core::usubscription::v3 {
 class USubscriptionUUriBuilderTest : public ::testing::Test {
@@ -27,7 +29,7 @@ protected:
 
 	void SetUp() override {
 		expected_uri_.set_authority_name("core.usubscription");
-		expected_uri_.set_ue_id(0);
+		expected_uri_.set_ue_id(TEST_UE_ID);
 		expected_uri_.set_ue_version_major(3);
 	}
 
@@ -38,7 +40,10 @@ TEST_F(USubscriptionUUriBuilderTest, GetServiceUriWithResourceId) {  // NOLINT
 	// Example test case for building a subscription UUri
 	auto expected_uri = getExpectedUri();
 	expected_uri.set_resource_id(RESOURCE_ID_TEST);
-	const USubscriptionUUriBuilder builder;
+	USubscriptionUUriBuilder builder;
+	builder.setAuthorityName("core.usubscription")
+	    .setInstanceId(1)
+	    .setServiceId(2);
 	const v1::UUri actual_uri =
 	    builder.getServiceUriWithResourceId(RESOURCE_ID_TEST);
 
@@ -51,6 +56,9 @@ TEST_F(USubscriptionUUriBuilderTest, GetNotificationUri) {  // NOLINT
 	auto expected_uri = getExpectedUri();
 	expected_uri.set_resource_id(RESOURCE_ID_NOTIFICATION_ID);
 	USubscriptionUUriBuilder builder;
+	builder.setAuthorityName("core.usubscription")
+	    .setInstanceId(1)
+	    .setServiceId(2);
 	v1::UUri actual_uri = builder.getNotificationUri();
 	EXPECT_TRUE(actual_uri.IsInitialized());
 	EXPECT_EQ(actual_uri.GetTypeName(), "uprotocol.v1.UUri");

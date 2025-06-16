@@ -117,7 +117,6 @@ struct ProtoConverter {
 				}
 				return TOrStatus<T>(response);
 			}
-			case v1::UPayloadFormat::UPAYLOAD_FORMAT_UNSPECIFIED:
 			case v1::UPayloadFormat::UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY: {
 				google::protobuf::Any any;
 				if (!any.ParseFromString(message.payload())) {
@@ -138,6 +137,7 @@ struct ProtoConverter {
 				}
 				return TOrStatus<T>(response);
 			}
+			case v1::UPayloadFormat::UPAYLOAD_FORMAT_UNSPECIFIED:
 			case v1::UPayloadFormat::UPAYLOAD_FORMAT_JSON:
 			case v1::UPayloadFormat::UPAYLOAD_FORMAT_SOMEIP:
 			case v1::UPayloadFormat::UPAYLOAD_FORMAT_SOMEIP_TLV:

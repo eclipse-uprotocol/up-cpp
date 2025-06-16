@@ -180,24 +180,30 @@ struct RpcClient {
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] InvokeFuture invokeMethod(const v1::UUri&);
 
+	template <typename R>
+	InvokeHandle invokeProtoMethod(const R& request_message,
+	                               Callback&& callback) {
+		auto payload_or_status =
+		    uprotocol::utils::ProtoConverter::protoToPayload(request_message);
+
+		if (!payload_or_status.has_value()) {
+			return {};
+		}
+
+		datamodel::builder::Payload tmp_payload(payload_or_status.value());
+		auto handle = invokeMethod(builder_.build(std::move(tmp_payload)),
+		                           std::move(callback));
+
+		return handle;
+	}
+
 	template <typename T, typename R>
 	InvokeProtoFuture<T> invokeProtoMethod(const v1::UUri& method, const R& request_message) {
 		auto result_promise =
 		    std::make_shared<std::promise<ResponseOrStatus<T>>>();
 		auto future = result_promise->get_future();
-		auto payload_or_status =
-		    uprotocol::utils::ProtoConverter::protoToPayload(request_message);
-
-		if (!payload_or_status.has_value()) {
-			result_promise->set_value(ResponseOrStatus<T>(
-			    UnexpectedStatus(payload_or_status.error())));
-			return {std::move(future), InvokeHandle()};
-		}
-
-		datamodel::builder::Payload tmp_payload(payload_or_status.value());
-
-		auto handle = invokeMethod(
-		    builder_.build(std::move(tmp_payload)),
+		auto handle = invokeProtoMethod(
+		    request_message,
 		    [result_promise](const MessageOrStatus& message_or_status) {
 			    if (!message_or_status.has_value()) {
 				    result_promise->set_value(ResponseOrStatus<T>(
@@ -219,6 +225,28 @@ struct RpcClient {
 
 			    result_promise->set_value(
 			        ResponseOrStatus<T>(response_or_status.value()));
+		    });
+
+		return {std::move(future), std::move(handle)};
+	}
+
+	template <typename R>
+	InvokeFuture invokeProtoMethod(const R& request_message) {
+		auto result_promise =
+		    std::make_shared<std::promise<ResponseOrStatus<v1::UMessage>>>();
+		auto future = result_promise->get_future();
+
+		auto handle = invokeProtoMethod(
+		    request_message,
+		    [result_promise](const MessageOrStatus& message_or_status) {
+			    if (!message_or_status.has_value()) {
+				    result_promise->set_value(ResponseOrStatus<v1::UMessage>(
+				        UnexpectedStatus(message_or_status.error())));
+				    return;
+			    }
+
+			    result_promise->set_value(
+			        ResponseOrStatus<v1::UMessage>(message_or_status.value()));
 		    });
 
 		return {std::move(future), std::move(handle)};
