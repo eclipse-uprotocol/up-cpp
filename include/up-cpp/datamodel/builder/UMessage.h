@@ -23,7 +23,12 @@
 #include <string>
 #include <vector>
 
+#include "up-cpp/communication/NotificationSink.h"
 #include "up-cpp/datamodel/builder/Uuid.h"
+
+namespace uprotocol::communication {
+struct RpcClient;
+}
 
 namespace uprotocol::datamodel::builder {
 
@@ -38,6 +43,7 @@ namespace uprotocol::datamodel::builder {
 ///          instance can be held and reused by calling .build(payload)
 ///          for each new set of message data.
 struct UMessageBuilder {
+	friend struct communication::RpcClient;
 	/// @brief Pre-populates a message builder with the attributes of a
 	///        "publish" type message.
 	///
@@ -102,6 +108,17 @@ struct UMessageBuilder {
 	/// @throws InvalidUUri if URI fails validation.
 	/// @returns UMessageBuilder configured to build a "response" message
 	static UMessageBuilder response(const v1::UMessage& request);
+
+	/// @brief Set the method attribute for built messages.
+	///
+	/// @param The method to use when building messages.
+	///
+	/// @throws std::out_of_range when setting a priority lower than CS4
+	///                           for "request" or "response" messages.
+	/// @throws std::out_of_range if the value is outside of the range of
+	///                           v1::UPriority
+	/// @returns A reference to this UMessageBuilder
+	UMessageBuilder& withMethod(const v1::UUri&);
 
 	/// @brief Set the message priority attribute for built messages.
 	///

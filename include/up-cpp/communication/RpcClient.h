@@ -48,8 +48,7 @@ struct RpcClient {
 	/// For guidance on the permeission_level and token parameters, see:
 	/// https://github.com/eclipse-uprotocol/up-spec/blob/main/basics/permissions.adoc
 	explicit RpcClient(std::shared_ptr<transport::UTransport> transport,
-	                   v1::UUri&& method, v1::UPriority priority,
-	                   std::chrono::milliseconds ttl,
+	                   v1::UPriority priority, std::chrono::milliseconds ttl,
 	                   std::optional<v1::UPayloadFormat> payload_format = {},
 	                   std::optional<uint32_t> permission_level = {},
 	                   std::optional<std::string> token = {});
@@ -100,6 +99,7 @@ struct RpcClient {
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
+	/// @param The method that will be invoked
 	/// @param A Payload builder containing the payload to be sent with the
 	///        request.
 	/// @param A callback that will be called with the result.
@@ -111,11 +111,13 @@ struct RpcClient {
 	///       * A UStatus based on the commstatus received in the response
 	///         message (if not OK).
 	///       * A UMessage containing the response from the RPC target.
-	[[nodiscard]] InvokeHandle invokeMethod(datamodel::builder::Payload&&,
+	[[nodiscard]] InvokeHandle invokeMethod(const v1::UUri&,
+	                                        datamodel::builder::Payload&&,
 	                                        Callback&&);
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
+	/// @param The method that will be invoked
 	/// @param A Payload builder containing the payload to be sent with the
 	///        request.
 	///
@@ -128,13 +130,15 @@ struct RpcClient {
 	///          * A UStatus based on the commstatus received in the response
 	///            message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
-	[[nodiscard]] InvokeFuture invokeMethod(datamodel::builder::Payload&&);
+	[[nodiscard]] InvokeFuture invokeMethod(const v1::UUri&,
+	                                        datamodel::builder::Payload&&);
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
 	/// Request is sent with an empty payload. Can only be called if no payload
 	/// format was provided at construction time.
 	///
+	/// @param The method that will be invoked
 	/// @param A callback that will be called with the result.
 	///
 	/// @post The provided callback will be called with one of:
@@ -144,13 +148,14 @@ struct RpcClient {
 	///       * A UStatus based on the commstatus received in the response
 	///         message (if not OK).
 	///       * A UMessage containing the response from the RPC target.
-	[[nodiscard]] InvokeHandle invokeMethod(Callback&&);
+	[[nodiscard]] InvokeHandle invokeMethod(const v1::UUri&, Callback&&);
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
 	/// Request is sent with an empty payload. Can only be called if no payload
 	/// format was provided at construction time.
 	///
+	/// @param The method that will be invoked
 	/// @remarks This is a wrapper around the callback form of invokeMethod.
 	///
 	/// @returns A promised future that can resolve to one of:
@@ -160,7 +165,7 @@ struct RpcClient {
 	///          * A UStatus based on the commstatus received in the response
 	///            message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
-	[[nodiscard]] InvokeFuture invokeMethod();
+	[[nodiscard]] InvokeFuture invokeMethod(const v1::UUri&);
 
 	/// @brief Default move constructor (defined in RpcClient.cpp)
 	RpcClient(RpcClient&&) noexcept;
