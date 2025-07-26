@@ -223,6 +223,16 @@ TEST_F(RpcClientTest, InvokeFutureWithoutPayload) {  // NOLINT
 	}
 }
 
+TEST_F(RpcClientTest, InvokeFutureWithInvalidMethod) {  // NOLINT
+	auto client = communication::RpcClient(
+	    getTransport(), v1::UPriority::UPRIORITY_CS4, TEN_MILLISECONDS);
+
+	decltype(client.invokeMethod(v1::UUri{})) invoke_future;
+	EXPECT_THROW(invoke_future =  // NOLINT
+	             client.invokeMethod(v1::UUri{}),
+	             std::invalid_argument);
+}
+
 TEST_F(RpcClientTest, InvokeFutureWithoutPayloadAndFormatSet) {  // NOLINT
 	auto client = communication::RpcClient(
 	    getTransport(), v1::UPriority::UPRIORITY_CS4, TEN_MILLISECONDS,
@@ -548,7 +558,7 @@ TEST_F(RpcClientTest, InvokeFutureWithPayloadCommstatus) {  // NOLINT
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// RpcClient::invokeMethod(methodUri()Callback)
+// RpcClient::invokeMethod(methodUri(),Callback)
 TEST_F(RpcClientTest, InvokeCallbackWithoutPayload) {  // NOLINT
 	auto client = communication::RpcClient(
 	    getTransport(), v1::UPriority::UPRIORITY_CS4, TEN_MILLISECONDS);
@@ -714,7 +724,7 @@ TEST_F(RpcClientTest, InvokeCallbackWithoutPayloadCommstatus) {  // NOLINT
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// RpcClient::invokeMethod(methodUri()Payload, Callback)
+// RpcClient::invokeMethod(methodUri(), Payload, Callback)
 TEST_F(RpcClientTest, InvokeCallbackWithPayload) {  // NOLINT
 	auto client = communication::RpcClient(
 	    getTransport(), v1::UPriority::UPRIORITY_CS4, TEN_MILLISECONDS);
@@ -799,6 +809,43 @@ TEST_F(RpcClientTest, InvokeCallbackWithPayloadAndWrongFormatSet) {  // NOLINT
 	EXPECT_THROW(  // NOLINT
 	    handle = client.invokeMethod(methodUri(), fakePayload(), [](auto) {}),
 	    datamodel::builder::UMessageBuilder::UnexpectedFormat);
+
+	EXPECT_EQ(getTransport()->getSendCount(), 0);
+	EXPECT_FALSE(getTransport()->getListener());
+}
+
+TEST_F(RpcClientTest, InvokeCallbackWithPayloadAndInvalidMethod) {  // NOLINT
+	auto client = communication::RpcClient(
+	    getTransport(), v1::UPriority::UPRIORITY_CS4, TEN_MILLISECONDS);
+
+	auto payload = fakePayload();
+	auto payload_content = payload.buildCopy();
+
+	bool callback_called = false;
+	v1::UMessage received_response;
+
+	communication::RpcClient::InvokeHandle handle;
+	EXPECT_THROW(  // NOLINT
+	    handle = client.invokeMethod(
+	        v1::UUri{}, std::move(payload),
+	        [&callback_called, &received_response](auto maybe_response) {
+		        callback_called = true;
+		        EXPECT_TRUE(maybe_response);
+		        received_response = std::move(maybe_response).value();
+	        }),
+	    std::invalid_argument);
+}
+
+TEST_F(RpcClientTest,  // NOLINT
+       InvokeCallbackWithPayloadAndFormatAndInvalidMethod) {
+	auto client = communication::RpcClient(
+	    getTransport(), v1::UPriority::UPRIORITY_CS4, TEN_MILLISECONDS,
+	    v1::UPayloadFormat::UPAYLOAD_FORMAT_TEXT);
+
+	communication::RpcClient::InvokeHandle handle;
+	EXPECT_THROW(  // NOLINT
+	    handle = client.invokeMethod(v1::UUri{}, fakePayload(), [](auto) {}),
+	    std::invalid_argument);
 
 	EXPECT_EQ(getTransport()->getSendCount(), 0);
 	EXPECT_FALSE(getTransport()->getListener());

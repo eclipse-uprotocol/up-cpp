@@ -113,10 +113,8 @@ struct UMessageBuilder {
 	///
 	/// @param The method to use when building messages.
 	///
-	/// @throws std::out_of_range when setting a priority lower than CS4
-	///                           for "request" or "response" messages.
-	/// @throws std::out_of_range if the value is outside of the range of
-	///                           v1::UPriority
+	/// @throws std::out_of_range if the value is not a valid method UUri
+	///
 	/// @returns A reference to this UMessageBuilder
 	UMessageBuilder& withMethod(const v1::UUri&);
 
