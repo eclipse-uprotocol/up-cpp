@@ -137,6 +137,18 @@ UMessageBuilder& UMessageBuilder::withPriority(v1::UPriority priority) {
 	return *this;
 }
 
+UMessageBuilder& UMessageBuilder::withMethod(const v1::UUri& method) {
+	auto [isValid, reason] = validator::uri::isValidRpcMethod(method);
+	if (!isValid) {
+		throw std::invalid_argument(
+		    "The UUri provided is not a valid RpcMethod");
+	}
+
+	*attributes_.mutable_sink() = method;
+
+	return *this;
+}
+
 UMessageBuilder& UMessageBuilder::withTtl(std::chrono::milliseconds ttl) {
 	if ((ttl.count() <= 0) ||
 	    (ttl.count() > std::numeric_limits<uint32_t>::max())) {

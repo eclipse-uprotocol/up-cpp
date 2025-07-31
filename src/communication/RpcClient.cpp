@@ -99,17 +99,19 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 RpcClient::RpcClient(std::shared_ptr<transport::UTransport> transport,
-                     v1::UUri&& method, v1::UPriority priority,
-                     std::chrono::milliseconds ttl,
+                     v1::UPriority priority, std::chrono::milliseconds ttl,
                      std::optional<v1::UPayloadFormat> payload_format,
                      std::optional<uint32_t> permission_level,
                      std::optional<std::string> token)
     : transport_(std::move(transport)),
       ttl_(ttl),
-      builder_(datamodel::builder::UMessageBuilder::request(
-          std::move(method), v1::UUri(transport_->getEntityUri()), priority,
-          ttl_)),
+      builder_(datamodel::builder::UMessageBuilder(
+          v1::UMESSAGE_TYPE_REQUEST, v1::UUri(transport_->getEntityUri()),
+          v1::UUri{})),
       expire_service_(std::make_unique<ExpireService>()) {
+	builder_.withPriority(priority);
+	builder_.withTtl(ttl);
+
 	if (payload_format) {
 		builder_.withPayloadFormat(*payload_format);
 	}
@@ -204,17 +206,20 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 }
 
 RpcClient::InvokeHandle RpcClient::invokeMethod(
-    datamodel::builder::Payload&& payload, Callback&& callback) {
-	return invokeMethod(builder_.build(std::move(payload)),
+    const v1::UUri& method, datamodel::builder::Payload&& payload,
+    Callback&& callback) {
+	return invokeMethod(builder_.withMethod(method).build(std::move(payload)),
 	                    std::move(callback));
 }
 
-RpcClient::InvokeHandle RpcClient::invokeMethod(Callback&& callback) {
-	return invokeMethod(builder_.build(), std::move(callback));
+RpcClient::InvokeHandle RpcClient::invokeMethod(const v1::UUri& method,
+                                                Callback&& callback) {
+	return invokeMethod(builder_.withMethod(method).build(),
+	                    std::move(callback));
 }
 
 RpcClient::InvokeFuture RpcClient::invokeMethod(
-    datamodel::builder::Payload&& payload) {
+    const v1::UUri& method, datamodel::builder::Payload&& payload) {
 	// Note: functors need to be copy constructable. We work around this by
 	// wrapping the promise in a shared_ptr. Unique access to it will be
 	// assured by the implementation at the core of invokeMethod - it only
@@ -222,7 +227,7 @@ RpcClient::InvokeFuture RpcClient::invokeMethod(
 	auto promise = std::make_shared<std::promise<MessageOrStatus>>();
 	auto future = promise->get_future();
 	auto handle =
-	    invokeMethod(std::move(payload),
+	    invokeMethod(method, std::move(payload),
 	                 [promise](const MessageOrStatus& maybe_message) mutable {
 		                 promise->set_value(maybe_message);
 	                 });
@@ -230,15 +235,15 @@ RpcClient::InvokeFuture RpcClient::invokeMethod(
 	return {std::move(future), std::move(handle)};
 }
 
-RpcClient::InvokeFuture RpcClient::invokeMethod() {
+RpcClient::InvokeFuture RpcClient::invokeMethod(const v1::UUri& method) {
 	// Note: functors need to be copy constructable. We work around this by
 	// wrapping the promise in a shared_ptr. Unique access to it will be
 	// assured by the implementation at the core of invokeMethod - it only
 	// allows exactly one call to the callback via std::call_once.
 	auto promise = std::make_shared<std::promise<MessageOrStatus>>();
 	auto future = promise->get_future();
-	auto handle =
-	    invokeMethod([promise](const MessageOrStatus& maybe_message) mutable {
+	auto handle = invokeMethod(
+	    method, [promise](const MessageOrStatus& maybe_message) mutable {
 		    promise->set_value(maybe_message);
 	    });
 

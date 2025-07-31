@@ -91,8 +91,7 @@ v1::UStatus Consumer::subscribe(
     v1::UPriority priority, std::chrono::milliseconds subscription_request_ttl,
     ListenCallback&& callback) {
 	rpc_client_ = std::make_unique<communication::RpcClient>(
-	    transport_, uSubscriptionUUriBuilder_.getServiceUriWithResourceId(1),
-	    priority, subscription_request_ttl);
+	    transport_, priority, subscription_request_ttl);
 
 	auto on_response = [this](const auto& maybe_response) {
 		if (maybe_response.has_value() &&
@@ -110,8 +109,9 @@ v1::UStatus Consumer::subscribe(
 	SubscriptionRequest const subscription_request = buildSubscriptionRequest();
 	auto payload = datamodel::builder::Payload(subscription_request);
 
-	rpc_handle_ =
-	    rpc_client_->invokeMethod(std::move(payload), std::move(on_response));
+	rpc_handle_ = rpc_client_->invokeMethod(
+	    uSubscriptionUUriBuilder_.getServiceUriWithResourceId(1),
+	    std::move(payload), std::move(on_response));
 
 	// Create a L2 subscription
 	auto result = communication::Subscriber::subscribe(
@@ -135,8 +135,7 @@ UnsubscribeRequest Consumer::buildUnsubscriptionRequest() {
 void Consumer::unsubscribe(v1::UPriority priority,
                            std::chrono::milliseconds request_ttl) {
 	rpc_client_ = std::make_unique<communication::RpcClient>(
-	    transport_, uSubscriptionUUriBuilder_.getServiceUriWithResourceId(2),
-	    priority, request_ttl);
+	    transport_, priority, request_ttl);
 
 	auto on_response = [](const auto& maybe_response) {
 		if (!maybe_response.has_value()) {
@@ -147,8 +146,9 @@ void Consumer::unsubscribe(v1::UPriority priority,
 	UnsubscribeRequest const unsubscribe_request = buildUnsubscriptionRequest();
 	auto payload = datamodel::builder::Payload(unsubscribe_request);
 
-	rpc_handle_ =
-	    rpc_client_->invokeMethod(std::move(payload), std::move(on_response));
+	rpc_handle_ = rpc_client_->invokeMethod(
+	    uSubscriptionUUriBuilder_.getServiceUriWithResourceId(2),
+	    std::move(payload), std::move(on_response));
 
 	subscriber_.reset();
 }
