@@ -27,87 +27,62 @@ RpcClientUSubscription::RpcClientUSubscription(
 	uuri_builder_.setAuthorityName(options.authority_name)
 	    .setInstanceId(options.instance_id);
 
-	subscribe_client_ = std::make_shared<communication::RpcClient>(
-	    transport_,
-	    uuri_builder_.getServiceUriWithResourceId(RESOURCE_ID_SUBSCRIBE),
-	    priority, USUBSCRIPTION_REQUEST_TTL);
-
-	unsubscribe_client_ = std::make_shared<communication::RpcClient>(
-	    transport_,
-	    uuri_builder_.getServiceUriWithResourceId(RESOURCE_ID_UNSUBSCRIBE),
-	    priority, USUBSCRIPTION_REQUEST_TTL);
-
-	fetch_subscriptions_client_ = std::make_shared<communication::RpcClient>(
-	    transport_,
-	    uuri_builder_.getServiceUriWithResourceId(
-	        RESOURCE_ID_FETCH_SUBSCRIPTIONS),
-	    priority, USUBSCRIPTION_REQUEST_TTL);
-
-	fetch_subscribers_client_ = std::make_shared<communication::RpcClient>(
-	    transport_,
-	    uuri_builder_.getServiceUriWithResourceId(
-	        RESOURCE_ID_FETCH_SUBSCRIBERS),
-	    priority, USUBSCRIPTION_REQUEST_TTL);
-
-	register_for_notification_client_ =
-	    std::make_shared<communication::RpcClient>(
-	        transport_,
-	        uuri_builder_.getServiceUriWithResourceId(
-	            RESOURCE_ID_REGISTER_FOR_NOTIFICATIONS),
-	        priority, USUBSCRIPTION_REQUEST_TTL);
-
-	unregister_for_notification_client_ =
-	    std::make_shared<communication::RpcClient>(
-	        transport_,
-	        uuri_builder_.getServiceUriWithResourceId(
-	            RESOURCE_ID_UNREGISTER_FOR_NOTIFICATIONS),
-	        priority, USUBSCRIPTION_REQUEST_TTL);
+	rpc_client_ = std::make_shared<communication::RpcClient>(
+	    transport_, priority, USUBSCRIPTION_REQUEST_TTL);
 }
 
 communication::RpcClient::InvokeProtoFuture<SubscriptionResponse>
 RpcClientUSubscription::subscribe(
     const SubscriptionRequest& subscription_request) {
-	return subscribe_client_->invokeProtoMethod<SubscriptionResponse>(
-	    subscription_request);
+	auto method =
+	    uuri_builder_.getServiceUriWithResourceId(RESOURCE_ID_SUBSCRIBE);
+	return rpc_client_->invokeProtoMethod<SubscriptionResponse>(
+	    method, subscription_request);
 }
 
 communication::RpcClient::InvokeProtoFuture<UnsubscribeResponse>
 RpcClientUSubscription::unsubscribe(
     const UnsubscribeRequest& unsubscribe_request) {
-	return unsubscribe_client_->invokeProtoMethod<UnsubscribeResponse>(
-	    unsubscribe_request);
+	auto method =
+	    uuri_builder_.getServiceUriWithResourceId(RESOURCE_ID_UNSUBSCRIBE);
+	return rpc_client_->invokeProtoMethod<UnsubscribeResponse>(
+	    method, unsubscribe_request);
 }
 
 communication::RpcClient::InvokeProtoFuture<FetchSubscriptionsResponse>
 RpcClientUSubscription::fetch_subscriptions(
     const FetchSubscriptionsRequest& fetch_subscriptions_request) {
-	return fetch_subscriptions_client_
-	    ->invokeProtoMethod<FetchSubscriptionsResponse>(
-	        fetch_subscriptions_request);
+	auto method = uuri_builder_.getServiceUriWithResourceId(
+	    RESOURCE_ID_FETCH_SUBSCRIPTIONS);
+	return rpc_client_->invokeProtoMethod<FetchSubscriptionsResponse>(
+	    method, fetch_subscriptions_request);
 }
 
 communication::RpcClient::InvokeProtoFuture<FetchSubscribersResponse>
 RpcClientUSubscription::fetch_subscribers(
     const FetchSubscribersRequest& fetch_subscribers_request) {
-	return fetch_subscribers_client_
-	    ->invokeProtoMethod<FetchSubscribersResponse>(
-	        fetch_subscribers_request);
+	auto method = uuri_builder_.getServiceUriWithResourceId(
+	    RESOURCE_ID_FETCH_SUBSCRIBERS);
+	return rpc_client_->invokeProtoMethod<FetchSubscribersResponse>(
+	    method, fetch_subscribers_request);
 }
 
 communication::RpcClient::InvokeProtoFuture<NotificationsResponse>
 RpcClientUSubscription::register_for_notifications(
     const NotificationsRequest& register_notifications_request) {
-	return register_for_notification_client_
-	    ->invokeProtoMethod<NotificationsResponse>(
-	        register_notifications_request);
+	auto method = uuri_builder_.getServiceUriWithResourceId(
+	    RESOURCE_ID_REGISTER_FOR_NOTIFICATIONS);
+	return rpc_client_->invokeProtoMethod<NotificationsResponse>(
+	    method, register_notifications_request);
 }
 
 communication::RpcClient::InvokeProtoFuture<NotificationsResponse>
 RpcClientUSubscription::unregister_for_notifications(
     const NotificationsRequest& unregister_notifications_request) {
-	return unregister_for_notification_client_
-	    ->invokeProtoMethod<NotificationsResponse>(
-	        unregister_notifications_request);
+	auto method = uuri_builder_.getServiceUriWithResourceId(
+	    RESOURCE_ID_UNREGISTER_FOR_NOTIFICATIONS);
+	return rpc_client_->invokeProtoMethod<NotificationsResponse>(
+	    method, unregister_notifications_request);
 }
 
 }  // namespace uprotocol::core::usubscription::v3

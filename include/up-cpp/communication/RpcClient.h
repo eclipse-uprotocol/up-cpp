@@ -181,7 +181,8 @@ struct RpcClient {
 	[[nodiscard]] InvokeFuture invokeMethod(const v1::UUri&);
 
 	template <typename R>
-	InvokeHandle invokeProtoMethod(const R& request_message,
+	InvokeHandle invokeProtoMethod(const v1::UUri& method,
+	                               const R& request_message,
 	                               Callback&& callback) {
 		auto payload_or_status =
 		    uprotocol::utils::ProtoConverter::protoToPayload(request_message);
@@ -191,19 +192,21 @@ struct RpcClient {
 		}
 
 		datamodel::builder::Payload tmp_payload(payload_or_status.value());
-		auto handle = invokeMethod(builder_.build(std::move(tmp_payload)),
-		                           std::move(callback));
+		auto handle = invokeMethod(
+		    builder_.withMethod(method).build(std::move(tmp_payload)),
+		    std::move(callback));
 
 		return handle;
 	}
 
 	template <typename T, typename R>
-	InvokeProtoFuture<T> invokeProtoMethod(const v1::UUri& method, const R& request_message) {
+	InvokeProtoFuture<T> invokeProtoMethod(const v1::UUri& method,
+	                                       const R& request_message) {
 		auto result_promise =
 		    std::make_shared<std::promise<ResponseOrStatus<T>>>();
 		auto future = result_promise->get_future();
 		auto handle = invokeProtoMethod(
-		    request_message,
+		    method, request_message,
 		    [result_promise](const MessageOrStatus& message_or_status) {
 			    if (!message_or_status.has_value()) {
 				    result_promise->set_value(ResponseOrStatus<T>(
@@ -231,13 +234,14 @@ struct RpcClient {
 	}
 
 	template <typename R>
-	InvokeFuture invokeProtoMethod(const R& request_message) {
+	InvokeFuture invokeProtoMethod(const v1::UUri& method,
+	                               const R& request_message) {
 		auto result_promise =
 		    std::make_shared<std::promise<ResponseOrStatus<v1::UMessage>>>();
 		auto future = result_promise->get_future();
 
 		auto handle = invokeProtoMethod(
-		    request_message,
+		    method, request_message,
 		    [result_promise](const MessageOrStatus& message_or_status) {
 			    if (!message_or_status.has_value()) {
 				    result_promise->set_value(ResponseOrStatus<v1::UMessage>(

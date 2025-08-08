@@ -125,19 +125,7 @@ struct RpcClientUSubscription : USubscription {
 
 private:
 	std::shared_ptr<transport::UTransport> transport_;
-	// Currently a single RpcClient can only send messages to a fixed UUri.
-	// This forces us to use different RpcClients for different resource ids.
-	// The alternative would be to create a new RpcClient for each request and
-	// return a pointer to the client together with the InvokeProtoFuture to
-	// keep it alive
-	std::shared_ptr<communication::RpcClient> subscribe_client_;
-	std::shared_ptr<communication::RpcClient> unsubscribe_client_;
-	std::shared_ptr<communication::RpcClient> fetch_subscriptions_client_;
-	std::shared_ptr<communication::RpcClient> fetch_subscribers_client_;
-	std::shared_ptr<communication::RpcClient> register_for_notification_client_;
-	std::shared_ptr<communication::RpcClient>
-	    unregister_for_notification_client_;
-
+	std::shared_ptr<communication::RpcClient> rpc_client_;
 	USubscriptionUUriBuilder uuri_builder_;
 };
 

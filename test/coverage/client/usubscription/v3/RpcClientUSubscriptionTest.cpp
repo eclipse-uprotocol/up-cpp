@@ -865,6 +865,8 @@ TEST_F(RpcClientUSubscriptionTest,  // NOLINT
 	ASSERT_NE(server_or_status.value(), nullptr);
 	EXPECT_TRUE(getServerTransport()->getListener());
 
+	auto test = getUSubscriptionOptions().authority_name;
+	std::cout << "the authority name is " << test << std::endl;
 	auto client = uprotocol::core::usubscription::v3::RpcClientUSubscription(
 	    getClientTransport(), getUSubscriptionOptions());
 
