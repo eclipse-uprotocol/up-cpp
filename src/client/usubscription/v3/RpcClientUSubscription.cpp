@@ -36,7 +36,7 @@ RpcClientUSubscription::subscribe(
     const SubscriptionRequest& subscription_request) {
 	auto method =
 	    uuri_builder_.getServiceUriWithResourceId(RESOURCE_ID_SUBSCRIBE);
-	return rpc_client_->invokeProtoMethod<SubscriptionResponse>(
+	return rpc_client_->invokeMethodToProto<SubscriptionResponse>(
 	    method, subscription_request);
 }
 
@@ -45,7 +45,7 @@ RpcClientUSubscription::unsubscribe(
     const UnsubscribeRequest& unsubscribe_request) {
 	auto method =
 	    uuri_builder_.getServiceUriWithResourceId(RESOURCE_ID_UNSUBSCRIBE);
-	return rpc_client_->invokeProtoMethod<UnsubscribeResponse>(
+	return rpc_client_->invokeMethodToProto<UnsubscribeResponse>(
 	    method, unsubscribe_request);
 }
 
@@ -54,7 +54,7 @@ RpcClientUSubscription::fetch_subscriptions(
     const FetchSubscriptionsRequest& fetch_subscriptions_request) {
 	auto method = uuri_builder_.getServiceUriWithResourceId(
 	    RESOURCE_ID_FETCH_SUBSCRIPTIONS);
-	return rpc_client_->invokeProtoMethod<FetchSubscriptionsResponse>(
+	return rpc_client_->invokeMethodToProto<FetchSubscriptionsResponse>(
 	    method, fetch_subscriptions_request);
 }
 
@@ -63,7 +63,7 @@ RpcClientUSubscription::fetch_subscribers(
     const FetchSubscribersRequest& fetch_subscribers_request) {
 	auto method = uuri_builder_.getServiceUriWithResourceId(
 	    RESOURCE_ID_FETCH_SUBSCRIBERS);
-	return rpc_client_->invokeProtoMethod<FetchSubscribersResponse>(
+	return rpc_client_->invokeMethodToProto<FetchSubscribersResponse>(
 	    method, fetch_subscribers_request);
 }
 
@@ -72,7 +72,7 @@ RpcClientUSubscription::register_for_notifications(
     const NotificationsRequest& register_notifications_request) {
 	auto method = uuri_builder_.getServiceUriWithResourceId(
 	    RESOURCE_ID_REGISTER_FOR_NOTIFICATIONS);
-	return rpc_client_->invokeProtoMethod<NotificationsResponse>(
+	return rpc_client_->invokeMethodToProto<NotificationsResponse>(
 	    method, register_notifications_request);
 }
 
@@ -81,7 +81,7 @@ RpcClientUSubscription::unregister_for_notifications(
     const NotificationsRequest& unregister_notifications_request) {
 	auto method = uuri_builder_.getServiceUriWithResourceId(
 	    RESOURCE_ID_UNREGISTER_FOR_NOTIFICATIONS);
-	return rpc_client_->invokeProtoMethod<NotificationsResponse>(
+	return rpc_client_->invokeMethodToProto<NotificationsResponse>(
 	    method, unregister_notifications_request);
 }
 
