@@ -208,19 +208,13 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 RpcClient::InvokeHandle RpcClient::invokeMethod(
     const v1::UUri& method, datamodel::builder::Payload&& payload,
     Callback&& callback) {
-	// makes a local copy of the builder to make this call thread safe
-	auto local_builder = builder_;
-	return invokeMethod(
-	    local_builder.withMethod(method).build(std::move(payload)),
-	    std::move(callback));
+	return invokeMethod(builder_.build(method, std::move(payload)),
+	                    std::move(callback));
 }
 
 RpcClient::InvokeHandle RpcClient::invokeMethod(const v1::UUri& method,
                                                 Callback&& callback) {
-	// makes a local copy of the builder to make this call thread safe
-	auto local_builder = builder_;
-	return invokeMethod(local_builder.withMethod(method).build(),
-	                    std::move(callback));
+	return invokeMethod(builder_.build(method), std::move(callback));
 }
 
 RpcClient::InvokeFuture RpcClient::invokeMethod(

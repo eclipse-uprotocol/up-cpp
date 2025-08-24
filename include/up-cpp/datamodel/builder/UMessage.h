@@ -234,6 +234,16 @@ struct UMessageBuilder {
 	/// @return A built message with no payload populated.
 	[[nodiscard]] v1::UMessage build() const;
 
+	/// @brief Creates a UMessage based on the builder's current state.
+	///
+	/// @param A UUri of the method that should be called
+	///
+	/// @throws UnexpectedFormat if withPayloadFormat() has been previously
+	///         called.
+	///
+	/// @return A built message with no payload populated.
+	[[nodiscard]] v1::UMessage build(const v1::UUri&) const;
+
 	/// @brief Creates a UMessage with a provided payload based on the
 	///        builder's current state.
 	///
@@ -246,6 +256,21 @@ struct UMessageBuilder {
 	///
 	/// @return A built message with the provided payload data embedded.
 	[[nodiscard]] v1::UMessage build(builder::Payload&&) const;
+
+	/// @brief Creates a UMessage with a provided payload based on the
+	///        builder's current state.
+	///
+	/// @param A UUri of the method that should be called
+	///
+	/// @param A Payload builder containing a payload to embed in the message.
+	///
+	/// @note The contents of the payload builder will be moved.
+	///
+	/// @throws UnexpectedFormat if withPayloadFormat() has been previously
+	///         called and the format in the payload builder does not match.
+	///
+	/// @return A built message with the provided payload data embedded.
+	[[nodiscard]] v1::UMessage build(const v1::UUri&, builder::Payload&&) const;
 
 	/// @brief Access the attributes of the message being built.
 	/// @return A reference to the attributes of the message being built.

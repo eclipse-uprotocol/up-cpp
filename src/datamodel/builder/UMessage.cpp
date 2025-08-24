@@ -218,10 +218,45 @@ v1::UMessage UMessageBuilder::build() const {
 	return message;
 }
 
+v1::UMessage UMessageBuilder::build(const v1::UUri& method) const {
+	v1::UMessage message;
+	if (expectedPayloadFormat_.has_value()) {
+		throw UnexpectedFormat(
+		    "Tried to build with no payload when a payload format has been set "
+		    "using withPayloadFormat()");
+	}
+
+	*message.mutable_attributes() = attributes_;
+	*message.mutable_attributes()->mutable_sink() = method;
+	*(message.mutable_attributes()->mutable_id()) = uuidBuilder_.build();
+
+	return message;
+}
+
 v1::UMessage UMessageBuilder::build(builder::Payload&& payload) const {
 	v1::UMessage message;
 
 	*message.mutable_attributes() = attributes_;
+	*(message.mutable_attributes()->mutable_id()) = uuidBuilder_.build();
+	auto [payloadData, payloadFormat] = std::move(payload).buildMove();
+	if (expectedPayloadFormat_.has_value()) {
+		if (payloadFormat != expectedPayloadFormat_) {
+			throw UnexpectedFormat(
+			    "Payload format does not match the expected format");
+		}
+	}
+	*message.mutable_payload() = std::move(payloadData);
+	message.mutable_attributes()->set_payload_format(payloadFormat);
+
+	return message;
+}
+
+v1::UMessage UMessageBuilder::build(const v1::UUri& method,
+                                    builder::Payload&& payload) const {
+	v1::UMessage message;
+
+	*message.mutable_attributes() = attributes_;
+	*message.mutable_attributes()->mutable_sink() = method;
 	*(message.mutable_attributes()->mutable_id()) = uuidBuilder_.build();
 	auto [payloadData, payloadFormat] = std::move(payload).buildMove();
 	if (expectedPayloadFormat_.has_value()) {
