@@ -208,14 +208,13 @@ RpcClient::InvokeHandle RpcClient::invokeMethod(v1::UMessage&& request,
 RpcClient::InvokeHandle RpcClient::invokeMethod(
     const v1::UUri& method, datamodel::builder::Payload&& payload,
     Callback&& callback) {
-	return invokeMethod(builder_.withMethod(method).build(std::move(payload)),
+	return invokeMethod(builder_.build(method, std::move(payload)),
 	                    std::move(callback));
 }
 
 RpcClient::InvokeHandle RpcClient::invokeMethod(const v1::UUri& method,
                                                 Callback&& callback) {
-	return invokeMethod(builder_.withMethod(method).build(),
-	                    std::move(callback));
+	return invokeMethod(builder_.build(method), std::move(callback));
 }
 
 RpcClient::InvokeFuture RpcClient::invokeMethod(
@@ -252,15 +251,6 @@ RpcClient::InvokeFuture RpcClient::invokeMethod(const v1::UUri& method) {
 
 RpcClient::RpcClient(RpcClient&&) noexcept = default;
 RpcClient::~RpcClient() = default;
-
-RpcClient::InvokeFuture::InvokeFuture() = default;
-RpcClient::InvokeFuture::InvokeFuture(InvokeFuture&& other) noexcept = default;
-RpcClient::InvokeFuture& RpcClient::InvokeFuture::operator=(
-    InvokeFuture&& other) noexcept = default;
-
-RpcClient::InvokeFuture::InvokeFuture(std::future<MessageOrStatus>&& future,
-                                      InvokeHandle&& handle) noexcept
-    : callback_handle_(std::move(handle)), future_(std::move(future)) {}
 
 }  // namespace uprotocol::communication
 

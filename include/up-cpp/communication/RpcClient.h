@@ -12,11 +12,14 @@
 #ifndef UP_CPP_COMMUNICATION_RPCCLIENT_H
 #define UP_CPP_COMMUNICATION_RPCCLIENT_H
 
+#include <spdlog/spdlog.h>
 #include <up-cpp/datamodel/builder/Payload.h>
 #include <up-cpp/datamodel/builder/UMessage.h>
 #include <up-cpp/transport/UTransport.h>
 #include <up-cpp/utils/Expected.h>
+#include <up-cpp/utils/ProtoConverter.h>
 #include <uprotocol/v1/umessage.pb.h>
+#include <uprotocol/v1/uri.pb.h>
 #include <uprotocol/v1/ustatus.pb.h>
 
 #include <future>
@@ -25,6 +28,9 @@
 #include <variant>
 
 namespace uprotocol::communication {
+template <typename R>
+using ResponseOrStatus = utils::Expected<R, v1::UStatus>;
+using UnexpectedStatus = utils::Unexpected<v1::UStatus>;
 
 /// @brief Interface for uEntities to invoke RPC methods.
 ///
@@ -69,17 +75,22 @@ struct RpcClient {
 	///        for the duration of an RPC call.
 	using InvokeHandle = Connection::Handle;
 
-	/// @brief Extension to std::future that also holds a callback handle
-	class InvokeFuture {
+	/// @brief Extension to std::future with template type that also holds a
+	/// callback handle
+	template <typename T>
+	class InvokeProtoFuture {
 		InvokeHandle callback_handle_;
-		std::future<MessageOrStatus> future_;
+		std::future<utils::Expected<T, v1::UStatus>> future_;
 
 	public:
-		InvokeFuture();
-		InvokeFuture(InvokeFuture&&) noexcept;
-		InvokeFuture(std::future<MessageOrStatus>&&, InvokeHandle&&) noexcept;
+		InvokeProtoFuture() = default;
+		InvokeProtoFuture(InvokeProtoFuture&& other) noexcept = default;
+		InvokeProtoFuture& operator=(InvokeProtoFuture&& other) noexcept =
+		    default;
 
-		InvokeFuture& operator=(InvokeFuture&&) noexcept;
+		InvokeProtoFuture(std::future<utils::Expected<T, v1::UStatus>>&& future,
+		                  InvokeHandle&& handle) noexcept
+		    : callback_handle_(std::move(handle)), future_(std::move(future)) {}
 
 		/// @name Passthroughs for std::future
 		/// @{
@@ -96,6 +107,8 @@ struct RpcClient {
 		}
 		/// @}
 	};
+
+	using InvokeFuture = InvokeProtoFuture<v1::UMessage>;
 
 	/// @brief Invokes an RPC method by sending a request message.
 	///
@@ -166,6 +179,82 @@ struct RpcClient {
 	///            message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] InvokeFuture invokeMethod(const v1::UUri&);
+
+	template <typename R>
+	InvokeHandle invokeMethodToProto(const v1::UUri& method,
+	                                 const R& request_message,
+	                                 Callback&& callback) {
+		auto payload_or_status =
+		    uprotocol::utils::ProtoConverter::protoToPayload(request_message);
+
+		if (!payload_or_status.has_value()) {
+			return {};
+		}
+
+		datamodel::builder::Payload tmp_payload(payload_or_status.value());
+		auto handle = invokeMethod(
+		    builder_.withMethod(method).build(std::move(tmp_payload)),
+		    std::move(callback));
+
+		return handle;
+	}
+
+	template <typename T, typename R>
+	InvokeProtoFuture<T> invokeMethodToProto(const v1::UUri& method,
+	                                         const R& request_message) {
+		auto result_promise =
+		    std::make_shared<std::promise<ResponseOrStatus<T>>>();
+		auto future = result_promise->get_future();
+		auto handle = invokeMethodToProto(
+		    method, request_message,
+		    [result_promise](const MessageOrStatus& message_or_status) {
+			    if (!message_or_status.has_value()) {
+				    result_promise->set_value(ResponseOrStatus<T>(
+				        UnexpectedStatus(message_or_status.error())));
+				    return;
+			    }
+			    auto response_or_status =
+			        utils::ProtoConverter::extractFromProtobuf<T>(
+			            message_or_status.value());
+
+			    if (!response_or_status.has_value()) {
+				    spdlog::error(
+				        "invokeProtoMethod: Error when extracting response "
+				        "from "
+				        "protobuf.");
+				    result_promise->set_value(response_or_status);
+				    return;
+			    }
+
+			    result_promise->set_value(
+			        ResponseOrStatus<T>(response_or_status.value()));
+		    });
+
+		return {std::move(future), std::move(handle)};
+	}
+
+	template <typename R>
+	InvokeFuture invokeMethodToProto(const v1::UUri& method,
+	                                 const R& request_message) {
+		auto result_promise =
+		    std::make_shared<std::promise<ResponseOrStatus<v1::UMessage>>>();
+		auto future = result_promise->get_future();
+
+		auto handle = invokeMethodToProto(
+		    method, request_message,
+		    [result_promise](const MessageOrStatus& message_or_status) {
+			    if (!message_or_status.has_value()) {
+				    result_promise->set_value(ResponseOrStatus<v1::UMessage>(
+				        UnexpectedStatus(message_or_status.error())));
+				    return;
+			    }
+
+			    result_promise->set_value(
+			        ResponseOrStatus<v1::UMessage>(message_or_status.value()));
+		    });
+
+		return {std::move(future), std::move(handle)};
+	}
 
 	/// @brief Default move constructor (defined in RpcClient.cpp)
 	RpcClient(RpcClient&&) noexcept;
