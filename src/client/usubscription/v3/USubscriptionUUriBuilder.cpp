@@ -43,14 +43,14 @@ USubscriptionUUriBuilder& USubscriptionUUriBuilder::setAuthorityName(
 }
 
 USubscriptionUUriBuilder& USubscriptionUUriBuilder::setUEntityId(
-    u_int32_t ue_id) {
+    uint32_t ue_id) {
 	base_uri_.set_ue_id(ue_id);
 	return *this;
 }
 
 constexpr uint16_t BITS_UINT_16 = 16;
 USubscriptionUUriBuilder& USubscriptionUUriBuilder::setInstanceId(
-    u_int16_t instance_id) {
+    uint16_t instance_id) {
 	auto updated_ue_id = (SERVICE_ID_BITMASK & base_uri_.ue_id()) +
 	                     (static_cast<uint32_t>(instance_id) << BITS_UINT_16);
 	base_uri_.set_ue_id(updated_ue_id);
@@ -58,14 +58,14 @@ USubscriptionUUriBuilder& USubscriptionUUriBuilder::setInstanceId(
 }
 
 USubscriptionUUriBuilder& USubscriptionUUriBuilder::setServiceId(
-    u_int16_t service_id) {
+    uint16_t service_id) {
 	auto updated_ue_id = (INSTANCE_ID_BITMASK & base_uri_.ue_id()) + service_id;
 	base_uri_.set_ue_id(updated_ue_id);
 	return *this;
 }
 
 USubscriptionUUriBuilder& USubscriptionUUriBuilder::setResourceId(
-    u_int32_t resource_id) {
+    uint32_t resource_id) {
 	base_uri_.set_resource_id(resource_id);
 	return *this;
 }
