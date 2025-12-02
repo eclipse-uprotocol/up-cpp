@@ -195,9 +195,9 @@ struct RpcClient {
 	///         message (if not OK).
 	///       * A UMessage containing the response from the RPC target.
 	template <typename R>
-	[[nodiscard]] InvokeHandle invokeMethodToProto(const v1::UUri& method,
-	                                               const R& request_message,
-	                                               Callback&& callback) {
+	[[nodiscard]] InvokeHandle invokeMethodFromProto(const v1::UUri& method,
+	                                                 const R& request_message,
+	                                                 Callback&& callback) {
 		auto payload_or_status =
 		    uprotocol::utils::ProtoConverter::protoToPayload(request_message);
 
@@ -228,14 +228,14 @@ struct RpcClient {
 	///          * A UStatus based on the commstatus received in the response
 	///            message (if not OK).
 	///		   	* A protobuf object constructed from the response from the RPC
-	///target.
+	/// target.
 	template <typename T, typename R>
 	[[nodiscard]] InvokeProtoFuture<T> invokeMethodToProto(
 	    const v1::UUri& method, const R& request_message) {
 		auto result_promise =
 		    std::make_shared<std::promise<ResponseOrStatus<T>>>();
 		auto future = result_promise->get_future();
-		auto handle = invokeMethodToProto(
+		auto handle = invokeMethodFromProto(
 		    method, request_message,
 		    [result_promise](const MessageOrStatus& message_or_status) {
 			    if (!message_or_status.has_value()) {
@@ -276,13 +276,13 @@ struct RpcClient {
 	///            message (if not OK).
 	///          * A UMessage containing the response from the RPC target.
 	template <typename R>
-	[[nodiscard]] InvokeFuture invokeMethodToProto(const v1::UUri& method,
-	                                               const R& request_message) {
+	[[nodiscard]] InvokeFuture invokeMethodFromProto(const v1::UUri& method,
+	                                                 const R& request_message) {
 		auto result_promise =
 		    std::make_shared<std::promise<ResponseOrStatus<v1::UMessage>>>();
 		auto future = result_promise->get_future();
 
-		auto handle = invokeMethodToProto(
+		auto handle = invokeMethodFromProto(
 		    method, request_message,
 		    [result_promise](const MessageOrStatus& message_or_status) {
 			    if (!message_or_status.has_value()) {
