@@ -33,16 +33,40 @@ public:
 	/// @brief Constructor for uSubscriptionUUriBuilder.
 	USubscriptionUUriBuilder();
 
+	/// @brief Sets the authority name that will be used to build URIs.
+	///
+	/// @param authority_name The authority to set in the URI.
+	///
+	/// @return Returns a reference to the builder instance
 	USubscriptionUUriBuilder& setAuthorityName(
 	    const std::string& authority_name);
 
+	/// @brief Sets the uEntity id that will be used to build URIs.
+	///
+	/// @param ue_id The uEntity id to set in the URI.
+	///
+	/// @return Returns a reference to the builder instance
 	USubscriptionUUriBuilder& setUEntityId(uint32_t ue_id);
 
+	///
+	/// @brief Sets the instance id that will be used to build URIs.
+	/// @param instance_id The instance id to set in the URI.
+	///
+	/// @return Returns a reference to the builder instance
 	USubscriptionUUriBuilder& setInstanceId(uint16_t instance_id);
 
+	/// @brief Sets the service id that will be used to build URIs.
+	/// @param service_id The service id to set in the URI.
+	///
+	/// @return Returns a reference to the builder instance
 	USubscriptionUUriBuilder& setServiceId(uint16_t service_id);
 
+	/// @brief Sets the resource id that will be used to build URIs.
+	/// @param resource_id The resource id to set in the URI.
+	///
+	/// @return Returns a reference to the builder instance
 	USubscriptionUUriBuilder& setResourceId(uint32_t resource_id);
+
 	/// @brief Get the URI with a specific resource ID.
 	///
 	/// @param resource_id The resource ID to set in the URI.

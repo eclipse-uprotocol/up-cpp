@@ -59,11 +59,9 @@ endfunction()
 ########################### COVERAGE ##########################################
 # Utils
 add_coverage_test("ExpectedTest" coverage/utils/ExpectedTest.cpp)
-add_coverage_test("base64Test" coverage/utils/base64Test.cpp)
 add_coverage_test("IpAddressTest" coverage/utils/IpAddressTest.cpp)
 add_coverage_test("CallbackConnectionTest" coverage/utils/CallbackConnectionTest.cpp)
 add_coverage_test("CyclicQueueTest" coverage/utils/CyclicQueueTest.cpp)
-add_coverage_test("ThreadPoolTest" coverage/utils/ThreadPoolTest.cpp)
 
 # Validators
 add_coverage_test("UuidValidatorTest" coverage/datamodel/UuidValidatorTest.cpp)

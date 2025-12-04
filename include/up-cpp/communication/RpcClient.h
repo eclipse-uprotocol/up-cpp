@@ -180,10 +180,24 @@ struct RpcClient {
 	///          * A UMessage containing the response from the RPC target.
 	[[nodiscard]] InvokeFuture invokeMethod(const v1::UUri&);
 
+	/// @brief Invokes an RPC method by sending a request message directly
+	/// from a protobuf object.
+	///
+	/// @param The method that will be invoked
+	/// @param The protobuf object that will be sent as the payload
+	/// @param A callback that will be called with the result.
+	///
+	/// @post The provided callback will be called with one of:
+	///       * A UStatus with a DEADLINE_EXCEEDED code if no response was
+	///         received before the request expired (based on request TTL).
+	///       * A UStatus with the value returned by UTransport::send().
+	///       * A UStatus based on the commstatus received in the response
+	///         message (if not OK).
+	///       * A UMessage containing the response from the RPC target.
 	template <typename R>
-	InvokeHandle invokeMethodToProto(const v1::UUri& method,
-	                                 const R& request_message,
-	                                 Callback&& callback) {
+	[[nodiscard]] InvokeHandle invokeMethodFromProto(const v1::UUri& method,
+	                                                 const R& request_message,
+	                                                 Callback&& callback) {
 		auto payload_or_status =
 		    uprotocol::utils::ProtoConverter::protoToPayload(request_message);
 
@@ -199,13 +213,29 @@ struct RpcClient {
 		return handle;
 	}
 
+	/// @brief Invokes an RPC method by sending a request message directly
+	/// from a protobuf object and converts the returned payload
+	/// to protobuf.
+	///
+	/// @param The method that will be invoked
+	/// @param The protobuf object that will be sent as the payload
+	/// @param A callback that will be called with the result.
+	///
+	/// @returns A promised future that can resolve to one of:
+	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
+	///            received before the request expired (based on request TTL).
+	///          * A UStatus with the value returned by UTransport::send().
+	///          * A UStatus based on the commstatus received in the response
+	///            message (if not OK).
+	///		   	* A protobuf object constructed from the response from the RPC
+	/// target.
 	template <typename T, typename R>
-	InvokeProtoFuture<T> invokeMethodToProto(const v1::UUri& method,
-	                                         const R& request_message) {
+	[[nodiscard]] InvokeProtoFuture<T> invokeMethodToProto(
+	    const v1::UUri& method, const R& request_message) {
 		auto result_promise =
 		    std::make_shared<std::promise<ResponseOrStatus<T>>>();
 		auto future = result_promise->get_future();
-		auto handle = invokeMethodToProto(
+		auto handle = invokeMethodFromProto(
 		    method, request_message,
 		    [result_promise](const MessageOrStatus& message_or_status) {
 			    if (!message_or_status.has_value()) {
@@ -233,14 +263,26 @@ struct RpcClient {
 		return {std::move(future), std::move(handle)};
 	}
 
+	/// @brief Invokes an RPC method by sending a request message.
+	///
+	/// @param The method that will be invoked
+	/// @param The protobuf object that will be sent as a payload.
+	///
+	/// @returns A promised future that can resolve to one of:
+	///          * A UStatus with a DEADLINE_EXCEEDED code if no response was
+	///            received before the request expired (based on request TTL).
+	///          * A UStatus with the value returned by UTransport::send().
+	///          * A UStatus based on the commstatus received in the response
+	///            message (if not OK).
+	///          * A UMessage containing the response from the RPC target.
 	template <typename R>
-	InvokeFuture invokeMethodToProto(const v1::UUri& method,
-	                                 const R& request_message) {
+	[[nodiscard]] InvokeFuture invokeMethodFromProto(const v1::UUri& method,
+	                                                 const R& request_message) {
 		auto result_promise =
 		    std::make_shared<std::promise<ResponseOrStatus<v1::UMessage>>>();
 		auto future = result_promise->get_future();
 
-		auto handle = invokeMethodToProto(
+		auto handle = invokeMethodFromProto(
 		    method, request_message,
 		    [result_promise](const MessageOrStatus& message_or_status) {
 			    if (!message_or_status.has_value()) {
