@@ -19,7 +19,7 @@ jobs:
           version: 2.3.2
 
       - name: Fetch up-cpp
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           path: up-cpp
 
@@ -34,7 +34,7 @@ jobs:
         run: sudo apt-get install -y gcovr
 
       - name: Fetch up-core-api conan recipe
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           path: up-conan-recipes
           repository: eclipse-uprotocol/up-conan-recipes
@@ -80,7 +80,7 @@ jobs:
 
       
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: success() || failure()
         with:
           name: coverage-report
