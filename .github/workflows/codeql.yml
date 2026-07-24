@@ -39,13 +39,13 @@ jobs:
         version: 2.3.2
 
     - name: Checkout repository
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         path: up-cpp
     
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@d77b13a0df3134d64a457ea9003f600b09fa1c8a # v3.36.1
+      uses: github/codeql-action/init@4187e74d05793876e9989daffde9c3e66b4acd07 # v3.37.3
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -60,7 +60,7 @@ jobs:
 
     - if: matrix.build-mode == 'manual'
       name: Fetch up-core-api conan recipe
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         path: up-conan-recipes
         repository: eclipse-uprotocol/up-conan-recipes
@@ -82,7 +82,7 @@ jobs:
         cmake --build . -- -j
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@d77b13a0df3134d64a457ea9003f600b09fa1c8a # v3.36.1
+      uses: github/codeql-action/analyze@4187e74d05793876e9989daffde9c3e66b4acd07 # v3.37.3
       with:
         category: "/language:${{matrix.language}}"
         checkout_path: up-cpp
